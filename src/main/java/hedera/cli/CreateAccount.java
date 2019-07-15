@@ -52,7 +52,7 @@ public class CreateAccount {
         // 3. Create new account on Hedera
 
         // In TINYBARS :D
-        var amount = new BigInteger("500000000"); //500hbars
+        var amount = new BigInteger("500000000"); //5hbars
         var initialBalance = amount.longValue();
         var newAccountId = client.createAccount(newPublicKey, initialBalance).toString();
 

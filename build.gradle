@@ -14,6 +14,23 @@ plugins {
     id 'application'
 }
 
+task(runCreateAccount, dependsOn: 'classes', type: JavaExec) {
+    main = 'hedera.cli.CreateAccount'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task(runCryptoTransfer, dependsOn: 'classes', type: JavaExec) {
+    main = 'hedera.cli.CryptoTransfer'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task(runHelloWorld, dependsOn: 'classes', type: JavaExec) {
+    main = 'hedera.cli.App'
+    classpath = sourceSets.main.runtimeClasspath
+//    args 'mrhaki'
+//    systemProperty 'simple.message', 'Hello '
+}
+
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
@@ -38,12 +55,6 @@ dependencies {
 jar {
     version =  '0.1.0'
     manifest {
-//        attributes 'Main-Class': 'hedera.cli.CreateAccount'
-        attributes(
-//                'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' '),
-//                "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
-                'Main-Class': 'hedera.cli.CreateAccount'
-        )
     }
 }
 
