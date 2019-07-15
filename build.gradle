@@ -14,6 +14,12 @@ plugins {
     id 'application'
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'hedera.cli.CreateAccount'
+    }
+}
+
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
@@ -27,11 +33,14 @@ dependencies {
     // hedera sdk
     implementation 'com.hedera.hashgraph:sdk:0.5.1'
 
+    // dotenv
+    compile 'io.github.cdimascio:java-dotenv:5.1.0'
+
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
 
 application {
     // Define the main class for the application
-    mainClassName = 'hedera.cli.App'
+    mainClassName = 'hedera.cli.CreateAccount'
 }

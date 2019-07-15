@@ -138,3 +138,6 @@ modules.xml
 .idea/sonarlint
 .idea/
 # End of https://www.gitignore.io/api/intellij
+
+.env
+!.env.sample
