@@ -14,12 +14,6 @@ plugins {
     id 'application'
 }
 
-jar {
-    manifest {
-        attributes 'Main-Class': 'hedera.cli.CreateAccount'
-    }
-}
-
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
@@ -35,9 +29,22 @@ dependencies {
 
     // dotenv
     compile 'io.github.cdimascio:java-dotenv:5.1.0'
+    compile "joda-time:joda-time:2.2"
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+}
+
+jar {
+    version =  '0.1.0'
+    manifest {
+//        attributes 'Main-Class': 'hedera.cli.CreateAccount'
+        attributes(
+//                'Class-Path': configurations.runtimeClasspath.files.collect { it.getName() }.join(' '),
+//                "Class-Path": configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'hedera.cli.CreateAccount'
+        )
+    }
 }
 
 application {
