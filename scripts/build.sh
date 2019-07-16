@@ -1,6 +1,15 @@
 #!/bin/sh
 
+# clean gradle
+echo "cleanup..."
+./gradlew clean
+
+# build gradle
+echo "rebuild..."
+./gradlew clean build
+
 # create the fat jar with shadow jar plugin
+echo "creating jar..."
 ./gradlew shadowJar
 
 # copy out the fat jar

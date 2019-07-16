@@ -23,20 +23,12 @@ Get Started
 ===
 
 ```bash
-gradle build
-./gradlew run
-```
-
-Account Creation
-===
-
-```bash
-gradle runCreateAccount
+./hedera
 ```
 
 Crypto Transfer
 ===
 
 ```bash
-gradle runCryptoTransfer
+cryptotransfer 1001 44
 ```
