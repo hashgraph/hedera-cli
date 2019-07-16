@@ -3,8 +3,10 @@ package hedera.cli;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 public final class CryptoTransfer {
     private CryptoTransfer() { }
@@ -12,8 +14,11 @@ public final class CryptoTransfer {
     public static void main(String[] args) throws HederaException {
         var operatorId = ExampleHelper.getOperatorId();
         var client = ExampleHelper.createHederaClient();
+//
+//        var senderId = AccountId.fromString("0.0." + args[0]);
+//        var senderPrivateKey = Ed25519PrivateKey.fromString(Objects.requireNonNull(ExampleHelper.getEnv().get("KEYGEN_MOBILE_PRIVATE_KEY")));
 
-        var recipientId = AccountId.fromString("0.0.1004");
+        var recipientId = AccountId.fromString("0.0." + args[0]);
         var amount = new BigInteger("500000000"); //5hbars
 
         var senderBalanceBefore = client.getAccountBalance(operatorId);

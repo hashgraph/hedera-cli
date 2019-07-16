@@ -11,7 +11,7 @@ import java.util.Objects;
 public class ExampleHelper {
     private ExampleHelper() { }
 
-    private static Dotenv getEnv() {
+    public static Dotenv getEnv() {
         // Load configuration from the environment or a $projectRoot/.env file, if present
         // See .env.sample for an example of what it is looking for
         return Dotenv.load();

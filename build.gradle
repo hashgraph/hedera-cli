@@ -27,8 +27,12 @@ task(runCryptoTransfer, dependsOn: 'classes', type: JavaExec) {
 task(runHelloWorld, dependsOn: 'classes', type: JavaExec) {
     main = 'hedera.cli.App'
     classpath = sourceSets.main.runtimeClasspath
-//    args 'mrhaki'
-//    systemProperty 'simple.message', 'Hello '
+}
+
+task(runSimple, dependsOn: 'classes', type: JavaExec) {
+    main = 'hedera.cli.Simple'
+    classpath = sourceSets.main.runtimeClasspath
+    systemProperty 'simple.message', 'Hello '
 }
 
 repositories {
