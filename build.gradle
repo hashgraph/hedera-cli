@@ -69,7 +69,7 @@ jar {
 
 application {
     // Define the main class for the application
-    mainClassName = 'hedera.cli.CreateAccount'
+    mainClassName = 'hedera.cli.App'
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
