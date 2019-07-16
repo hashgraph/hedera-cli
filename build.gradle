@@ -42,6 +42,10 @@ repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+
+    maven {
+        url 'https://repo.spring.io/libs-snapshot'
+    }
 }
 
 dependencies {
@@ -56,6 +60,8 @@ dependencies {
     compile "joda-time:joda-time:2.2"
 
     implementation 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
+
+    compile 'org.springframework.shell:spring-shell-starter:2.0.1.BUILD-SNAPSHOT'
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
