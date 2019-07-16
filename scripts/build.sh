@@ -4,7 +4,7 @@
 ./gradlew shadowJar
 
 # copy out the fat jar
-cp build/libs/hedera-cli-all.jar hedera.jar
+cp build/libs/hedera-cli-0.0.1.jar hedera.jar
 
 # pack our fat jar into a linux/unix executable
 cat ./scripts/stub.sh hedera.jar > hedera && chmod +x hedera
