@@ -1,22 +1,42 @@
 Project Setup
-1. Make sure you have gradle `brew install gradle`
-2. Clone repository and change directory to `hedera-cli`
-3. copy `.env.sample` and create `.env` with node id, node address as well as operator's id and private key
+===
 
+* Gradle version 5.0+ is required.
+* Gradle can be installed via your OS' package manager
+* Alternatively, use [sdkman.io](https://sdkman.io/install) to manage all your java/gradle tooling
 
-To run
+```
+git clone https://github.com/hashgraph/hedera-cli
+cp .env.sample .env
+# update .env with node id, node address, 
+# operator's id and private key
+```
+
+Generating the Executable
+===
+
+```
+./scripts/build.sh
+```
+
+Get Started
+===
+
 ```bash
 gradle build
 ./gradlew run
 ```
 
-For account creation run
+Account Creation
+===
+
 ```bash
 gradle runCreateAccount
 ```
 
+Crypto Transfer
+===
 
-For crypto transfer run
 ```bash
 gradle runCryptoTransfer
 ```
