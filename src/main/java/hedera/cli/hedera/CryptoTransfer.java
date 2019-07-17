@@ -1,29 +1,38 @@
-package hedera.cli;
+package hedera.cli.hedera;
 
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-
+import hedera.cli.ExampleHelper;
+import hedera.cli.shell.ProgressCounter;
+import org.jline.terminal.Terminal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
 import java.math.BigInteger;
-import java.util.Objects;
 
-public final class CryptoTransfer {
-    private CryptoTransfer() { }
+@ShellComponent
+public class CryptoTransfer {
 
-    public static void main(String[] args) throws HederaException {
+    @Autowired
+    @Lazy
+    private Terminal terminal;
+
+
+    @Autowired
+    ProgressCounter progressCounter;
+
+    @ShellMethod("Cryptotransfer")
+    public String cryptotransfer(String recipient, String recipientAmt) throws HederaException, InterruptedException {
         var operatorId = ExampleHelper.getOperatorId();
         var client = ExampleHelper.createHederaClient();
-//
-//        var senderId = AccountId.fromString("0.0." + args[0]);
-//        var senderPrivateKey = Ed25519PrivateKey.fromString(Objects.requireNonNull(ExampleHelper.getEnv().get("KEYGEN_MOBILE_PRIVATE_KEY")));
 
-        var recipientId = AccountId.fromString("0.0." + args[0]);
-        var amount = new BigInteger("500000000"); //5hbars
+        var recipientId = AccountId.fromString("0.0." + recipient);
+        var amount = new BigInteger(recipientAmt);
 
         var senderBalanceBefore = client.getAccountBalance(operatorId);
         var receiptBalanceBefore = client.getAccountBalance(recipientId);
-
         System.out.println("" + operatorId + " balance = " + senderBalanceBefore);
         System.out.println("" + recipientId + " balance = " + receiptBalanceBefore);
 
@@ -36,14 +45,13 @@ public final class CryptoTransfer {
                 // As we are sending from the operator we do not need to explicitly sign the transaction
                 .executeForRecord();
 
-        System.out.println("transferred " + amount.longValue() + "...");
+        System.out.println("transferring " + amount.longValue() + " tinybar...");
 
         var senderBalanceAfter = client.getAccountBalance(operatorId);
         var receiptBalanceAfter = client.getAccountBalance(recipientId);
 
         System.out.println("" + operatorId + " balance = " + senderBalanceAfter);
-        System.out.println("" + recipientId + " balance = " + receiptBalanceAfter);
-//        System.out.println("Transfer memo: " + record.getMemo());
+        return String.format("" + recipientId + " balance = " + receiptBalanceAfter);
     }
 }
 

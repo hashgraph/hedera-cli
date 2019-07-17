@@ -1,16 +1,25 @@
-package hedera.cli;
+package hedera.cli.hedera;
 
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.jline.terminal.Terminal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
 
 import java.math.BigInteger;
 import java.util.Map;
 
-
+@ShellComponent
 public class CreateAccount {
+
+    @Autowired
+    @Lazy
+    private Terminal terminal;
 
     public static Client hederaClient() {
 
@@ -32,36 +41,34 @@ public class CreateAccount {
         return hederaClient;
     }
 
-    public static void main(String[] args) throws HederaException {
+    @ShellMethod("Create account")
+    public String createaccount() throws HederaException {
 
+        try{
         // 1. Generate a Ed25519 private, public key pair
-
         var newKey = Ed25519PrivateKey.generate();
         var newPublicKey = newKey.getPublicKey();
 
-//        var newKey = Ed25519PrivateKey.fromString(Dotenv.load().get("KEYGEN_MOBILE_PRIVATE_KEY"));
-//        var newPublicKey = Ed25519PublicKey.fromString(Dotenv.load().get("KEYGEN_MOBILE_PUBLIC_KEY"));
-
-        System.out.println("private key = " + newKey);
-        System.out.println("public key = " + newPublicKey);
-
         // 2. Initialize Hedera client
-
         var client = hederaClient();
 
         // 3. Create new account on Hedera
-
         // In TINYBARS :D
         var amount = new BigInteger("500000000"); //5hbars
         var initialBalance = amount.longValue();
         var newAccountId = client.createAccount(newPublicKey, initialBalance).toString();
 
-        System.out.println(newAccountId);
-
         // 4. Check new account balance
 
         var accountBalance = client.getAccountBalance(AccountId.fromString(newAccountId));
-
-        System.out.println(accountBalance);
+        return String.format(
+                "private key = " + newKey,
+                "public key = " + newPublicKey,
+                newAccountId,
+                accountBalance
+        );
+        } catch (HederaException e) {
+            return "Something went wrong";
+        }
     }
 }

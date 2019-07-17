@@ -1,11 +1,11 @@
 #!/bin/sh
 
 # clean gradle
-echo "cleanup..."
+echo "cleaning up the ocean..."
 ./gradlew clean
 
 # build gradle
-echo "rebuild..."
+echo "rebuilding the world..."
 ./gradlew clean build
 
 # create the fat jar with shadow jar plugin
