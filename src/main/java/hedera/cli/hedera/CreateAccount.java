@@ -54,19 +54,19 @@ public class CreateAccount {
 
         // 3. Create new account on Hedera
         // In TINYBARS :D
-        var amount = new BigInteger("500000000"); //5hbars
+        var amount = new BigInteger("50000000"); //0.5hbars
         var initialBalance = amount.longValue();
         var newAccountId = client.createAccount(newPublicKey, initialBalance).toString();
 
         // 4. Check new account balance
 
         var accountBalance = client.getAccountBalance(AccountId.fromString(newAccountId));
-        return String.format(
-                "private key = " + newKey,
-                "public key = " + newPublicKey,
-                newAccountId,
-                accountBalance
-        );
+
+        return "Created" +
+                "\nprivate key = " + newKey +
+                "\npublic key = " + newPublicKey +
+                "\n" + newAccountId +
+                "\n" + accountBalance;
         } catch (HederaException e) {
             return "Something went wrong";
         }

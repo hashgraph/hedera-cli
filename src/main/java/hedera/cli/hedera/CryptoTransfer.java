@@ -50,8 +50,8 @@ public class CryptoTransfer {
         var senderBalanceAfter = client.getAccountBalance(operatorId);
         var receiptBalanceAfter = client.getAccountBalance(recipientId);
 
-        System.out.println("" + operatorId + " balance = " + senderBalanceAfter);
-        return String.format("" + recipientId + " balance = " + receiptBalanceAfter);
+        return "" + operatorId + " balance = " + senderBalanceAfter +
+                "\n" + recipientId + " balance = " + receiptBalanceAfter;
     }
 }
 
