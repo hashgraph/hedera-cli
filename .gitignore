@@ -141,3 +141,6 @@ modules.xml
 
 .env
 !.env.sample
+
+# hedera jar binary
+hedera
