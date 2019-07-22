@@ -4,6 +4,7 @@ import hedera.cli.shell.ProgressBar;
 import hedera.cli.shell.ProgressCounter;
 import hedera.cli.shell.ShellHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -20,6 +21,15 @@ public class PracticeCommands {
     @Autowired
     ProgressCounter progressCounter;
 
+    @ShellMethod(value = "Do Something.", group = "Explicit Group Method Level 3")
+    public void explicit3() {
+
+    }
+
+    @ShellMethod(value = "Do Something Else")
+    public void implicit3() {
+
+    }
 
     @ShellMethod("Add two integers together.")
     public String add(String a, String b) {

@@ -2,8 +2,10 @@ package hedera.cli.hedera;
 
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.HederaException;
+import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+import hedera.cli.ExampleHelper;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.jline.terminal.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,31 +46,53 @@ public class CreateAccount {
     @ShellMethod("Create account")
     public String createaccount() throws HederaException {
 
-        try{
-        // 1. Generate a Ed25519 private, public key pair
-        var newKey = Ed25519PrivateKey.generate();
-        var newPublicKey = newKey.getPublicKey();
+//        try{
+//        // 1. Generate a Ed25519 private, public key pair
+//        var newKey = Ed25519PrivateKey.generate();
+//        var newPublicKey = newKey.getPublicKey();
+//
+//        // 2. Initialize Hedera client
+//        var client = hederaClient();
+//
+//        // 3. Create new account on Hedera
+//        // In TINYBARS :D
+//        var amount = new BigInteger("50000000"); //0.5hbars
+//        var initialBalance = amount.longValue();
+//        var newAccountId = client.createAccount(newPublicKey, initialBalance).toString();
+//
+//        // 4. Check new account balance
+//
+//        var accountBalance = client.getAccountBalance(AccountId.fromString(newAccountId));
+//
+//        return "Created" +
+//                "\nprivate key = " + newKey +
+//                "\npublic key = " + newPublicKey +
+//                "\n" + newAccountId +
+//                "\n" + accountBalance;
+//        } catch (HederaException e) {
+//            return "Something went wrong";
+//        }
 
-        // 2. Initialize Hedera client
-        var client = hederaClient();
+            // Generate a Ed25519 private, public key pair
+            var newKey = Ed25519PrivateKey.generate();
+            var newPublicKey = newKey.getPublicKey();
 
-        // 3. Create new account on Hedera
-        // In TINYBARS :D
-        var amount = new BigInteger("50000000"); //0.5hbars
-        var initialBalance = amount.longValue();
-        var newAccountId = client.createAccount(newPublicKey, initialBalance).toString();
+            System.out.println("private key = " + newKey);
+            System.out.println("public key = " + newPublicKey);
 
-        // 4. Check new account balance
+            var client = ExampleHelper.createHederaClient();
 
-        var accountBalance = client.getAccountBalance(AccountId.fromString(newAccountId));
+            var tx = new AccountCreateTransaction(client)
+                    // The only _required_ property here is `key`
+                    .setKey(newKey.getPublicKey())
+                    .setInitialBalance(1000);
 
-        return "Created" +
-                "\nprivate key = " + newKey +
-                "\npublic key = " + newPublicKey +
-                "\n" + newAccountId +
-                "\n" + accountBalance;
-        } catch (HederaException e) {
-            return "Something went wrong";
-        }
+            // This will wait for the receipt to become available
+            var receipt = tx.executeForReceipt();
+
+            var newAccountId = receipt.getAccountId();
+
+            return "account = " + newAccountId;
+
     }
 }

@@ -3,7 +3,14 @@
  */
 package hedera.cli;
 
+import org.jline.reader.LineReader;
+import org.jline.reader.impl.completer.StringsCompleter;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 public class HederaShellTest {
@@ -11,4 +18,18 @@ public class HederaShellTest {
         HederaShell classUnderTest = new HederaShell();
 //        assertNotNull("app should have a greeting", classUnderTest.getGreeting());
     }
+
+//    @Autowired
+//    LineReader reader;
+
+//    @Test
+//    public void testStringsCompleter() {
+//        StringsCompleter completer = new StringsCompleter("abc", "abd", "ac");
+//        List<CharSequence> candidates = new ArrayList<>();
+//        completer.complete("a", 1, candidates);
+//        System.out.println(candidates);
+//        candidates.clear();
+//        completer.complete("ab", 2, candidates);
+//        System.out.println(candidates);
+//    }
 }

@@ -65,7 +65,19 @@ dependencies {
     compile 'io.github.cdimascio:java-dotenv:5.1.0'
     compile "joda-time:joda-time:2.2"
 
+    // shadowJar for creating hedera fatjar binary
     implementation 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
+
+    // picocli
+    compile 'info.picocli:picocli:4.0.1'
+    // picocli annotation processor to check errors at compile time
+    // IDE config here https://immutables.github.io/apt.html
+    compile 'info.picocli:picocli:4.0.1'
+    annotationProcessor 'info.picocli:picocli-codegen:4.0.1'
+
+    compileJava {
+        options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
+    }
 
     // springboot implementation
     implementation 'com.fasterxml.jackson.core:jackson-databind'
@@ -73,6 +85,10 @@ dependencies {
 
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
+}
+
+compileJava {
+    options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
 }
 
 application {
