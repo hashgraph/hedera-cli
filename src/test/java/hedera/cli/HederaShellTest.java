@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 
 public class HederaShellTest {
     @Test public void testHederaShellHasAGreeting() {
-        HederaShell classUnderTest = new HederaShell();
+//        HederaShell classUnderTest = new HederaShell();
 //        assertNotNull("app should have a greeting", classUnderTest.getGreeting());
     }
 

@@ -75,6 +75,9 @@ dependencies {
     compile 'info.picocli:picocli:4.0.1'
     annotationProcessor 'info.picocli:picocli-codegen:4.0.1'
 
+    // jline smart terminal
+    compile group: 'info.picocli', name: 'picocli-shell-jline3', version: '3.9.5'
+
     compileJava {
         options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
     }
@@ -93,7 +96,7 @@ compileJava {
 
 application {
     // Define the main class for the application
-    mainClassName = 'hedera.cli.HederaShell'
+    mainClassName = 'hedera.cli.MySpringApp'
 }
 
 apply plugin: 'io.spring.dependency-management'

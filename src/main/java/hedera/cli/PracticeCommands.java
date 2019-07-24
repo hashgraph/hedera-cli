@@ -21,6 +21,13 @@ public class PracticeCommands {
     @Autowired
     ProgressCounter progressCounter;
 
+    @ShellMethod(value = "whatever")
+    public void myCommand() {
+        MyCommand myCommand = new MyCommand();
+        myCommand.run();
+    }
+
+
     @ShellMethod(value = "Do Something.", group = "Explicit Group Method Level 3")
     public void explicit3() {
 
