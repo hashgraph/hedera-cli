@@ -36,13 +36,14 @@ public class CryptoTransfer {
         System.out.println("" + operatorId + " balance = " + senderBalanceBefore);
         System.out.println("" + recipientId + " balance = " + receiptBalanceBefore);
 
-        var record = new CryptoTransferTransaction(client)
-                // .addSender and .addRecipient can be called as many times as you want as long as the total sum from
+        new CryptoTransferTransaction(client)
+                // .addSender and .addRecipient can be called as many times as you want as long
+                // as the total sum from
                 // both sides is equivalent
-                .addSender(operatorId, amount.longValue())
-                .addRecipient(recipientId, amount.longValue())
+                .addSender(operatorId, amount.longValue()).addRecipient(recipientId, amount.longValue())
                 .setMemo("transfer test")
-                // As we are sending from the operator we do not need to explicitly sign the transaction
+                // As we are sending from the operator we do not need to explicitly sign the
+                // transaction
                 .executeForRecord();
 
         System.out.println("transferring " + amount.longValue() + " tinybar...");
