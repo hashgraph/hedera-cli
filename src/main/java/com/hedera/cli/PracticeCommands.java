@@ -21,16 +21,13 @@ public class PracticeCommands {
     @Autowired
     ProgressCounter progressCounter;
 
-    @ShellMethod(value = "whatever")
-    public void myCommand() {
-        MyCommand myCommand = new MyCommand();
-        myCommand.run();
-    }
+    @Autowired
+    Account account;
 
-
-    @ShellMethod(value = "Do Something.", group = "Explicit Group Method Level 3")
-    public void explicit3() {
-
+    @ShellMethod(value = "manage hedera account")
+    public void account() {
+        Account account = new Account();
+        account.run();
     }
 
     @ShellMethod(value = "Do Something Else")

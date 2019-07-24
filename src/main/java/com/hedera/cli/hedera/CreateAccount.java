@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import java.math.BigInteger;
 import java.util.Map;
 
 @ShellComponent

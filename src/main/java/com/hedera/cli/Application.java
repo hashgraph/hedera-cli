@@ -12,25 +12,26 @@ import picocli.CommandLine;
 import picocli.CommandLine.IFactory;
 
 @SpringBootApplication
-public class Application implements CommandLineRunner, ExitCodeGenerator {
-    private int exitCode;
+public class Application {
+// public class Application implements CommandLineRunner, ExitCodeGenerator {
+    // private int exitCode;
 
-    @Autowired
-    IFactory factory; // auto-configured to inject PicocliSpringFactory
+    // @Autowired
+    // IFactory factory; // auto-configured to inject PicocliSpringFactory
 
-    @Autowired
-    MyCommand myCommand; // your @picocli.CommandLine.Command-annotated class
+    // @Autowired
+    // MyCommand myCommand; // your @picocli.CommandLine.Command-annotated class
 
-    @Override
-    public void run(String... args) {
-        // let picocli parse command line args and run the business logic
-        exitCode = new CommandLine(myCommand, factory).execute(args);
-    }
+    // @Override
+    // public void run(String... args) {
+    //     // let picocli parse command line args and run the business logic
+    //     exitCode = new CommandLine(myCommand, factory).execute(args);
+    // }
 
-    @Override
-    public int getExitCode() {
-        return exitCode;
-    }
+    // @Override
+    // public int getExitCode() {
+    //     return exitCode;
+    // }
 
     public static void main(String[] args) {
         // let Spring instantiate and inject dependencies
