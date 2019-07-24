@@ -23,27 +23,6 @@ plugins {
 group = 'hedera-cli'
 version = '0.0.1'
 
-//task(runCreateAccount, dependsOn: 'classes', type: JavaExec) {
-//    main = 'hedera.cli.CreateAccount'
-//    classpath = sourceSets.main.runtimeClasspath
-//}
-//
-//task(runCryptoTransfer, dependsOn: 'classes', type: JavaExec) {
-//    main = 'hedera.cli.CryptoTransfer'
-//    classpath = sourceSets.main.runtimeClasspath
-//}
-//
-//task(runHelloWorld, dependsOn: 'classes', type: JavaExec) {
-//    main = 'hedera.cli.App'
-//    classpath = sourceSets.main.runtimeClasspath
-//}
-//
-//task(runSimple, dependsOn: 'classes', type: JavaExec) {
-//    main = 'hedera.cli.Simple'
-//    classpath = sourceSets.main.runtimeClasspath
-//    systemProperty 'simple.message', 'Hello '
-//}
-
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
@@ -75,9 +54,6 @@ dependencies {
     compile 'info.picocli:picocli:4.0.1'
     annotationProcessor 'info.picocli:picocli-codegen:4.0.1'
 
-    // jline smart terminal
-    compile group: 'info.picocli', name: 'picocli-shell-jline3', version: '3.9.5'
-
     compileJava {
         options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
     }
@@ -96,7 +72,7 @@ compileJava {
 
 application {
     // Define the main class for the application
-    mainClassName = 'hedera.cli.MySpringApp'
+    mainClassName = 'com.hedera.cli.MySpringApp'
 }
 
 apply plugin: 'io.spring.dependency-management'

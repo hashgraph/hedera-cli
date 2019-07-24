@@ -11,15 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import picocli.CommandLine;
 import picocli.CommandLine.IFactory;
 
-//@SpringBootApplication
-//public class HederaShell {
-//
-//    public static void main(String[] args) throws Exception {
-//        ConfigurableApplicationContext context = SpringApplication.run(HederaShell.class, args);
-//    }
-//}
 @SpringBootApplication
-public class MySpringApp implements CommandLineRunner, ExitCodeGenerator {
+public class Application implements CommandLineRunner, ExitCodeGenerator {
     private int exitCode;
 
     @Autowired
@@ -41,6 +34,6 @@ public class MySpringApp implements CommandLineRunner, ExitCodeGenerator {
 
     public static void main(String[] args) {
         // let Spring instantiate and inject dependencies
-        System.exit(SpringApplication.exit(SpringApplication.run(MySpringApp.class, args)));
+        System.exit(SpringApplication.exit(SpringApplication.run(Application.class, args)));
     }
 }

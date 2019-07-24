@@ -72,7 +72,7 @@ compileJava {
 
 application {
     // Define the main class for the application
-    mainClassName = 'com.hedera.cli.MySpringApp'
+    mainClassName = 'com.hedera.cli.Application'
 }
 
 apply plugin: 'io.spring.dependency-management'
