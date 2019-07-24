@@ -4,7 +4,6 @@ import com.hedera.cli.shell.ProgressBar;
 import com.hedera.cli.shell.ProgressCounter;
 import com.hedera.cli.shell.ShellHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
