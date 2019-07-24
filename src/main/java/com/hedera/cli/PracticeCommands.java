@@ -25,14 +25,13 @@ public class PracticeCommands {
     Account account;
 
     @ShellMethod(value = "manage hedera account")
-    public void account(@ShellOption(defaultValue="") String subCommand) {
-        System.out.println(subCommand);
+    public void account(@ShellOption(defaultValue="") String... args) {
         Account account = new Account();
-        if (subCommand.isEmpty()) {
+        if (args.length == 0) {
             System.out.println("subCommand is empty");
             account.run();
         } else {
-            account.subCommand(subCommand);                        
+            account.subCommand(args);                        
         }
     }
 

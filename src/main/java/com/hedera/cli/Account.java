@@ -12,15 +12,6 @@ import com.hedera.cli.hedera.CryptoCreate;
 @Command(name = "account", subcommands = CryptoCreate.class)
 public class Account implements Runnable {
 
-    // public Account(String[] args) {
-    //     System.out.println(args);
-    //     CommandLine commandLine = new CommandLine(this);
-    //     commandLine.addSubcommand("create", new CryptoCreate());
-
-    //     ParseResult parsed = commandLine.parseArgs(args);
-    //     handleParseResult(parsed);
-    // }
-
     // public static void main(String[] args) {
     //     CommandLine commandLine = new CommandLine(new Account());
     //     commandLine.addSubcommand("create", new CryptoCreate());
@@ -52,16 +43,24 @@ public class Account implements Runnable {
         CommandLine.usage(this, System.out);
     }
 
-    public void subCommand(String subCommand) {
-        // CryptoCreate create = new CryptoCreate();
-        // create.run();
-
+    public void subCommand(String... args) {
         CommandLine commandLine = new CommandLine(new Account());
-        commandLine.addSubcommand("create", new CryptoCreate());
-
-        ParseResult parsed = commandLine.parseArgs(subCommand);
-        handleParseResult(parsed);
+        // commandLine.addSubcommand("create", new CryptoCreate());
+        commandLine.execute(args);
     }
+
+    // public void subCommand(String... subCommand) {
+    //     // CryptoCreate create = new CryptoCreate();
+    //     // create.run();
+
+    //     CommandLine commandLine = new CommandLine(new Account());
+    //     commandLine.addSubcommand("create", new CryptoCreate());
+
+    //     ParseResult parsed = commandLine.parseArgs(subCommand);
+    //     commandLine.execute(parsed);
+    //     // ParseResult parsed = commandLine.parseArgs(subCommand);
+    //     // handleParseResult(parsed);
+    // }
 }
 //public class MyCommand implements Callable<Integer> {
 //
