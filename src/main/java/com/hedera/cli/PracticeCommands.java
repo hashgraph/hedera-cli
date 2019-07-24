@@ -34,16 +34,6 @@ public class PracticeCommands {
         }
     }
 
-    @ShellMethod(value = "Do Something Else")
-    public void implicit3() {
-
-    }
-
-    @ShellMethod("Add two integers together.")
-    public String add(String a, String b) {
-        return a + b;
-    }
-
     @ShellMethod("Displays greeting message to the user whose name is supplied")
     public String echo(@ShellOption({"-N", "--name"}) String name) {
         String message = String.format("Hello %s!", name);
