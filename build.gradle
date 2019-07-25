@@ -18,6 +18,8 @@ plugins {
 
     // shadow jar plugin to build fat jars
     id 'com.github.johnrengelman.shadow' version '5.1.0'
+
+    id 'org.jetbrains.dokka' version '0.9.18'
 }
 
 group = 'hedera-cli'
@@ -73,6 +75,11 @@ compileJava {
 application {
     // Define the main class for the application
     mainClassName = 'com.hedera.cli.Application'
+}
+
+dokka {
+    outputFormat = 'markdown' 
+    outputDirectory = "$buildDir/javadoc"
 }
 
 apply plugin: 'io.spring.dependency-management'

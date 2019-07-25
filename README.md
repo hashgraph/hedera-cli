@@ -1,10 +1,6 @@
 Project Setup
 ===
 
-* Gradle version 5.0+ is required.
-* Gradle can be installed via your OS' package manager
-* Alternatively, use [sdkman.io](https://sdkman.io/install) to manage all your java/gradle tooling
-
 ```
 git clone https://github.com/hashgraph/hedera-cli
 cp .env.sample .env
