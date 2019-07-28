@@ -8,18 +8,8 @@ echo "cleaning up the ocean..."
 echo "rebuilding the world..."
 ./gradlew clean build
 
-# create the fat jar with shadow jar plugin
-echo "creating jar..."
-./gradlew shadowJar
-
-# copy out the fat jar
-cp build/libs/hedera-cli-0.0.1.jar hedera.jar
-
-# pack our fat jar into a linux/unix executable
-cat ./scripts/stub.sh hedera.jar > hedera && chmod +x hedera
-
-# clean up
-rm hedera.jar 2> /dev/null 
+# copy out the executable jar built with Spring Boot's LaunchScript
+cp build/libs/hedera-cli-0.0.1.jar hedera && chmod +x hedera
 
 # once the hedera executable is moved to a PATH directory,
 # it should be available anywhere as a command line program
