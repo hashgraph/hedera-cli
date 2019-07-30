@@ -1,6 +1,8 @@
 
 package com.hedera.cli.hedera.crypto;
 
+import javax.sound.midi.SysexMessage;
+
 import com.hedera.cli.ExampleHelper;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
@@ -29,6 +31,10 @@ public class CryptoCreate implements Runnable {
 
   @Override
   public void run() {
+
+    System.out.println("CryptoCreate subcommand");
+    System.out.println(this.generateRecord);
+    System.out.println(this.initBal);
 
       // Generate a Ed25519 private, public key pair
       var newKey = Ed25519PrivateKey.generate();

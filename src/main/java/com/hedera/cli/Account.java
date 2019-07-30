@@ -29,13 +29,15 @@ public class Account implements Runnable {
     public void handle(String subCommand, String... args) {
         CommandLine cmd = new CommandLine(new Account());
         System.out.println("args parsed in account");
-        System.out.println(subCommand + Arrays.asList(args));
+        System.out.println(subCommand + " " + Arrays.asList(args));
         // Check subcommand before parsing args
         switch (subCommand) {
             case "create":
-                CommandLine.usage(new CryptoCreate(), System.out);
-                cmd.parseArgs(args);
-                cmd.execute(args);
+                if (args.length == 0) {
+                    CommandLine.usage(new CryptoCreate(), System.out);
+                } else {
+                    new CommandLine(new CryptoCreate()).execute(args);
+                }
                 break;
             case "transfer":
                 CommandLine.usage(new CryptoTransfer(), System.out);
