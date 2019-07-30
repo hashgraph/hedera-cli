@@ -17,9 +17,9 @@ description = "Deletes the file with FileID in the format of" +
 "shardNum.realmNum.fileNum")
 public class FileDelete implements Runnable {
 
-    @Option(names = {"-d", "--date"},
+    @Option(names = {"-d", "--date"}, arity = "0..2",
             description = "Enter date of file expiration in the format of"
-    + "dd-MM-yyyy hh:mm:ss for example 11-01-2019 11:11:59")
+    + "dd-MM-yyyy hh:mm:ss for example -d=11-01-2019,11:11:59")
     private String[] date;
 
     @Override

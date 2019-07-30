@@ -19,7 +19,7 @@ import java.util.Arrays;
 public class FileCreate implements Runnable {
 
     @Option(names = {"-d", "--date"}, arity = "0..2", description = "Enter file expiry date in the format of"
-            + "dd-MM-yyyy hh:mm:ss for example 22-02-2019 21:30:58")
+            + "dd-MM-yyyy hh:mm:ss for example -d=22-02-2019,21:30:58")
     private String[] date;
 
     @Override
