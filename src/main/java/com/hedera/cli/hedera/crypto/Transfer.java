@@ -6,8 +6,9 @@ import picocli.CommandLine.Command;
 
 @Component
 @Command(name= "transfer",
-        description = "Crypto transfer to single or multiple users(kiv)",
-        subcommands = {CryptoTransfer.class})
+        description = "@|fg(magenta) Crypto transfer to single or multiple accounts|@ %n" +
+        "@|fg(yellow) transfer single <args> OR transfer multiple <args>|@",
+        subcommands = {CryptoTransfer.class, CryptoTransferMultiple.class})
 public class Transfer implements Runnable {
 
     @Override

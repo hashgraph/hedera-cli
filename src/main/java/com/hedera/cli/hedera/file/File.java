@@ -4,7 +4,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import java.util.Arrays;
 
-@Command(name = "file", header = "Create, update, delete file.",
+@Command(name = "file", description = "@|fg(magenta) Create, update, delete file.|@",
 subcommands = {FileCreate.class, FileDelete.class})
 // This subcommand here is not for the real subcommand handling it is only for documentation
 public class File implements Runnable {

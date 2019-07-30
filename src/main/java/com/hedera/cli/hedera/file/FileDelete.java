@@ -11,15 +11,15 @@ import picocli.CommandLine.Option;
 import java.time.Instant;
 
 @Command(name = "delete", header = "Delete specified file from the Hedera network",
-description = "Deletes the file with FileID in the format of" +
-"shardNum.realmNum.fileNum")
+description = "@|fg(magenta) Deletes the file with FileID in the format of%n" +
+"shardNum.realmNum.fileNum|@")
 public class FileDelete implements Runnable {
 
     @Option(names = {"-d", "--date"}, arity = "0..2",
-            description = "Enter date of file expiration in the format of " +
-                    "dd-MM-yyyy hh:mm:ss " +
+            description = "Enter date of file expiration in the format of%n" +
+                    "dd-MM-yyyy hh:mm:ss%n" +
                     "%n@|bold,underline Usage:|@%n" +
-                    "-d=11-01-2019,11:11:59")
+                    "@|fg(yellow) -d=11-01-2019,11:11:59|@")
     private String[] date;
 
     @Override
