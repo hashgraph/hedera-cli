@@ -6,6 +6,7 @@ import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
 import com.hedera.hashgraph.sdk.proto.ResponseCodeEnum;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -20,7 +21,7 @@ public class FileDelete implements Runnable {
 
     @Option(names = {"-d", "--date"},
             description = "Enter date of file expiration in the format of"
-    + "dd-MM-yyyy hh:mm:ss for example 22-02-2019 21:30:58")
+    + "dd-MM-yyyy hh:mm:ss for example 11-01-2019 11:11:59")
     private Date date;
 
     @Override

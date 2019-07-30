@@ -1,5 +1,5 @@
 
-package com.hedera.cli.hedera;
+package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.ExampleHelper;
 import com.hedera.hashgraph.sdk.HederaException;
@@ -10,12 +10,11 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name = "create",
-        sortOptions = false,
-        headerHeading = "@|bold,underline Usage:|@%n%n",
-        synopsisHeading = "%n",
-        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
-        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
-        optionListHeading = "%n@|bold,underline Options:|@%n",
+//        headerHeading = "@|bold,underline Usage:|@%n%n",
+//        synopsisHeading = "%n",
+//        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
+//        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
+//        optionListHeading = "%n@|bold,underline Options:|@%n",
         header = "Creates a new account in Hedera network",
         description = "Creates a new Hedera account and returns an accountID in the form of" +
                 "shardNum.realmNum.accountNum.",
@@ -30,9 +29,6 @@ public class CryptoCreate implements Runnable {
 
   @Override
   public void run() {
-      System.out.println("create subcommand options invoked");
-      System.out.println(this.generateRecord);
-      System.out.println(this.initBal);
 
       // Generate a Ed25519 private, public key pair
       var newKey = Ed25519PrivateKey.generate();

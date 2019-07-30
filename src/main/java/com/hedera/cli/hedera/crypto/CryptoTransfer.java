@@ -1,20 +1,22 @@
-package com.hedera.cli.hedera;
+package com.hedera.cli.hedera.crypto;
 
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.cli.ExampleHelper;
 import java.math.BigInteger;
+
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ParseResult;
 
 @Command(name= "transfer",
-        sortOptions = false,
-        headerHeading = "@|bold,underline Usage:|@%n%n",
-        synopsisHeading = "%n",
-        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
-        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
-        optionListHeading = "%n@|bold,underline Options:|@%n",
+//        headerHeading = "@|bold,underline Usage:|@%n%n",
+//        synopsisHeading = "%n",
+//        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
+//        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
+//        optionListHeading = "%n@|bold,underline Options:|@%n",
         header = "Transfer hbars to a single or multiple accounts",
         description = "Transfer hbar to single or multiple hedera accounts",
         helpCommand = true)
@@ -26,8 +28,19 @@ public class CryptoTransfer implements Runnable {
     @Option(names = {"-a", "--recipientAmt"}, arity = "0..2", description = "Amount to transfer")
     private String recipientAmt;
 
+    public ParseResult handleArgsHere() {
+        CommandLine cmd = new CommandLine(this);
+        System.out.println("handling args");
+        System.out.println(recipient);
+        System.out.println(recipientAmt);
+        ParseResult result =  cmd.parseArgs();
+
+        return result;
+    }
+
     @Override
     public void run() {
+
         var operatorId = ExampleHelper.getOperatorId();
         var client = ExampleHelper.createHederaClient();
         var recipientId = AccountId.fromString("0.0." + recipient);
