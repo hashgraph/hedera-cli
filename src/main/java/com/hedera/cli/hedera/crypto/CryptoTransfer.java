@@ -28,16 +28,6 @@ public class CryptoTransfer implements Runnable {
     @Option(names = {"-a", "--recipientAmt"}, arity = "0..2", description = "Amount to transfer")
     private String recipientAmt;
 
-    public ParseResult handleArgsHere() {
-        CommandLine cmd = new CommandLine(this);
-        System.out.println("handling args");
-        System.out.println(recipient);
-        System.out.println(recipientAmt);
-        ParseResult result =  cmd.parseArgs();
-
-        return result;
-    }
-
     @Override
     public void run() {
 

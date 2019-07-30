@@ -2,21 +2,33 @@ package com.hedera.cli.hedera.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 
 public class Utils {
 
-    public long DateToMilliSeconds(Date date) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat(date.toString());
-        String dateInString = "22-06-2019 14:44:44";
-        Date date1 = sdf.parse(dateInString);
-        System.out.println(dateInString);
-        System.out.println("Date - Time in milliseconds : " + date1.getTime());
+    public Instant dateToMilliseconds(String[] dateInString) throws ParseException {
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date1);
-        System.out.println("Calendar - Time in milliseconds : " + calendar.getTimeInMillis());
-        return calendar.getTimeInMillis();
+        System.out.println(Arrays.asList(dateInString));
+
+        StringBuilder appendedString = new StringBuilder();
+        System.out.println("The date from cli is: ");
+        for (String date : dateInString) {
+            System.out.println(date);
+            appendedString.append(date).append(" ");
+        }
+
+        System.out.println("Appended string here is....?");
+        System.out.println(appendedString);
+        SimpleDateFormat sdfWithTime = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+        Date dateWithTime;
+        dateWithTime = sdfWithTime.parse(appendedString.toString());
+        System.out.println("Day Date Time : " + dateWithTime);
+
+        Instant instant = dateWithTime.toInstant();
+        System.out.println("Date of File Expiry is: " + instant);
+        return instant;
     }
 }

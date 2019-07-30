@@ -6,13 +6,11 @@ import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
 import com.hedera.hashgraph.sdk.proto.ResponseCodeEnum;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 
 @Command(name = "delete", header = "Delete specified file from the Hedera network",
 description = "Deletes the file with FileID in the format of" +
@@ -22,7 +20,7 @@ public class FileDelete implements Runnable {
     @Option(names = {"-d", "--date"},
             description = "Enter date of file expiration in the format of"
     + "dd-MM-yyyy hh:mm:ss for example 11-01-2019 11:11:59")
-    private Date date;
+    private String[] date;
 
     @Override
     public void run() {
@@ -31,9 +29,9 @@ public class FileDelete implements Runnable {
             var client = ExampleHelper.createHederaClient();
             var fileContents = "This is the file content for FileDelete.class".getBytes();
             Utils utils = new Utils();
-            var tx = new FileCreateTransaction(client).setExpirationTime(
-                    Instant.now()
-                            .plus(Duration.ofSeconds(utils.DateToMilliSeconds(date))))
+            Instant instant = utils.dateToMilliseconds(date);
+            var tx = new FileCreateTransaction(client)
+                    .setExpirationTime(instant)
                     .addKey(operatorKey.getPublicKey())
                     .setContents(fileContents);
             var receipt = tx.executeForReceipt();
