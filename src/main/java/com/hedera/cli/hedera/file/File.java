@@ -15,17 +15,24 @@ public class File implements Runnable {
     }
 
     public void handle(String subCommand, String... args) {
-        CommandLine cmd = new CommandLine(new File());
+        System.out.println("args parsed in file");
+        System.out.println(subCommand + " " + Arrays.asList(args));
         switch (subCommand) {
             case "create":
                 System.out.println(Arrays.asList(args));
-                CommandLine.usage(new FileCreate(), System.out);
-                cmd.execute(args);
+                if (args.length == 0) {
+                    CommandLine.usage(new FileCreate(), System.out);
+                } else {
+                    new CommandLine(new FileCreate()).execute(args);
+                }
                 break;
             case "delete":
                 System.out.println(Arrays.asList(args));
-                CommandLine.usage(new FileDelete(), System.out);
-                cmd.execute(args);
+                if (args.length == 0) {
+                    CommandLine.usage(new FileDelete(), System.out);
+                } else {
+                    new CommandLine(new FileDelete()).execute(args);
+                }
                 break;
             case "update":
                 System.out.println("Not yet implemented");

@@ -27,7 +27,6 @@ public class Account implements Runnable {
     }
 
     public void handle(String subCommand, String... args) {
-        CommandLine cmd = new CommandLine(new Account());
         System.out.println("args parsed in account");
         System.out.println(subCommand + " " + Arrays.asList(args));
         // Check subcommand before parsing args
@@ -40,9 +39,11 @@ public class Account implements Runnable {
                 }
                 break;
             case "transfer":
-                CommandLine.usage(new CryptoTransfer(), System.out);
-                cmd.parseArgs(args);
-                cmd.execute(args);
+                if (args.length == 0) {
+                    CommandLine.usage(new CryptoTransfer(), System.out);
+                } else {
+                    new CommandLine(new CryptoTransfer()).execute(args);
+                }
                 break;
             default:
                 this.run();
