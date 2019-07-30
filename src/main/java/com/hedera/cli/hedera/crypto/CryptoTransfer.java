@@ -5,24 +5,23 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.cli.ExampleHelper;
 import java.math.BigInteger;
-
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.ParseResult;
 
-@Command(name= "transfer",
+@Command(name= "single",
 //        headerHeading = "@|bold,underline Usage:|@%n%n",
 //        synopsisHeading = "%n",
 //        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
 //        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
 //        optionListHeading = "%n@|bold,underline Options:|@%n",
-        header = "Transfer hbars to a single or multiple accounts",
-        description = "Transfer hbar to single or multiple hedera accounts",
+        description = "Transfer hbars to a single account",
         helpCommand = true)
 public class CryptoTransfer implements Runnable {
 
-    @Option(names = {"-r", "--recipient"}, arity = "0..2", description = "Recipient to transfer to")
+    @Option(names = {"-r", "--recipient"}, arity = "0..2",  description = "Recipient to transfer to"+
+            "%n@|bold,underline Usage:|@%n" +
+            "transfer single -r=1234,-a=100 OR %n" +
+            "transfer single --recipient=1234,--recipientAmt=100")
     private String recipient;
 
     @Option(names = {"-a", "--recipientAmt"}, arity = "0..2", description = "Amount to transfer")

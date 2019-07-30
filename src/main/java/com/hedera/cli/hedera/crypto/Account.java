@@ -1,19 +1,16 @@
-package com.hedera.cli;
+package com.hedera.cli.hedera.crypto;
 
 import java.util.Arrays;
 
-import com.hedera.cli.hedera.crypto.CryptoTransfer;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.ParseResult;
-import com.hedera.cli.hedera.crypto.CryptoCreate;
 
 @Component
 @Command(name = "account",
 //        synopsisHeading = "%n",
 //        headerHeading = "@|bold,underline Usage:|@%n%n",
-        header = "Crypto API",
+//        header = "Crypto API",
 //        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
         description = "Create, update, delete an account by providing the <args>",
 //        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
@@ -36,13 +33,6 @@ public class Account implements Runnable {
                     CommandLine.usage(new CryptoCreate(), System.out);
                 } else {
                     new CommandLine(new CryptoCreate()).execute(args);
-                }
-                break;
-            case "transfer":
-                if (args.length == 0) {
-                    CommandLine.usage(new CryptoTransfer(), System.out);
-                } else {
-                    new CommandLine(new CryptoTransfer()).execute(args);
                 }
                 break;
             default:

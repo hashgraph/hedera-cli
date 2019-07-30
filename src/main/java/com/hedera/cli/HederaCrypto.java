@@ -1,5 +1,7 @@
 package com.hedera.cli;
 
+import com.hedera.cli.hedera.crypto.Account;
+import com.hedera.cli.hedera.crypto.Transfer;
 import com.hedera.cli.shell.ShellHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
@@ -24,8 +26,11 @@ public class HederaCrypto {
     }
 
     @ShellMethod(value = "transfer hbars from one hedera account to another")
-    public void transfer() {
-        System.out.println("Stub function.");
+    public void transfer(
+        @ShellOption(defaultValue = "") String subCommand,
+        @ShellOption(defaultValue = "", arity = -1) String... args) {
+        Transfer transfer = new Transfer();
+        transfer.handle(subCommand, args);
     }
 
 }

@@ -1,8 +1,6 @@
 
 package com.hedera.cli.hedera.crypto;
 
-import javax.sound.midi.SysexMessage;
-
 import com.hedera.cli.ExampleHelper;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
@@ -17,7 +15,6 @@ import picocli.CommandLine.Option;
 //        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
 //        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
 //        optionListHeading = "%n@|bold,underline Options:|@%n",
-        header = "Creates a new account in Hedera network",
         description = "Creates a new Hedera account and returns an accountID in the form of" +
                 "shardNum.realmNum.accountNum.",
         helpCommand = true)
@@ -26,7 +23,10 @@ public class CryptoCreate implements Runnable {
   @Option(names = { "-r", "--record"}, description = "Generates a record that lasts 25hrs")
   private boolean generateRecord;
 
-  @Option(names = {"-b", "--balance"}, description = "Initial balance of new account created")
+  @Option(names = {"-b", "--balance"}, description = "Initial balance of new account created " +
+          "%n@|bold,underline Usage:|@%n" +
+          "account create -b=100 OR %n" +
+          "account create --balance=100")
   private int initBal;
 
   @Override

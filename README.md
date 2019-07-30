@@ -22,9 +22,47 @@ Get Started
 ./hedera
 ```
 
+
+Help
+===
+
+```bash
+help
+```
+
+
+Create Account
+===
+
+```bash
+account create -b=100 OR
+account create --balance=100
+```
+
+File Create
+===
+
+```bash
+
+# where -d is file expiration date, must include time
+file create -d=dd-MM-yyyy,hh:mm:ss
+file create --date=dd-MM-yyyy,hh:mm:ss
+
+```
+
+Create Account
+===
+
+```bash
+account create -b=100 OR
+account create --balance=100
+```
+
 Crypto Transfer
 ===
 
 ```bash
-cryptotransfer 1001 44
+transfer single -r=1001,-a=44 OR
+transfer single -recipient=1001,-recipientAmt=44
+
 ```

@@ -7,8 +7,6 @@ import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 

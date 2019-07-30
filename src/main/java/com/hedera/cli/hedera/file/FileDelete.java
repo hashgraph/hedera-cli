@@ -8,8 +8,6 @@ import com.hedera.hashgraph.sdk.file.FileInfoQuery;
 import com.hedera.hashgraph.sdk.proto.ResponseCodeEnum;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-
-import java.time.Duration;
 import java.time.Instant;
 
 @Command(name = "delete", header = "Delete specified file from the Hedera network",
@@ -18,8 +16,10 @@ description = "Deletes the file with FileID in the format of" +
 public class FileDelete implements Runnable {
 
     @Option(names = {"-d", "--date"}, arity = "0..2",
-            description = "Enter date of file expiration in the format of"
-    + "dd-MM-yyyy hh:mm:ss for example -d=11-01-2019,11:11:59")
+            description = "Enter date of file expiration in the format of " +
+                    "dd-MM-yyyy hh:mm:ss " +
+                    "%n@|bold,underline Usage:|@%n" +
+                    "-d=11-01-2019,11:11:59")
     private String[] date;
 
     @Override
