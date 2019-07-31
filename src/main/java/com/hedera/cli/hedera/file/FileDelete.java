@@ -1,6 +1,6 @@
 package com.hedera.cli.hedera.file;
 
-import com.hedera.cli.ExampleHelper;
+import com.hedera.cli.Hedera;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
@@ -24,8 +24,8 @@ public class FileDelete implements Runnable {
     @Override
     public void run() {
         try {
-            var operatorKey = ExampleHelper.getOperatorKey();
-            var client = ExampleHelper.createHederaClient();
+            var operatorKey = Hedera.getOperatorKey();
+            var client = Hedera.createHederaClient();
             var fileContents = "This is the file content for FileDelete.class".getBytes();
             Utils utils = new Utils();
             Instant instant = utils.dateToMilliseconds(date);

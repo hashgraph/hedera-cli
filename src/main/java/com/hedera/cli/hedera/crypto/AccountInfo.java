@@ -1,6 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.ExampleHelper;
+import com.hedera.cli.Hedera;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -26,8 +26,8 @@ public class AccountInfo implements Runnable {
             System.out.println("AccountInfo commands");
 //            System.out.println(request);
 //            System.out.println(privateKey);
-            var operatorId = ExampleHelper.getOperatorId();
-            var client = ExampleHelper.createHederaClient();
+            var operatorId = Hedera.getOperatorId();
+            var client = Hedera.createHederaClient();
             AccountInfoQuery q = null;
             q = new AccountInfoQuery(client)
                     .setAccountId(operatorId);

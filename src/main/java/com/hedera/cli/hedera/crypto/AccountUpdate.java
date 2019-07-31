@@ -1,6 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.ExampleHelper;
+import com.hedera.cli.Hedera;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountUpdateTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -24,7 +24,7 @@ public class AccountUpdate implements Runnable {
     @Override
     public void run() {
         try {
-            var client = ExampleHelper.createHederaClient();
+            var client = Hedera.createHederaClient();
             // First, we create a new account so we don't affect our account
             var originalKey = Ed25519PrivateKey.generate();
             var accountId = client.createAccount(originalKey.getPublicKey(), 0);

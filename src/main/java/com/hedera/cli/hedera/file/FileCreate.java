@@ -1,6 +1,6 @@
 package com.hedera.cli.hedera.file;
 
-import com.hedera.cli.ExampleHelper;
+import com.hedera.cli.Hedera;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
@@ -27,8 +27,8 @@ public class FileCreate implements Runnable {
         CommandLine.usage(this, System.out);
         System.out.println("File create " + Arrays.asList(date));
         try {
-            var operatorKey = ExampleHelper.getOperatorKey();
-            var client = ExampleHelper.createHederaClient();
+            var operatorKey = Hedera.getOperatorKey();
+            var client = Hedera.createHederaClient();
             // The file is required to be a byte array,
             // you can easily use the bytes of a file instead.
             var fileContents = "Hedera hashgraph is great!".getBytes();
