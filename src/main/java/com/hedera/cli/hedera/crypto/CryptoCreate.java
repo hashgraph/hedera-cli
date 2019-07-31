@@ -20,10 +20,12 @@ import picocli.CommandLine.Option;
         helpCommand = true)
 public class CryptoCreate implements Runnable {
 
-  @Option(names = { "-r", "--record"}, description = "Generates a record that lasts 25hrs")
+  @Option(names = { "-r", "--record"}, 
+          description = "Generates a record that lasts 25hrs")
   private boolean generateRecord;
 
-  @Option(names = {"-b", "--balance"}, description = "Initial balance of new account created " +
+  @Option(names = {"-b", "--balance"},
+          description = "Initial balance of new account created " +
           "%n@|bold,underline Usage:|@%n" +
           "account create -b=100 OR %n" +
           "account create --balance=100")
