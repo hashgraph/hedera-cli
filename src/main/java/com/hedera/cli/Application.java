@@ -3,12 +3,17 @@
  */
 package com.hedera.cli;
 
+import com.hedera.cli.hedera.utils.DataDirectory;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class Application {
     public static void main(String[] args) {
+        // set defaults
+        DataDirectory.readFile("network.txt", "aspen");
+        
         // let Spring instantiate and inject dependencies
         System.exit(SpringApplication.exit(SpringApplication.run(Application.class, args)));
     }
