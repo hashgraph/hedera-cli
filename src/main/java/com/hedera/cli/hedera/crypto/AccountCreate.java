@@ -10,11 +10,6 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name = "create",
-//        headerHeading = "@|bold,underline Usage:|@%n%n",
-//        synopsisHeading = "%n",
-//        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
-//        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
-//        optionListHeading = "%n@|bold,underline Options:|@%n",
         description = "@|fg(magenta) Creates a new Hedera account and returns an accountID in the form of "
                 + "%nshardNum.realmNum.accountNum.|@",
         helpCommand = true)
@@ -30,6 +25,8 @@ public class AccountCreate implements Runnable {
           "@|fg(yellow) account create -b=100 OR%n" +
           "account create --balance=100|@")
   private int initBal;
+
+  // KIV multisig
 
   @Override
   public void run() {
