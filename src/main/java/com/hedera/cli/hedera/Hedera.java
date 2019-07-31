@@ -1,17 +1,48 @@
 package com.hedera.cli.hedera;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedera.cli.models.Network;
 import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.models.AddressBook;
+import com.hedera.cli.models.HederaNode;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import io.github.cdimascio.dotenv.Dotenv;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class Hedera {
 
-    public Hedera() {}
+    private HederaNode node;
+
+    public Hedera() {
+        this.node = this.getRandomNode();
+    }
+
+    private HederaNode getRandomNode() {
+        InputStream addressBookInputStream = getClass().getClassLoader().getResourceAsStream("/addressbook.json");
+        ObjectMapper objectMapper = new ObjectMapper();
+        HederaNode node = null;
+        try {
+           AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);   
+           List<Network> networks = addressBook.getNetworks();    
+           String currentNetwork = DataDirectory.readFile("network.txt", "aspen");  
+           for (Network network: networks) {
+               if (network.getName().equals(currentNetwork)) {
+                    node = network.getRandomNode();
+               }
+           }
+           
+        } catch (IOException e) {
+           e.printStackTrace(); 
+        }
+        return node;
+    } 
 
     public static Dotenv getEnv() {
         // Load configuration from the environment or a $projectRoot/.env file, if present
@@ -19,8 +50,8 @@ public class Hedera {
         return Dotenv.load();
     }
 
-    public static AccountId getNodeId() {
-        return AccountId.fromString(Objects.requireNonNull(getEnv().get("NODE_ID")));
+    public AccountId getNodeId() {
+        return AccountId.fromString(this.node.getAccount());
     }
 
     public static AccountId getOperatorId() {
@@ -31,10 +62,10 @@ public class Hedera {
         return Ed25519PrivateKey.fromString(Objects.requireNonNull(getEnv().get("OPERATOR_KEY")));
     }
 
-    public static Client createHederaClient() {
+    public Client createHederaClient() {
         // To connect to a network with more nodes, add additional entries to the network map
-        var nodeAddress = Objects.requireNonNull(getEnv().get("NODE_ADDRESS"));
-        var client = new Client(Map.of(getNodeId(), nodeAddress));
+        var nodeAddress = this.node.getAddress();
+        var client = new Client(Map.of(this.getNodeId(), nodeAddress));
 
         // Defaults the operator account ID and key such that all generated transactions will be paid for
         // by this account and be signed by this key

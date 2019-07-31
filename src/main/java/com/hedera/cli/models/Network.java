@@ -1,6 +1,7 @@
 package com.hedera.cli.models;
 
 import java.util.List;
+import java.util.Random;
 
 public class Network {
 
@@ -14,5 +15,12 @@ public class Network {
    
   public String getName() {
     return name;
+  }
+
+  public HederaNode getRandomNode() {
+    Random rand = new Random();
+    List<HederaNode> nodes = this.getNodes();
+    HederaNode node = nodes.get(rand.nextInt(nodes.size()));
+    return node;
   }
 }

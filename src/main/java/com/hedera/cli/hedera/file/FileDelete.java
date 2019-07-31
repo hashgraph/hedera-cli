@@ -24,8 +24,9 @@ public class FileDelete implements Runnable {
     @Override
     public void run() {
         try {
+            Hedera hedera = new Hedera();
             var operatorKey = Hedera.getOperatorKey();
-            var client = Hedera.createHederaClient();
+            var client = hedera.createHederaClient();
             var fileContents = "This is the file content for FileDelete.class".getBytes();
             Utils utils = new Utils();
             Instant instant = utils.dateToMilliseconds(date);

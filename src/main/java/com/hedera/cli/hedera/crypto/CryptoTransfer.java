@@ -29,7 +29,8 @@ public class CryptoTransfer implements Runnable {
     public void run() {
 
         var operatorId = Hedera.getOperatorId();
-        var client = Hedera.createHederaClient();
+        Hedera hedera = new Hedera();
+        var client = hedera.createHederaClient();
         var recipientId = AccountId.fromString("0.0." + recipient);
         var amount = new BigInteger(recipientAmt);
 

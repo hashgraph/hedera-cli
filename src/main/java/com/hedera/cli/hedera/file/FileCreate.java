@@ -27,8 +27,9 @@ public class FileCreate implements Runnable {
         CommandLine.usage(this, System.out);
         System.out.println("File create " + Arrays.asList(date));
         try {
+            Hedera hedera = new Hedera();
             var operatorKey = Hedera.getOperatorKey();
-            var client = Hedera.createHederaClient();
+            var client = hedera.createHederaClient();
             // The file is required to be a byte array,
             // you can easily use the bytes of a file instead.
             var fileContents = "Hedera hashgraph is great!".getBytes();

@@ -26,8 +26,9 @@ public class AccountInfo implements Runnable {
             System.out.println("AccountInfo commands");
 //            System.out.println(request);
 //            System.out.println(privateKey);
+            Hedera hedera = new Hedera();
             var operatorId = Hedera.getOperatorId();
-            var client = Hedera.createHederaClient();
+            var client = hedera.createHederaClient();
             AccountInfoQuery q = null;
             q = new AccountInfoQuery(client)
                     .setAccountId(operatorId);
