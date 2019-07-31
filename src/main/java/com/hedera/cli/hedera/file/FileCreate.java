@@ -1,6 +1,6 @@
 package com.hedera.cli.hedera.file;
 
-import com.hedera.cli.Hedera;
+import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
