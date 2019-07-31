@@ -1,4 +1,4 @@
-package com.hedera.cli;
+package com.hedera.cli.hedera;
 
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;

@@ -3,7 +3,7 @@ package com.hedera.cli.hedera.crypto;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
-import com.hedera.cli.Hedera;
+import com.hedera.cli.hedera.Hedera;
 import java.math.BigInteger;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
