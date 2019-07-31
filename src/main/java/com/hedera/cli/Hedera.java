@@ -8,8 +8,13 @@ import io.github.cdimascio.dotenv.Dotenv;
 import java.util.Map;
 import java.util.Objects;
 
-public class ExampleHelper {
-    private ExampleHelper() { }
+public class Hedera {
+
+    public Hedera() {}
+
+    private String getCurrentNetwork() {
+        return "";
+    }
 
     public static Dotenv getEnv() {
         // Load configuration from the environment or a $projectRoot/.env file, if present

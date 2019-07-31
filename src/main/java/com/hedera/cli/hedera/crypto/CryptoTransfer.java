@@ -3,7 +3,7 @@ package com.hedera.cli.hedera.crypto;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
-import com.hedera.cli.ExampleHelper;
+import com.hedera.cli.Hedera;
 import java.math.BigInteger;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -28,8 +28,8 @@ public class CryptoTransfer implements Runnable {
     @Override
     public void run() {
 
-        var operatorId = ExampleHelper.getOperatorId();
-        var client = ExampleHelper.createHederaClient();
+        var operatorId = Hedera.getOperatorId();
+        var client = Hedera.createHederaClient();
         var recipientId = AccountId.fromString("0.0." + recipient);
         var amount = new BigInteger(recipientAmt);
 
