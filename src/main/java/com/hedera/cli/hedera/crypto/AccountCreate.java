@@ -18,7 +18,7 @@ import picocli.CommandLine.Option;
         description = "@|fg(magenta) Creates a new Hedera account and returns an accountID in the form of "
                 + "%nshardNum.realmNum.accountNum.|@",
         helpCommand = true)
-public class CryptoCreate implements Runnable {
+public class AccountCreate implements Runnable {
 
   @Option(names = { "-r", "--record"},
           description = "Generates a record that lasts 25hrs")
@@ -33,7 +33,7 @@ public class CryptoCreate implements Runnable {
   @Override
   public void run() {
 
-    System.out.println("CryptoCreate subcommand");
+    System.out.println("AccountCreate subcommand");
     System.out.println(this.generateRecord);
     System.out.println(this.initBal);
 

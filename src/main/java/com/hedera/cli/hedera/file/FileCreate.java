@@ -11,7 +11,6 @@ import java.time.Instant;
 import java.util.Arrays;
 
 @Command(name = "create",
-        header = "Creates a new file",
         description = "@|fg(magenta) Creates a new File and returns a FileID in the format of%n" +
                 "shardNum.realmNum.fileNum|@")
 public class FileCreate implements Runnable {
@@ -20,7 +19,7 @@ public class FileCreate implements Runnable {
             description = "Enter file expiry date in the format of%n"
                     + "dd-MM-yyyy hh:mm:ss%n"
                     + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) -d=22-02-2019,21:30:58|@")
+                    + "@|fg(yellow) file create -d=22-02-2019,21:30:58|@")
     private String[] date;
 
     @Override

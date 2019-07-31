@@ -12,10 +12,9 @@ import java.util.Arrays;
 public class CryptoTransferMultiple implements Runnable {
 
     @Option(names = {"-r", "--recipient"}, split = " ", arity = "0..*",
-            description = "Recipient to transfer to"+
-            "%n@|bold,underline Usage:|@%n" +
-            "@|fg(yellow) transfer multiple -r=1001,1002,-a=100,100 OR%n" +
-            "transfer multiple --recipient=1001,1002,--recipientAmt=100,100|@")
+            description = "Recipient to transfer to"
+                    +"%n@|bold,underline Usage:|@%n"
+                    + "@|fg(yellow) transfer multiple -r=1001,1002,-a=100,100|@")
     private String[] recipient;
 
     @Option(names = {"-a", "--recipientAmt"}, split = " ", arity = "0..*", description = "Amount to transfer")

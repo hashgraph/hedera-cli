@@ -9,19 +9,17 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name= "single",
-//        headerHeading = "@|bold,underline Usage:|@%n%n",
 //        synopsisHeading = "%n",
 //        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
 //        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
 //        optionListHeading = "%n@|bold,underline Options:|@%n",
-        description = "@|fg(magenta) Transfer hbars to a single account|@",
+        description = "@|fg(magenta) Transfer hbars to a single account|@%n",
         helpCommand = true)
 public class CryptoTransfer implements Runnable {
 
-    @Option(names = {"-r", "--recipient"}, arity = "0..1",  description = "Recipient to transfer to"+
-            "%n@|bold,underline Usage:|@%n" +
-            "@|fg(yellow) transfer single -r=1234,-a=100 OR%n" +
-            "transfer single --recipient=1234,--recipientAmt=100|@")
+    @Option(names = {"-r", "--recipient"}, arity = "0..1",  description = "Recipient to transfer to"
+            + "%n@|bold,underline Usage:|@%n"
+            + "@|fg(yellow) transfer single -r=1234,-a=100|@")
     private String recipient;
 
     @Option(names = {"-a", "--recipientAmt"}, arity = "0..2", description = "Amount to transfer")
