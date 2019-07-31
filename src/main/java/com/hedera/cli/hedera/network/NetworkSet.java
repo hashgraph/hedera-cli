@@ -22,9 +22,7 @@ public class NetworkSet implements Runnable {
   
   @Override
   public void run() {
-    System.out.println("Setting network name " + name);
-    String userHome = System.getProperty("user.home");
-    System.out.println("We should save it to " + userHome);
+    System.out.println("Setting network to " + name);
     DataDirectory.writeFile("network.txt", name);
   }
 
