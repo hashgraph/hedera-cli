@@ -3,7 +3,6 @@ package com.hedera.cli;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.shell.ShellHelper;
