@@ -1,6 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.Hedera;
+import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.TransactionRecord;
 import com.hedera.hashgraph.sdk.account.AccountDeleteTransaction;
