@@ -1,7 +1,7 @@
 
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.ExampleHelper;
+import com.hedera.cli.Hedera;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
@@ -45,7 +45,7 @@ public class AccountCreate implements Runnable {
       System.out.println("private key = " + newKey);
       System.out.println("public key = " + newPublicKey);
 
-      var client = ExampleHelper.createHederaClient();
+      var client = Hedera.createHederaClient();
 
       var tx = new AccountCreateTransaction(client)
               // The only _required_ property here is `key`
