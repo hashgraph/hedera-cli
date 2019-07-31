@@ -12,10 +12,15 @@ import picocli.CommandLine.Command;
 //        headerHeading = "@|bold,underline Usage:|@%n%n",
 //        header = "Crypto API",
 //        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
-        description = "Create, update, delete an account by providing the <args>",
+        description = "@|fg(magenta) Create, update, delete or querying an account by providing the <args>|@"
+                + "%n@|fg(yellow) account create <args> OR"
+                + "%naccount update <args> OR"
+                + "%naccount delete <args> OR|@",
 //        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
 //        optionListHeading = "%n@|bold,underline Options:|@%n",
-        subcommands = {CryptoCreate.class, CryptoTransfer.class})
+        subcommands = {AccountCreate.class,
+                AccountUpdate.class,
+                AccountInfo.class})
 public class Account implements Runnable {
 
     @Override
@@ -30,9 +35,23 @@ public class Account implements Runnable {
         switch (subCommand) {
             case "create":
                 if (args.length == 0) {
-                    CommandLine.usage(new CryptoCreate(), System.out);
+                    CommandLine.usage(new AccountCreate(), System.out);
                 } else {
-                    new CommandLine(new CryptoCreate()).execute(args);
+                    new CommandLine(new AccountCreate()).execute(args);
+                }
+                break;
+            case "update":
+                if (args.length == 0) {
+                    CommandLine.usage(new AccountUpdate(), System.out);
+                } else {
+                    new CommandLine(new AccountUpdate()).execute(args);
+                }
+                break;
+            case "info":
+                if (args.length == 0) {
+                    CommandLine.usage(new AccountInfo(), System.out);
+                } else {
+                    new CommandLine(new AccountInfo()).execute(args);
                 }
                 break;
             default:
