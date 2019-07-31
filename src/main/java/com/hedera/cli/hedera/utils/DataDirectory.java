@@ -36,9 +36,8 @@ public class DataDirectory {
     }
   }
 
-  static public String readFile(String fileName) {
-    String defaultNetwork = "aspen";
-    String currentNetwork = defaultNetwork;
+  static public String readFile(String fileName, String defaultValue) {
+    String currentNetwork = defaultValue;
     String userHome = System.getProperty("user.home");
     String directoryName = ".hedera";
     Path path = Paths.get(userHome, directoryName);
@@ -53,7 +52,8 @@ public class DataDirectory {
     File file = new File(filePath.toString());
     boolean fileExists = Files.exists(filePath);
     if (!fileExists) {
-      return defaultNetwork;
+      writeFile(fileName, currentNetwork);
+      return currentNetwork;
     }
 
     try {

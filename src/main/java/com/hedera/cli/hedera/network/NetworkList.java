@@ -27,7 +27,7 @@ public class NetworkList implements Runnable {
        AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);          
        List<Network> networks = addressBook.getNetworks();
        for (Network network: networks) {
-         String currentNetwork = DataDirectory.readFile("network.txt");
+         String currentNetwork = DataDirectory.readFile("network.txt", "aspen");
          if (currentNetwork.equals(network.getName())) {
           System.out.println("* " + network.getName());
          } else {

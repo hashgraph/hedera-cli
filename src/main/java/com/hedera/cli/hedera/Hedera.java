@@ -1,5 +1,6 @@
 package com.hedera.cli.hedera;
 
+import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -11,10 +12,6 @@ import java.util.Objects;
 public class Hedera {
 
     public Hedera() {}
-
-    private String getCurrentNetwork() {
-        return "";
-    }
 
     public static Dotenv getEnv() {
         // Load configuration from the environment or a $projectRoot/.env file, if present
