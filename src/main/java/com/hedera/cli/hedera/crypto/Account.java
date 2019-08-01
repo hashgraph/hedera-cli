@@ -8,19 +8,16 @@ import picocli.CommandLine.Command;
 
 @Component
 @Command(name = "account",
-//        synopsisHeading = "%n",
-//        headerHeading = "@|bold,underline Usage:|@%n%n",
-//        header = "Crypto API",
-//        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
+        // synopsisHeading = "%n",
+        // headerHeading = "@|bold,underline Usage:|@%n%n",
+        // header = "Crypto API",
+        // descriptionHeading = "%n@|bold,underline Description:|@%n%n",
         description = "@|fg(magenta) Create, update, delete or querying an account by providing the <args>|@"
-                + "%n@|fg(yellow) account create <args> OR"
-                + "%naccount update <args> OR"
+                + "%n@|fg(yellow) account create <args> OR" + "%naccount update <args> OR"
                 + "%naccount delete <args> OR|@",
-//        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
-//        optionListHeading = "%n@|bold,underline Options:|@%n",
-        subcommands = {AccountCreate.class,
-                AccountUpdate.class,
-                AccountInfo.class})
+        // parameterListHeading = "%n@|bold,underline Parameters:|@%n",
+        // optionListHeading = "%n@|bold,underline Options:|@%n",
+        subcommands = { AccountCreate.class, AccountUpdate.class, AccountInfo.class, AccountDefault.class })
 public class Account implements Runnable {
 
     @Override
@@ -33,30 +30,30 @@ public class Account implements Runnable {
         System.out.println(subCommand + " " + Arrays.asList(args));
         // Check subcommand before parsing args
         switch (subCommand) {
-            case "create":
-                if (args.length == 0) {
-                    CommandLine.usage(new AccountCreate(), System.out);
-                } else {
-                    new CommandLine(new AccountCreate()).execute(args);
-                }
-                break;
-            case "update":
-                if (args.length == 0) {
-                    CommandLine.usage(new AccountUpdate(), System.out);
-                } else {
-                    new CommandLine(new AccountUpdate()).execute(args);
-                }
-                break;
-            case "info":
-                if (args.length == 0) {
-                    CommandLine.usage(new AccountInfo(), System.out);
-                } else {
-                    new CommandLine(new AccountInfo()).execute(args);
-                }
-                break;
-            default:
-                this.run();
-                break;
+        case "create":
+            if (args.length == 0) {
+                CommandLine.usage(new AccountCreate(), System.out);
+            } else {
+                new CommandLine(new AccountCreate()).execute(args);
+            }
+            break;
+        case "update":
+            if (args.length == 0) {
+                CommandLine.usage(new AccountUpdate(), System.out);
+            } else {
+                new CommandLine(new AccountUpdate()).execute(args);
+            }
+            break;
+        case "info":
+            if (args.length == 0) {
+                CommandLine.usage(new AccountInfo(), System.out);
+            } else {
+                new CommandLine(new AccountInfo()).execute(args);
+            }
+            break;
+        default:
+            this.run();
+            break;
         }
     }
 }
