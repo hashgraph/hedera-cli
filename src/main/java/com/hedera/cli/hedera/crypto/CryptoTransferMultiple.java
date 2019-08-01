@@ -2,23 +2,23 @@ package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.TransactionBuilder;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
+import com.hedera.hashgraph.sdk.proto.*;
+import io.grpc.MethodDescriptor;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import shadow.org.codehaus.plexus.util.StringUtils;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Command(name= "multiple",
         description = "@|fg(magenta) Transfer hbars to multiple accounts|@",
         helpCommand = true)
-public class CryptoTransferMultiple implements Runnable  {
+public class CryptoTransferMultiple  extends TransactionBuilder<CryptoTransferTransaction> implements Runnable {
 
     @Option(names = {"-r", "--recipient"}, split = " ", arity = "0..*",
             description = "Recipient to transfer to"
@@ -29,48 +29,56 @@ public class CryptoTransferMultiple implements Runnable  {
     @Option(names = {"-a", "--recipientAmt"}, split = " ", arity = "0..*", description = "Amount to transfer")
     private String[] recipientAmt;
 
+    long sum = 0;
+
+    private final CryptoTransferTransactionBody.Builder builder = bodyBuilder.getCryptoTransferBuilder();
+    private final TransferList.Builder transferList = builder.getTransfersBuilder();
+
+    protected CryptoTransferMultiple(@Nullable Client client) {
+        super(client);
+    }
+
     @Override
     public void run() {
-        System.out.println("TODO multiple transfer list");
-        System.out.println(Arrays.asList(recipient));
-        System.out.println(Arrays.asList(recipientAmt));
-        System.out.println(recipient.length + " " + recipientAmt.length);
 
         var recipientList = Arrays.asList(recipient);
         var amountList = Arrays.asList(recipientAmt);
-        System.out.println(recipientList);
-        System.out.println(amountList);
-        recipientList(recipientList, amountList);
+        verifiedRecipientMap(recipientList, amountList);
         var operatorId = Hedera.getOperatorId();
-        var client = Hedera.createHederaClient();
 
-        // TODO figure out sdk for cryptotransfer
+        var map = verifiedRecipientMap(recipientList,amountList);
+        map.forEach((key, value) -> {
+            if (map.size() != amountList.size()) {
+                throw new IllegalArgumentException("Please check your recipient list");
+            }
+            var account = value.accountId.toProto();
+            var amount = value.amount;
+            transferList.addAccountAmounts(
+                    AccountAmount.newBuilder()
+                    .setAccountID(account)
+                    .setAmount(amount));
+            System.out.println(key + ":" + "Account: " + value.accountId + " Amount: " + value.amount);
+        });
+        System.out.println(transferList);
 //        new CryptoTransferTransaction(client)
-//                .addSender(operatorId, 100)
-//                .addTransfer();
-
+//                .addTransfer(transferList.build());
     }
 
-    public void recipientList(List<String > accountList, List<String> amountList) {
+    public Map<Integer, Recipient> verifiedRecipientMap(List<String > accountList, List<String> amountList) {
         AccountId accountId;
         String acc, amt;
         Map<Integer, Recipient> map = new HashMap<>();
-        long sum = 0;
-
         try {
             System.out.println(accountList);
             System.out.println(amountList);
             if (accountList.size() != amountList.size())
-                System.err.println("Lists aren't the same size");
+                throw new IllegalArgumentException("Lists aren't the same size");
             else {
                 for (int i = 0; i < accountList.size(); ++i) {
-
                     acc = accountList.get(i);
                     amt = amountList.get(i);
-                    var cleanAccString = StringUtils.isNumeric(acc);
-                    if (cleanAccString) {
+                    if (StringUtils.isNumeric(acc)) {
                         if (isAccountId(acc) && isNumeric(amt)) {
-                            System.out.println(acc);
                             accountId = AccountId.fromString("0.0." + acc);
                             var amount = new BigInteger(amt);
                             sum += amount.longValue();
@@ -79,17 +87,12 @@ public class CryptoTransferMultiple implements Runnable  {
                         }
                     }
                 }
-                System.out.println("Total sum is " + sum);
-                map.forEach((key, value) -> {
-                    if (map.size() != amountList.size()) {
-                        throw new IllegalArgumentException("Please check your recipient list");
-                    }
-                    System.out.println(key + ":" + "Acc: " + value.accountId + " Amt: " + value.amount);
-                });
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("Total sum is " + sum);
+        return map;
     }
 
     public boolean isNumeric(final String str) {
@@ -110,17 +113,27 @@ public class CryptoTransferMultiple implements Runnable  {
         if(str == null || str.isEmpty()) {
             return false;
         }
-
+        // checks if accountId only contains 0
         if (str.matches("^[0]+$")) {
             return false;
         }
-
         try {
+            // parse string to make sure it can be of type AccountId
             AccountId.fromString("0.0." + str);
             return true;
         } catch(Exception e) {
             return false;
         }
+    }
+
+    @Override
+    protected void doValidate() {
+
+    }
+
+    @Override
+    protected MethodDescriptor<Transaction, TransactionResponse> getMethod() {
+        return null;
     }
 
     private class Recipient {

@@ -42,7 +42,8 @@ public class CryptoTransfer implements Runnable {
                     // .addSender and .addRecipient can be called as many times as you want as long
                     // as the total sum from
                     // both sides is equivalent
-                    .addSender(operatorId, amount.longValue()).addRecipient(recipientId, amount.longValue())
+                    .addSender(operatorId, amount.longValue())
+                    .addRecipient(recipientId, amount.longValue())
                     .setMemo("transfer test")
                     // As we are sending from the operator we do not need to explicitly sign the
                     // transaction

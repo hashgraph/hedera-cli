@@ -1,5 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.hedera.cli.hedera.Hedera;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -27,10 +28,11 @@ public class Transfer implements Runnable {
                 }
                 break;
             case "multiple":
+                var client = Hedera.createHederaClient();
                 if (args.length == 0) {
-                    CommandLine.usage(new CryptoTransferMultiple(), System.out);
+                    CommandLine.usage(new CryptoTransferMultiple(client), System.out);
                 } else {
-                    new CommandLine(new CryptoTransferMultiple()).execute(args);
+                    new CommandLine(new CryptoTransferMultiple(client)).execute(args);
                 }
                 break;
             default:
