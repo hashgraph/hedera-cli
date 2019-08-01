@@ -198,7 +198,7 @@ public class Reference {
 	 * @return the checksum
 	 */
 	public static byte crc8(byte[] data) {
-	  int count = data.length;
+	  // int count = data.length;
 		int crc = 0xFF;
 		for (int i = 0; i < data.length - 1; i++) {
 			crc ^= Reference.byteToUnsignedInt(data[i]);

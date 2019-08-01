@@ -5,7 +5,6 @@ import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountUpdateTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.springframework.stereotype.Component;
-import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 

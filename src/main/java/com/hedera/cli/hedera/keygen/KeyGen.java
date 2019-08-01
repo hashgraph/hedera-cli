@@ -1,21 +1,6 @@
 package com.hedera.cli.hedera.keygen;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
-import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.util.encoders.Hex;
-
-import com.google.common.io.BaseEncoding;
-
-import net.i2p.crypto.eddsa.EdDSAPrivateKey;
-import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
-import net.i2p.crypto.eddsa.spec.EdDSAPrivateKeySpec;
-import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 public final class KeyGen {
 
@@ -172,19 +157,19 @@ public final class KeyGen {
 
     if (createStore) {
 
-      try {
-        final AsymmetricKeyParameter privateKeyAsymKeyParam = PrivateKeyFactory.createKey(keyPair.getPrivateKeySeed());
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      try {
-        final AsymmetricKeyParameter privateKeyAsymKeyParam = PrivateKeyFactory
-            .createKey(keyPair.getPrivateKey().getEncoded());
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+      // try {
+      //   final AsymmetricKeyParameter privateKeyAsymKeyParam = PrivateKeyFactory.createKey(keyPair.getPrivateKeySeed());
+      // } catch (IOException e) {
+      //   // Auto-generated catch block
+      //   e.printStackTrace();
+      // }
+      // try {
+      //   final AsymmetricKeyParameter privateKeyAsymKeyParam = PrivateKeyFactory
+      //       .createKey(keyPair.getPrivateKey().getEncoded());
+      // } catch (IOException e) {
+      //   // Auto-generated catch block
+      //   e.printStackTrace();
+      // }
 
       KeyStoreGen.createKeyStore(password.toCharArray(), fileName, keyPair);
     }

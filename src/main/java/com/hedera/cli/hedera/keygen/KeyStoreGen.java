@@ -35,7 +35,6 @@ import org.bouncycastle.operator.OutputEncryptor;
 import org.bouncycastle.operator.bc.BcECContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCSException;
-import org.bouncycastle.util.encoders.Hex;
 import org.bouncycastle.util.io.pem.PemObject;
 
 import java.io.FileInputStream;
@@ -153,6 +152,7 @@ public class KeyStoreGen {
 
     pemWriter.writeObject(pemObject);
     pemWriter.flush();
+    pemWriter.close();
 
   }
 
@@ -162,6 +162,7 @@ public class KeyStoreGen {
     final Provider edProvider = new EdDSASecurityProvider();
     final PEMParser parser = new PEMParser(new InputStreamReader(istream));
     final Object rawObject = parser.readObject();
+
     final JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider(edProvider);
 
     java.security.KeyPair kp;
@@ -186,6 +187,7 @@ public class KeyStoreGen {
       kp = converter.getKeyPair(ukp);
     }
 
+    parser.close();
     return kp;
   }
 }

@@ -2,7 +2,6 @@ package com.hedera.cli.hedera.crypto;
 
 
 import org.junit.Test;
-import picocli.CommandLine;
 
 public class CryptoTransfer {
 
