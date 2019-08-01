@@ -9,12 +9,13 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import java.util.Arrays;
 
 @Command(name = "info",
-        description = "@|fg(magenta) Gets the information of a specific account." +
-        "%nRequires key for account modification" +
-        "%nreturns a stateproof if requested|@")
+        description = "@|fg(magenta) Gets the information of a specific account. Requires key for account "
+        + "modification returns a stateproof if requested|@")
 public class AccountInfo implements Runnable {
 
-    @Option(names = {"-k, --key"} , description = "The key associated with the account which must sign for any modification")
+    @Option(names = {"-k, --key"} , description = "The key associated with the account which must sign for any modification"
+            + "%n@|bold,underline Usage:|@%n"
+            + "@|fg(yellow) account info -k=abcd123|@")
     private Ed25519PrivateKey privateKey;
 
     @Option(names = {"-rq", "--request"}, description = "Type of request: cost, state proof, both, or neither")

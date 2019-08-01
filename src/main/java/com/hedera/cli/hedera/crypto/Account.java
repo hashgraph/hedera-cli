@@ -1,23 +1,15 @@
 package com.hedera.cli.hedera.crypto;
 
-import java.util.Arrays;
-
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 @Component
 @Command(name = "account",
-        // synopsisHeading = "%n",
-        // headerHeading = "@|bold,underline Usage:|@%n%n",
-        // header = "Crypto API",
-        // descriptionHeading = "%n@|bold,underline Description:|@%n%n",
         description = "@|fg(magenta) Create, update, delete or querying an account by providing the <args>|@"
-                + "%n@|fg(yellow) account create <args> OR" + "%naccount update <args> OR"
-                + "%naccount delete <args> OR|@",
-        // parameterListHeading = "%n@|bold,underline Parameters:|@%n",
-        // optionListHeading = "%n@|bold,underline Options:|@%n",
-        subcommands = { AccountCreate.class, AccountUpdate.class, AccountInfo.class, AccountDefault.class })
+                + "%n@|fg(yellow) <command> <subcommand> <args>"
+                + "%neg. account create <args>|@",
+        subcommands = { AccountCreate.class, AccountUpdate.class, AccountInfo.class, AccountDefault.class, AccountDelete.class })
 public class Account implements Runnable {
 
     @Override
@@ -26,8 +18,6 @@ public class Account implements Runnable {
     }
 
     public void handle(String subCommand, String... args) {
-        System.out.println("args parsed in account");
-        System.out.println(subCommand + " " + Arrays.asList(args));
         // Check subcommand before parsing args
         switch (subCommand) {
         case "create":
@@ -49,6 +39,13 @@ public class Account implements Runnable {
                 CommandLine.usage(new AccountInfo(), System.out);
             } else {
                 new CommandLine(new AccountInfo()).execute(args);
+                }
+                break;
+            case "delete":
+                if (args.length == 0) {
+                    CommandLine.usage(new AccountDelete(), System.out);
+                } else {
+                    new CommandLine(new AccountDelete()).execute(args);
             }
             break;
         default:
