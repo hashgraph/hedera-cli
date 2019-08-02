@@ -21,7 +21,7 @@ public class HederaCrypto {
     @Autowired
     Account account;
 
-    @ShellMethod(value = "manage hedera account")
+    @ShellMethod(value = "manage Hedera account")
     public void account(
         @ShellOption(defaultValue = "") String subCommand,
         @ShellOption(defaultValue = "", arity = -1) String... args) {
