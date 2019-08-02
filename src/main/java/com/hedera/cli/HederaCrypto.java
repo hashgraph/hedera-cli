@@ -1,5 +1,6 @@
 package com.hedera.cli;
 
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.crypto.Account;
 import com.hedera.cli.hedera.crypto.Transfer;
 import com.hedera.cli.shell.ShellHelper;
@@ -15,6 +16,9 @@ public class HederaCrypto {
     ShellHelper shellHelper;
 
     @Autowired
+    InputReader inputReader;
+
+    @Autowired
     Account account;
 
     @ShellMethod(value = "manage hedera account")
@@ -22,7 +26,7 @@ public class HederaCrypto {
         @ShellOption(defaultValue = "") String subCommand,
         @ShellOption(defaultValue = "", arity = -1) String... args) {
         Account account = new Account();
-        account.handle(subCommand, args);
+        account.handle(inputReader, subCommand, args);
     }
 
     @ShellMethod(value = "transfer hbars from one hedera account to another")

@@ -1,5 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.hedera.cli.config.InputReader;
+
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -16,7 +18,7 @@ public class Account implements Runnable {
         CommandLine.usage(this, System.out);
     }
 
-    public void handle(String subCommand, String... args) {
+    public void handle(InputReader inputReader, String subCommand, String... args) {
         // Check subcommand before parsing args
         switch (subCommand) {
         case "create":
@@ -49,9 +51,9 @@ public class Account implements Runnable {
             break;
         case "recovery":
             if (args.length == 0) {
-                CommandLine.usage(new AccountRecovery(), System.out);
+                CommandLine.usage(new AccountRecovery(inputReader), System.out);
             } else {
-                new CommandLine(new AccountRecovery()).execute(args);
+                new CommandLine(new AccountRecovery(inputReader)).execute(args);
             }
             break;
         default:

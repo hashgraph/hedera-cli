@@ -3,6 +3,8 @@ package com.hedera.cli.config;
 import com.hedera.cli.shell.ProgressBar;
 import com.hedera.cli.shell.ProgressCounter;
 import com.hedera.cli.shell.ShellHelper;
+
+import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,11 @@ public class SpringShellConfig {
     @Bean
     public ShellHelper shellHelper(@Lazy Terminal terminal) {
         return new ShellHelper(terminal);
+    }
+
+    @Bean
+    public InputReader inputReader(@Lazy LineReader lineReader) {
+        return new InputReader(lineReader);
     }
 
     @Bean
