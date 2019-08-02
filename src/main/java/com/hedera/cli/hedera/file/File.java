@@ -18,8 +18,6 @@ public class File implements Runnable {
     }
 
     public void handle(String subCommand, String... args) {
-        System.out.println("args parsed in file");
-        System.out.println(subCommand + " " + Arrays.asList(args));
         switch (subCommand) {
             case "create":
                 System.out.println(Arrays.asList(args));
