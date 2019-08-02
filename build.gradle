@@ -40,9 +40,9 @@ dependencies {
     implementation 'com.hedera.hashgraph:sdk:0.5.1'
 
     // dependencies for crypto functions
-    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
-    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.60'
-    compile group: 'net.i2p.crypto', name: 'eddsa', version: '0.3.0'
+    // compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
+    // compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.60'
+    // compile group: 'net.i2p.crypto', name: 'eddsa', version: '0.3.0'
 
     // dotenv
     compile 'io.github.cdimascio:java-dotenv:5.1.0'
