@@ -47,7 +47,7 @@ public class Account implements Runnable {
                 new CommandLine(new AccountDelete()).execute(args);
             }
             break;
-        case "recover":
+        case "recovery":
             if (args.length == 0) {
                 CommandLine.usage(new AccountRecovery(), System.out);
             } else {
