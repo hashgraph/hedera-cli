@@ -48,6 +48,9 @@ dependencies {
     compile 'io.github.cdimascio:java-dotenv:5.1.0'
     compile "joda-time:joda-time:2.2"
 
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+
     // picocli
     compile 'info.picocli:picocli:4.0.1'
 
