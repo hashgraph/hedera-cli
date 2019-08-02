@@ -30,9 +30,9 @@ public class Transfer implements Runnable {
             case "multiple":
                 var client = Hedera.createHederaClient();
                 if (args.length == 0) {
-                    CommandLine.usage(new CryptoTransferMultiple(client), System.out);
+                    CommandLine.usage(new CryptoTransferMultiple(), System.out);
                 } else {
-                    new CommandLine(new CryptoTransferMultiple(client)).execute(args);
+                    new CommandLine(new CryptoTransferMultiple()).execute(args);
                 }
                 break;
             default:
