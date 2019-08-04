@@ -35,13 +35,13 @@ public class FileCreate implements Runnable {
                     + "@|fg(yellow) file create -f=200000|@")
     private int maxTransactionFee;
 
-    @Option(names = {"-s", "--contentsString"}, split = " ", arity = "0..*",
+    @Option(names = {"-c", "--contentsString"}, split = " ", arity = "0..*",
             description = "File contents in string"
                     + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) file create -s=\"hello world again\"|@")
+                    + "@|fg(yellow) file create -s=100,-d=22-11-2019,21:21:21,-t=200000,-c=\"hello there human!\"|@")
     private String[] fileContentsInString;
 
-    @Option(names = {"-b", "--fileSizeByte"},
+    @Option(names = {"-s", "--fileSizeByte"},
             description = "Test file size")
     private int fileSizeByte;
 
@@ -92,6 +92,9 @@ public class FileCreate implements Runnable {
             Hedera hedera = new Hedera();
             var operatorKey = Hedera.getOperatorKey();
             var client = hedera.createHederaClient();
+            System.out.println(fileSizeByte+maxTransactionFee);
+            System.out.println(Arrays.asList(fileContentsInString));
+            System.out.println(Arrays.asList(date));
             // The file is required to be a byte array,
             // you can easily use the bytes of a file instead.
 
@@ -99,6 +102,8 @@ public class FileCreate implements Runnable {
 //            String stringOfNBytes = String.join("", Collections.nCopies(fileSizeByte, "A"));
 //            var fileContents2 = stringOfNBytes.getBytes();
 //            var fileContents1 = readBytesFromFilePath("Hedera hashgraph is great!");
+            System.out.println(stringArrayToString(fileContentsInString));
+            System.out.println(stringArrayToString(fileContentsInString).getBytes().length);
             var fileContents = stringArrayToString(fileContentsInString).getBytes();
             FileCreateTransaction tx = null;
             Utils utils = new Utils();
