@@ -21,22 +21,8 @@ public class NetworkList implements Runnable {
 
   @Override
   public void run() {
-    InputStream addressBookInputStream = getClass().getClassLoader().getResourceAsStream("/addressbook.json");
-    ObjectMapper objectMapper = new ObjectMapper();
-    try {
-       AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);          
-       List<Network> networks = addressBook.getNetworks();
-       for (Network network: networks) {
-         String currentNetwork = DataDirectory.readFile("network.txt", "aspen");
-         if (currentNetwork.equals(network.getName())) {
-          System.out.println("* " + network.getName());
-         } else {
-          System.out.println("  " + network.getName());
-         }
-       }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    DataDirectory dataDirectory = new DataDirectory();
+    InputStream addressBookInputStream = getClass().getResourceAsStream("/addressbook.json");
+    dataDirectory.readJsonToMap(addressBookInputStream);
   }
-
 }

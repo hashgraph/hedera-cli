@@ -1,14 +1,16 @@
 package com.hedera.cli.hedera.utils;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedera.cli.models.AddressBook;
+import com.hedera.cli.models.Network;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DataDirectory {
 
@@ -23,6 +25,24 @@ public class DataDirectory {
     if (!directoryExists) {
       File directory = new File(path.toString());
       directory.mkdirs();
+    }
+  }
+
+  public void readJsonToMap(InputStream addressBookInputStream) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
+      List<Network> networks = addressBook.getNetworks();
+      for (Network network: networks) {
+        String currentNetwork = DataDirectory.readFile("network.txt", "aspen");
+        if (currentNetwork.equals(network.getName())) {
+          System.out.println("* " + network.getName());
+        } else {
+          System.out.println("  " + network.getName());
+        }
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
 
   }
