@@ -1,6 +1,7 @@
 
 package com.hedera.cli.hedera.crypto;
 
+import com.hedera.cli.decorators.DefaultAccount;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
@@ -9,6 +10,7 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+@DefaultAccount
 @Command(name = "create",
         description = "@|fg(magenta) Creates a new Hedera account and returns an accountID in the form of "
                 + "%nshardNum.realmNum.accountNum.|@",
