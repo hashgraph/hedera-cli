@@ -12,6 +12,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +43,29 @@ public class Hedera {
            e.printStackTrace(); 
         }
         return node;
-    } 
+    }
+
+    private List<Network> getNetworks() {
+        List<Network> networks = null;
+        InputStream addressBookInputStream = getClass().getClassLoader().getResourceAsStream("/addressbook.json");
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+           AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);   
+            networks = addressBook.getNetworks();    
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return networks;
+    }
+
+    public List<String> getNetworksStrings() {
+        List<String> list = new ArrayList<String>();
+        List<Network> networks = this.getNetworks();
+        for (Network network: networks) {
+            list.add(network.getName());
+        }
+        return list;
+    }
 
     public static Dotenv getEnv() {
         // Load configuration from the environment or a $projectRoot/.env file, if present

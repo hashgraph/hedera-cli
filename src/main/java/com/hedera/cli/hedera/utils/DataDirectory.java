@@ -12,6 +12,21 @@ import java.nio.file.Paths;
 
 public class DataDirectory {
 
+  // e.g. "mainnet/accounts"
+  static public void mkHederaSubDir(String pathToSubDir) {
+    String userHome = System.getProperty("user.home");
+    String directoryName = ".hedera";
+    Path subdirpath = Paths.get(pathToSubDir);
+    Path path = Paths.get(userHome, directoryName, subdirpath.toString());
+    
+    boolean directoryExists = Files.exists(path);
+    if (!directoryExists) {
+      File directory = new File(path.toString());
+      directory.mkdirs();
+    }
+
+  }
+
   static public void writeFile(String fileName, String value) {
     String userHome = System.getProperty("user.home");
     String directoryName = ".hedera";
