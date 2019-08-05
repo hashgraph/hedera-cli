@@ -25,9 +25,11 @@ public class AccountUpdate implements Runnable {
         try {
             Hedera hedera = new Hedera();
             var client = hedera.createHederaClient();
+
             // First, we create a new account so we don't affect our account
             var originalKey = Ed25519PrivateKey.generate();
             var accountId = client.createAccount(originalKey.getPublicKey(), 0);
+
             // Next, we update the key
             var newKey = Ed25519PrivateKey.generate();
             System.out.println(" :: update public key of account " + accountId);

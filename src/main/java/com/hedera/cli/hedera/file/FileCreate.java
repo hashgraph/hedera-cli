@@ -94,27 +94,33 @@ public class FileCreate implements Runnable {
             var client = hedera.createHederaClient()
                     .setMaxTransactionFee(maxTransactionFee);
             System.out.println(maxTransactionFee);
-            System.out.println(Arrays.asList(fileContentsInString));
             System.out.println(Arrays.asList(date));
-            // The file is required to be a byte array,
-            // you can easily use the bytes of a file instead.
 
-            // This is to test the file size, by parsing in -b=10, it creates file contents on 10bytes
-//            String stringOfNBytes = String.join("", Collections.nCopies(fileSizeByte, "A"));
-            var fileContents2 = stringOfNBytes(fileSizeByte).getBytes();
-//            var fileContents1 = readBytesFromFilePath("Hedera hashgraph is great!");
-            System.out.println(stringArrayToString(fileContentsInString));
-            System.out.println(stringArrayToString(fileContentsInString).getBytes().length);
-            var fileContents = stringArrayToString(fileContentsInString).getBytes();
             FileCreateTransaction tx = null;
             Utils utils = new Utils();
             Instant instant = utils.dateToMilliseconds(date);
-            tx = new FileCreateTransaction(client)
-                    .setExpirationTime(instant)
-                    // Use the same key as the operator to "own" this file
-                    .addKey(operatorKey.getPublicKey())
-                    .setContents(fileContents)
-                    .setTransactionFee(maxTransactionFee);
+
+            boolean testSize = false;
+            if (testSize) {
+                // This is to test the file size, by parsing in -b=100, it creates file contents on 100bytes
+                var fileContentsTestSize = stringOfNBytes(fileSizeByte).getBytes();
+                tx = new FileCreateTransaction(client)
+                        .setExpirationTime(instant)
+                        // Use the same key as the operator to "own" this file
+                        .addKey(operatorKey.getPublicKey())
+                        .setContents(fileContentsTestSize)
+                        .setTransactionFee(maxTransactionFee);
+            } else {
+                // The file is required to be a byte array,
+                // you can easily use the bytes of a file instead.
+                var fileContents = stringArrayToString(fileContentsInString).getBytes();
+                tx = new FileCreateTransaction(client)
+                        .setExpirationTime(instant)
+                        // Use the same key as the operator to "own" this file
+                        .addKey(operatorKey.getPublicKey())
+                        .setContents(fileContents)
+                        .setTransactionFee(maxTransactionFee);
+            }
             // This will wait for the receipt to become available
             TransactionReceipt receipt = tx.executeForReceipt();
             var newFileId = receipt.getFileId();
