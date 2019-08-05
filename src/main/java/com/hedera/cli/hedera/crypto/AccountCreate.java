@@ -43,7 +43,8 @@ public class AccountCreate implements Runnable {
       System.out.println("public key = " + newPublicKey);
 
       Hedera hedera = new Hedera();
-      var client = hedera.createHederaClient();
+      var client = hedera.createHederaClient()
+              .setMaxTransactionFee(100000000);
 
       var tx = new AccountCreateTransaction(client)
               // The only _required_ property here is `key`
@@ -53,12 +54,15 @@ public class AccountCreate implements Runnable {
       // This will wait for the receipt to become available
       TransactionReceipt receipt = null;
       try {
-          receipt = tx.executeForReceipt();
-      } catch (HederaException e) {
-          e.printStackTrace();
+        receipt = tx.executeForReceipt();
+        if (receipt != null) {
+          var newAccountId = receipt.getAccountId();
+          System.out.println("account = " + newAccountId);
+        } else {
+          throw new Exception("Receipt is null");
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
       }
-      assert receipt != null;
-      var newAccountId = receipt.getAccountId();
-      System.out.println("account = " + newAccountId);
   }
 }
