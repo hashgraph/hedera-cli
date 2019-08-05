@@ -91,8 +91,9 @@ public class FileCreate implements Runnable {
         try {
             Hedera hedera = new Hedera();
             var operatorKey = Hedera.getOperatorKey();
-            var client = hedera.createHederaClient();
-            System.out.println(fileSizeByte+maxTransactionFee);
+            var client = hedera.createHederaClient()
+                    .setMaxTransactionFee(maxTransactionFee);
+            System.out.println(maxTransactionFee);
             System.out.println(Arrays.asList(fileContentsInString));
             System.out.println(Arrays.asList(date));
             // The file is required to be a byte array,
@@ -100,7 +101,7 @@ public class FileCreate implements Runnable {
 
             // This is to test the file size, by parsing in -b=10, it creates file contents on 10bytes
 //            String stringOfNBytes = String.join("", Collections.nCopies(fileSizeByte, "A"));
-//            var fileContents2 = stringOfNBytes.getBytes();
+            var fileContents2 = stringOfNBytes(fileSizeByte).getBytes();
 //            var fileContents1 = readBytesFromFilePath("Hedera hashgraph is great!");
             System.out.println(stringArrayToString(fileContentsInString));
             System.out.println(stringArrayToString(fileContentsInString).getBytes().length);
@@ -156,5 +157,10 @@ public class FileCreate implements Runnable {
         String str = Arrays.toString(fileContentsInString);
         str = str.substring(1, str.length()-1).replace(",", "");
         return str;
+    }
+
+    public String stringOfNBytes(int fileSizeByte) {
+        String result = String.join("", Collections.nCopies(fileSizeByte, "A"));
+        return result;
     }
 }

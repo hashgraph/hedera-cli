@@ -43,7 +43,8 @@ public class AccountCreate implements Runnable {
       System.out.println("public key = " + newPublicKey);
 
       Hedera hedera = new Hedera();
-      var client = hedera.createHederaClient();
+      var client = hedera.createHederaClient()
+              .setMaxTransactionFee(100000000);
 
       var tx = new AccountCreateTransaction(client)
               // The only _required_ property here is `key`
