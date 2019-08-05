@@ -41,7 +41,7 @@ dependencies {
 
     // dependencies for crypto functions
     // compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
-    // compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.60'
+    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.60'
     compile group: 'net.i2p.crypto', name: 'eddsa', version: '0.3.0'
 
     // dotenv
@@ -53,6 +53,9 @@ dependencies {
 
     // picocli
     compile 'info.picocli:picocli:4.0.1'
+
+    // hjson
+    compile 'org.hjson:hjson:3.0.0'
 
     // json
     compile 'com.fasterxml.jackson.core:jackson-core:2.4.1'
