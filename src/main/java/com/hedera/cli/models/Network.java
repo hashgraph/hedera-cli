@@ -9,6 +9,12 @@ public class Network {
 
   public List<HederaNode> nodes;
 
+  public String ref;
+
+  public String getRef() {
+    return ref;
+  }
+
   public List<HederaNode> getNodes() {
     return nodes;
   }
