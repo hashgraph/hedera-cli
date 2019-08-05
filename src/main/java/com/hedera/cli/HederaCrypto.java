@@ -1,16 +1,18 @@
 package com.hedera.cli;
 
 import com.hedera.cli.config.InputReader;
+import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.crypto.Account;
 import com.hedera.cli.hedera.crypto.Transfer;
 import com.hedera.cli.shell.ShellHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 @ShellComponent
-public class HederaCrypto {
+public class HederaCrypto extends CliDefaults {
 
     @Autowired
     ShellHelper shellHelper;
@@ -21,6 +23,7 @@ public class HederaCrypto {
     @Autowired
     Account account;
 
+    @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "manage Hedera account")
     public void account(
         @ShellOption(defaultValue = "") String subCommand,
@@ -29,6 +32,7 @@ public class HederaCrypto {
         account.handle(inputReader, subCommand, args);
     }
 
+    @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "transfer hbars from one hedera account to another")
     public void transfer(
         @ShellOption(defaultValue = "") String subCommand,

@@ -77,6 +77,10 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
 
+    // auto-service for annotation processor registration
+    annotationProcessor 'com.google.auto.service:auto-service:1.0-rc6'
+    compile 'com.google.auto.service:auto-service:1.0-rc6'
+
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
