@@ -29,4 +29,10 @@ public class Network {
     HederaNode node = nodes.get(rand.nextInt(nodes.size()));
     return node;
   }
+
+  public HederaNode getSingleNode() {
+    List<HederaNode> nodes = this.getNodes();
+    System.out.println("models");
+    return nodes.get(0);
+  }
 }

@@ -22,6 +22,12 @@ public class Hedera {
     private HederaNode node;
 
     public Hedera() {
+        boolean dev = true;
+        if (dev) {
+            System.out.println("devv");
+            InputStream addressBookInputStream = getClass().getResourceAsStream("/addressbook.json");
+            this.node = this.getSingleNode(addressBookInputStream);
+        }
         this.node = this.getRandomNode();
     }
 
@@ -41,6 +47,28 @@ public class Hedera {
            
         } catch (IOException e) {
            e.printStackTrace(); 
+        }
+        return node;
+    }
+
+    public HederaNode getSingleNode(InputStream addressBookInputStream) {
+        HederaNode node = null;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
+            List<Network> networks = addressBook.getNetworks();
+            String currentNetwork = DataDirectory.readFile("network.txt", "external");
+            for (Network network: networks) {
+                if (network.getName().equals(currentNetwork)) {
+                    node = network.getSingleNode();
+                    System.out.println("here");
+                    System.out.println(node.account);
+                    System.out.println(node.address);
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return node;
     }
