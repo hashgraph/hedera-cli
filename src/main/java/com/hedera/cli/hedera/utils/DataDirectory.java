@@ -47,6 +47,26 @@ public class DataDirectory {
 
   }
 
+  public String networkGetName(InputStream addressBookInputStream) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    String nodeName = "";
+    try {
+      AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
+      List<Network> networks = addressBook.getNetworks();
+      String currentNetwork = DataDirectory.readFile("network.txt", "aspen");
+      for (Network network: networks) {
+        if (currentNetwork.equals(network.getName())) {
+          nodeName = network.getName();
+          return nodeName;
+        }
+      }
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+    return nodeName;
+  }
+
   static public void writeFile(String fileName, String value) {
     String userHome = System.getProperty("user.home");
     String directoryName = ".hedera";

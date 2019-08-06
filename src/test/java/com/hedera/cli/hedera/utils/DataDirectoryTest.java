@@ -19,4 +19,12 @@ public class DataDirectoryTest {
 //        DataDirectory.mkHederaSubDir(pathToSubDir);
 
     }
+
+    @Test
+    public void testNetworkGetName() {
+        DataDirectory dataDirectory = new DataDirectory();
+        InputStream addressBookInputStream = getClass().getResourceAsStream("/addressbook.json");
+        String networkName = dataDirectory.networkGetName(addressBookInputStream);
+        System.out.println(networkName);
+    }
 }
