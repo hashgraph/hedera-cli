@@ -3,7 +3,7 @@ package com.hedera.cli.hedera.crypto;
 
 import org.junit.Test;
 
-public class CryptoTransfer {
+public class CryptoTransferTests {
 
     @Test
     public void run() {

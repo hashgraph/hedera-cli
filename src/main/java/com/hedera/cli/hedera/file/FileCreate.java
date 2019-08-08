@@ -7,7 +7,6 @@ import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.ArgGroup;
 
 import java.io.File;
 import java.io.FileInputStream;

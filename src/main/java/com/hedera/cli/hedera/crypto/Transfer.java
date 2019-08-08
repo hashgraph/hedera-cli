@@ -1,6 +1,5 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.hedera.Hedera;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
