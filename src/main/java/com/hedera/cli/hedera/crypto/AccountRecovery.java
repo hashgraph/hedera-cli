@@ -48,6 +48,7 @@ public class AccountRecovery implements Runnable {
       System.out.println(keyPair.getPublicKeyEncodedHex());
       System.out.println(keyPair.getPrivateKeyHex());
       System.out.println(keyPair.getPublicKeyHex());
+      System.out.println(keyPair.getSeedAndPublicKeyHex());
     } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
       e.printStackTrace();
     }
