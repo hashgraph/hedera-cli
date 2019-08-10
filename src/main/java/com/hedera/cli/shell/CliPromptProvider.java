@@ -18,12 +18,13 @@ public class CliPromptProvider implements PromptProvider {
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.BLUE));
 
         // green
-        String currentNetwork = DataDirectory.readFile("network.txt", "aspen");
+        DataDirectory dataDirectory = new DataDirectory();
+        String currentNetwork = dataDirectory.readFile("network.txt", "aspen");
         AttributedString currentNetworkAttr = new AttributedString("[" + currentNetwork + "]",
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
 
         // blue
-        AttributedString promptAttr = new AttributedString(":> ",
+        AttributedString promptAttr = new AttributedString(" :> ",
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.BLUE));
 
         // one more: current operator account

@@ -3,6 +3,7 @@
  */
 package com.hedera.cli;
 
+import java.io.File;
 import java.util.List;
 
 import com.hedera.cli.hedera.Hedera;
@@ -15,11 +16,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Application {
     public static void main(String[] args) {
         // set defaults
-        DataDirectory.readFile("network.txt", "aspen");
+        DataDirectory dataDirectory = new DataDirectory();
+        dataDirectory.readFile("network.txt", "aspen");
         Hedera hedera = new Hedera();
         List<String> networkList = hedera.getNetworksStrings();
         for (String network: networkList) {
-            DataDirectory.mkHederaSubDir(network + "/accounts");
+            String accountsDirForNetwork = network + File.separator + "accounts";
+            dataDirectory.mkHederaSubDir(accountsDirForNetwork);
         }
         
         // let Spring instantiate and inject dependencies

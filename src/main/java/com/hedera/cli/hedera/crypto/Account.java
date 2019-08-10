@@ -10,7 +10,7 @@ import picocli.CommandLine.Command;
 @Command(name = "account", description = "@|fg(magenta) Create, update, delete or querying an account by providing the <args>|@"
         + "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. account create <args>|@", subcommands = {
                 AccountCreate.class, AccountUpdate.class, AccountInfo.class, AccountDefault.class, AccountDelete.class,
-                AccountRecovery.class })
+                AccountRecovery.class, AccountList.class })
 public class Account implements Runnable {
 
     @Override
@@ -54,6 +54,13 @@ public class Account implements Runnable {
                 CommandLine.usage(new AccountRecovery(inputReader), System.out);
             } else {
                 new CommandLine(new AccountRecovery(inputReader)).execute(args);
+            }
+            break;
+        case "list":
+            if (args.length == 0) {
+                new CommandLine(new AccountList()).execute(args);
+            } else {
+                CommandLine.usage(new AccountList(), System.out);
             }
             break;
         default:

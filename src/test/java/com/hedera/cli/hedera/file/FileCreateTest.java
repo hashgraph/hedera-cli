@@ -1,7 +1,7 @@
 package com.hedera.cli.hedera.file;
 
 import org.junit.Test;
-import picocli.CommandLine;
+// import picocli.CommandLine;
 
 import java.util.Collections;
 
@@ -12,8 +12,8 @@ public class FileCreateTest {
 
     @Test
     public void testFileCreate() {
-        FileCreate fileCreate = new FileCreate();
-        CommandLine cmd = new CommandLine(fileCreate);
+        // FileCreate fileCreate = new FileCreate();
+        // CommandLine cmd = new CommandLine(fileCreate);
 
 //        try {
 //            cmd.parseArgs("-a=1", "-b=2");

@@ -10,6 +10,7 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import io.github.cdimascio.dotenv.Dotenv;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,13 +27,15 @@ public class Hedera {
     }
 
     private HederaNode getRandomNode() {
-        InputStream addressBookInputStream = getClass().getClassLoader().getResourceAsStream("/addressbook.json");
+        String addressBookJson = File.separator + "addressbook.json";
+        InputStream addressBookInputStream = getClass().getClassLoader().getResourceAsStream(addressBookJson);
         ObjectMapper objectMapper = new ObjectMapper();
         HederaNode node = null;
         try {
            AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);   
-           List<Network> networks = addressBook.getNetworks();    
-           String currentNetwork = DataDirectory.readFile("network.txt", "aspen");  
+           List<Network> networks = addressBook.getNetworks();   
+           DataDirectory dataDirectory = new DataDirectory(); 
+           String currentNetwork = dataDirectory.readFile("network.txt", "aspen");  
            for (Network network: networks) {
                if (network.getName().equals(currentNetwork)) {
                     node = network.getRandomNode();
@@ -47,7 +50,8 @@ public class Hedera {
 
     private List<Network> getNetworks() {
         List<Network> networks = null;
-        InputStream addressBookInputStream = getClass().getClassLoader().getResourceAsStream("/addressbook.json");
+        String addressBookJson = File.separator + "addressbook.json";
+        InputStream addressBookInputStream = getClass().getClassLoader().getResourceAsStream(addressBookJson);
         ObjectMapper objectMapper = new ObjectMapper();
         try {
            AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);   

@@ -1,5 +1,6 @@
 package com.hedera.cli.hedera.network;
 
+import java.io.File;
 import java.io.InputStream;
 
 import com.hedera.cli.hedera.utils.DataDirectory;
@@ -16,8 +17,9 @@ public class NetworkList implements Runnable {
 
   @Override
   public void run() {
+    String addressBookJson = File.separator + "addressbook.json";
+    InputStream addressBookInputStream = getClass().getResourceAsStream(addressBookJson);
     DataDirectory dataDirectory = new DataDirectory();
-    InputStream addressBookInputStream = getClass().getResourceAsStream("/addressbook.json");
     dataDirectory.readJsonToMap(addressBookInputStream);
   }
 }

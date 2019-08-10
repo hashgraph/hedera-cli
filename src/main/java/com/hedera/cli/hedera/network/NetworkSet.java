@@ -23,7 +23,8 @@ public class NetworkSet implements Runnable {
   @Override
   public void run() {
     System.out.println("Setting network to " + name);
-    DataDirectory.writeFile("network.txt", name);
+    DataDirectory dataDirectory = new DataDirectory();
+    dataDirectory.writeFile("network.txt", name);
   }
 
 }
