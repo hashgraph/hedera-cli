@@ -5,6 +5,11 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.cli.hedera.Hedera;
 import java.math.BigInteger;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -27,6 +32,11 @@ public class CryptoTransfer implements Runnable {
 
     @Override
     public void run() {
+
+//        // Handle GRPC channels shutdown and termination gracefully
+//        List<String> networkList = hedera.getNetworksStrings();
+//        ManagedChannel channel = ManagedChannelBuilder.forAddress(network, port);
+
 
         var operatorId = Hedera.getOperatorId();
         Hedera hedera = new Hedera();
@@ -55,6 +65,10 @@ public class CryptoTransfer implements Runnable {
             var receiptBalanceAfter = client.getAccountBalance(recipientId);
             System.out.println("" + operatorId + " balance = " + senderBalanceAfter +
                     "\n" + recipientId + " balance = " + receiptBalanceAfter);
+
+//            // shutdown channel
+//            channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+
         } catch (HederaException e) {
             e.printStackTrace();
         }

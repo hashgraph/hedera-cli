@@ -16,14 +16,17 @@ import picocli.CommandLine.Option;
 import java.util.Arrays;
 import java.util.List;
 
-@Command(name = "create", description = "@|fg(magenta) Creates a new Hedera account and returns an accountID in the form of "
-                + "%nshardNum.realmNum.accountNum.|@", helpCommand = true)
+@Command(name = "create",
+        description = "@|fg(magenta) Generates a new Ed25519 Keypair compatible with java and wallet,"
+                + "%ntogether with 24 recovery words (bip39 compatible),"
+                + "%nCreates a new Hedera account and "
+                + "%nReturns an accountID in the form of shardNum.realmNum.accountNum.|@", helpCommand = true)
 public class AccountCreate implements Runnable {
 
         @Option(names = { "-r", "--record" }, description = "Generates a record that lasts 25hrs")
         private boolean generateRecord;
 
-        @Option(names = { "-b", "--balance" }, description = "Initial balance of new account created "
+        @Option(names = { "-b", "--balance" }, description = "Initial balance of new account created in hbars "
                         + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b=100 OR%n"
                         + "account create --balance=100|@")
         private int initBal;
@@ -60,8 +63,8 @@ public class AccountCreate implements Runnable {
                 seed = CryptoUtils.deriveKey(entropy, index, 32);
                 EDKeyPair keyPair1 = new EDKeyPair(seed);
                 System.out.println("seed entropy from mnemonic: " + Arrays.toString(entropy));
-                System.out.println("priv key encoded: " + keyPair1.getPrivateKeyEncodedHex());
-                System.out.println("pub key encoded: " + keyPair1.getPublicKeyEncodedHex());
+                System.out.println("priv key ASN.1 encoded: " + keyPair1.getPrivateKeyEncodedHex());
+                System.out.println("pub key ASN.1 encoded: " + keyPair1.getPublicKeyEncodedHex());
                 System.out.println("priv key hex legacy: " + keyPair1.getSeedAndPublicKeyHex().substring(0, 64));
                 System.out.println("pub key hex: " + keyPair1.getPublicKeyHex());
                 System.out.println("seed and pub key hex: " + keyPair1.getSeedAndPublicKeyHex());
@@ -72,8 +75,8 @@ public class AccountCreate implements Runnable {
                 keyPair = keyChain.keyAtIndex(index);
                 System.out.println("******* COMPARE KEYPAIR WITH KEYGEN ****** ");
                 System.out.println("seed entropy from HGC Seed: " + Arrays.toString(hgcSeed.getEntropy()));
-                System.out.println("priv key encoded: " + keyPair.getPrivateKeyEncodedHex()); // encoded works with index 0
-                System.out.println("pub key encoded: " + keyPair.getPublicKeyEncodedHex()); // encoded works with index 0
+                System.out.println("priv key ASN.1 encoded: " + keyPair.getPrivateKeyEncodedHex()); // encoded works with index 0
+                System.out.println("pub key ASN.1 encoded: " + keyPair.getPublicKeyEncodedHex()); // encoded works with index 0
                 System.out.println("priv key hex legacy: " + keyPair.getSeedAndPublicKeyHex().substring(0, 64));
                 System.out.println("pub key hex: " + keyPair.getPublicKeyHex());
                 System.out.println("seed and pub key: " + keyPair.getSeedAndPublicKeyHex());
@@ -81,8 +84,8 @@ public class AccountCreate implements Runnable {
 
 
                 System.out.println("AccountCreate subcommand");
-                System.out.println(this.generateRecord);
-                System.out.println(this.initBal);
+                System.out.println(generateRecord);
+                System.out.println(initBal);
 
 
                 // ****************** CREATE ACCOUNT ******************************
@@ -110,7 +113,7 @@ public class AccountCreate implements Runnable {
 
                 var tx = new AccountCreateTransaction(client)
                                 // The only _required_ property here is `key`
-                                .setKey(newKey.getPublicKey()).setInitialBalance(this.initBal);
+                                .setKey(newKey.getPublicKey()).setInitialBalance(initBal);
 
                 // This will wait for the receipt to become available
                 TransactionReceipt receipt = null;
