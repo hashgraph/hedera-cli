@@ -44,11 +44,11 @@ public class AccountRecovery implements Runnable {
       byte[] entropy = mnemonic.toEntropy(phraseList);
       byte[] seed = CryptoUtils.deriveKey(entropy, index, 32);
       EDKeyPair keyPair = new EDKeyPair(seed);
-      System.out.println(keyPair.getPrivateKeyEncodedHex());
-      System.out.println(keyPair.getPublicKeyEncodedHex());
-      System.out.println(keyPair.getPrivateKeyHex());
-      System.out.println(keyPair.getPublicKeyHex());
-      System.out.println(keyPair.getSeedAndPublicKeyHex());
+      System.out.println("priv key encoded: " + keyPair.getPrivateKeyEncodedHex());
+      System.out.println("pub key encoded: " + keyPair.getPublicKeyEncodedHex());
+      System.out.println("priv key hex legacy: " + keyPair.getSeedAndPublicKeyHex().substring(0, 64));
+      System.out.println("pub key hex: " + keyPair.getPublicKeyHex());
+      System.out.println("seed(priv) + pub key hex: " + keyPair.getSeedAndPublicKeyHex());
     } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
       e.printStackTrace();
     }

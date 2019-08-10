@@ -31,7 +31,7 @@ public class AccountCreate implements Runnable {
         @Override
         public void run() {
 
-                // ****************** KEYGEN index 0 (as wellet) ******************************
+                // ****************** KEYGEN index 0 (as wallet) ******************************
                 KeyPair keyPair;
                 int index = 0;
                 List<String> mnemonic;
@@ -46,6 +46,7 @@ public class AccountCreate implements Runnable {
                 byte[] entropy = null;
                 byte[] seed;
                 try {
+                        // Mnemonic returns an entropy
                         entropy = new Mnemonic().toEntropy(mnemonic);
                         List<String> compareMnemonic = new Mnemonic().toMnemonic(entropy);
                         System.out.println(compareMnemonic);
@@ -61,7 +62,7 @@ public class AccountCreate implements Runnable {
                 System.out.println("seed entropy from mnemonic: " + Arrays.toString(entropy));
                 System.out.println("priv key encoded: " + keyPair1.getPrivateKeyEncodedHex());
                 System.out.println("pub key encoded: " + keyPair1.getPublicKeyEncodedHex());
-                System.out.println("priv key hex: " + keyPair1.getPrivateKeyHex());
+                System.out.println("priv key hex legacy: " + keyPair1.getSeedAndPublicKeyHex().substring(0, 64));
                 System.out.println("pub key hex: " + keyPair1.getPublicKeyHex());
                 System.out.println("seed and pub key hex: " + keyPair1.getSeedAndPublicKeyHex());
 
@@ -73,10 +74,11 @@ public class AccountCreate implements Runnable {
                 System.out.println("seed entropy from HGC Seed: " + Arrays.toString(hgcSeed.getEntropy()));
                 System.out.println("priv key encoded: " + keyPair.getPrivateKeyEncodedHex()); // encoded works with index 0
                 System.out.println("pub key encoded: " + keyPair.getPublicKeyEncodedHex()); // encoded works with index 0
-                System.out.println("priv key hex: " + keyPair.getPrivateKeyHex());
+                System.out.println("priv key hex legacy: " + keyPair.getSeedAndPublicKeyHex().substring(0, 64));
                 System.out.println("pub key hex: " + keyPair.getPublicKeyHex());
                 System.out.println("seed and pub key: " + keyPair.getSeedAndPublicKeyHex());
                 System.out.println("********* ********* ********* KEYPAIR WITH KEYGEN ********* ********* *********");
+
 
                 System.out.println("AccountCreate subcommand");
                 System.out.println(this.generateRecord);
@@ -85,35 +87,43 @@ public class AccountCreate implements Runnable {
 
                 // ****************** CREATE ACCOUNT ******************************
 
-//                // Generate a Ed25519 private, public key pair
-////                var newKey = Ed25519PrivateKey.generate();
-////                var newPublicKey = newKey.getPublicKey();
-//
-//                var newKey = Ed25519PrivateKey.fromString(Dotenv.load().get("KEYGEN_MOBILE_PRIVATE_KEY"));
-//                var newPublicKey = Ed25519PublicKey.fromString(Dotenv.load().get("KEYGEN_MOBILE_PUBLIC_KEY"));
-//
-//                System.out.println("private key = " + newKey);
-//                System.out.println("public key = " + newPublicKey);
-//
-//                Hedera hedera = new Hedera();
-//                var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
-//
-//                var tx = new AccountCreateTransaction(client)
-//                                // The only _required_ property here is `key`
-//                                .setKey(newKey.getPublicKey()).setInitialBalance(this.initBal);
-//
-//                // This will wait for the receipt to become available
-//                TransactionReceipt receipt = null;
-//                try {
-//                        receipt = tx.executeForReceipt();
-//                        if (receipt != null) {
-//                                var newAccountId = receipt.getAccountId();
-//                                System.out.println("account = " + newAccountId);
-//                        } else {
-//                                throw new Exception("Receipt is null");
-//                        }
-//                } catch (Exception e) {
-//                        e.printStackTrace();
-//                }
+                // Use the generated keypair from above
+                // Using the encoded keypair
+                var newKey = Ed25519PrivateKey.fromString(keyPair.getPrivateKeyEncodedHex());
+                var newPublicKey = Ed25519PublicKey.fromString(keyPair.getPublicKeyEncodedHex());
+
+                // Use the generated keypair from above
+                // *** Using the hex keypair (note that the priv key come from the seedAndPublicKey method
+                // ** not directly from keypair due to legacy
+                // var newKey = Ed25519PrivateKey.fromString(keyPair.getSeedAndPublicKeyHex().substring(0, 64));
+                // var newPublicKey = Ed25519PublicKey.fromString(keyPair.getPublicKeyHex());
+
+                // Reading from Dotenv
+                // var newKey = Ed25519PrivateKey.fromString(Dotenv.load().get("KEYGEN_MOBILE_PRIVATE_KEY"));
+                // var newPublicKey = Ed25519PublicKey.fromString(Dotenv.load().get("KEYGEN_MOBILE_PUBLIC_KEY"));
+
+                System.out.println("private key = " + newKey);
+                System.out.println("public key = " + newPublicKey);
+
+                Hedera hedera = new Hedera();
+                var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
+
+                var tx = new AccountCreateTransaction(client)
+                                // The only _required_ property here is `key`
+                                .setKey(newKey.getPublicKey()).setInitialBalance(this.initBal);
+
+                // This will wait for the receipt to become available
+                TransactionReceipt receipt = null;
+                try {
+                        receipt = tx.executeForReceipt();
+                        if (receipt != null) {
+                                var newAccountId = receipt.getAccountId();
+                                System.out.println("account = " + newAccountId);
+                        } else {
+                                throw new Exception("Receipt is null");
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
         }
 }
