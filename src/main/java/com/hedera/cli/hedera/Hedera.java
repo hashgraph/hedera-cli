@@ -25,7 +25,6 @@ public class Hedera {
     public Hedera() {
         boolean dev = true;
         if (dev) {
-            System.out.println("devv");
             InputStream addressBookInputStream = getClass().getResourceAsStream("/addressbook.json");
             this.node = this.getSingleNode(addressBookInputStream);
         }
@@ -65,7 +64,6 @@ public class Hedera {
             for (Network network: networks) {
                 if (network.getName().equals(currentNetwork)) {
                     node = network.getSingleNode();
-                    System.out.println("here");
                 }
             }
 

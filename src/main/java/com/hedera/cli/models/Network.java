@@ -42,7 +42,6 @@ public class Network {
 
   public HederaNode getSingleNode() {
     List<HederaNode> nodes = this.getNodes();
-    System.out.println("models");
     return nodes.get(0);
   }
 }

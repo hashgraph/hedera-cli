@@ -1,7 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountUpdateTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;

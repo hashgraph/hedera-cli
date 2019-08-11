@@ -9,8 +9,6 @@ import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
-import io.github.cdimascio.dotenv.Dotenv;
-import org.bouncycastle.util.encoders.Hex;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import java.util.Arrays;
