@@ -4,7 +4,6 @@ import com.hedera.cli.config.InputReader;
 import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.crypto.Account;
 import com.hedera.cli.hedera.crypto.Transfer;
-import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
