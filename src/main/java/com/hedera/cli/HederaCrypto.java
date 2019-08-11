@@ -24,9 +24,7 @@ public class HederaCrypto extends CliDefaults {
     @Autowired
     Account account;
 
-    public HederaCrypto(DataDirectory dataDirectory) {
-        super(dataDirectory);
-    }
+    public HederaCrypto() {}
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "manage Hedera account")
