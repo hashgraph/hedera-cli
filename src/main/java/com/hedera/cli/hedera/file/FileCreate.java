@@ -28,12 +28,16 @@ public class FileCreate implements Runnable {
             + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) file create -f=200000|@")
     private int maxTransactionFee;
 
-    @Option(names = { "-c", "--contentsString" }, split = " ", arity = "0..*", description = "File contents in string"
-            + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) file create -s=100,-d=22-11-2019,21:21:21,-t=200000,-c=\"hello there human!\"|@")
+    @Option(names = {"-c", "--contentsString"}, split = " ", arity = "0..*",
+            description = "File contents in string"
+                    + "%n@|bold,underline Usage:|@%n"
+                    + "@|fg(yellow) file create -d=22-11-2019,21:21:21,-t=200000,-c=\"winter is coming!\"|@")
     private String[] fileContentsInString;
 
-    @Option(names = { "-s", "--fileSizeByte" }, description = "Test file size")
+    @Option(names = {"-s", "--fileSizeByte"},
+            description = "Test file size"
+                    + "%n@|bold,underline Usage:|@%n"
+                    + "@|fg(yellow) file create -d=22-11-2019,21:21:21,-t=200000,-s=10000|@")
     private int fileSizeByte;
 
     // @ArgGroup(exclusive = false)
@@ -84,25 +88,33 @@ public class FileCreate implements Runnable {
             var operatorKey = Hedera.getOperatorKey();
             var client = hedera.createHederaClient().setMaxTransactionFee(maxTransactionFee);
             System.out.println(maxTransactionFee);
-            System.out.println(Arrays.asList(fileContentsInString));
             System.out.println(Arrays.asList(date));
-            // The file is required to be a byte array,
-            // you can easily use the bytes of a file instead.
 
-            // This is to test the file size, by parsing in -b=10, it creates file contents
-            // on 10bytes
-            // String stringOfNBytes = String.join("", Collections.nCopies(fileSizeByte,
-            // "A"));
-            // var fileContents1 = readBytesFromFilePath("Hedera hashgraph is great!");
-            System.out.println(stringArrayToString(fileContentsInString));
-            System.out.println(stringArrayToString(fileContentsInString).getBytes().length);
-            var fileContents = stringArrayToString(fileContentsInString).getBytes();
             FileCreateTransaction tx = null;
             Utils utils = new Utils();
             Instant instant = utils.dateToMilliseconds(date);
-            tx = new FileCreateTransaction(client).setExpirationTime(instant)
-                    // Use the same key as the operator to "own" this file
-                    .addKey(operatorKey.getPublicKey()).setContents(fileContents).setTransactionFee(maxTransactionFee);
+
+            boolean testSize = false;
+            if (testSize) {
+                // This is to test the file size, by parsing in -b=100, it creates file contents on 100bytes
+                var fileContentsTestSize = stringOfNBytes(fileSizeByte).getBytes();
+                tx = new FileCreateTransaction(client)
+                        .setExpirationTime(instant)
+                        // Use the same key as the operator to "own" this file
+                        .addKey(operatorKey.getPublicKey())
+                        .setContents(fileContentsTestSize)
+                        .setTransactionFee(maxTransactionFee);
+            } else {
+                // The file is required to be a byte array,
+                // you can easily use the bytes of a file instead.
+                var fileContents = stringArrayToString(fileContentsInString).getBytes();
+                tx = new FileCreateTransaction(client)
+                        .setExpirationTime(instant)
+                        // Use the same key as the operator to "own" this file
+                        .addKey(operatorKey.getPublicKey())
+                        .setContents(fileContents)
+                        .setTransactionFee(maxTransactionFee);
+            }
             // This will wait for the receipt to become available
             TransactionReceipt receipt = tx.executeForReceipt();
             var newFileId = receipt.getFileId();

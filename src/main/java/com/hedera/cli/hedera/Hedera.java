@@ -23,6 +23,12 @@ public class Hedera {
     private HederaNode node;
 
     public Hedera() {
+        boolean dev = true;
+        if (dev) {
+            System.out.println("devv");
+            InputStream addressBookInputStream = getClass().getResourceAsStream("/addressbook.json");
+            this.node = this.getSingleNode(addressBookInputStream);
+        }
         this.node = this.getRandomNode();
     }
 
@@ -32,18 +38,39 @@ public class Hedera {
         ObjectMapper objectMapper = new ObjectMapper();
         HederaNode node = null;
         try {
-           AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);   
-           List<Network> networks = addressBook.getNetworks();   
-           DataDirectory dataDirectory = new DataDirectory(); 
-           String currentNetwork = dataDirectory.readFile("network.txt", "aspen");  
-           for (Network network: networks) {
-               if (network.getName().equals(currentNetwork)) {
+            AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
+            List<Network> networks = addressBook.getNetworks();
+            DataDirectory dataDirectory = new DataDirectory();
+            String currentNetwork = dataDirectory.readFile("network.txt", "aspen");
+            for (Network network: networks) {
+                if (network.getName().equals(currentNetwork)) {
                     node = network.getRandomNode();
-               }
-           }
-           
+                }
+            }
+
         } catch (IOException e) {
-           e.printStackTrace(); 
+            e.printStackTrace();
+        }
+        return node;
+    }
+
+    public HederaNode getSingleNode(InputStream addressBookInputStream) {
+        HederaNode node = null;
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
+            List<Network> networks = addressBook.getNetworks();
+            DataDirectory dataDirectory = new DataDirectory();
+            String currentNetwork = dataDirectory.readFile("network.txt", "external");
+            for (Network network: networks) {
+                if (network.getName().equals(currentNetwork)) {
+                    node = network.getSingleNode();
+                    System.out.println("here");
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return node;
     }
@@ -54,8 +81,8 @@ public class Hedera {
         InputStream addressBookInputStream = getClass().getClassLoader().getResourceAsStream(addressBookJson);
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-           AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);   
-            networks = addressBook.getNetworks();    
+            AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
+            networks = addressBook.getNetworks();
         } catch (IOException e) {
             e.printStackTrace();
         }

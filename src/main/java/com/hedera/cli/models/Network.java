@@ -9,6 +9,12 @@ public class Network {
 
   private List<HederaNode> nodes;
 
+  public String ref;
+
+  public String getRef() {
+    return ref;
+  }
+
   public List<HederaNode> getNodes() {
     return nodes;
   }
@@ -26,11 +32,17 @@ public class Network {
 
   public HederaNode getNodeByAccountId(String accountId) {
     HederaNode selectedNode = null;
-    for (HederaNode node: nodes) {
+    for (HederaNode node : nodes) {
       if (node.getAccount().equals(accountId)) {
         selectedNode = node;
       }
     }
     return selectedNode;
+  }
+
+  public HederaNode getSingleNode() {
+    List<HederaNode> nodes = this.getNodes();
+    System.out.println("models");
+    return nodes.get(0);
   }
 }
