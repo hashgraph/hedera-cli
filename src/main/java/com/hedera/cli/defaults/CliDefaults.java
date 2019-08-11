@@ -9,16 +9,20 @@ import org.springframework.shell.Availability;
 
 public abstract class CliDefaults {
 
+  private String defaultNetworkName = "aspen";
+
+  public CliDefaults(DataDirectory dataDirectory) {}
+
   public Availability isDefaultNetworkAndAccountSet() {
     DataDirectory dataDirectory = new DataDirectory();
     // sequentially
     // invoke isDefaultNetworkSet
-    String defaultNetwork = dataDirectory.readFile("network.txt", "aspen");
+    String defaultNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
     if (StringUtils.isEmpty(defaultNetwork)) {
       return Availability.unavailable("Please set your default network with network set command");
     }
 
-    String currentNetwork = dataDirectory.readFile("network.txt", "aspen");
+    String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
     String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + "default.txt";
     String defaultAccount = "";
     try {

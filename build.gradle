@@ -81,7 +81,8 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     
     // Mockito for JUnit
-    testCompile "org.mockito:mockito-core:2.+" 
+    testCompile "org.mockito:mockito-core:2.+"
+    testCompile "org.springframework.boot:spring-boot-starter-test"
 }
 
 compileJava {

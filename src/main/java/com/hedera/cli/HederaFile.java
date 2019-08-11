@@ -2,6 +2,7 @@ package com.hedera.cli;
 
 import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.file.File;
+import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,10 @@ public class HederaFile extends CliDefaults {
 
   @Autowired
   ShellHelper shellHelper;
+
+  public HederaFile(DataDirectory dataDirectory) {
+    super(dataDirectory);
+}
   
   @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
   @ShellMethod(value = "manage hedera file")
