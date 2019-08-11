@@ -1,15 +1,17 @@
 package com.hedera.cli.models;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.util.ResourceUtils;
+import com.hedera.cli.hedera.utils.DataDirectory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * AddressBook class manages the parsing of the addressbook.json file, which is stored in resources directory
+ * AddressBook class manages the parsing of the addressbook.json file, which is
+ * stored in resources directory
  */
 public class AddressBook {
 
@@ -32,8 +34,8 @@ public class AddressBook {
     try {
       // mapper.readerForUpdating(this).readValue(addressBookInputStream);
       ObjectMapper mapper = new ObjectMapper();
-      File file = ResourceUtils.getFile(AddressBook.class.getResource(addressBookJson));
-      addressBook = mapper.readValue(file, AddressBook.class);
+      InputStream input = AddressBook.class.getResourceAsStream(addressBookJson);
+      addressBook = mapper.readValue(input, AddressBook.class);
     } catch (IOException e) {
       // do nothing
     }
@@ -42,6 +44,30 @@ public class AddressBook {
 
   public List<Network> getNetworks() {
     return networks;
+  }
+
+  public List<String> getNetworksAsStrings() {
+    List<String> list = new ArrayList<String>();
+    List<Network> networks = this.getNetworks();
+    for (Network network: networks) {
+        list.add(network.getName());
+    }
+    return list;
+  }
+
+  public Network getCurrentNetwork() {
+    try {
+      DataDirectory dataDirectory = new DataDirectory();
+      String currentNetworkString = dataDirectory.readFile("network.txt");
+      for (Network network : networks) {
+        if (network.getName().equals(currentNetworkString)) {
+          return network;
+        }
+      }
+    } catch (Exception e) {
+      // do nothing
+    }
+    return null;
   }
 
 }
