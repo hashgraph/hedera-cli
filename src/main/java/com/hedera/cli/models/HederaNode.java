@@ -1,8 +1,10 @@
 package com.hedera.cli.models;
 
 public class HederaNode {
-  public String account;
-  public String address;
+
+  private String account;
+  
+  private String address;
 
   public String getAccount() {
     return account;
