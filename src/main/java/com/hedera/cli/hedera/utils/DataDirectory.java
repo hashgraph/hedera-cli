@@ -3,6 +3,7 @@ package com.hedera.cli.hedera.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.models.AddressBook;
 import com.hedera.cli.models.Network;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Component
 public class DataDirectory {
 
   private String userHome = System.getProperty("user.home");
@@ -23,7 +25,7 @@ public class DataDirectory {
   public void mkHederaSubDir(String pathToSubDir) {
     Path subdirpath = Paths.get(pathToSubDir);
     Path path = Paths.get(userHome, directoryName, subdirpath.toString());
-    
+
     boolean directoryExists = Files.exists(path);
     if (!directoryExists) {
       File directory = new File(path.toString());
@@ -49,6 +51,27 @@ public class DataDirectory {
       e.printStackTrace();
     }
 
+  }
+
+
+  public String networkGetName(InputStream addressBookInputStream) {
+    ObjectMapper objectMapper = new ObjectMapper();
+    String nodeName = "";
+    try {
+      AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
+      List<Network> networks = addressBook.getNetworks();
+      String currentNetwork = this.readFile("network.txt", "aspen");
+      for (Network network: networks) {
+        if (currentNetwork.equals(network.getName())) {
+          nodeName = network.getName();
+          return nodeName;
+        }
+      }
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+    return nodeName;
   }
 
   public void writeFile(String fileName, String value) {
@@ -83,7 +106,7 @@ public class DataDirectory {
     }
 
     Path filePath = Paths.get(userHome, directoryName, pathToFile);
-    
+
     BufferedReader br = null;
     try {
       File file = new File(filePath.toString());
@@ -144,7 +167,7 @@ public class DataDirectory {
     try {
       Stream<Path> walk = Files.walk(path);
       List<String> result = walk.map(x -> x.toString())
-          .filter(f -> f.endsWith(".json")).collect(Collectors.toList());
+              .filter(f -> f.endsWith(".json")).collect(Collectors.toList());
       if (result.isEmpty()) {
         System.out.println("No Hedera accounts have created in the current network");
       }
@@ -154,5 +177,5 @@ public class DataDirectory {
       e.printStackTrace();
     }
   }
-  
+
 }

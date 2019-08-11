@@ -1,6 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountUpdateTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -16,18 +17,26 @@ public class AccountUpdate implements Runnable {
 
     @Option(names = {"-a", "--account"}, description = "AccountId of public key to be updated")
     private String accountId;
-
-    @Option(names = {"-origk", "--origKey"}, description = "Original public key to be updated")
-    private String originalKey;
+//
+//    @Option(names = {"-origk", "--origKey"}, description = "Original public key to be updated")
+//    private String originalKey;
 
     @Override
     public void run() {
         try {
             Hedera hedera = new Hedera();
             var client = hedera.createHederaClient();
+
+            boolean update = false;
+            if (update) {
+                // parse in keys
+//                var originalKeyFromLocal = DataDirectory.readFile("network.txt", );
+                // update keys
+            }
             // First, we create a new account so we don't affect our account
             var originalKey = Ed25519PrivateKey.generate();
             var accountId = client.createAccount(originalKey.getPublicKey(), 0);
+
             // Next, we update the key
             var newKey = Ed25519PrivateKey.generate();
             System.out.println(" :: update public key of account " + accountId);

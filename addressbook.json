@@ -2,6 +2,7 @@
   "networks": [
     {
       "name": "mainnet",
+      "ref": "mainnet",
       "nodes": [
         {
           "account": "0.0.3",
