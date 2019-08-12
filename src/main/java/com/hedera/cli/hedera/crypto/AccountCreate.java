@@ -29,56 +29,19 @@ public class AccountCreate implements Runnable {
                         + "account create --balance=100|@")
         private int initBal;
 
+        @Option(names = {"-k", "--keygen"}, description = "Creates a brand new key associated with account creation"
+                + "%n@|bold,underline Usage:|@"
+                + "%n@|fg(yellow) account create -k=yes,-b=100000|@")
+        private boolean keyGen;
+
         @Override
         public void run() {
 
-                // ****************** KEYGEN index 0 (as wallet) ******************************
-                KeyPair keyPair;
-                int index = 0;
-                List<String> mnemonic;
-
-                // This is the starting point
-                // get random data and create an HGCSeed
-                HGCSeed hgcSeed = new HGCSeed(CryptoUtils.getSecureRandomData(32));
-                // Seed becomes a wordlist ie mnemonic
-                System.out.println("seed to wordlist: " + hgcSeed.toWordsList());
-                mnemonic = hgcSeed.toWordsList();
-
-                byte[] entropy = null;
-                byte[] seed;
-                try {
-                        // Mnemonic returns an entropy
-                        entropy = new Mnemonic().toEntropy(mnemonic);
-                        List<String> compareMnemonic = new Mnemonic().toMnemonic(entropy);
-                        System.out.println(compareMnemonic);
-                        System.out.println(mnemonic);
-
-                } catch (Exception e) {
-                        e.printStackTrace();
-                }
-
-                // keys from seed from entropy
-                seed = CryptoUtils.deriveKey(entropy, index, 32);
-                EDKeyPair keyPair1 = new EDKeyPair(seed);
-                System.out.println("seed entropy from mnemonic: " + Arrays.toString(entropy));
-                System.out.println("priv key ASN.1 encoded: " + keyPair1.getPrivateKeyEncodedHex());
-                System.out.println("pub key ASN.1 encoded: " + keyPair1.getPublicKeyEncodedHex());
-                System.out.println("priv key hex legacy: " + keyPair1.getSeedAndPublicKeyHex().substring(0, 64));
-                System.out.println("pub key hex: " + keyPair1.getPublicKeyHex());
-                System.out.println("seed and pub key hex: " + keyPair1.getSeedAndPublicKeyHex());
-
-
-                // key from hgc seed
-                KeyChain keyChain = new EDKeyChain(hgcSeed);
-                keyPair = keyChain.keyAtIndex(index);
-                System.out.println("******* COMPARE KEYPAIR WITH KEYGEN ****** ");
-                System.out.println("seed entropy from HGC Seed: " + Arrays.toString(hgcSeed.getEntropy()));
-                System.out.println("priv key ASN.1 encoded: " + keyPair.getPrivateKeyEncodedHex()); // encoded works with index 0
-                System.out.println("pub key ASN.1 encoded: " + keyPair.getPublicKeyEncodedHex()); // encoded works with index 0
-                System.out.println("priv key hex legacy: " + keyPair.getSeedAndPublicKeyHex().substring(0, 64));
-                System.out.println("pub key hex: " + keyPair.getPublicKeyHex());
-                System.out.println("seed and pub key: " + keyPair.getSeedAndPublicKeyHex());
-                System.out.println("********* ********* ********* KEYPAIR WITH KEYGEN ********* ********* *********");
+                // Generate new keys
+                KeyGeneration keyGeneration = new KeyGeneration();
+                HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
+                List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
+                KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed);
 
 
                 System.out.println("AccountCreate subcommand");
@@ -90,8 +53,8 @@ public class AccountCreate implements Runnable {
 
                 // Use the generated keypair from above
                 // Using the encoded keypair
-                var newKey = Ed25519PrivateKey.fromString(keyPair.getPrivateKeyEncodedHex());
-                var newPublicKey = Ed25519PublicKey.fromString(keyPair.getPublicKeyEncodedHex());
+                var newKey = Ed25519PrivateKey.fromString(keypair.getPrivateKeyEncodedHex());
+                var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
 
                 // Use the generated keypair from above
                 // *** Using the hex keypair (note that the priv key come from the seedAndPublicKey method
