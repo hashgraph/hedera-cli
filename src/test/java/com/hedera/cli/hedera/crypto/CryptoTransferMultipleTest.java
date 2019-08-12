@@ -64,17 +64,11 @@ public class CryptoTransferMultipleTest {
         cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList);
     }
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Test
-    public void testRecipientList1() {
-//        thrown.expect(IllegalArgumentException.class);
-//        thrown.expectMessage("Please check your recipient list");
-//        thrown.reportMissingExceptionWithMessage("Exception expected");
+//    @Test(expected = IllegalArgumentException.class)
+//    public void testRecipientList1() {
 //        List<String> accountList = Arrays.asList("1001", "1002", "1003");
 //        List<String> amountList= Arrays.asList("100", "9888486986", "1000000 1100000");
 //        CryptoTransferMultiple cryptoTransferMultiple = new CryptoTransferMultiple();
-//        cryptoTransferMultiple.recipientList(accountList, amountList);
-    }
+//        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList);
+//    }
 }

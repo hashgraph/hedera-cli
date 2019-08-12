@@ -1,14 +1,9 @@
 package com.hedera.cli.hedera.keygen;
 
 import com.hedera.cli.hedera.bip39.Mnemonic;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-
 import org.springframework.stereotype.Component;
-
 import picocli.CommandLine.Command;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Component

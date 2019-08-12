@@ -32,7 +32,6 @@ public class FileCreateTest {
          FileCreate fileCreate = new FileCreate();
          CommandLine cmd = new CommandLine(fileCreate);
          ParseResult result = cmd.parseArgs("-t","100");
-//         assertTrue(result.hasSubcommand());
          assertTrue(result.hasMatchedOption("t"));
          FileCreate fc = cmd.getCommand();
          assertEquals(100,fc.maxTransactionFee);
