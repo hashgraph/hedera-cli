@@ -28,8 +28,11 @@ public class KeyGenerationTest {
         Assert.assertEquals(keypair.getPrivateKeyEncodedHex(), compareKeyPair.getPrivateKeyEncodedHex());
         Assert.assertEquals(keypair.getPrivateKeyEncodedHex(), compareKeyPair.getPrivateKeyEncodedHex());
         Assert.assertEquals(keypair.getPublicKeyEncodedHex(), compareKeyPair.getPublicKeyEncodedHex());
-        Assert.assertEquals(keypair.getSeedAndPublicKeyHex().substring(0,64), compareKeyPair.getSeedAndPublicKeyHex().substring(0, 64));
+        Assert.assertEquals(keypair.getPrivateKeyHex(), compareKeyPair.getPrivateKeyHex());
         Assert.assertEquals(keypair.getPublicKeyHex(), compareKeyPair.getPublicKeyHex());
         Assert.assertEquals(keypair.getSeedAndPublicKeyHex(), compareKeyPair.getSeedAndPublicKeyHex());
+        Assert.assertEquals(keypair.getPrivateKeySeedHex(),keypair.getSeedAndPublicKeyHex().substring(0,64),keypair.getPrivateKeyHex());
+        Assert.assertEquals(compareKeyPair.getPrivateKeySeedHex(),compareKeyPair.getSeedAndPublicKeyHex().substring(0,64),compareKeyPair.getPrivateKeyHex());
+
     }
 }

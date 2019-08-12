@@ -35,7 +35,7 @@ public class KeyGeneration implements Runnable {
     KeyPair keyPair = keyChain.keyAtIndex(index);
     System.out.println("Private key ASN.1 encoded: " + keyPair.getPrivateKeyEncodedHex()); // encoded works with index 0
     System.out.println("Public key ASN.1 encoded: " + keyPair.getPublicKeyEncodedHex()); // encoded works with index 0
-    System.out.println("Private key HEX: " + keyPair.getSeedAndPublicKeyHex().substring(0, 64));
+    System.out.println("Private key HEX: " + keyPair.getPrivateKeyHex());
     System.out.println("Public key HEX: " + keyPair.getPublicKeyHex());
     System.out.println("Private key wallet/extension: " + keyPair.getSeedAndPublicKeyHex());
     return keyPair;
