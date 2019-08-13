@@ -1,6 +1,10 @@
 package com.hedera.cli.hedera.utils;
 
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -23,10 +27,9 @@ public class DataDirectoryTest {
 
     @Test
     public void testNetworkGetName() {
-        //TODO test fails if ~/.hedera does not exit
-//        DataDirectory dataDirectory = new DataDirectory();
-//        InputStream addressBookInputStream = getClass().getResourceAsStream("/addressbook.json");
-//        String networkName = dataDirectory.networkGetName(addressBookInputStream);
-//        System.out.println(networkName);
+        DataDirectory dataDirectory = new DataDirectory();
+        InputStream addressBookInputStream = getClass().getResourceAsStream("/addressbook.json");
+        String networkName = dataDirectory.networkGetName(addressBookInputStream);
+        System.out.println(networkName);
     }
 }

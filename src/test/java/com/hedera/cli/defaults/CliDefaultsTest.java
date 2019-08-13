@@ -25,12 +25,12 @@ public class CliDefaultsTest {
     public void noDefaultAccountSet() {
 
         // TODO this needs to handle when first launch without ~/.hedera dir
-//        CliDefaults defaults = Mockito.mock(CliDefaults.class, Mockito.CALLS_REAL_METHODS);
-//        Availability availability = defaults.isDefaultNetworkAndAccountSet();
-//
-//        String expected = "you have not set your default account for the current network";
-//        assertEquals(expected, availability.getReason());
+        CliDefaults defaults = Mockito.mock(CliDefaults.class, Mockito.CALLS_REAL_METHODS);
+        Availability availability = defaults.isDefaultNetworkAndAccountSet();
+
+        String expected = "you have not set your default account for the current network";
+        assertEquals(expected, availability.getReason());
                 
-        // String actual = capture.toString().trim(); // trim, because a new line char is added in stdout
+         String actual = capture.toString().trim(); // trim, because a new line char is added in stdout
     }
 }

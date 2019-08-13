@@ -2,6 +2,9 @@ package com.hedera.cli.hedera.setup;
 
 import com.hedera.cli.hedera.utils.DataDirectory;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -18,8 +21,6 @@ public class SetupTest {
 
     @Test
     public void testWriteBotanyFilename() {
-
-        // TODO test fails if ~/.hedera does not exist
 //        String userHome = System.getProperty("user.home");
 //        String directoryName = ".hedera";
 //
@@ -28,7 +29,7 @@ public class SetupTest {
 //
 //        String fileName = setup.getRandomName();
 //        String networkName = dataDirectory.readFile("network.txt");
-//        System.out.println(networkName);
+//        System.out.println("network here is " + networkName);
 //
 //        // write the data
 //        Path filePath = Paths.get(userHome, directoryName, networkName, fileName);

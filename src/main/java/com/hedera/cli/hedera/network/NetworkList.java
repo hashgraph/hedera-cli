@@ -17,9 +17,14 @@ public class NetworkList implements Runnable {
 
   @Override
   public void run() {
+    String networkName = getNetworkNameFromFile();
+    System.out.println(networkName);
+  }
+
+  public String getNetworkNameFromFile() {
     String addressBookJson = File.separator + "addressbook.json";
     InputStream addressBookInputStream = getClass().getResourceAsStream(addressBookJson);
     DataDirectory dataDirectory = new DataDirectory();
-    dataDirectory.readJsonToMap(addressBookInputStream);
+    return dataDirectory.readJsonToMap(addressBookInputStream);
   }
 }

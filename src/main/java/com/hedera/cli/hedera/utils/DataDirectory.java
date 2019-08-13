@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 public class DataDirectory {
 
   private String userHome = System.getProperty("user.home");
-  private String directoryName = ".hedera";
+  public String directoryName = ".hedera";
 
   // Example usage:
   // String currentNetwork = DataDirectory.readFile("network.txt", "aspen");
@@ -33,7 +33,8 @@ public class DataDirectory {
     }
   }
 
-  public void readJsonToMap(InputStream addressBookInputStream) {
+  public String readJsonToMap(InputStream addressBookInputStream) {
+    String networkName = "";
     ObjectMapper objectMapper = new ObjectMapper();
     try {
       AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
@@ -41,16 +42,21 @@ public class DataDirectory {
       DataDirectory dataDirectory = new DataDirectory();
       for (Network network: networks) {
         String currentNetwork = dataDirectory.readFile("network.txt", "aspen");
+        if (currentNetwork == null) return "aspen";
         if (currentNetwork.equals(network.getName())) {
           System.out.println("* " + network.getName());
+          networkName = network.getName();
+          return networkName;
         } else {
           System.out.println("  " + network.getName());
+          networkName = network.getName();
+          return networkName;
         }
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
-
+    return networkName;
   }
 
 
@@ -61,6 +67,7 @@ public class DataDirectory {
       AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
       List<Network> networks = addressBook.getNetworks();
       String currentNetwork = this.readFile("network.txt", "aspen");
+      if (currentNetwork == null) return "aspen";
       for (Network network: networks) {
         if (currentNetwork.equals(network.getName())) {
           nodeName = network.getName();
