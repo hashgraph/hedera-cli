@@ -18,6 +18,7 @@ public class DataDirectory {
 
   private String userHome = System.getProperty("user.home");
   public String directoryName = ".hedera";
+  private String defaultNetworkName = "aspen";
 
   // Example usage:
   // String currentNetwork = DataDirectory.readFile("network.txt", "aspen");
@@ -41,8 +42,8 @@ public class DataDirectory {
       List<Network> networks = addressBook.getNetworks();
       DataDirectory dataDirectory = new DataDirectory();
       for (Network network: networks) {
-        String currentNetwork = dataDirectory.readFile("network.txt", "aspen");
-        if (currentNetwork == null) return "aspen";
+        String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
+        if (currentNetwork == null) return defaultNetworkName;
         if (currentNetwork.equals(network.getName())) {
           System.out.println("* " + network.getName());
           networkName = network.getName();
@@ -66,8 +67,8 @@ public class DataDirectory {
     try {
       AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
       List<Network> networks = addressBook.getNetworks();
-      String currentNetwork = this.readFile("network.txt", "aspen");
-      if (currentNetwork == null) return "aspen";
+      String currentNetwork = this.readFile("network.txt", defaultNetworkName);
+      if (currentNetwork == null) return defaultNetworkName;
       for (Network network: networks) {
         if (currentNetwork.equals(network.getName())) {
           nodeName = network.getName();
@@ -115,7 +116,6 @@ public class DataDirectory {
       File directory = new File(path.toString());
       directory.mkdir();
     }
-
     Path filePath = Paths.get(userHome, directoryName, pathToFile);
 
     BufferedReader br = null;
