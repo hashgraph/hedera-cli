@@ -44,4 +44,9 @@ public abstract class CliDefaults {
     return Availability.unavailable("it is not completed");
   }
 
+  public boolean checkFirstRun() {
+    DataDirectory dataDirectory = new DataDirectory();
+    String defaultNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
+    return defaultNetwork == null;
+  }
 }
