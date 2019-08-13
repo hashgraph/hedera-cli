@@ -25,23 +25,22 @@ import java.util.List;
 public class AccountCreate implements Runnable {
 
         @Option(names = { "-r", "--record" }, description = "Generates a record that lasts 25hrs")
-        private boolean generateRecord;
+        private boolean generateRecord = false;
 
         @Option(names = { "-b", "--balance" }, description = "Initial balance of new account created in hbars "
                         + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b=100 OR%n"
                         + "account create --balance=100|@")
-        private int initBal;
+        private int initBal = 0;
 
         @Option(names = {"-k", "--keygen"}, description = "Creates a brand new key associated with account creation"
                 + "default is false"
                 + "%n@|bold,underline Usage:|@"
                 + "%n@|fg(yellow) account create -k=true,-b=100000|@")
-        private boolean keyGen;
+        private boolean keyGen = false;
 
         @Override
         public void run() {
 
-                keyGen = false;
                 if (keyGen) {
                         // If keyGen via args is set to true, generate new keys
                         KeyGeneration keyGeneration = new KeyGeneration();
