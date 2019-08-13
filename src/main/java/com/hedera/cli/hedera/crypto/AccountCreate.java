@@ -1,21 +1,19 @@
 
 package com.hedera.cli.hedera.crypto;
 
+import java.util.List;
+
 import com.hedera.cli.hedera.Hedera;
 
-import com.hedera.cli.hedera.bip39.Mnemonic;
 import com.hedera.cli.hedera.keygen.*;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
-import com.hedera.hashgraph.sdk.proto.AccountID;
 import io.github.cdimascio.dotenv.Dotenv;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import java.util.Arrays;
-import java.util.List;
 
 @Command(name = "create",
         description = "@|fg(magenta) Generates a new Ed25519 Keypair compatible with java and wallet,"
@@ -52,6 +50,7 @@ public class AccountCreate implements Runnable {
                         var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
                         AccountId accountID = createNewAccount(newKey, newPublicKey);
                         System.out.println("AccountID = " + accountID);
+                        System.out.println("mnemonic = " + mnemonic);
                 }
                 // Else keyGen always set to false and read from Dotenv
                 var newKey = Ed25519PrivateKey.fromString(Dotenv.load().get("KEYGEN_MOBILE_PRIVATE_KEY"));
