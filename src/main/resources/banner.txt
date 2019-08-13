@@ -6,7 +6,7 @@
 # |  | |  |  ___/  (_|  |  ___/  | |  (_|  |
 # \__| |__/\____|\___,__|\____|__|  \___,__|
 #
-# :: hedera-cli  :: ${application.formatted-version}
+# :: hedera-cli :: ${application.formatted-version}
 #
 # (c) Hedera Hashgraph LLC 2019.
 # =============================================================================

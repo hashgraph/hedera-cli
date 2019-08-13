@@ -2,7 +2,6 @@ package com.hedera.cli.hedera.file;
 
 import org.junit.Test;
 import picocli.CommandLine;
-import picocli.CommandLine.MutuallyExclusiveArgsException;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParseResult;
 
