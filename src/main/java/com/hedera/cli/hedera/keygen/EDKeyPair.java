@@ -89,7 +89,7 @@ public class EDKeyPair implements KeyPair {
 
   @Override
   public String getPrivateKeyHex() {
-    return Hex.toHexString(this.getPrivateKeyBytes());
+    return Hex.toHexString(this.privateKey.getSeed());
   }
 
   @Override
