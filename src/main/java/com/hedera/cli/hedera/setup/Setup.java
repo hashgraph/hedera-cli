@@ -50,7 +50,7 @@ public class Setup implements Runnable {
       EDKeyPair keyPair = new EDKeyPair(seed);
       System.out.println("priv key encoded: " + keyPair.getPrivateKeyEncodedHex());
       System.out.println("pub key encoded: " + keyPair.getPublicKeyEncodedHex());
-      System.out.println("priv key hex legacy: " + keyPair.getSeedAndPublicKeyHex().substring(0, 64));
+      System.out.println("priv key hex: " + keyPair.getPrivateKeyHex());
       System.out.println("pub key hex: " + keyPair.getPublicKeyHex());
       System.out.println("seed(priv) + pub key hex: " + keyPair.getSeedAndPublicKeyHex());
     } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
@@ -58,18 +58,18 @@ public class Setup implements Runnable {
     }
 
 
-  // TODO: once done, we write it as an "account_name.json" file and mark the account id in default.txt
-  DataDirectory dataDirectory = new DataDirectory();
-  // String filename = 
+    // ~/.hedera/[network_name]/accounts/[account_name].json
+    // TODO: once done, we write it as an "account_name.json" file and mark the account id in default.txt
+    DataDirectory dataDirectory = new DataDirectory();
+    String fileName = getRandomName();
+//    String networkName = dataDirectory.readFile("network.txt");
+//    dataDirectory.writeFile("network.txt", fileName);
 
   }
 
-  private String getRandomName() {
+  public String getRandomName() {
     Random rand = new Random();
     List<String> botanyNames = BotanyWordList.words;
-    // HederaNode node = nodes.get(rand.nextInt(nodes.size()))
-
+    return botanyNames.get(rand.nextInt(botanyNames.size()));
   }
-
-
 }

@@ -82,9 +82,13 @@ public class DataDirectory {
       directory.mkdir();
     }
 
+    System.out.println("dirname: " + directoryName);
+    System.out.println("filename: " + fileName);
     // write the data
     Path filePath = Paths.get(userHome, directoryName, fileName);
     File file = new File(filePath.toString());
+    System.out.println("file: " + file);
+    System.out.println("value: " + value);
     try {
       FileWriter fw = new FileWriter(file.getAbsoluteFile());
       BufferedWriter bw = new BufferedWriter(fw);
@@ -96,7 +100,7 @@ public class DataDirectory {
     }
   }
 
-  public String readFile(String pathToFile) throws Exception {
+  public String readFile(String pathToFile) {
     String value = null;
     Path path = Paths.get(userHome, directoryName);
     boolean directoryExists = Files.exists(path);
