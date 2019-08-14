@@ -40,8 +40,4 @@ public class SetupTest {
 //        dataDirectory.writeFile(fileName, "0.0.blah");
     }
 
-    @Test
-    public void testReadBotanyFilename() {
-//        dataDirectory.readFile
-    }
 }
