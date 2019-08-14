@@ -43,15 +43,16 @@ public class DataDirectory {
       DataDirectory dataDirectory = new DataDirectory();
       for (Network network: networks) {
         String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
-        if (currentNetwork == null) return defaultNetworkName;
-        if (currentNetwork.equals(network.getName())) {
-          System.out.println("* " + network.getName());
-          networkName = network.getName();
-          return networkName;
-        } else {
-          System.out.println("  " + network.getName());
-          networkName = network.getName();
-          return networkName;
+        if (currentNetwork != null) {
+          if (currentNetwork.equals(network.getName())) {
+            System.out.println("* " + network.getName());
+            networkName = network.getName();
+            return networkName;
+          } else {
+            System.out.println("  " + network.getName());
+            networkName = network.getName();
+            return networkName;
+          }
         }
       }
     } catch (IOException e) {
@@ -68,11 +69,12 @@ public class DataDirectory {
       AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
       List<Network> networks = addressBook.getNetworks();
       String currentNetwork = this.readFile("network.txt", defaultNetworkName);
-      if (currentNetwork == null) return defaultNetworkName;
-      for (Network network: networks) {
-        if (currentNetwork.equals(network.getName())) {
-          nodeName = network.getName();
-          return nodeName;
+      if (currentNetwork != null) {
+        for (Network network : networks) {
+          if (currentNetwork.equals(network.getName())) {
+            nodeName = network.getName();
+            return nodeName;
+          }
         }
       }
     }

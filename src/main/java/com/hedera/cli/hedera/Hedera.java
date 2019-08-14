@@ -20,11 +20,18 @@ public class Hedera {
 
     public Hedera() {
         addressBook = AddressBook.init();
+        System.out.println(this.getRandomNode());
         this.node = this.getRandomNode();
     }
 
+//    private HederaNode getRandomNode() {
+//        return addressBook.getCurrentNetwork().getRandomNode();
+//    }
     private HederaNode getRandomNode() {
-        return addressBook.getCurrentNetwork().getRandomNode();
+        if (addressBook.getCurrentNetwork() != null) {
+            return addressBook.getCurrentNetwork().getRandomNode();
+        }
+        return null;
     }
 
     public List<Network> getNetworks() {
