@@ -1,5 +1,6 @@
 package com.hedera.cli.hedera.setup;
 
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -38,6 +39,15 @@ public class SetupTest {
 //
 //        // compare with datadirectory writefile
 //        dataDirectory.writeFile(fileName, "0.0.blah");
+    }
+
+    @Test
+    public void testSaveToJson() {
+        Setup setup = new Setup();
+        String accountId = "";
+        String phrase = "";
+        setup.saveToJson(accountId, phrase);
+
     }
 
 }
