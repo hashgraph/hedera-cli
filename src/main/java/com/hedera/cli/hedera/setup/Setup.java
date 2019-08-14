@@ -73,18 +73,24 @@ public class Setup implements Runnable {
     // ~/.hedera/[network_name]/accounts/[account_name].json
     // TODO: once done, we write it as an "account_name.json" file and mark the account id in default.txt
     DataDirectory dataDirectory = new DataDirectory();
-    String fileName = getRandomName() + ".json";
+    String fileName = getRandomName();
+    String fileNameWithExt = fileName + ".json";
     String networkName = dataDirectory.readFile("network.txt");
 
-    String pathToFile = networkName + File.separator + "accounts" + File.separator +  fileName;
+    String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
+    String pathToAccountFile =  pathToAccountsFolder +  fileNameWithExt;
+    String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
 
     ObjectMapper mapper = new ObjectMapper();
     
     try {
+      // create the account json and write it to disk
       Object jsonObject = mapper.readValue(account.toString(), HederaAccount.class);
       String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
       System.out.println(accountValue);
-      dataDirectory.writeFile(pathToFile, accountValue);
+      dataDirectory.writeFile(pathToAccountFile, accountValue);
+      // mark this account as the default
+      dataDirectory.writeFile(pathToDefaultTxt, fileName + ":" + accountId);
     } catch (Exception e) {
       e.printStackTrace();
     }
