@@ -1,5 +1,6 @@
 package com.hedera.cli.defaults;
 
+import com.hedera.cli.hedera.utils.DataDirectory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Rule;
@@ -10,7 +11,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.shell.Availability;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CliDefaultsTest {
@@ -24,20 +26,18 @@ public class CliDefaultsTest {
     @Test
     public void testIsDefaultNetworkAndAccountSet() {
 
-        CliDefaults defaults = Mockito.mock(CliDefaults.class, Mockito.CALLS_REAL_METHODS);
-        Availability availability = defaults.isDefaultNetworkAndAccountSet();
-        boolean firstRun = defaults.checkFirstRun();
+        DataDirectory dataDirectory = Mockito.mock(DataDirectory.class);
+        when(dataDirectory.readFile("network.txt", "aspen")).thenReturn("aspen");
 
-        if (firstRun) {
-            System.out.println("hello");
-            String expected = "you have not set your default network";
-            assertEquals(expected, availability.getReason());
-        } else {
-            System.out.println("hello again");
-            String expected1 = "you have not set your default account for the current network";
-            assertEquals(expected1, availability.getReason());
-        }
-//         String actual = capture.toString().trim(); // trim, because a new line char is added in stdout
+        CliDefaults defaults = new CliDefaults() {
+            @Override
+            public Availability isDefaultNetworkAndAccountSet() {
+                return super.isDefaultNetworkAndAccountSet();
+            }
+        };
+        defaults.setDataDirectory(dataDirectory);
+        Availability availability = defaults.isDefaultNetworkAndAccountSet();
+        assertEquals(Availability.available().getReason(), availability.getReason());
     }
 }
 

@@ -15,10 +15,11 @@ public abstract class CliDefaults {
 
   private String defaultNetworkName = "aspen";
 
+  private DataDirectory dataDirectory =  new DataDirectory();
+
   public CliDefaults() {}
 
   public Availability isDefaultNetworkAndAccountSet() {
-    DataDirectory dataDirectory = new DataDirectory();
     // sequentially
     // invoke isDefaultNetworkSet
     String defaultNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
@@ -44,9 +45,7 @@ public abstract class CliDefaults {
     return Availability.unavailable("it is not completed");
   }
 
-  public boolean checkFirstRun() {
-    DataDirectory dataDirectory = new DataDirectory();
-    String defaultNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
-    return defaultNetwork == null;
+  public void setDataDirectory(DataDirectory dataDirectory) {
+    this.dataDirectory = dataDirectory;
   }
 }
