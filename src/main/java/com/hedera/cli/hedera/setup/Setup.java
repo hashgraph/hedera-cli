@@ -17,6 +17,7 @@ import com.hedera.cli.hedera.botany.BotanyWordList;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.models.HederaAccount;
 
 import org.apache.logging.log4j.core.util.JsonUtils;
 import org.hjson.JsonObject;
@@ -79,11 +80,13 @@ public class Setup implements Runnable {
     String pathToFile = networkName + File.separator + "accounts" + File.separator +  fileName;
 
     ObjectMapper mapper = new ObjectMapper();
+    
     try {
-      String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(account);
+      Object jsonObject = mapper.readValue(account.toString(), HederaAccount.class);
+      String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
       System.out.println(accountValue);
       dataDirectory.writeFile(pathToFile, accountValue);
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
