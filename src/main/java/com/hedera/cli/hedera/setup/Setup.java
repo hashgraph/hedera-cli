@@ -40,15 +40,14 @@ public class Setup implements Runnable {
 
   public void handle(InputReader inputReader) {
     System.out.println("Start the setup process");
-    // System.out.println("Recovering account id " + accountId);
-    // TODO: prompt user to input the accountId
-
     String accountId = inputReader.prompt("account id that we will use as default operator");
-
     String phrase = inputReader.prompt("24 words phrase", "secret", false);
+    saveToJson(accountId, phrase);
+  }
+
+  public void saveToJson(String accountId, String phrase) {
     List<String> phraseList = Arrays.asList(phrase.split(" "));
     System.out.println(phraseList);
-
 
     JsonObject account = new JsonObject();
 
