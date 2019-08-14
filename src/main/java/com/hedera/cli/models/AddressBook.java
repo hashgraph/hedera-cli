@@ -17,6 +17,8 @@ public class AddressBook {
 
   private List<Network> networks;
 
+  private DataDirectory dataDirectory =  new DataDirectory();
+
   static public AddressBook init() {
     return create("");
   }
@@ -57,7 +59,6 @@ public class AddressBook {
 
   public Network getCurrentNetwork() {
     try {
-      DataDirectory dataDirectory = new DataDirectory();
       System.out.println(dataDirectory);
       String currentNetworkString = dataDirectory.readFile("network.txt");
       for (Network network : networks) {
@@ -69,6 +70,10 @@ public class AddressBook {
       // do nothing
     }
     return null;
+  }
+
+  public void setDataDirectory(DataDirectory dataDirectory) {
+    this.dataDirectory = dataDirectory;
   }
 
 }
