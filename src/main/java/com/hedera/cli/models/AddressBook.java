@@ -58,6 +58,7 @@ public class AddressBook {
   public Network getCurrentNetwork() {
     try {
       DataDirectory dataDirectory = new DataDirectory();
+      System.out.println(dataDirectory);
       String currentNetworkString = dataDirectory.readFile("network.txt");
       for (Network network : networks) {
         if (network.getName().equals(currentNetworkString)) {

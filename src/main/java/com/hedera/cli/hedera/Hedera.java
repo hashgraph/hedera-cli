@@ -20,7 +20,6 @@ public class Hedera {
 
     public Hedera() {
         addressBook = AddressBook.init();
-        System.out.println(this.getRandomNode());
         this.node = this.getRandomNode();
     }
 
