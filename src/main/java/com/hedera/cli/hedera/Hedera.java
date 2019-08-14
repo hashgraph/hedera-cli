@@ -24,14 +24,8 @@ public class Hedera {
         this.node = this.getRandomNode();
     }
 
-//    private HederaNode getRandomNode() {
-//        return addressBook.getCurrentNetwork().getRandomNode();
-//    }
     private HederaNode getRandomNode() {
-        if (addressBook.getCurrentNetwork() != null) {
-            return addressBook.getCurrentNetwork().getRandomNode();
-        }
-        return null;
+        return addressBook.getCurrentNetwork().getRandomNode();
     }
 
     public List<Network> getNetworks() {
