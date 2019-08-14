@@ -84,7 +84,8 @@ public class DataDirectory {
     return nodeName;
   }
 
-  public void writeFile(String fileName, String value) {
+  // pathToFile instead of fileName
+  public void writeFile(String pathToFile, String value) {
     Path path = Paths.get(userHome, directoryName);
     boolean directoryExists = Files.exists(path);
     if (!directoryExists) {
@@ -92,7 +93,7 @@ public class DataDirectory {
       directory.mkdir();
     }
     // write the data
-    Path filePath = Paths.get(userHome, directoryName, fileName);
+    Path filePath = Paths.get(userHome, directoryName, pathToFile);
     File file = new File(filePath.toString());
     try {
       FileWriter fw = new FileWriter(file.getAbsoluteFile());

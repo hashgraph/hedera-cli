@@ -1,9 +1,13 @@
 package com.hedera.cli.hedera.setup;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.stream.JsonWriter;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.bip39.Mnemonic;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicChecksumException;
@@ -14,6 +18,8 @@ import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
+import org.apache.logging.log4j.core.util.JsonUtils;
+import org.hjson.JsonObject;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
@@ -42,6 +48,9 @@ public class Setup implements Runnable {
     List<String> phraseList = Arrays.asList(phrase.split(" "));
     System.out.println(phraseList);
 
+
+    JsonObject account = new JsonObject();
+
     // recover key from phrase
     Mnemonic mnemonic = new Mnemonic();
     try {
@@ -53,18 +62,30 @@ public class Setup implements Runnable {
       System.out.println("priv key hex: " + keyPair.getPrivateKeyHex());
       System.out.println("pub key hex: " + keyPair.getPublicKeyHex());
       System.out.println("seed(priv) + pub key hex: " + keyPair.getSeedAndPublicKeyHex());
+      account.add("accountId", accountId);
+      account.add("privateKey", keyPair.getPrivateKeyHex());
+      account.add("publicKey", keyPair.getPublicKeyHex());
+
     } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
       e.printStackTrace();
     }
 
-
     // ~/.hedera/[network_name]/accounts/[account_name].json
     // TODO: once done, we write it as an "account_name.json" file and mark the account id in default.txt
     DataDirectory dataDirectory = new DataDirectory();
-    String fileName = getRandomName();
-//    String networkName = dataDirectory.readFile("network.txt");
-//    dataDirectory.writeFile("network.txt", fileName);
+    String fileName = getRandomName() + ".json";
+    String networkName = dataDirectory.readFile("network.txt");
 
+    String pathToFile = networkName + File.separator + "accounts" + File.separator +  fileName;
+
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(account);
+      System.out.println(accountValue);
+      dataDirectory.writeFile(pathToFile, accountValue);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+    }
   }
 
   public String getRandomName() {

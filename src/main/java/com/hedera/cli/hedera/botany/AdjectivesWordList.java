@@ -1,0 +1,57 @@
+package com.hedera.cli.hedera.botany;
+
+import java.util.Arrays;
+import java.util.List;
+
+public class AdjectivesWordList {
+    static public List<String> words = Arrays.asList("abandoned", "able", "absolute","academic","acceptable","acclaimed","accomplished","accurate","aching","acidic","acrobatic","active","actual","adept","admirable","admired","adolescent","adorable","adored","advanced","adventurous","affectionate","afraid","aged","aggravating","aggressive","agile","agitated","agonizing","agreeable","ajar","alarmed","alarming","alert","alienated","alive","all","altruistic","amazing","ambitious","ample","amused","amusing","anchored","ancient","angelic","angry","anguished","animated","annual","another","antique","anxious","any","apprehensive","appropriate","apt","arctic","arid","aromatic","artistic","ashamed","assured","astonishing","athletic","attached","attentive","attractive","austere","authentic","authorized","automatic","avaricious","average","aware","awesome","awful","awkward"
+//B
+//            babyishbackbadbaggybarebarrenbasicbeautifulbelatedbelovedbeneficialbestbetterbewitchedbigbiodegradablebitterblackblandblankblaringbleakblindblissfulblondblueblushingbogusboilingboldbonyboringbossybothbouncybountifulbowedbravebreakablebriefbrightbrilliantbriskbrokenbronzebrownbruisedbubblybulkybumpybuoyantburdensomeburlybustlingbusybutterybuzzing
+//            C
+//            calculatingcalmcandidcaninecapitalcarefreecarefulcarelesscaringcautiouscavernouscelebratedcharmingcheapcheerfulcheerychiefchillychubbycircularclassiccleanclearclevercloseclosedcloudycluelessclumsyclutteredcoarsecoldcolorfulcolorlesscolossalcomfortablecommoncompassionatecompetentcompletecomplexcomplicatedcomposedconcernedconcreteconfusedconsciousconsiderateconstantcontentconventionalcookedcoolcooperativecoordinatedcornycorruptcostlycourageouscourteouscraftycrazycreamycreativecreepycriminalcrispcriticalcrookedcrowdedcruelcrushingcuddlycultivatedculturedcumbersomecurlycurvycutecylindrical
+//            D
+//            damageddampdangerousdapperdaringdarkdarlingdazzlingdeaddeadlydeafeningdeardearestdecentdecimaldecisivedeepdefenselessdefensivedefiantdeficientdefinitedefinitivedelayeddelectabledeliciousdelightfuldeliriousdemandingdensedentaldependabledependentdescriptivedeserteddetaileddetermineddevoteddifferentdifficultdigitaldiligentdimdimpleddimwitteddirectdirtydisastrousdiscretedisfigureddisguiseddisgustingdishonestdisloyaldismaldistantdistinctdistorteddizzydopeydotingdoubledownrightdrabdraftydramaticdrearydroopydrydualdulldutiful
+//            E
+//            eacheagerearlyearnesteasyecstaticedibleeducatedelaborateelasticelatedelderlyelectricelegantelementaryellipticalembarrassedembellishedeminentemotionalemptyenchantedenchantingenergeticenlightenedenormousenragedentireenviousequalequatorialessentialesteemedethicaleuphoricevenevergreeneverlastingeveryevilexaltedexcellentexcitableexcitedexcitingexemplaryexhaustedexoticexpensiveexperiencedexpertextraneousextroverted
+//            F
+//            fabulousfailingfaintfairfaithfulfakefalsefamiliarfamousfancyfantasticfarfarawayfastfatfatalfatherlyfavorablefavoritefearfulfearlessfeistyfelinefemalefemininefewficklefilthyfinefinishedfirmfirstfirsthandfittingfixedflakyflamboyantflashyflatflawedflawlessflickeringflimsyflippantfloweryfluffyfluidflusteredfocusedfondfoolhardyfoolishforcefulforkedformalforsakenforthrightfortunatefragrantfrailfrankfrayedfreeFrenchfrequentfreshfriendlyfrightenedfrighteningfrigidfrillyfrivolousfrizzyfrontfrostyfrozenfrugalfruitfulfullfumblingfunctionalfunnyfussyfuzzy
+//            G
+//            gargantuangaseousgeneralgenerousgentlegenuinegiantgiddygiftedgiganticgivingglamorousglaringglassgleaminggleefulglisteningglitteringgloomygloriousglossyglumgoldengoodgorgeousgracefulgraciousgrandgrandiosegranulargratefulgravegraygreatgreedygreengregariousgrimgrimygrippinggrizzledgrossgrotesquegrouchygroundedgrowinggrowlinggrowngrubbygruesomegrumpyguiltygulliblegummy
+//            H
+//            hairyhalfhandmadehandsomehandyhappyhardharmfulharmlessharmoniousharshhastyhatefulhauntinghealthyheartfeltheartyheavenlyheavyheftyhelpfulhelplesshiddenhideoushighhilarioushoarsehollowhomelyhonesthonorablehonoredhopefulhorriblehospitablehothugehumblehumiliatinghumminghumongoushungryhurtfulhusky
+//            I
+//            ickyicyidealidealisticidenticalidioticidleidolizedignorantillillegalilliterateillustriousimaginaryimaginativeimmaculateimmaterialimmediateimmenseimpartialimpassionedimpeccableimperfectimperturbableimpishimpoliteimportantimpossibleimpracticalimpressionableimpressiveimprobableimpureinbornincomparableincompatibleincompleteinconsequentialincredibleindelibleindolentinexperiencedinfamousinfantileinfatuatedinferiorinfiniteinformalinnocentinsecureinsidiousinsignificantinsistentinstructiveinsubstantialintelligentintentintentionalinterestinginternalinternationalintrepidironcladirresponsibleirritatingitchy
+//            J
+//            jadedjaggedjauntyjealousjitteryjointjollyjovialjoyfuljoyousjubilantjudiciousjuicyjumbojumpyjuniorjuvenile
+//            K
+//            kaleidoscopickeenkeykindkindheartedkindlyklutzyknobbyknottyknowingknowledgeableknownkookykosher
+//            L
+//            lamelankylargelastlastinglatelavishlawfullazyleadingleafyleanleftlegallegitimatelightlightheartedlikablelikelylimitedlimplimpinglinearlinedliquidlittlelivelivelylividloathsomelonelonelylonglong-termlooselopsidedlostloudlovablelovelylovinglowloyalluckylumberingluminouslumpylustrousluxurious
+//            M
+//            madmagnificentmajesticmajormalemammothmarriedmarvelousmasculinemassivematuremeagermealymeanmeaslymeatymedicalmediocremediummeekmellowmelodicmemorablemenacingmerrymessymetallicmildmilkymindlessminiatureminormintymiserablemiserlymisguidedmistymixedmodernmodestmoistmonstrousmonthlymonumentalmoralmortifiedmotherlymotionlessmountainousmuddymuffledmulticoloredmundanemurkymushymustymutedmysterious
+//            N
+//            naivenarrownastynaturalnaughtynauticalnearneatnecessaryneedynegativeneglectednegligibleneighboringnervousnewnextniceniftynimblenippynocturnalnoisynonstopnormalnotablenotednoteworthynovelnoxiousnumbnutritiousnutty
+//            O
+//            obedientobeseoblongobviousoccasionaloddoddballoffbeatoffensiveofficialoilyoldonlyopenoptimaloptimisticopulentorangeorderlyordinaryorganicoriginalornateorneryotherouroutgoingoutlandishoutlyingoutrageousoutstandingovalovercookedoverdueoverjoyedoverlooked
+//            P
+//            palatablepalepaltryparallelparchedpartialpassionatepastpastelpeacefulpepperyperfectperfumedperiodicperkypersonalpertinentpeskypessimisticpettyphonyphysicalpiercingpinkpitifulplainplaintiveplasticplayfulpleasantpleasedpleasingplumpplushpointedpointlesspoisedpolishedpolitepoliticalpoorpopularportlyposhpositivepossiblepotablepowerfulpowerlesspracticalpreciouspresentprestigiousprettypreviouspriceypricklyprimaryprimepristineprivateprizeprobableproductiveprofitableprofuseproperproudprudentpunctualpungentpunypurepurplepushyputridpuzzledpuzzling
+//            Q
+//            quaintqualifiedquarrelsomequarterlyqueasyquerulousquestionablequickquietquintessentialquirkyquixoticquizzical
+//            R
+//            radiantraggedrapidrarerashrawreadyrealrealisticreasonablerecentrecklessrectangularredreflectingregalregularreliablerelievedremarkableremorsefulremoterepentantrepulsiverequiredrespectfulresponsiblerevolvingrewardingrichrightrigidringedriperoastedrobustrosyrotatingrottenroughroundrowdyroyalrubberyruddyruderundownrunnyruralrusty
+//            S
+//            sadsafesaltysamesandysanesarcasticsardonicsatisfiedscalyscarcescaredscaryscentedscholarlyscientificscornfulscratchyscrawnysecondsecondarysecretselfishsentimentalseparatesereneseriousserpentineseveralsevereshabbyshadowyshadyshallowshamefulshamelesssharpshimmeringshinyshockedshockingshoddyshortshowyshrillshysicksilentsilkysillysilversimilarsimplesimplisticsinfulsinglesizzlingskeletalskinnysleepyslightslimslimyslipperyslowslushysmallsmartsmoggysmoothsmugsnappysnarlingsneakysnivelingsnoopysociablesoftsoggysolidsombersomesophisticatedsoresorrowfulsoulfulsoupysourSpanishsparklingsparsespecificspectacularspeedysphericalspicyspiffyspiritedspitefulsplendidspotlessspottedsprysquaresqueakysquigglystablestaidstainedstalestandardstarchystarkstarrysteelsteepstickystiffstimulatingstingystormystraightstrangestrictstridentstrikingstripedstrongstudiousstunningstupendousstupidsturdystylishsubduedsubmissivesubstantialsubtlesuburbansuddensugarysunnysupersuperbsuperficialsuperiorsupportivesurprisedsuspicioussveltesweatysweetswelteringswiftsympathetic
+//            T
+//            talkativetalltametantangibletarttastytatteredtauttediousteemingtemptingtendertensetepidterribleterrifictestythankfulthatthesethickthinthirdthirstythisthornythoroughthosethoughtfulthreadbarethriftythunderoustidytighttimelytintedtinytiredtorntotaltoughtragictrainedtraumatictreasuredtremendoustriangulartrickytriflingtrimtrivialtroubledtruetrustingtrustworthytrustytruthfultubbyturbulenttwin
+//            U
+//            uglyultimateunacceptableunawareuncomfortableuncommonunconsciousunderstatedunequaledunevenunfinishedunfitunfoldedunfortunateunhappyunhealthyuniformunimportantuniqueunitedunkemptunknownunlawfulunlinedunluckyunnaturalunpleasantunrealisticunripeunrulyunselfishunsightlyunsteadyunsunguntidyuntimelyuntrieduntrueunusedunusualunwelcomeunwieldyunwillingunwittingunwrittenupbeatuprightupseturbanusableusedusefuluselessutilizedutter
+//            V
+//            vacantvaguevainvalidvaluablevapidvariablevastvelvetyveneratedvengefulverifiablevibrantviciousvictoriousvigilantvigorousvillainousviolentvioletvirtualvirtuousvisiblevitalvivaciousvividvoluminous
+//            W
+//            wanwarlikewarmwarmheartedwarpedwarywastefulwatchfulwaterloggedwaterywavyweakwealthywearywebbedweeweeklyweepyweightyweirdwelcomewetwhichwhimsicalwhirlwindwhisperedwhitewholewhoppingwickedwidewigglywildwillingwiltedwindingwindywingedwirywisewittywobblywoefulwonderfulwoodenwoozywordyworldlywornworriedworrisomeworseworstworthlessworthwhileworthywrathfulwretchedwrithingwrongwry
+//            Y
+//            yawningyearlyyellowyellowishyoungyouthfulyummy
+//            Z
+//            zanyzealouszestyzigzag
+    );
+}
