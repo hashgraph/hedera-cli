@@ -13,11 +13,19 @@ import picocli.CommandLine.Command;
 @Command(name = "ls", description = "List all available Hedera network", helpCommand = true)
 public class NetworkList implements Runnable {
 
+  private String addressBookJson;
+
   @Override
   public void run() {
-    String addressBookJson = File.separator + "addressbook.json";
+    addressBookJson = File.separator + "addressbook.json";
     InputStream addressBookInputStream = getClass().getResourceAsStream(addressBookJson);
     DataDirectory dataDirectory = new DataDirectory();
     dataDirectory.listNetworks(addressBookInputStream);
   }
+
+  // allow for dependency injection
+  public void setAddressBookJson(String addressBookJsonRelativePath) {
+    this.addressBookJson = addressBookJsonRelativePath;
+  }
+
 }
