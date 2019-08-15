@@ -17,21 +17,17 @@ import java.util.stream.Stream;
 public class DataDirectory {
 
   private String userHome = System.getProperty("user.home");
-  public String directoryName = ".hedera";
+  private String directoryName = ".hedera";
   private String defaultNetworkName = "aspen";
 
   // Example usage:
   // String currentNetwork = DataDirectory.readFile("network.txt", "aspen");
   // String pathToSubDir = currentNetwork + File.separator + "accounts"
-  public void mkHederaSubDir(String pathToSubDir) {
+  public boolean mkHederaSubDir(String pathToSubDir) {
     Path subdirpath = Paths.get(pathToSubDir);
     Path path = Paths.get(userHome, directoryName, subdirpath.toString());
-
-    boolean directoryExists = Files.exists(path);
-    if (!directoryExists) {
-      File directory = new File(path.toString());
-      directory.mkdirs();
-    }
+    File directory = new File(path.toString());
+    return directory.mkdirs();
   }
 
   public void listNetworks(InputStream addressBookInputStream) {
@@ -54,7 +50,7 @@ public class DataDirectory {
       e.printStackTrace();
     }
   }
-  
+
   public String networkGetName(InputStream addressBookInputStream) {
     ObjectMapper objectMapper = new ObjectMapper();
     String nodeName = "";
@@ -178,6 +174,18 @@ public class DataDirectory {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public String getUserHome() {
+    return userHome;
+  }
+
+  public String getDirectoryName() {
+    return directoryName;
+  }
+
+  public String getDefaultNetworkName() {
+    return defaultNetworkName;
   }
 
 }
