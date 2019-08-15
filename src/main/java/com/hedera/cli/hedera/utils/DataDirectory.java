@@ -54,35 +54,7 @@ public class DataDirectory {
       e.printStackTrace();
     }
   }
-
-  public String readJsonToMap(InputStream addressBookInputStream) {
-    String networkName = "";
-    ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
-      List<Network> networks = addressBook.getNetworks();
-      DataDirectory dataDirectory = new DataDirectory();
-      for (Network network: networks) {
-        String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
-        if (currentNetwork != null) {
-          if (currentNetwork.equals(network.getName())) {
-            System.out.println("* " + network.getName());
-            networkName = network.getName();
-            return networkName;
-          } else {
-            System.out.println("  " + network.getName());
-            networkName = network.getName();
-            return networkName;
-          }
-        }
-      }
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return networkName;
-  }
-
-
+  
   public String networkGetName(InputStream addressBookInputStream) {
     ObjectMapper objectMapper = new ObjectMapper();
     String nodeName = "";
