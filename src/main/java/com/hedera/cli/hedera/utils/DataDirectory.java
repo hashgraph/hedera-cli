@@ -34,6 +34,27 @@ public class DataDirectory {
     }
   }
 
+  public void listNetworks(InputStream addressBookInputStream) {
+    try {
+      ObjectMapper mapper = new ObjectMapper();
+      AddressBook addressBook = mapper.readValue(addressBookInputStream, AddressBook.class);
+      List<Network> networks = addressBook.getNetworks();
+      DataDirectory dataDirectory = new DataDirectory();
+      for (Network network: networks) {
+        String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
+        if (currentNetwork != null) {
+          if (currentNetwork.equals(network.getName())) {
+            System.out.println("* " + network.getName());
+          } else {
+            System.out.println("  " + network.getName());
+          }
+        }
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   public String readJsonToMap(InputStream addressBookInputStream) {
     String networkName = "";
     ObjectMapper objectMapper = new ObjectMapper();
