@@ -1,15 +1,6 @@
 package com.hedera.cli.hedera.setup;
 
-import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.utils.DataDirectory;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class SetupTest {
 

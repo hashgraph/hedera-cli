@@ -1,8 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import java.util.*;
 import static org.junit.Assert.*;
 

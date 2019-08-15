@@ -5,9 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.stream.JsonWriter;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.bip39.Mnemonic;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicChecksumException;
@@ -19,7 +17,6 @@ import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 
-import org.apache.logging.log4j.core.util.JsonUtils;
 import org.hjson.JsonObject;
 import org.springframework.stereotype.Component;
 
@@ -71,7 +68,6 @@ public class Setup implements Runnable {
     }
 
     // ~/.hedera/[network_name]/accounts/[account_name].json
-    // TODO: once done, we write it as an "account_name.json" file and mark the account id in default.txt
     DataDirectory dataDirectory = new DataDirectory();
     String fileName = getRandomName();
     String fileNameWithExt = fileName + ".json";

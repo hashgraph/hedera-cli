@@ -1,9 +1,6 @@
 package com.hedera.cli.hedera.utils;
 
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.io.InputStream;
