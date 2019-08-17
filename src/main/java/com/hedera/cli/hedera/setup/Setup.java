@@ -11,6 +11,7 @@ import com.hedera.cli.hedera.bip39.Mnemonic;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicChecksumException;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicLengthException;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
+import com.hedera.cli.hedera.botany.AdjectivesWordList;
 import com.hedera.cli.hedera.botany.BotanyWordList;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
@@ -95,6 +96,10 @@ public class Setup implements Runnable {
   public String getRandomName() {
     Random rand = new Random();
     List<String> botanyNames = BotanyWordList.words;
-    return botanyNames.get(rand.nextInt(botanyNames.size()));
+    List<String> adjectives = AdjectivesWordList.words;
+    String randomBotanyName = botanyNames.get(rand.nextInt(botanyNames.size()));
+    String randomAdjectives = adjectives.get(rand.nextInt(adjectives.size()));
+    int randomNumber = rand.nextInt(10000);
+    return randomAdjectives + "_" + randomBotanyName + "_" + randomNumber;
   }
 }

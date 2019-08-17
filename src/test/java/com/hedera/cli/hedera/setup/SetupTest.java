@@ -37,8 +37,7 @@ public class SetupTest {
         Setup setup = new Setup();
         String accountId = "";
         String phrase = "";
-        setup.saveToJson(accountId, phrase);
-
+//        setup.saveToJson(accountId, phrase);
     }
 
 }
