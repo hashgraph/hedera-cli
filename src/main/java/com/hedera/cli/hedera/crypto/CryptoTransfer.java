@@ -10,10 +10,6 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name= "single",
-//        synopsisHeading = "%n",
-//        descriptionHeading = "%n@|bold,underline Description:|@%n%n",
-//        parameterListHeading = "%n@|bold,underline Parameters:|@%n",
-//        optionListHeading = "%n@|bold,underline Options:|@%n",
         description = "@|fg(magenta) Transfer hbars to a single account|@%n",
         helpCommand = true)
 public class CryptoTransfer implements Runnable {

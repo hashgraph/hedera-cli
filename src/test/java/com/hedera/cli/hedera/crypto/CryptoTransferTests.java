@@ -7,11 +7,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParseResult;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import static org.junit.Assert.*;
 
 public class CryptoTransferTests {

@@ -49,13 +49,14 @@ public class CryptoTransferMultiple implements Runnable {
                 cryptoTransferTransaction.addTransfer(account, amount);
                 System.out.println("Recipient "+ key + ":" + "Account: " + value.accountId + " Amount: " + value.amount);
             });
+
             var senderBalanceBefore = client.getAccountBalance(operatorId);
-            System.out.println("" + operatorId + " balance = " + senderBalanceBefore);
+            System.out.println(operatorId + " balance = " + senderBalanceBefore);
                 System.out.println("CryptoTransferTransaction");
                 cryptoTransferTransaction.build().execute();
                 System.out.println("transferring...");
             var senderBalanceAfter = client.getAccountBalance(operatorId);
-            System.out.println("" + operatorId + " balance = " + senderBalanceAfter);
+            System.out.println(operatorId + " balance = " + senderBalanceAfter);
 
         } catch (Exception e) {
             e.printStackTrace();

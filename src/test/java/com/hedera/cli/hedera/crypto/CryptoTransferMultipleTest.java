@@ -1,6 +1,11 @@
 package com.hedera.cli.hedera.crypto;
 
 import org.junit.Test;
+import picocli.CommandLine;
+import picocli.CommandLine.ParseResult;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+
 import java.util.*;
 import static org.junit.Assert.*;
 
@@ -69,4 +74,29 @@ public class CryptoTransferMultipleTest {
 //        CryptoTransferMultiple cryptoTransferMultiple = new CryptoTransferMultiple();
 //        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList);
 //    }
+
+    @Test
+    public void testCryptoTransferMultipleArgs() {
+
+        @Command
+        class CryptoTransferMultiple {
+
+            @Option(names = {"-r", "--recipient"}, split = " ", arity = "0..*")
+            private String[] recipient;
+
+            @Option(names = {"-a", "--recipientAmt"}, split = " ", arity = "0..*")
+            private String[] recipientAmt;
+
+        }
+
+        CryptoTransferMultiple ct = CommandLine.populateCommand(new CryptoTransferMultiple(), "-r=1001,1002,1003","-a=100,200,300");
+        assertEquals(Collections.singletonList("1001,1002,1003"), Arrays.asList(ct.recipient));
+        assertEquals(Collections.singletonList("100,200,300"), Arrays.asList(ct.recipientAmt));
+
+        CommandLine cmd = new CommandLine(new CryptoTransfer());
+        ParseResult result = cmd.parseArgs("-r=1111,2222,3333", "-a=1000,200,3000");
+        assertTrue(result.hasMatchedOption("r"));
+        assertTrue(result.hasMatchedOption("a"));
+        assertEquals(Arrays.asList("-r=1111,2222,3333","-a=1000,200,3000"), result.originalArgs());
+    }
 }

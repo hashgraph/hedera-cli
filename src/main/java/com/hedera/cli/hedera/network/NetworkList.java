@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 
 import com.hedera.cli.hedera.utils.DataDirectory;
-
 import org.springframework.stereotype.Component;
-
 import picocli.CommandLine.Command;
 
 @Component
