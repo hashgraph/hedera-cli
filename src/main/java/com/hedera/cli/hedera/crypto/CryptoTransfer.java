@@ -23,21 +23,17 @@ public class CryptoTransfer implements Runnable {
             + "@|fg(yellow) transfer single -r=1234,-a=100|@")
     private String recipient;
 
-    @Option(names = {"-a", "--recipientAmt"}, arity = "0..2", description = "Amount to transfer")
+    @Option(names = {"-a", "--recipientAmt"}, arity = "0..1", description = "Amount to transfer")
     private String recipientAmt;
 
     @Override
     public void run() {
 
-//        // Handle GRPC channels shutdown and termination gracefully
-//        List<String> networkList = hedera.getNetworksStrings();
-//        ManagedChannel channel = ManagedChannelBuilder.forAddress(network, port);
-
-
         var operatorId = Hedera.getOperatorId();
         Hedera hedera = new Hedera();
         var client = hedera.createHederaClient();
         var recipientId = AccountId.fromString("0.0." + recipient);
+        System.out.println(recipientId);
         var amount = new BigInteger(recipientAmt);
 
         try {
@@ -61,9 +57,6 @@ public class CryptoTransfer implements Runnable {
             var receiptBalanceAfter = client.getAccountBalance(recipientId);
             System.out.println("" + operatorId + " balance = " + senderBalanceAfter +
                     "\n" + recipientId + " balance = " + receiptBalanceAfter);
-
-//            // shutdown channel
-//            channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
 
         } catch (HederaException e) {
             e.printStackTrace();

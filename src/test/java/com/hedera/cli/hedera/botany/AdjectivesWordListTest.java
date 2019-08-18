@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera;
+package com.hedera.cli.hedera.botany;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;

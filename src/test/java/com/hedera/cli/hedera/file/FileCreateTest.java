@@ -2,10 +2,13 @@ package com.hedera.cli.hedera.file;
 
 import org.junit.Test;
 import picocli.CommandLine;
+import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParseResult;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
@@ -13,13 +16,14 @@ import static org.junit.Assert.*;
 public class FileCreateTest {
 
     @Test
-    public void testFileCreate() {
+    public void testFileCreateArgs() {
 
-        class FileCreate {
-            @Option(names = { "-d", "--date" }, arity = "0..2")
+        @Command class FileCreate {
+
+            @Option(names = {"-d", "--date"}, arity = "0..1")
             private String[] date;
 
-            @Option(names = { "-t", "--maxTransactionFee" })
+            @Option(names = {"-t", "--maxTransactionFee"})
             private int maxTransactionFee;
 
             @Option(names = {"-c", "--contentsString"}, split = " ", arity = "0..*")
@@ -27,13 +31,26 @@ public class FileCreateTest {
 
             @Option(names = {"-s", "--fileSizeByte"})
             private int fileSizeByte;
+
         }
-         FileCreate fileCreate = new FileCreate();
-         CommandLine cmd = new CommandLine(fileCreate);
-         ParseResult result = cmd.parseArgs("-t","100");
-         assertTrue(result.hasMatchedOption("t"));
-         FileCreate fc = cmd.getCommand();
-         assertEquals(100,fc.maxTransactionFee);
+
+        FileCreate fc = CommandLine.populateCommand(new FileCreate(), "-d=22-02-2019,21:30:58","-t=100","-c=\"hello world\"");
+        List<String> expectedDate = new ArrayList<>();
+        expectedDate.add("22-02-2019,21:30:58");
+        List<String> expectedContentString = new ArrayList<>();
+        expectedContentString.add("\"hello world\"");
+        assertEquals(expectedContentString, Arrays.asList(fc.fileContentsInString));
+        assertEquals(100, fc.maxTransactionFee);
+        assertEquals(0, fc.fileSizeByte);
+        assertEquals(expectedDate, Arrays.asList(fc.date));
+
+        CommandLine cmd = new CommandLine(new FileCreate());
+        ParseResult result = cmd.parseArgs("-t=100");
+        assertTrue(result.hasMatchedOption("t"));
+        assertNull(result.subcommand());
+        assertEquals(Integer.valueOf(100), result.matchedOptionValue('t', 100));
+        assertEquals(Collections.singletonList(100), result.matchedOption('t').typedValues());
+        assertEquals(Collections.singletonList("-t=100"), result.originalArgs());
     }
 
     @Test

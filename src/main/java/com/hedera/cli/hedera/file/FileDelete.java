@@ -4,6 +4,7 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
+import com.hedera.hashgraph.sdk.file.FileId;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
 import com.hedera.hashgraph.sdk.proto.ResponseCodeEnum;
 import picocli.CommandLine.Command;
@@ -14,34 +15,22 @@ import java.time.Instant;
         description = "@|fg(magenta) Deletes specified file from the Hedera network|@")
 public class FileDelete implements Runnable {
 
-    @Option(names = {"-d", "--date"}, arity = "0..2",
-            description = "Enter date of file expiration in the format of%n" +
-                    "dd-MM-yyyy hh:mm:ss%n" +
-                    "%n@|bold,underline Usage:|@%n" +
-                    "@|fg(yellow) file delete -d=11-01-2019,11:11:59|@")
-    private String[] date;
+    @Option(names = {"-f", "--fileID"},
+            description = "@|fg(magenta) Enter the file ID of the file to be deleted,in the format of"
+                    + "%nshardNum.realmNum.fileNum|@")
+    private String fileNumInString;
 
     @Override
     public void run() {
         try {
             Hedera hedera = new Hedera();
-            var operatorKey = Hedera.getOperatorKey();
             var client = hedera.createHederaClient();
-            var fileContents = "This is the file content for FileDelete.class".getBytes();
-            Utils utils = new Utils();
-            Instant instant = utils.dateToMilliseconds(date);
-            var tx = new FileCreateTransaction(client)
-                    .setExpirationTime(instant)
-                    .addKey(operatorKey.getPublicKey())
-                    .setContents(fileContents);
-            var receipt = tx.executeForReceipt();
-            var newFileId = receipt.getFileId();
-
-            System.out.println("file: " + newFileId);
+            FileId fileId = FileId.fromString(fileNumInString);
+            System.out.println("file: " + fileId);
 
             // now to delete the file
             var txDeleteReceipt = new FileDeleteTransaction(client)
-                    .setFileId(newFileId)
+                    .setFileId(fileId)
                     .executeForReceipt();
 
             if(txDeleteReceipt.getStatus() != ResponseCodeEnum.SUCCESS) {
@@ -51,7 +40,7 @@ public class FileDelete implements Runnable {
 
             System.out.println("File deleted successfully");
             var fileInfo = new FileInfoQuery(client)
-                    .setFileId(newFileId)
+                    .setFileId(fileId)
                     .execute();
 
             System.out.println("File info " + fileInfo);
