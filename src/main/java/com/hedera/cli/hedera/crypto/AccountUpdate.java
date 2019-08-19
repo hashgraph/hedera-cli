@@ -10,7 +10,7 @@ import picocli.CommandLine.Option;
 
 @Component
 @Command(name="update",
-        description = "@|fg(magenta) Updates the account public key|@",
+        description = "@|fg(225) Updates the account public key|@",
         subcommands = {})
 public class AccountUpdate implements Runnable {
 

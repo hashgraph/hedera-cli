@@ -12,11 +12,11 @@ import picocli.CommandLine.Option;
 import java.time.Instant;
 
 @Command(name = "delete",
-        description = "@|fg(magenta) Deletes specified file from the Hedera network|@")
+        description = "@|fg(225) Deletes specified file from the Hedera network|@")
 public class FileDelete implements Runnable {
 
     @Option(names = {"-f", "--fileID"},
-            description = "@|fg(magenta) Enter the file ID of the file to be deleted,in the format of"
+            description = "@|fg(225) Enter the file ID of the file to be deleted,in the format of"
                     + "%nshardNum.realmNum.fileNum|@")
     private String fileNumInString;
 

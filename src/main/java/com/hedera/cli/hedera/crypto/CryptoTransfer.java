@@ -10,16 +10,16 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name= "single",
-        description = "@|fg(magenta) Transfer hbars to a single account|@%n",
+        description = "@|fg(225) Transfer hbars to a single account|@%n",
         helpCommand = true)
 public class CryptoTransfer implements Runnable {
 
-    @Option(names = {"-r", "--recipient"}, arity = "0..1",  description = "Recipient to transfer to"
+    @Option(names = {"-r", "--recipient"}, arity = "1",  description = "Recipient to transfer to"
             + "%n@|bold,underline Usage:|@%n"
             + "@|fg(yellow) transfer single -r=1234,-a=100|@")
     private String recipient;
 
-    @Option(names = {"-a", "--recipientAmt"}, arity = "0..1", description = "Amount to transfer")
+    @Option(names = {"-a", "--recipientAmt"}, arity = "1", description = "Amount to transfer")
     private String recipientAmt;
 
     @Override

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Component
 @Command(name = "generate",
-         description = "@|fg(magenta) Transfer hbars to a single account|@%n",
+         description = "@|fg(225) Transfer hbars to a single account|@%n",
          helpCommand = true)
 public class KeyGeneration implements Runnable {
 

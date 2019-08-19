@@ -11,17 +11,17 @@ import java.math.BigInteger;
 import java.util.*;
 
 @Command(name= "multiple",
-        description = "@|fg(magenta) Transfer hbars to multiple accounts|@",
+        description = "@|fg(225) Transfer hbars to multiple accounts|@",
         helpCommand = true)
 public class CryptoTransferMultiple implements Runnable {
 
-    @Option(names = {"-r", "--recipient"}, split = " ", arity = "0..*",
+    @Option(names = {"-r", "--recipient"}, split = " ", arity = "1..*",
             description = "Recipient to transfer to"
                     +"%n@|bold,underline Usage:|@%n"
                     + "@|fg(yellow) transfer multiple -r=1001,1002,1003,-a=100,100,100|@")
     private String[] recipient;
 
-    @Option(names = {"-a", "--recipientAmt"}, split = " ", arity = "0..*", description = "Amount to transfer")
+    @Option(names = {"-a", "--recipientAmt"}, split = " ", arity = "1..*", description = "Amount to transfer")
     private String[] recipientAmt;
 
     @Override

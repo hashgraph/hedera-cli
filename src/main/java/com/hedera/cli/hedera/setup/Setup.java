@@ -1,9 +1,7 @@
 package com.hedera.cli.hedera.setup;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.config.InputReader;
@@ -78,6 +76,10 @@ public class Setup implements Runnable {
     String pathToAccountFile =  pathToAccountsFolder +  fileNameWithExt;
     String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
 
+    String pathToIndexTxt = pathToAccountsFolder + "index.txt";
+    Map<String, String> mHashMap = new HashMap<>();
+    mHashMap.put(accountId, fileName);
+
     ObjectMapper mapper = new ObjectMapper();
     
     try {
@@ -88,6 +90,7 @@ public class Setup implements Runnable {
       dataDirectory.writeFile(pathToAccountFile, accountValue);
       // mark this account as the default
       dataDirectory.writeFile(pathToDefaultTxt, fileName + ":" + accountId);
+      dataDirectory.writeFile(pathToIndexTxt, accountId + ": " + fileName);
     } catch (Exception e) {
       e.printStackTrace();
     }

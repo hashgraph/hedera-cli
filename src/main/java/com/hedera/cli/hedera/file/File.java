@@ -4,7 +4,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import java.util.Arrays;
 
-@Command(name = "file", description = "@|fg(magenta) Create, update, delete file.|@"
+@Command(name = "file", description = "@|fg(225) Create, update, delete file.|@"
         + "%n@|fg(yellow) file create <args> OR"
         + "%nfile update <args> OR"
         + "%nfile delete <args> OR|@",

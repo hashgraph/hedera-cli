@@ -15,7 +15,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 
-@Command(name = "create", description = "@|fg(magenta) Creates a new File and returns a FileID in the format of%n"
+@Command(name = "create", description = "@|fg(225) Creates a new File and returns a FileID in the format of%n"
         + "shardNum.realmNum.fileNum|@")
 public class FileCreate implements Runnable {
 

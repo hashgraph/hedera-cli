@@ -8,7 +8,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name = "delete",
-        description = "@|fg(magenta) Gets the information of a specific account." +
+        description = "@|fg(225) Gets the information of a specific account." +
                 "%nRequires key for account modification" +
                 "%nreturns a stateproof if requested|@")
 public class AccountDelete implements Runnable {

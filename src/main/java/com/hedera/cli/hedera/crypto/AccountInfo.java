@@ -9,7 +9,7 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import java.util.Arrays;
 
 @Command(name = "info",
-        description = "@|fg(magenta) Gets the information of a specific account. Requires key for account "
+        description = "@|fg(225) Gets the information of a specific account. Requires key for account "
         + "modification returns a stateproof if requested|@")
 public class AccountInfo implements Runnable {
 

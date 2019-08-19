@@ -14,7 +14,7 @@ import com.hedera.cli.hedera.keygen.EDKeyPair;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "recovery", description = "@|fg(magenta) Recovers a Hedera account via the 24 recovery words.|@", helpCommand = true)
+@Command(name = "recovery", description = "@|fg(225) Recovers a Hedera account via the 24 recovery words.|@", helpCommand = true)
 public class AccountRecovery implements Runnable {
 
   private int index = 0;

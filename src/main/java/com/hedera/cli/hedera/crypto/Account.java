@@ -7,7 +7,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 @Component
-@Command(name = "account", description = "@|fg(magenta) Create, update, delete or querying an account by providing the <args>|@"
+@Command(name = "account", description = "@|fg(225) Create, update, delete or querying an account by providing the <args>|@"
         + "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. account create <args>|@", subcommands = {
                 AccountCreate.class, AccountUpdate.class, AccountInfo.class, AccountDefault.class, AccountDelete.class,
                 AccountRecovery.class, AccountList.class })

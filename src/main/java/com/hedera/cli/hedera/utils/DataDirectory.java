@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -154,6 +155,22 @@ public class DataDirectory {
       System.exit(-1);
     }
     return defaultValue;
+  }
+
+  public String readFileHashmap(String pathToFile, Map<String, String> defaultValue) {
+
+      // check if index.txt exists, if not, create one
+      Path filePath = Paths.get(userHome, directoryName, pathToFile);
+      File file = new File(filePath.toString());
+      boolean fileExists = Files.exists(filePath);
+      if (!fileExists) {
+        try {
+          file.createNewFile();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      return "";
   }
 
   public void listFiles(String pathToSubDir) {

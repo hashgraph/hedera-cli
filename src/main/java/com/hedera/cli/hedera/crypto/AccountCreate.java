@@ -4,7 +4,6 @@ package com.hedera.cli.hedera.crypto;
 import java.util.List;
 
 import com.hedera.cli.hedera.Hedera;
-
 import com.hedera.cli.hedera.keygen.*;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
@@ -12,15 +11,22 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 import io.github.cdimascio.dotenv.Dotenv;
+import picocli.CommandLine;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Model.*;
+import picocli.CommandLine.Spec;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Command(name = "create",
-        description = "@|fg(magenta) Generates a new Ed25519 Keypair compatible with java and wallet,"
+        description = "@|fg(225) Generates a new Ed25519 Keypair compatible with java and wallet,"
                 + "%ntogether with 24 recovery words (bip39 compatible),"
                 + "%nCreates a new Hedera account and "
                 + "%nReturns an accountID in the form of shardNum.realmNum.accountNum.|@", helpCommand = true)
 public class AccountCreate implements Runnable {
+
+        @Spec
+        CommandSpec spec;
 
         @Option(names = { "-r", "--record" }, description = "Generates a record that lasts 25hrs")
         private boolean generateRecord = false;
@@ -29,6 +35,12 @@ public class AccountCreate implements Runnable {
                         + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b=100 OR%n"
                         + "account create --balance=100|@")
         private int initBal = 0;
+        private void setMinimum(int min) {
+                if (min < 0) {
+                        throw new ParameterException(spec.commandLine(), "Minimum must be a positive integer");
+                }
+                initBal = min;
+        }
 
         @Option(names = {"-k", "--keygen"}, description = "Creates a brand new key associated with account creation"
                 + "default is false"
@@ -38,6 +50,8 @@ public class AccountCreate implements Runnable {
 
         @Override
         public void run() {
+
+                setMinimum(initBal);
 
                 if (keyGen) {
                         // If keyGen via args is set to true, generate new keys
