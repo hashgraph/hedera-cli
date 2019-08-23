@@ -10,6 +10,7 @@ import java.util.Scanner;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.keygen.*;
+import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
@@ -17,6 +18,7 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.hjson.JsonObject;
 import picocli.CommandLine;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Model.*;
@@ -88,32 +90,44 @@ public class AccountCreate implements Runnable {
                 HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
                 var origKey = Ed25519PrivateKey.fromString(defaultJsonAccount.get("privateKey").toString());
                 var origPublicKey = Ed25519PublicKey.fromString(defaultJsonAccount.get("publicKey").toString());
+
                 AccountId accountID = createNewAccount(origKey, origPublicKey);
+
+                // save to local disk
                 System.out.println("AccountID = " + accountID);
+                Setup setup = new Setup();
+                JsonObject account = new JsonObject();
+                account.add("accountId", accountID.toString());
+                account.add("privateKey", defaultJsonAccount.get("privateKey").toString());
+                account.add("publicKey", defaultJsonAccount.get("publicKey").toString());
+//                account.add("privateKey_ASN1", origKey.toString());
+//                account.add("publicKey_ASN1", origPublicKey.toString());
+                System.out.println(account);
+                setup.saveToJson(accountID.toString(), account);
         }
 
         public AccountId createNewAccount(Ed25519PrivateKey privateKey, Ed25519PublicKey publicKey) {
                 System.out.println("private key = " + privateKey);
                 System.out.println("public key = " + publicKey);
                 AccountId accountId = null;
-//                Hedera hedera = new Hedera();
-//                var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
-//                var tx = new AccountCreateTransaction(client)
-//                        // The only _required_ property here is `key`
-//                        .setKey(privateKey.getPublicKey()).setInitialBalance(initBal);
-//
-//                // This will wait for the receipt to become available
-//                TransactionReceipt receipt = null;
-//                try {
-//                        receipt = tx.executeForReceipt();
-//                        if (receipt != null) {
-//                                accountId = receipt.getAccountId();
-//                        } else {
-//                                throw new Exception("Receipt is null");
-//                        }
-//                } catch (Exception e) {
-//                        e.printStackTrace();
-//                }
+                Hedera hedera = new Hedera();
+                var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
+                var tx = new AccountCreateTransaction(client)
+                        // The only _required_ property here is `key`
+                        .setKey(privateKey.getPublicKey()).setInitialBalance(initBal);
+
+                // This will wait for the receipt to become available
+                TransactionReceipt receipt = null;
+                try {
+                        receipt = tx.executeForReceipt();
+                        if (receipt != null) {
+                                accountId = receipt.getAccountId();
+                        } else {
+                                throw new Exception("Receipt is null");
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
                 return accountId;
         }
 }

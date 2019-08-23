@@ -102,7 +102,7 @@ public class DataDirectoryTest {
         boolean fileExists = Files.exists(filePath);
         if (!fileExists) {
             // file does not exist so create a new file and write value
-            dataDirectory.writeFileHashmap(pathToFile, mHashmap);
+            dataDirectory.readFileHashmap(pathToFile, mHashmap);
             System.out.println("File does not exist: " + file);
         }
         try {

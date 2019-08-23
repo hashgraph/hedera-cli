@@ -164,11 +164,13 @@ public class DataDirectory {
       File file = new File(filePath.toString());
       boolean fileExists = Files.exists(filePath);
       if (!fileExists) {
+        System.out.println("HELLOOOOO WHY ARENT YOU HERE" + defaultValue.toString());
         // file does not exist so create a new file and write value
-        writeFileHashmap(pathToFile, defaultValue);
+        writeFile(pathToFile, defaultValue.toString());
         return defaultValue;
       }
       try {
+        System.out.println("OR DID YOUC OME HER");
         // file exist
         Scanner reader = new Scanner(file);
         HashMap<String, String> newHashmap = new HashMap<>();
@@ -201,25 +203,6 @@ public class DataDirectory {
     }
     return newHashmap;
   }
-
-  public HashMap<String, String> writeFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
-
-//    try {
-//      FileWriter fw = new FileWriter(pathToFile);
-//      BufferedWriter bw = new BufferedWriter(fw);
-//      HashMap<String, String> mHashmap = new HashMap<>();
-//      mHashmap.put(defaultValue);
-//      bw.write(mHashmap.toString());
-//      bw.close();
-//
-      Path filePath = Paths.get(userHome, directoryName, pathToFile);
-      File file = new File(filePath.toString());
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
-    return defaultValue;
-  }
-
 
   public void listFiles(String pathToSubDir) {
     String userHome = System.getProperty("user.home");

@@ -39,22 +39,36 @@ public class Setup implements Runnable {
     System.out.println("Start the setup process");
     String accountId = inputReader.prompt("account id that we will use as default operator");
     String phrase = inputReader.prompt("24 words phrase", "secret", false);
-    saveToJson(accountId, phrase);
+    JsonObject account = accountFromMnemonic(accountId, phrase);
+    saveToJson(accountId, account);
   }
 
-  public void saveToJson(String accountId, String phrase) {
+  public List<String> phraseListFromMnemonic(String phrase) {
     List<String> phraseList = Arrays.asList(phrase.split(" "));
     System.out.println(phraseList);
+    return phraseList;
+  }
 
-    JsonObject account = new JsonObject();
-
+  public JsonObject accountFromMnemonic(String accountId, String phrase) {
+    List<String> phraseList = phraseListFromMnemonic(phrase);
     // recover key from phrase
     AccountRecovery ac = new AccountRecovery();
     EDKeyPair keyPair = ac.recoverEd25519AccountKeypair(phraseList);
+    // add account
+    return addAccountToJson(accountId, keyPair);
+  }
+
+  public JsonObject addAccountToJson(String accountId, EDKeyPair keyPair ) {
+    JsonObject account = new JsonObject();
     account.add("accountId", accountId);
     account.add("privateKey", keyPair.getPrivateKeyHex());
     account.add("publicKey", keyPair.getPublicKeyHex());
+//    account.add("privateKey_ASN1", keyPair.getPrivateKeyEncodedHex());
+//    account.add("publicKey_ASN1", keyPair.getPublicKeyEncodedHex());
+    return account;
+  }
 
+  public void saveToJson(String accountId, JsonObject account) {
     // ~/.hedera/[network_name]/accounts/[account_name].json
     DataDirectory dataDirectory = new DataDirectory();
     String fileName = getRandomName();
