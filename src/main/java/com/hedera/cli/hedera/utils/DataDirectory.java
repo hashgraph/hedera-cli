@@ -147,6 +147,7 @@ public class DataDirectory {
     }
 
     try {
+      // file exist, check if empty
       FileReader fr = new FileReader(file.getAbsoluteFile());
       BufferedReader br = new BufferedReader(fr);
       defaultValue = br.readLine();

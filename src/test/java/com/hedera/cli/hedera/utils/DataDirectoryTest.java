@@ -122,7 +122,7 @@ public class DataDirectoryTest {
         } catch (Exception e ) {
             e.printStackTrace();
         }
-        System.out.println("Return if emtpy: " + mHashmap);
+        System.out.println("Return if empty: " + mHashmap);
     }
 
     @Test

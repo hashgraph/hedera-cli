@@ -90,9 +90,8 @@ public class Setup implements Runnable {
       String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
       System.out.println(accountValue);
       dataDirectory.writeFile(pathToAccountFile, accountValue);
+      dataDirectory.readFile(pathToDefaultTxt,fileName + ":" + accountId);
       // mark this account as the default
-      dataDirectory.writeFile(pathToDefaultTxt, fileName + ":" + accountId);
-      // TODO double check
       dataDirectory.readFileHashmap(pathToIndexTxt, mHashMap);
     } catch (Exception e) {
       e.printStackTrace();
