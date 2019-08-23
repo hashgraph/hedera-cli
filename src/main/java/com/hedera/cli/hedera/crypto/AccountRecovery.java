@@ -37,13 +37,17 @@ public class AccountRecovery implements Runnable {
     String phrase = inputReader.prompt("24 words phrase", "secret", false);
     List<String> phraseList = Arrays.asList(phrase.split(" "));
     System.out.println(phraseList);
-
     // recover key from phrase
+    recoverEd25519AccountKeypair(phraseList);
+  }
+
+  public EDKeyPair recoverEd25519AccountKeypair(List<String> phraseList) {
+    EDKeyPair keyPair = null;
     Mnemonic mnemonic = new Mnemonic();
     try {
       byte[] entropy = mnemonic.toEntropy(phraseList);
       byte[] seed = CryptoUtils.deriveKey(entropy, index, 32);
-      EDKeyPair keyPair = new EDKeyPair(seed);
+      keyPair = new EDKeyPair(seed);
       System.out.println("priv key encoded: " + keyPair.getPrivateKeyEncodedHex());
       System.out.println("pub key encoded: " + keyPair.getPublicKeyEncodedHex());
       System.out.println("priv key hex legacy: " + keyPair.getSeedAndPublicKeyHex().substring(0, 64));
@@ -52,7 +56,6 @@ public class AccountRecovery implements Runnable {
     } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
       e.printStackTrace();
     }
-
+    return keyPair;
   }
-
 }

@@ -86,9 +86,9 @@ public class AccountCreate implements Runnable {
 
                 // retrieve the public/private key from the associated file
                 HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
-                var newKey = Ed25519PrivateKey.fromString(defaultJsonAccount.get("privateKey").toString());
-                var newPublicKey = Ed25519PublicKey.fromString(defaultJsonAccount.get("publicKey").toString());
-                AccountId accountID = createNewAccount(newKey, newPublicKey);
+                var origKey = Ed25519PrivateKey.fromString(defaultJsonAccount.get("privateKey").toString());
+                var origPublicKey = Ed25519PublicKey.fromString(defaultJsonAccount.get("publicKey").toString());
+                AccountId accountID = createNewAccount(origKey, origPublicKey);
                 System.out.println("AccountID = " + accountID);
         }
 

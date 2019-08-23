@@ -11,6 +11,7 @@ import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicLengthException;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
 import com.hedera.cli.hedera.botany.AdjectivesWordList;
 import com.hedera.cli.hedera.botany.BotanyWordList;
+import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
@@ -48,23 +49,11 @@ public class Setup implements Runnable {
     JsonObject account = new JsonObject();
 
     // recover key from phrase
-    Mnemonic mnemonic = new Mnemonic();
-    try {
-      byte[] entropy = mnemonic.toEntropy(phraseList);
-      byte[] seed = CryptoUtils.deriveKey(entropy, index, 32);
-      EDKeyPair keyPair = new EDKeyPair(seed);
-      System.out.println("priv key encoded: " + keyPair.getPrivateKeyEncodedHex());
-      System.out.println("pub key encoded: " + keyPair.getPublicKeyEncodedHex());
-      System.out.println("priv key hex: " + keyPair.getPrivateKeyHex());
-      System.out.println("pub key hex: " + keyPair.getPublicKeyHex());
-      System.out.println("seed(priv) + pub key hex: " + keyPair.getSeedAndPublicKeyHex());
-      account.add("accountId", accountId);
-      account.add("privateKey", keyPair.getPrivateKeyHex());
-      account.add("publicKey", keyPair.getPublicKeyHex());
-
-    } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
-      e.printStackTrace();
-    }
+    AccountRecovery ac = new AccountRecovery();
+    EDKeyPair keyPair = ac.recoverEd25519AccountKeypair(phraseList);
+    account.add("accountId", accountId);
+    account.add("privateKey", keyPair.getPrivateKeyHex());
+    account.add("publicKey", keyPair.getPublicKeyHex());
 
     // ~/.hedera/[network_name]/accounts/[account_name].json
     DataDirectory dataDirectory = new DataDirectory();
