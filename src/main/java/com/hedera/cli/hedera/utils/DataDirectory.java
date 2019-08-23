@@ -9,8 +9,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -157,21 +159,44 @@ public class DataDirectory {
     return defaultValue;
   }
 
-  public String readFileHashmap(String pathToFile, Map<String, String> defaultValue) {
-
+  public HashMap<String, String> readFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
       // check if index.txt exists, if not, create one
       Path filePath = Paths.get(userHome, directoryName, pathToFile);
       File file = new File(filePath.toString());
       boolean fileExists = Files.exists(filePath);
       if (!fileExists) {
-        try {
-          file.createNewFile();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+        // file does not exist so create a new file and write value
+        writeFileHashmap(pathToFile, defaultValue);
+        return defaultValue;
       }
-      return "";
+      try {
+        // file exist
+        Scanner reader = new Scanner(file);
+        HashMap<String, String> newHashmap = new HashMap<>();
+        while (reader.hasNext()) {
+          String line = reader.nextLine();
+          String sliceLine = line.substring(1, line.length()-1);
+          String[] splitLines = sliceLine.split(", ");
+          for (int i = 0; i< splitLines.length; i++) {
+            String[] keyValuePairs = splitLines[i].split("=");
+            newHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+          }
+        }
+        return newHashmap;
+      } catch (Exception e ) {
+        e.printStackTrace();
+      }
+      return defaultValue;
   }
+
+  public HashMap<String, String> writeFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
+
+    Path filePath = Paths.get(userHome, directoryName, pathToFile);
+    File file = new File(filePath.toString());
+
+    return defaultValue;
+  }
+
 
   public void listFiles(String pathToSubDir) {
     String userHome = System.getProperty("user.home");

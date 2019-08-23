@@ -77,7 +77,7 @@ public class Setup implements Runnable {
     String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
 
     String pathToIndexTxt = pathToAccountsFolder + "index.txt";
-    Map<String, String> mHashMap = new HashMap<>();
+    HashMap<String, String> mHashMap = new HashMap<>();
     mHashMap.put(accountId, fileName);
 
     ObjectMapper mapper = new ObjectMapper();
@@ -90,7 +90,8 @@ public class Setup implements Runnable {
       dataDirectory.writeFile(pathToAccountFile, accountValue);
       // mark this account as the default
       dataDirectory.writeFile(pathToDefaultTxt, fileName + ":" + accountId);
-      dataDirectory.writeFile(pathToIndexTxt, accountId + ": " + fileName);
+      // TODO double check
+      dataDirectory.readFileHashmap(pathToIndexTxt, mHashMap);
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -13,14 +13,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DataDirectoryTest {
@@ -83,5 +80,74 @@ public class DataDirectoryTest {
         String networkName = dataDirectory.networkGetName(addressBookInputStream);
         System.out.println(networkName);
         assertEquals("aspen", networkName);
+    }
+
+    @Test
+    public void testReadFileHashmap() throws IOException {
+
+        String pathToFile = "index.txt";
+        FileWriter fw = new FileWriter("index.txt");
+        BufferedWriter bw = new BufferedWriter(fw);
+
+        HashMap<String,String> mHashmap = new HashMap<>();
+        mHashmap.put("0.0.9998", "filename_000");
+        bw.write(mHashmap.toString());
+        bw.close();
+
+//        DataDirectory dataDirectory = Mockito.mock(DataDirectory.class);
+//        when(dataDirectory.readFileHashmap(pathToFile, mHashmap)).thenReturn(mHashmap);
+
+        Path filePath = Paths.get(pathToFile);
+        File file = new File(filePath.toString());
+        boolean fileExists = Files.exists(filePath);
+        if (!fileExists) {
+            // file does not exist so create a new file and write value
+            dataDirectory.writeFileHashmap(pathToFile, mHashmap);
+            System.out.println("File does not exist: " + file);
+        }
+        try {
+            // file exist
+            Scanner reader = new Scanner(file);
+            HashMap<String, String> newHashmap = new HashMap<>();
+            while (reader.hasNext()) {
+                String line = reader.nextLine();
+                String sliceLine = line.substring(1, line.length()-1);
+                String[] splitLines = sliceLine.split(", ");
+                for (int i = 0; i< splitLines.length; i++) {
+                    String[] keyValuePairs = splitLines[i].split("=");
+                    newHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+                }
+            }
+            System.out.println("Hashmap: "+ newHashmap);
+        } catch (Exception e ) {
+            e.printStackTrace();
+        }
+        System.out.println("Return if emtpy: " + mHashmap);
+    }
+
+    @Test
+    public void testWhatHashmapDoes() throws IOException {
+        FileWriter fw = new FileWriter("index.txt");
+        BufferedWriter bw = new BufferedWriter(fw);
+
+        HashMap<String,String> mHashmap = new HashMap<>();
+        mHashmap.put("0.0.1223", "filename_222");
+        mHashmap.put("0.0.4444", "filename_444");
+        bw.write(mHashmap.toString());
+        bw.close();
+
+        File file = new File("index.txt");
+        Scanner reader = new Scanner(file);
+        HashMap<String, String> newHashmap = new HashMap<>();
+        while (reader.hasNext()) {
+            String line = reader.nextLine();
+            String sliceLine = line.substring(1, line.length()-1);
+            String[] splitLines = sliceLine.split(", ");
+            for (int i = 0; i< splitLines.length; i++) {
+                String[] keyValuePairs = splitLines[i].split("=");
+                newHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+            }
+        }
+        System.out.println(newHashmap);
     }
 }

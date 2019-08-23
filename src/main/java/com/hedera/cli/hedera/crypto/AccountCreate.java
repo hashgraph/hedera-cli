@@ -3,10 +3,7 @@ package com.hedera.cli.hedera.crypto;
 
 import java.util.List;
 
-import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.keygen.*;
-import com.hedera.hashgraph.sdk.TransactionReceipt;
-import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
@@ -77,24 +74,24 @@ public class AccountCreate implements Runnable {
                 System.out.println("private key = " + privateKey);
                 System.out.println("public key = " + publicKey);
                 AccountId accountId = null;
-                Hedera hedera = new Hedera();
-                var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
-                var tx = new AccountCreateTransaction(client)
-                        // The only _required_ property here is `key`
-                        .setKey(privateKey.getPublicKey()).setInitialBalance(initBal);
-
-                // This will wait for the receipt to become available
-                TransactionReceipt receipt = null;
-                try {
-                        receipt = tx.executeForReceipt();
-                        if (receipt != null) {
-                                accountId = receipt.getAccountId();
-                        } else {
-                                throw new Exception("Receipt is null");
-                        }
-                } catch (Exception e) {
-                        e.printStackTrace();
-                }
+//                Hedera hedera = new Hedera();
+//                var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
+//                var tx = new AccountCreateTransaction(client)
+//                        // The only _required_ property here is `key`
+//                        .setKey(privateKey.getPublicKey()).setInitialBalance(initBal);
+//
+//                // This will wait for the receipt to become available
+//                TransactionReceipt receipt = null;
+//                try {
+//                        receipt = tx.executeForReceipt();
+//                        if (receipt != null) {
+//                                accountId = receipt.getAccountId();
+//                        } else {
+//                                throw new Exception("Receipt is null");
+//                        }
+//                } catch (Exception e) {
+//                        e.printStackTrace();
+//                }
                 return accountId;
         }
 }
