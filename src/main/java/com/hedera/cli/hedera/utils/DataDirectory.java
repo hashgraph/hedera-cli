@@ -1,6 +1,7 @@
 package com.hedera.cli.hedera.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.models.AddressBook;
 import com.hedera.cli.models.Network;
 import org.springframework.stereotype.Component;
@@ -9,9 +10,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -160,31 +159,42 @@ public class DataDirectory {
   }
 
   public HashMap<String, String> readFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
-      // check if index.txt exists, if not, create one
-      Path filePath = Paths.get(userHome, directoryName, pathToFile);
-      File file = new File(filePath.toString());
+    // check if index.txt exists, if not, create one
+    Path filePath = Paths.get(userHome, directoryName, pathToFile);
+    File file = new File(filePath.toString());
       boolean fileExists = Files.exists(filePath);
       if (!fileExists) {
-        System.out.println("HELLOOOOO WHY ARENT YOU HERE" + defaultValue.toString());
         // file does not exist so create a new file and write value
         writeFile(pathToFile, defaultValue.toString());
         return defaultValue;
       }
       try {
-        System.out.println("OR DID YOUC OME HER");
         // file exist
         Scanner reader = new Scanner(file);
-        HashMap<String, String> newHashmap = new HashMap<>();
+        // read the new value
+        String key = "";
+        String value = "";
+        for(Map.Entry<String, String> entry : defaultValue.entrySet()) {
+          key = entry.getKey();
+          value = entry.getValue();
+        }
+        // creates a new map
+        HashMap<String, String> updatedHashmap = new HashMap<>();
         while (reader.hasNext()) {
+          // checks the old map
           String line = reader.nextLine();
           String sliceLine = line.substring(1, line.length()-1);
           String[] splitLines = sliceLine.split(", ");
           for (int i = 0; i< splitLines.length; i++) {
             String[] keyValuePairs = splitLines[i].split("=");
-            newHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+            updatedHashmap.put(keyValuePairs[0], keyValuePairs[1]);
           }
         }
-        return newHashmap;
+        // appends old map with new value
+        updatedHashmap.put(key,value);
+        // write to file
+        writeFile(pathToFile, updatedHashmap.toString());
+        return updatedHashmap;
       } catch (Exception e ) {
         e.printStackTrace();
       }

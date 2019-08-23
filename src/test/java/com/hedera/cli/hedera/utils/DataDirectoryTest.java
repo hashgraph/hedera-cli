@@ -85,49 +85,65 @@ public class DataDirectoryTest {
     @Test
     public void testReadFileHashmap() throws IOException {
 
+        // create new file with a single key value pair
         String pathToFile = "index.txt";
-        FileWriter fw = new FileWriter("index.txt");
+        FileWriter fw = new FileWriter(pathToFile);
         BufferedWriter bw = new BufferedWriter(fw);
-
         HashMap<String,String> mHashmap = new HashMap<>();
-        mHashmap.put("0.0.9998", "filename_000");
+        mHashmap.put("0.0.9998", "filename_001");
+        mHashmap.put("0.0.7777", "filename_007");
         bw.write(mHashmap.toString());
         bw.close();
 
-//        DataDirectory dataDirectory = Mockito.mock(DataDirectory.class);
-//        when(dataDirectory.readFileHashmap(pathToFile, mHashmap)).thenReturn(mHashmap);
+        // create an incoming file with a single key value pair
+        HashMap<String,String> newHashmap = new HashMap<>();
+        newHashmap.put("0.0.1111", "filename_111");
 
         Path filePath = Paths.get(pathToFile);
         File file = new File(filePath.toString());
         boolean fileExists = Files.exists(filePath);
         if (!fileExists) {
-            // file does not exist so create a new file and write value
-            dataDirectory.readFileHashmap(pathToFile, mHashmap);
-            System.out.println("File does not exist: " + file);
+            // do nothing here
         }
         try {
             // file exist
             Scanner reader = new Scanner(file);
-            HashMap<String, String> newHashmap = new HashMap<>();
+            // read the new value
+            String key = "";
+            String value = "";
+            for(Map.Entry<String, String> entry : newHashmap.entrySet()) {
+                key = entry.getKey();
+                value = entry.getValue();
+            }
+            // creates a new map
+            HashMap<String, String> updatedHashmap = new HashMap<>();
             while (reader.hasNext()) {
+                // checks the old map
                 String line = reader.nextLine();
                 String sliceLine = line.substring(1, line.length()-1);
                 String[] splitLines = sliceLine.split(", ");
                 for (int i = 0; i< splitLines.length; i++) {
                     String[] keyValuePairs = splitLines[i].split("=");
-                    newHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+                    updatedHashmap.put(keyValuePairs[0], keyValuePairs[1]);
                 }
             }
-            System.out.println("Hashmap: "+ newHashmap);
+            // appends old map with new value
+            updatedHashmap.put(key,value);
+            HashMap<String,String> expectedHashmap = new HashMap<>();
+            expectedHashmap.put("0.0.9998", "filename_001");
+            expectedHashmap.put("0.0.7777", "filename_007");
+            expectedHashmap.put("0.0.1111", "filename_111");
+
+            assertEquals(updatedHashmap,expectedHashmap);
         } catch (Exception e ) {
             e.printStackTrace();
         }
-        System.out.println("Return if empty: " + mHashmap);
     }
 
     @Test
     public void testWhatHashmapDoes() throws IOException {
-        FileWriter fw = new FileWriter("index.txt");
+        String pathToFile = "index.txt";
+        FileWriter fw = new FileWriter(pathToFile);
         BufferedWriter bw = new BufferedWriter(fw);
 
         HashMap<String,String> mHashmap = new HashMap<>();
@@ -136,7 +152,7 @@ public class DataDirectoryTest {
         bw.write(mHashmap.toString());
         bw.close();
 
-        File file = new File("index.txt");
+        File file = new File(pathToFile);
         Scanner reader = new Scanner(file);
         HashMap<String, String> newHashmap = new HashMap<>();
         while (reader.hasNext()) {

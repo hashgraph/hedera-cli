@@ -17,9 +17,7 @@ import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.hjson.JsonObject;
-import picocli.CommandLine;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Model.*;
 import picocli.CommandLine.Spec;
@@ -95,7 +93,6 @@ public class AccountCreate implements Runnable {
 
                 // save to local disk
                 System.out.println("AccountID = " + accountID);
-                Setup setup = new Setup();
                 JsonObject account = new JsonObject();
                 account.add("accountId", accountID.toString());
                 account.add("privateKey", defaultJsonAccount.get("privateKey").toString());
@@ -103,6 +100,7 @@ public class AccountCreate implements Runnable {
 //                account.add("privateKey_ASN1", origKey.toString());
 //                account.add("publicKey_ASN1", origPublicKey.toString());
                 System.out.println(account);
+                Setup setup = new Setup();
                 setup.saveToJson(accountID.toString(), account);
         }
 
