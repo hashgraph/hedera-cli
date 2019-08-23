@@ -79,7 +79,6 @@ public class Setup implements Runnable {
     String pathToIndexTxt = pathToAccountsFolder + "index.txt";
     HashMap<String, String> mHashMap = new HashMap<>();
     mHashMap.put(accountId, fileName);
-
     ObjectMapper mapper = new ObjectMapper();
     
     try {

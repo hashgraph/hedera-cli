@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -189,11 +188,35 @@ public class DataDirectory {
       return defaultValue;
   }
 
-  public HashMap<String, String> writeFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
-
+  public HashMap jsonToHashmap(String pathToFile) {
     Path filePath = Paths.get(userHome, directoryName, pathToFile);
     File file = new File(filePath.toString());
+    HashMap newHashmap = new HashMap<>();
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      String json = new Scanner(file).useDelimiter("\\Z").next();
+      newHashmap = mapper.readValue(json, HashMap.class);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return newHashmap;
+  }
 
+  public HashMap<String, String> writeFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
+
+//    try {
+//      FileWriter fw = new FileWriter(pathToFile);
+//      BufferedWriter bw = new BufferedWriter(fw);
+//      HashMap<String, String> mHashmap = new HashMap<>();
+//      mHashmap.put(defaultValue);
+//      bw.write(mHashmap.toString());
+//      bw.close();
+//
+      Path filePath = Paths.get(userHome, directoryName, pathToFile);
+      File file = new File(filePath.toString());
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
     return defaultValue;
   }
 

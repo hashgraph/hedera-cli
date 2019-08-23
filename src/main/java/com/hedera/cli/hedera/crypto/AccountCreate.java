@@ -1,9 +1,18 @@
 
 package com.hedera.cli.hedera.crypto;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.keygen.*;
+import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.hashgraph.sdk.TransactionReceipt;
+import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
@@ -63,9 +72,22 @@ public class AccountCreate implements Runnable {
                         System.out.println("AccountID = " + accountID);
                         System.out.println("mnemonic = " + mnemonic);
                 }
-                // Else keyGen always set to false and read from Dotenv
-                var newKey = Ed25519PrivateKey.fromString(Dotenv.load().get("KEYGEN_MOBILE_PRIVATE_KEY"));
-                var newPublicKey = Ed25519PublicKey.fromString(Dotenv.load().get("KEYGEN_MOBILE_PUBLIC_KEY"));
+
+                // Else keyGen always set to false and read from default.txt which contains operator keys
+                // Search for the current network and operator account associated with it
+                DataDirectory dataDirectory = new DataDirectory();
+                String networkName = dataDirectory.readFile("network.txt");
+                String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
+                String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
+
+                // read the key value, the associated file in the list
+                String readAccount = dataDirectory.readFile(pathToDefaultTxt);
+                String pathToDefaultJsonAccount = pathToAccountsFolder + readAccount.split(":")[0] + ".json";
+
+                // retrieve the public/private key from the associated file
+                HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
+                var newKey = Ed25519PrivateKey.fromString(defaultJsonAccount.get("privateKey").toString());
+                var newPublicKey = Ed25519PublicKey.fromString(defaultJsonAccount.get("publicKey").toString());
                 AccountId accountID = createNewAccount(newKey, newPublicKey);
                 System.out.println("AccountID = " + accountID);
         }
