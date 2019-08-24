@@ -74,29 +74,17 @@ public class AccountCreate implements Runnable {
                 }
 
                 // Else keyGen always set to false and read from default.txt which contains operator keys
-                // Search for the current network and operator account associated with it
-                DataDirectory dataDirectory = new DataDirectory();
-                String networkName = dataDirectory.readFile("network.txt");
-                String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
-                String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
-
-                // read the key value, the associated file in the list
-                String readAccount = dataDirectory.readFile(pathToDefaultTxt);
-                String pathToDefaultJsonAccount = pathToAccountsFolder + readAccount.split(":")[0] + ".json";
-
-                // retrieve the public/private key from the associated file
-                HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
-                var origKey = Ed25519PrivateKey.fromString(defaultJsonAccount.get("privateKey").toString());
-                var origPublicKey = Ed25519PublicKey.fromString(defaultJsonAccount.get("publicKey").toString());
-
+                Hedera hedera = new Hedera();
+                var origKey = hedera.getOperatorKey();
+                var origPublicKey = origKey.getPublicKey();
                 AccountId accountID = createNewAccount(origKey, origPublicKey);
 
                 // save to local disk
                 System.out.println("AccountID = " + accountID);
                 JsonObject account = new JsonObject();
                 account.add("accountId", accountID.toString());
-                account.add("privateKey", defaultJsonAccount.get("privateKey").toString());
-                account.add("publicKey", defaultJsonAccount.get("publicKey").toString());
+                account.add("privateKey", hedera.retrieveDefaultAccountKeyInHexString());
+                account.add("publicKey", hedera.retrieveDefaultAccountPublicKeyInHexString());
 //                account.add("privateKey_ASN1", origKey.toString());
 //                account.add("publicKey_ASN1", origPublicKey.toString());
                 System.out.println(account);

@@ -9,26 +9,18 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import java.util.Arrays;
 
 @Command(name = "info",
-        description = "@|fg(225) Gets the information of a specific account. Requires key for account "
+        description = "@|fg(225) Gets the information of the paying/operator account"
         + "modification returns a stateproof if requested|@")
 public class AccountInfo implements Runnable {
 
-    @Option(names = {"-k, --key"} , description = "The key associated with the account which must sign for any modification"
-            + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) account info -k=abcd123|@")
-    private Ed25519PrivateKey privateKey;
-
-    @Option(names = {"-rq", "--request"}, description = "Type of request: cost, state proof, both, or neither")
-    private String request;
+    @Option(names = {"-o", "--operator"}, description = "Get current paying/operator account")
+    private String operator;
 
     @Override
     public void run() {
         try {
-            System.out.println("AccountInfo commands");
-//            System.out.println(request);
-//            System.out.println(privateKey);
             Hedera hedera = new Hedera();
-            var operatorId = Hedera.getOperatorId();
+            var operatorId = hedera.getOperatorId();
             var client = hedera.createHederaClient();
             AccountInfoQuery q = null;
             q = new AccountInfoQuery(client)

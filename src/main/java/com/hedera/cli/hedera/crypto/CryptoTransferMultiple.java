@@ -32,7 +32,7 @@ public class CryptoTransferMultiple implements Runnable {
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
             verifiedRecipientMap(recipientList, amountList);
-            var operatorId = Hedera.getOperatorId();
+            var operatorId = hedera.getOperatorId();
             var client = hedera.createHederaClient();
 
             var senderTotal = sumOfTransfer(recipientAmt);

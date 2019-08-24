@@ -85,7 +85,7 @@ public class FileCreate implements Runnable {
         CommandLine.usage(this, System.out);
         try {
             Hedera hedera = new Hedera();
-            var operatorKey = Hedera.getOperatorKey();
+            var operatorKey = hedera.getOperatorKey();
             var client = hedera.createHederaClient().setMaxTransactionFee(maxTransactionFee);
             System.out.println(maxTransactionFee);
             System.out.println(Arrays.asList(date));

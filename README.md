@@ -3,9 +3,6 @@ Project Setup
 
 ```
 git clone https://github.com/hashgraph/hedera-cli
-cp .env.sample .env
-# update .env with node id, node address, 
-# operator's id and private key
 ```
 
 Generating the Executable
@@ -33,6 +30,21 @@ Help
 help
 ```
 
+Setup Network
+===
+
+```bash
+# To list available networks
+network ls
+
+# To select network
+network set -n=engnet1 OR
+network set -n=mainnet OR
+network set -n=wallet
+
+# Cli will prompt setup on first run to save default operator key into ~/.hedera
+setup
+```
 
 Create Account
 ===
