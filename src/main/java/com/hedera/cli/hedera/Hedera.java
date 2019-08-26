@@ -8,14 +8,10 @@ import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
-import io.github.cdimascio.dotenv.Dotenv;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class Hedera {
 
@@ -37,13 +33,6 @@ public class Hedera {
 
     public List<String> getNetworksStrings() {
         return addressBook.getNetworksAsStrings();
-    }
-
-    public static Dotenv getEnv() {
-        // Load configuration from the environment or a $projectRoot/.env file, if
-        // present
-        // See .env.sample for an example of what it is looking for
-        return Dotenv.load();
     }
 
     public AccountId getNodeId() {

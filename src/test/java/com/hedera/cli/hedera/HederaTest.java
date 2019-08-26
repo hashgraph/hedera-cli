@@ -30,24 +30,24 @@ public class HederaTest {
         assertEquals("mainnet", network.getName());
     }
 
-    @Test
-    public void testRetrieveDefaultAccountKeyInHexString() {
-        Hedera hedera = new Hedera();
-        String privateKey = hedera.retrieveDefaultAccountKeyInHexString();
-        System.out.println(privateKey);
-    }
-
-    @Test
-    public void testRetrieveDefaultAccountPublicKeyInHexString() {
-        Hedera hedera = new Hedera();
-        String publicKey = hedera.retrieveDefaultAccountPublicKeyInHexString();
-        System.out.println(publicKey);
-    }
-
-    @Test
-    public void testRetrieveDefaultAccountID() {
-        Hedera hedera = new Hedera();
-        AccountId accountId = hedera.retrieveDefaultAccountID();
-        System.out.println(accountId);
-    }
+//    @Test
+//    public void testRetrieveDefaultAccountKeyInHexString() {
+//        Hedera hedera = new Hedera();
+//        String privateKey = hedera.retrieveDefaultAccountKeyInHexString();
+//        System.out.println(privateKey);
+//    }
+//
+//    @Test
+//    public void testRetrieveDefaultAccountPublicKeyInHexString() {
+//        Hedera hedera = new Hedera();
+//        String publicKey = hedera.retrieveDefaultAccountPublicKeyInHexString();
+//        System.out.println(publicKey);
+//    }
+//
+//    @Test
+//    public void testRetrieveDefaultAccountID() {
+//        Hedera hedera = new Hedera();
+//        AccountId accountId = hedera.retrieveDefaultAccountID();
+//        System.out.println(accountId);
+//    }
 }
