@@ -1,17 +1,11 @@
 
 package com.hedera.cli.hedera.crypto;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.keygen.*;
 import com.hedera.cli.hedera.setup.Setup;
-import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
