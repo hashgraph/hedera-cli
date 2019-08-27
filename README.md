@@ -1,26 +1,16 @@
-Project Setup
-===
-
-```
-git clone https://github.com/hashgraph/hedera-cli
-```
-
-Generating the Executable
+Getting Started
 ===
 
 ```bash
-# Cleans gradle, builds gradle and jar
-./scripts/build.sh
+brew tap hashgraph/hedera-cli
+brew install hedera-cli
 ```
 
-Get Started
+Run
 ===
-
 ```bash
-# Runs the hedera shell
-./hedera
+hedera
 ```
-
 
 Help
 ===
