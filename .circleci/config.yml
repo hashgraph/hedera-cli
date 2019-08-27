@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:11-stretch
+
+    steps:
+      - checkout
+
+      - run:
+          name: Build and Test
+          command: ./scripts/build.sh
+
+      - run:
+          name: Prerequisites
+          command: sudo apt -y update && sudo apt -y install git python curl
+
+      - run:
+          name: Release
+          command: ./scripts/release.sh
