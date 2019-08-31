@@ -4,7 +4,6 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import java.util.Arrays;
 
