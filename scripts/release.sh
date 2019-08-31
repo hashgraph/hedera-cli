@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
 
+file="../gradle.properties"
+while IFS= read -r line
+do
+    # display $line or do somthing with $line
+    VERSION="$(echo $line | cut -d'=' -f2)"
+    printf '%s\n' "v$B will be released"
+done <"$file"
+
 GH_USER=hashgraph
 GH_PATH=$GITHUB_API_TOKEN
 GH_REPO=hedera-cli
 GH_TARGET=master
 ASSETS_PATH=.
-VERSION=0.0.1
 NAME=hedera
-tar -zcvf "${NAME}-${VERSION}.tar.gz" . 
+tar -zcvf "${NAME}-${VERSION}.tar.gz" .
 
 git add -u
 git commit -m "$VERSION release"
