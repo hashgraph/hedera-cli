@@ -5,7 +5,7 @@ while IFS= read -r line
 do
     # display $line or do somthing with $line
     VERSION="$(echo $line | cut -d'=' -f2)"
-    printf '%s\n' "v$B will be released"
+    printf '%s\n' "v$VERSION will be released"
 done <"$file"
 
 GH_USER=hashgraph
