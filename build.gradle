@@ -17,6 +17,13 @@ plugins {
     id 'application'
 
     id 'org.jetbrains.dokka' version '0.9.18'
+
+    id 'net.researchgate.release' version '2.6.0'
+}
+
+release {
+    failOnPublishNeeded = false
+    failOnUpdateNeeded = false
 }
 
 group = 'hedera-cli'
