@@ -24,6 +24,7 @@ plugins {
 release {
     failOnPublishNeeded = false
     failOnUpdateNeeded = false
+    tagTemplate = 'v$version'
 }
 
 group = 'hedera-cli'
