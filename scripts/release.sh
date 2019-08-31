@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-file="../gradle.properties"
+file="./gradle.properties"
 while IFS= read -r line
 do
     # display $line or do somthing with $line
