@@ -4,16 +4,19 @@ file="./gradle.properties"
 while IFS= read -r line
 do
     # display $line or do somthing with $line
-    VERSION="$(echo $line | cut -d'=' -f2)"
+    export VERSION="$(echo $line | cut -d'=' -f2)"
     printf '%s\n' "v$VERSION will be released"
 done <"$file"
 
-GH_USER=hashgraph
-GH_PATH=$GITHUB_API_TOKEN
-GH_REPO=hedera-cli
+export GH_USER=hashgraph
+export GH_PATH=$GITHUB_API_TOKEN
+export GH_REPO=hedera-cli
 GH_TARGET=master
 ASSETS_PATH=.
 NAME=hedera
+SHA256="$(sha256sum ${NAME}-${VERSION}.tar.gz | cut -d' ' -f1)"
+echo $SHA256 > hash.txt
+
 tar -zcvf "${NAME}-${VERSION}.tar.gz" .
 
 git add -u
@@ -38,3 +41,5 @@ curl --user "$GH_USER:$GH_PATH" -X POST https://uploads.github.com/repos/${GH_US
  --header 'Content-Type: text/javascript ' --upload-file ${ASSETS_PATH}/${file_name}
 
 rm ${ASSETS_PATH}/${file_name}
+
+source package_homebrew.sh

@@ -13,7 +13,7 @@ jobs:
 
       - run:
           name: Prerequisites
-          command: sudo apt -y update && sudo apt -y install git python curl
+          command: sudo apt -y update && sudo apt -y install git python curl ruby
 
       - run:
           name: Release
