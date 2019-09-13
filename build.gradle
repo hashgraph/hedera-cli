@@ -28,7 +28,7 @@ release {
 }
 
 group = 'hedera-cli'
-version = '0.0.1'
+// version is specified in gradle.properties
 
 repositories {
     // Use jcenter for resolving dependencies.
