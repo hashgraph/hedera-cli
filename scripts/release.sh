@@ -14,10 +14,16 @@ export GH_REPO=hedera-cli
 GH_TARGET=master
 ASSETS_PATH=.
 NAME=hedera
-SHA256="$(sha256sum ${NAME}-${VERSION}.tar.gz | cut -d' ' -f1)"
+
 PACKAGE="${NAME}-${VERSION}.tar.gz"
 
-tar -zcvf "${PACKAGE}" .
+# copy out the executable jar built with Spring Boot's LaunchScript
+cp build/libs/"${GH_REPO}-${VERSION}.jar" hedera && chmod +x hedera
+
+# pack only our hedera binary
+tar -zcvf "${PACKAGE}" hedera
+
+SHA256="$(sha256sum ${PACKAGE} | cut -d' ' -f1)"
 
 git add -u
 git commit -m "$VERSION release"
@@ -44,7 +50,7 @@ file_name=${NAME}-${VERSION}.tar.gz
 curl --user "$GH_USER:$GH_PATH" -X POST https://uploads.github.com/repos/${GH_USER}/${GH_REPO}/releases/${rel_id}/assets?name=${file_name}\
  --header 'Content-Type: text/javascript ' --upload-file ${ASSETS_PATH}/${file_name}
 
-source package_homebrew.sh
+source ./scripts/package_homebrew.sh
 
 # clean up
 rm ${ASSETS_PATH}/${file_name}
