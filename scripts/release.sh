@@ -14,10 +14,12 @@ export GH_REPO=hedera-cli
 GH_TARGET=master
 ASSETS_PATH=.
 NAME=hedera
-SHA256="$(sha256sum ${NAME}-${VERSION}.tar.gz | cut -d' ' -f1)"
+
 PACKAGE="${NAME}-${VERSION}.tar.gz"
 
 tar -zcvf "${PACKAGE}" .
+
+SHA256="$(sha256sum ${PACKAGE} | cut -d' ' -f1)"
 
 git add -u
 git commit -m "$VERSION release"
