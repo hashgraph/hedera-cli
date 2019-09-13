@@ -17,7 +17,11 @@ NAME=hedera
 
 PACKAGE="${NAME}-${VERSION}.tar.gz"
 
-tar -zcvf "${PACKAGE}" .
+# copy out the executable jar built with Spring Boot's LaunchScript
+cp build/libs/"${GH_REPO}-${VERSION}.jar" hedera && chmod +x hedera
+
+# pack only our hedera binary
+tar -zcvf "${PACKAGE}" hedera
 
 SHA256="$(sha256sum ${PACKAGE} | cut -d' ' -f1)"
 
