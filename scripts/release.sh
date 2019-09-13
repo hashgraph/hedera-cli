@@ -44,7 +44,7 @@ file_name=${NAME}-${VERSION}.tar.gz
 curl --user "$GH_USER:$GH_PATH" -X POST https://uploads.github.com/repos/${GH_USER}/${GH_REPO}/releases/${rel_id}/assets?name=${file_name}\
  --header 'Content-Type: text/javascript ' --upload-file ${ASSETS_PATH}/${file_name}
 
-source package_homebrew.sh
+source ./scripts/package_homebrew.sh
 
 # clean up
 rm ${ASSETS_PATH}/${file_name}
