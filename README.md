@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/hashgraph/hedera-cli/tree/master.svg?style=shield)](https://circleci.com/gh/hashgraph/hedera-cli/tree/master)
+
 Getting Started
 ===
 
