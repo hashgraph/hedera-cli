@@ -48,15 +48,16 @@ res=`curl --user "$GH_USER:$GH_PATH" -X POST https://api.github.com/repos/${GH_U
 }"`
 echo Create release result: ${res}
 rel_id=`echo ${res} | python -c 'import json,sys;print(json.load(sys.stdin)["id"])'`
-echo "#######"
-echo $rel_id
-echo "######"
-file_name=${NAME}-${VERSION}.tar.gz
+if [ -z "$rel_id" ]
+then
+  echo "No release required as it already exists"
+else
+  file_name=${NAME}-${VERSION}.tar.gz
+  curl --user "$GH_USER:$GH_PATH" -X POST https://uploads.github.com/repos/${GH_USER}/${GH_REPO}/releases/${rel_id}/assets?name=${file_name}\
+    --header 'Content-Type: text/javascript ' --upload-file ${ASSETS_PATH}/${file_name}
 
-curl --user "$GH_USER:$GH_PATH" -X POST https://uploads.github.com/repos/${GH_USER}/${GH_REPO}/releases/${rel_id}/assets?name=${file_name}\
- --header 'Content-Type: text/javascript ' --upload-file ${ASSETS_PATH}/${file_name}
-
-source ./scripts/package_homebrew.sh
+  source ./scripts/package_homebrew.sh
+fi
 
 # clean up
 rm ${ASSETS_PATH}/${file_name}
