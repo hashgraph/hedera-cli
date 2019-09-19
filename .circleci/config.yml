@@ -6,7 +6,7 @@ defaults: &defaults
 
 references:
   workspace_root: &workspace_root
-    /tmp/workspace
+    /home/circleci/hedera-cli
   attach_workspace: &attach_workspace
     attach_workspace:
       at: *workspace_root
