@@ -57,5 +57,10 @@ jobs:
             - "62:2e:37:7f:05:61:ac:02:0d:b2:5f:54:56:09:b8:06"
 
       - run:
+          name: Update Coveralls
+          command: |
+            curl -H "Authorization: token ${COVERALLS_REPO_TOKEN}" -F 'json_file=@build/coveralls/report.json'  'https://coveralls.io/api/v1/jobs'
+
+      - run:
           name: Release
           command: ./scripts/release.sh
