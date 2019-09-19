@@ -6,7 +6,7 @@ defaults: &defaults
 
 references:
   workspace_root: &workspace_root
-    /home/circleci/hedera-cli
+    /home/circleci/project
   attach_workspace: &attach_workspace
     attach_workspace:
       at: *workspace_root
@@ -42,7 +42,7 @@ jobs:
       - persist_to_workspace:
           root: *workspace_root
           paths:
-            - hedera-cli
+            - project
 
   release:
     <<: *defaults
