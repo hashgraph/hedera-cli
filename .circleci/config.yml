@@ -50,10 +50,6 @@ jobs:
     steps:
       - *attach_workspace
 
-      - run:
-          name: Prerequisites
-          command: sudo apt -y update && sudo apt -y install git python curl
-
       - add_ssh_keys:
           fingerprints:
             - "62:2e:37:7f:05:61:ac:02:0d:b2:5f:54:56:09:b8:06"
