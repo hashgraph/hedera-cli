@@ -57,10 +57,12 @@ else
     --header 'Content-Type: text/javascript ' --upload-file ${ASSETS_PATH}/${file_name}
 
   source ./scripts/package_homebrew.sh
+
+  rm ${ASSETS_PATH}/${file_name}
 fi
 
 # clean up
-rm ${ASSETS_PATH}/${file_name}
+
 rm hash.txt
 rm version.txt
 rm package.txt

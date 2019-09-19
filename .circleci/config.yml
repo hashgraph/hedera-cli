@@ -24,7 +24,8 @@ workflows:
             - build
           filters:
             branches:
-              only: /.*/
+              only:
+                - master
 
 jobs:
   build:
@@ -34,8 +35,7 @@ jobs:
 
       - run:
           name: Build and Test
-          command: |
-            ./scripts/build.sh
+          command: ./scripts/build.sh
 
       - persist_to_workspace:
           root: *workspace_root
