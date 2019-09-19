@@ -25,9 +25,6 @@ tar -zcvf "${PACKAGE}" hedera
 
 SHA256="$(sha256sum ${PACKAGE} | cut -d' ' -f1)"
 
-git config user.email "oss@hedera.com"
-git config user.name "OSS"
-
 git add -u
 git commit -m "$VERSION release"
 git push
