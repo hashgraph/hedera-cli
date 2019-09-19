@@ -1,4 +1,5 @@
-[![CircleCI](https://circleci.com/gh/hashgraph/hedera-cli/tree/master.svg?style=shield)](https://circleci.com/gh/hashgraph/hedera-cli/tree/master)
+[![CircleCI](https://circleci.com/gh/hashgraph/hedera-cli/tree/master.svg?style=shield)](https://circleci.com/gh/hashgraph/hedera-cli/tree/master) 
+[![GitHub](https://img.shields.io/github/license/hashgraph/hedera-mirror-node)](LICENSE)
 
 Getting Started
 ===
