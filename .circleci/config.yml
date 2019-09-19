@@ -45,7 +45,8 @@ jobs:
             - .
 
   release:
-    <<: *defaults
+    machine:
+      image: ubuntu-1604:201903-01
     steps:
       - *attach_workspace
 
