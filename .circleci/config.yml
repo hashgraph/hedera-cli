@@ -35,9 +35,7 @@ jobs:
 
       - run:
           name: Build and Test
-          command: |
-            pwd
-            ./scripts/build.sh
+          command: ./scripts/build.sh
 
       - persist_to_workspace:
           root: *workspace_root
@@ -49,6 +47,10 @@ jobs:
       image: ubuntu-1604:201903-01
     steps:
       - *attach_workspace
+
+      - run:
+          name: Prerequisites
+          command: sudo apt update && sudo apt -y install ruby-full
 
       - add_ssh_keys:
           fingerprints:
