@@ -35,7 +35,6 @@ jobs:
       - run:
           name: Build and Test
           command: |
-            pwd
             ./scripts/build.sh
 
       - persist_to_workspace:
@@ -51,7 +50,7 @@ jobs:
 
       - run:
           name: Prerequisites
-          command: sudo apt -y install ruby-full
+          command: sudo apt update && sudo apt -y install ruby-full
 
       - add_ssh_keys:
           fingerprints:
