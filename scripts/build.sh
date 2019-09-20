@@ -2,4 +2,4 @@
 
 # build gradle
 echo "clean, build (and, by default, test)"
-./gradlew clean build
+./gradlew clean build jacocoTestReport coveralls
