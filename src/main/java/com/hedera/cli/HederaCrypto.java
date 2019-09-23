@@ -40,7 +40,7 @@ public class HederaCrypto extends CliDefaults {
         @ShellOption(defaultValue = "") String subCommand,
         @ShellOption(defaultValue = "", arity = -1) String... args) {
         Transfer transfer = new Transfer();
-        transfer.handle(subCommand, args);
+        transfer.handle(inputReader, subCommand, args);
     }
 
 }

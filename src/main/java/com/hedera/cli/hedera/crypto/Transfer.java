@@ -1,11 +1,12 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.hedera.cli.config.InputReader;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 @Component
-@Command(name= "transfer",
+@Command(name = "transfer",
         description = "@|fg(225) Crypto transfer to single or multiple accounts|@"
                 + "%n@|fg(yellow) transfer single <args> OR"
                 + "%ntransfer multiple <args>|@",
@@ -17,7 +18,7 @@ public class Transfer implements Runnable {
         CommandLine.usage(this, System.out);
     }
 
-    public void handle(String subCommand, String... args) {
+    public void handle(InputReader inputReader, String subCommand, String... args) {
         switch (subCommand) {
             case "single":
                 if (args.length == 0) {
@@ -28,9 +29,9 @@ public class Transfer implements Runnable {
                 break;
             case "multiple":
                 if (args.length == 0) {
-                    CommandLine.usage(new CryptoTransferMultiple(), System.out);
+                    CommandLine.usage(new CryptoTransferMultiple(inputReader), System.out);
                 } else {
-                    new CommandLine(new CryptoTransferMultiple()).execute(args);
+                    new CommandLine(new CryptoTransferMultiple(inputReader)).execute(args);
                 }
                 break;
             default:
