@@ -1,6 +1,7 @@
 
 package com.hedera.cli.hedera.crypto;
 
+import java.time.Duration;
 import java.util.List;
 
 import com.hedera.cli.hedera.Hedera;
@@ -94,7 +95,8 @@ public class AccountCreate implements Runnable {
                 var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
                 var tx = new AccountCreateTransaction(client)
                         // The only _required_ property here is `key`
-                        .setKey(privateKey.getPublicKey()).setInitialBalance(initBal);
+                        .setKey(privateKey.getPublicKey()).setInitialBalance(initBal)
+                        .setAutoRenewPeriod(Duration.ofSeconds(7890000));
 
                 // This will wait for the receipt to become available
                 TransactionReceipt receipt = null;

@@ -31,7 +31,8 @@ public class CliPromptProvider implements PromptProvider {
 
                 // red
                 AttributedString noDefaultAccountAttr = new AttributedString(
-                                "You do not have a default operator account for this network. Please run setup.\n",
+                                "You do not have a default operator account for this network. Please run `setup`\n" +
+                                        "To see available networks, enter `network`\n",
                                 AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
 
                 // blue
