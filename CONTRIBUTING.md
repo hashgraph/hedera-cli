@@ -18,5 +18,6 @@ Get Started
 
 ```bash
 # Runs the hedera shell
-./hedera
+# 0.0.3 refers to the current version number
+./build/libs/hedera-cli-0.0.3.jar
 ```
