@@ -8,7 +8,5 @@ public class AccountCreateTest {
     @Test
     public void testCreateNewAccount() {
          AccountCreate accountCreate = new AccountCreate();
-//         AccountId accountId = accountCreate.createNewAccount(privateKey, publicKey);
-//         System.out.println(accountId);
     }
 }
