@@ -5,6 +5,7 @@ import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.Transaction;
+import com.hedera.hashgraph.sdk.TransactionRecord;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -39,6 +40,8 @@ public class CryptoTransferMultiple implements Runnable {
     @Option(names = {"-s", "--senderAccountID"}, arity = "1", description = "AccountID of sender who is transferring")
     private String senderAccountIDInString;
 
+    private String memoString;
+
     private InputReader inputReader;
     private Ed25519PrivateKey senderPrivKey;
 
@@ -49,11 +52,11 @@ public class CryptoTransferMultiple implements Runnable {
     @Override
     public void run() {
         try {
+            memoString = inputReader.prompt("Memo field");
             senderAccountIDInString = inputReader.prompt("Input sender accountID");
             String transferAmountInStr = inputReader.prompt("Input transfer amount");
             String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
             senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
-            System.out.println(senderAccountIDInString + ":" + senderPrivKeyInString);
             Hedera hedera = new Hedera();
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
@@ -70,7 +73,6 @@ public class CryptoTransferMultiple implements Runnable {
             var map = verifiedRecipientMap(recipientList, amountList);
             CryptoTransferTransaction cryptoTransferTransaction = new CryptoTransferTransaction(client);
             cryptoTransferTransaction.addTransfer(senderAccountID, -transferAmount.longValue());
-            System.out.println(senderTotal + " = " + transferAmount.longValue());
 
             map.forEach((key, value) -> {
                 if (map.size() != amountList.size()) {
@@ -79,27 +81,38 @@ public class CryptoTransferMultiple implements Runnable {
                 var account = value.accountId;
                 var amount = value.amount;
                 cryptoTransferTransaction.addTransfer(account, amount);
-                System.out.println("Recipient " + key + ":" + "Account: " + value.accountId + " Amount: " + value.amount);
+                System.out.println("Recipient " + key + " = " + "Account: " + value.accountId + " Amount: " + value.amount);
             });
 
+            cryptoTransferTransaction.setMemo(memoString);
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
             var operatorBalanceBefore = client.getAccountBalance(operatorId);
-            System.out.println(senderAccountID + " sender balance = " + senderBalanceBefore);
-            System.out.println(operatorId + " operator balance = " + operatorBalanceBefore);
+            System.out.println(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
+            System.out.println(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
 
             System.out.println("CryptoTransferTransaction");
 
             var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
 
-            Transaction.fromBytes(client, signedTxnBytes)
-                    .executeForReceipt();
+            TransactionRecord record = Transaction.fromBytes(client, signedTxnBytes)
+                    .executeForRecord();
 
             System.out.println("transferring...");
             var operatorBalanceAfter = client.getAccountBalance(operatorId);
             var senderBalanceAfter = client.getAccountBalance(senderAccountID);
 
-            System.out.println(senderAccountID + "sender balance = " + senderBalanceAfter);
-            System.out.println(operatorId + " operator balance = " + operatorBalanceAfter);
+            System.out.println(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
+            System.out.println(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
+
+            System.out.println("Transfer tx ID : " + record.getTransactionId().getAccountId().toString());
+            System.out.println("Transfer tx ID valid start: " + record.getTransactionId().getValidStart().toString());
+            System.out.println("Transfer tx ID valid start epochmilli: " + record.getTransactionId().getValidStart().toEpochMilli());
+            System.out.println("Transfer tx ID valid start milli: " + record.getTransactionId().getValidStart().toEpochMilli());
+            System.out.println("Transfer tx ID valid start nano: " + record.getTransactionId().getValidStart().getNano());
+            System.out.println("Transfer tx fee: " + record.getTransactionFee());
+            System.out.println("Transfer consensus timestamp: " + record.getConsensusTimestamp());
+            System.out.println("Transfer receipt status: " + record.getReceipt().getStatus());
+            System.out.println("Transfer memo: " + record.getMemo());
 
         } catch (Exception e) {
             e.printStackTrace();
