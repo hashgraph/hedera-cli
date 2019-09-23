@@ -21,7 +21,8 @@ public class AccountInfo implements Runnable {
         try {
             Hedera hedera = new Hedera();
             var operatorId = hedera.getOperatorId();
-            var client = hedera.createHederaClient();
+            var client = hedera.createHederaClient()
+                    .setMaxTransactionFee(100000000);
             AccountInfoQuery q = null;
             q = new AccountInfoQuery(client)
                     .setAccountId(operatorId);
