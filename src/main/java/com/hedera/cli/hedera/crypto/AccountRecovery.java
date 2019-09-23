@@ -16,6 +16,8 @@ import com.hedera.cli.hedera.keygen.KeyPair;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Spec;
+import picocli.CommandLine.Model.CommandSpec;
 
 @Command(name = "recovery", description = "@|fg(225) Recovers a Hedera account via the 24 recovery words.|@", helpCommand = true)
 public class AccountRecovery implements Runnable {
@@ -25,12 +27,10 @@ public class AccountRecovery implements Runnable {
   @Option(names = { "-a", "--account-id" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
   private String accountId;
 
-  @CommandLine.Spec
-  CommandLine.Model.CommandSpec spec;
+  @Spec
+  CommandSpec spec;
 
-  @Option(names = {"-m", "--method"}, description = "Input -m=hedera if passphrases have not been migrated on wallet "
-          + "%nor account creations are before 13 September 2019. Input -m=bip if passphrases have been migrated on the wallet,"
-          + "%nor account creations are after 13 September 2019")
+  @Option(names = {"-m", "--method"}, arity= "1", description = "Recovers keypair from recovery phrase")
   private String strMethod = "bip";
 
   private InputReader inputReader;
@@ -44,8 +44,8 @@ public class AccountRecovery implements Runnable {
 
   @Override
   public void run() {
-    System.out.println("Recovering account id in the format of 0.0.xxxx" + accountId);
-    strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter bip, else enter hgc");
+    System.out.println("Recovering accountID in the format of 0.0.xxxx" + accountId);
+    strMethod = inputReader.prompt("Have you updated your account on Hedera wallet? If updated, enter `bip`, else enter `hgc`");
     String phrase = inputReader.prompt("24 words phrase", "secret", false);
     List<String> phraseList = Arrays.asList(phrase.split(" "));
     System.out.println(phraseList);
