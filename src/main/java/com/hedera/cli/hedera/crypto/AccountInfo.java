@@ -9,10 +9,11 @@ import java.util.Arrays;
 
 @Command(name = "info",
         description = "@|fg(225) Gets the information of the paying/operator account"
-        + "modification returns a stateproof if requested|@")
+                + "modification returns a stateproof if requested|@")
 public class AccountInfo implements Runnable {
 
-    @Option(names = {"-o", "--operator"}, description = "Get current paying/operator account")
+    @Option(names = {"-o", "--operator"}, description = "Get current paying/operator account"
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account info -o=0.0.xxxx|@")
     private String operator;
 
     @Override
@@ -20,7 +21,8 @@ public class AccountInfo implements Runnable {
         try {
             Hedera hedera = new Hedera();
             var operatorId = hedera.getOperatorId();
-            var client = hedera.createHederaClient();
+            var client = hedera.createHederaClient()
+                    .setMaxTransactionFee(100000000);
             AccountInfoQuery q = null;
             q = new AccountInfoQuery(client)
                     .setAccountId(operatorId);
@@ -33,8 +35,8 @@ public class AccountInfo implements Runnable {
                                     "\n claim: " + accountRes.getClaims() +
                                     "\n autoRenewPeriod: " + accountRes.getAutoRenewPeriod() +
                                     "\n expirationTime: " + accountRes.getExpirationTime() +
-                                    "\n receivedRecordThreshold: " +accountRes.getGenerateReceiveRecordThreshold() +
-                                    "\n proxyAccountId: " +accountRes.getProxyAccountId()
+                                    "\n receivedRecordThreshold: " + accountRes.getGenerateReceiveRecordThreshold() +
+                                    "\n proxyAccountId: " + accountRes.getProxyAccountId()
                     };
             System.out.println(Arrays.asList(accountInfo));
         } catch (Exception e) {

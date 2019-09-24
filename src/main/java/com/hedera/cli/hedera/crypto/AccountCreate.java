@@ -26,90 +26,115 @@ import picocli.CommandLine.Option;
                 + "%nReturns an accountID in the form of shardNum.realmNum.accountNum.|@", helpCommand = true)
 public class AccountCreate implements Runnable {
 
-        @Spec
-        CommandSpec spec;
+    @Spec
+    CommandSpec spec;
 
-        @Option(names = { "-r", "--record" }, description = "Generates a record that lasts 25hrs")
-        private boolean generateRecord = false;
+    @Option(names = {"-r", "--record"}, description = "Generates a record that lasts 25hrs")
+    private boolean generateRecord = false;
 
-        @Option(names = { "-b", "--balance" }, description = "Initial balance of new account created in hbars "
-                        + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b=100 OR%n"
-                        + "account create --balance=100|@")
-        private int initBal = 0;
-        private void setMinimum(int min) {
-                if (min < 0) {
-                        throw new ParameterException(spec.commandLine(), "Minimum must be a positive integer");
-                }
-                initBal = min;
+    @Option(names = {"-b", "--balance"}, description = "Initial balance of new account created in hbars "
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b=100 OR%n"
+            + "account create --balance=100|@")
+    private int initBal = 0;
+
+    private void setMinimum(int min) {
+        if (min < 0) {
+            throw new ParameterException(spec.commandLine(), "Minimum must be a positive integer");
         }
+        initBal = min;
+    }
 
-        @Option(names = {"-k", "--keygen"}, description = "Creates a brand new key associated with account creation"
-                + "default is false"
-                + "%n@|bold,underline Usage:|@"
-                + "%n@|fg(yellow) account create -k=true,-b=100000|@")
-        private boolean keyGen = false;
+    @Option(names = {"-k", "--keygen"}, description = "Creates a brand new key associated with account creation"
+            + "default is false"
+            + "%n@|bold,underline Usage:|@"
+            + "%n@|fg(yellow) account create -k=true,-b=100000|@")
+    private boolean keyGen = false;
 
-        @Override
-        public void run() {
+    @Option(names = {"-m", "--method"}, description = "Input -m=hgc if passphrases have not been migrated on wallet "
+            + "%nor account creations are before 13 September 2019. Input -m=bip if passphrases have been migrated on the wallet,"
+            + "%nor account creations are after 13 September 2019")
+    private String strMethod = "bip";
 
-                setMinimum(initBal);
+    private String setMethod(String method) {
+        if (method.contains("bip")) {
+            strMethod = method;
+        } else if (method.contains("hgc")) {
+            strMethod = method;
+        } else {
+            throw new ParameterException(spec.commandLine(), "Method must either been hgc or bip");
+        }
+        return strMethod;
+    }
 
-                if (keyGen) {
-                        // If keyGen via args is set to true, generate new keys
-                        KeyGeneration keyGeneration = new KeyGeneration();
-                        HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
-                        List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
-                        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed);
-                        System.out.println("AccountCreate subcommand");
-                        var newKey = Ed25519PrivateKey.fromString(keypair.getPrivateKeyEncodedHex());
-                        var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
-                        AccountId accountID = createNewAccount(newKey, newPublicKey);
-                        System.out.println("AccountID = " + accountID);
-                        System.out.println("mnemonic = " + mnemonic);
-                }
+    private AccountId accountID;
+    private Hedera hedera = new Hedera();
 
-                // Else keyGen always set to false and read from default.txt which contains operator keys
-                Hedera hedera = new Hedera();
-                var origKey = hedera.getOperatorKey();
-                var origPublicKey = origKey.getPublicKey();
-                AccountId accountID = createNewAccount(origKey, origPublicKey);
+    @Override
+    public void run() {
 
-                // save to local disk
-                System.out.println("AccountID = " + accountID);
-                JsonObject account = new JsonObject();
-                account.add("accountId", accountID.toString());
-                account.add("privateKey", hedera.retrieveDefaultAccountKeyInHexString());
-                account.add("publicKey", hedera.retrieveDefaultAccountPublicKeyInHexString());
+        setMinimum(initBal);
+
+        if (keyGen) {
+            // If keyGen via args is set to true, generate new keys
+            KeyGeneration keyGeneration = new KeyGeneration();
+            HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
+            List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
+            KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, setMethod(strMethod), mnemonic);
+            System.out.println("AccountCreate subcommand");
+            var newKey = Ed25519PrivateKey.fromString(keypair.getPrivateKeyEncodedHex());
+            var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
+            accountID = createNewAccount(newKey, newPublicKey);
+            System.out.println("AccountID = " + accountID);
+            System.out.println("mnemonic = " + mnemonic);
+            // save to local disk
+            JsonObject account = new JsonObject();
+            account.add("accountId", accountID.toString());
+            account.add("privateKey", keypair.getPrivateKeyHex());
+            account.add("publicKey", keypair.getPublicKeyHex());
+            System.out.println(account);
+            Setup setup = new Setup();
+            setup.saveToJson(accountID.toString(), account);
+        } else {
+            // Else keyGen always set to false and read from default.txt which contains operator keys
+            var origKey = hedera.getOperatorKey();
+            var origPublicKey = origKey.getPublicKey();
+            accountID = createNewAccount(origKey, origPublicKey);
+            // save to local disk
+            System.out.println("AccountID = " + accountID);
+            JsonObject account = new JsonObject();
+            account.add("accountId", accountID.toString());
+            account.add("privateKey", hedera.retrieveDefaultAccountKeyInHexString());
+            account.add("publicKey", hedera.retrieveDefaultAccountPublicKeyInHexString());
 //                account.add("privateKey_ASN1", origKey.toString());
 //                account.add("publicKey_ASN1", origPublicKey.toString());
-                System.out.println(account);
-                Setup setup = new Setup();
-                setup.saveToJson(accountID.toString(), account);
+            System.out.println(account);
+            Setup setup = new Setup();
+            setup.saveToJson(accountID.toString(), account);
         }
+    }
 
-        public AccountId createNewAccount(Ed25519PrivateKey privateKey, Ed25519PublicKey publicKey) {
-                System.out.println("private key = " + privateKey);
-                System.out.println("public key = " + publicKey);
-                AccountId accountId = null;
-                Hedera hedera = new Hedera();
-                var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
-                var tx = new AccountCreateTransaction(client)
-                        // The only _required_ property here is `key`
-                        .setKey(privateKey.getPublicKey()).setInitialBalance(initBal)
-                        .setAutoRenewPeriod(Duration.ofSeconds(7890000));
-
-                // This will wait for the receipt to become available
-                TransactionReceipt receipt = null;
-                try {
-                        receipt = tx.executeForReceipt();
-                        if (receipt != null) {
-                                accountId = receipt.getAccountId();
-                        } else {
-                                throw new Exception("Receipt is null");
-                        }
-                } catch (Exception e) {
-                        e.printStackTrace();
-                }
-                return accountId;
+    public AccountId createNewAccount(Ed25519PrivateKey privateKey, Ed25519PublicKey publicKey) {
+        System.out.println("private key = " + privateKey);
+        System.out.println("public key = " + publicKey);
+        AccountId accountId = null;
+        Hedera hedera = new Hedera();
+        var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
+        var tx = new AccountCreateTransaction(client)
+                // The only _required_ property here is `key`
+                .setKey(privateKey.getPublicKey()).setInitialBalance(initBal)
+                .setAutoRenewPeriod(Duration.ofSeconds(7890000));
+        // This will wait for the receipt to become available
+        TransactionReceipt receipt = null;
+        try {
+            receipt = tx.executeForReceipt();
+            if (receipt != null) {
+                accountId = receipt.getAccountId();
+            } else {
+                throw new Exception("Receipt is null");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return accountId;
+    }
 }

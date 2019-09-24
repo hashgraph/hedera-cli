@@ -14,6 +14,7 @@ import com.hedera.cli.hedera.botany.BotanyWordList;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
+import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 
@@ -22,10 +23,21 @@ import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Spec;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Model.CommandSpec;
 
 @Component
 @Command(name = "setup", description = "")
 public class Setup implements Runnable {
+
+  @Spec
+  CommandSpec spec;
+
+  @Option(names = {"-m", "--method"}, description = "Input -m=hedera if passphrases have not been migrated on wallet "
+          + "%nor account creations are before 13 September 2019. Input -m=bip if passphrases have been migrated on the wallet,"
+          + "%nor account creations are after 13 September 2019")
+  private String strMethod = "bip";
 
   // default index 0 is compatible with Hedera wallet apps
   private int index = 0;
@@ -37,28 +49,25 @@ public class Setup implements Runnable {
 
   public void handle(InputReader inputReader) {
     System.out.println("Start the setup process");
-    String accountId = inputReader.prompt("account id that we will use as default operator");
+    strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter bip, else enter hgc");
+    String accountId = inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
     String phrase = inputReader.prompt("24 words phrase", "secret", false);
-    JsonObject account = accountFromMnemonic(accountId, phrase);
+    List<String> phraseList = Arrays.asList(phrase.split(" "));
+    System.out.println(phraseList);
+    // recover key from phrase
+    KeyPair keyPair;
+    AccountRecovery ac = new AccountRecovery();
+    if (strMethod.contains("bip")) {
+      keyPair =  ac.recoverEDKeypairPostBipMigration(phraseList);
+    } else {
+      keyPair = ac.recoverEd25519AccountKeypair(phraseList);
+    }
+    ac.printKeyPair(keyPair);
+    JsonObject account = addAccountToJson(accountId, keyPair);
     saveToJson(accountId, account);
   }
 
-  public List<String> phraseListFromMnemonic(String phrase) {
-    List<String> phraseList = Arrays.asList(phrase.split(" "));
-    System.out.println(phraseList);
-    return phraseList;
-  }
-
-  public JsonObject accountFromMnemonic(String accountId, String phrase) {
-    List<String> phraseList = phraseListFromMnemonic(phrase);
-    // recover key from phrase
-    AccountRecovery ac = new AccountRecovery();
-    EDKeyPair keyPair = ac.recoverEd25519AccountKeypair(phraseList);
-    // add account
-    return addAccountToJson(accountId, keyPair);
-  }
-
-  public JsonObject addAccountToJson(String accountId, EDKeyPair keyPair ) {
+  public JsonObject addAccountToJson(String accountId, KeyPair keyPair ) {
     JsonObject account = new JsonObject();
     account.add("accountId", accountId);
     account.add("privateKey", keyPair.getPrivateKeyHex());
@@ -83,7 +92,7 @@ public class Setup implements Runnable {
     HashMap<String, String> mHashMap = new HashMap<>();
     mHashMap.put(accountId, fileName);
     ObjectMapper mapper = new ObjectMapper();
-    
+
     try {
       // create the account json and write it to disk
       Object jsonObject = mapper.readValue(account.toString(), HederaAccount.class);

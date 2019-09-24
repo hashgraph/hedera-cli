@@ -6,6 +6,11 @@ import java.util.Collections;
 import java.util.List;
 
 import com.hedera.cli.hedera.keygen.CryptoUtils;
+import org.bouncycastle.crypto.digests.SHA512Digest;
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.bouncycastle.crypto.params.KeyParameter;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * A Mnemonic object may be used to convert lists of words per
@@ -16,6 +21,8 @@ import com.hedera.cli.hedera.keygen.CryptoUtils;
 public class Mnemonic {
 
   private List<String> wordList;
+  private static final int SEED_ITERATIONS = 2048;
+  private static final int SEED_KEY_SIZE = 512;
 
   public Mnemonic() {
     this.wordList = Arrays.asList(English.words);
@@ -129,5 +136,30 @@ public class Mnemonic {
       for (int j = 0; j < 8; ++j)
         bits[(i * 8) + j] = (data[i] & (1 << (7 - j))) != 0;
     return bits;
+  }
+
+  /**
+   * Convert mnemonic word list to seed.
+   * https://github.com/web3j/web3j/blob/master/crypto/src/main/java/org/web3j/crypto/MnemonicUtils.java
+   */
+  public static byte[] generateBipSeed(String mnemonic, String passphrase) {
+    if (isMnemonicEmpty(mnemonic)) {
+      throw new IllegalArgumentException("Mnemonic is required to generate a seed");
+    }
+    // A user may decide to protect their mnemonic with a passphrase. If a passphrase is not present, an empty string "" is used instead.
+    passphrase = passphrase == null ? "" : passphrase;
+
+    String salt = String.format("mnemonic%s", passphrase);
+    PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator(new SHA512Digest());
+
+    // gen.int(passwordInBytes, saltInBytes, iterationsInInt);
+    gen.init(mnemonic.getBytes(UTF_8), salt.getBytes(UTF_8), SEED_ITERATIONS);
+
+    byte[] bipSeed = ((KeyParameter) gen.generateDerivedParameters(SEED_KEY_SIZE)).getKey();
+    return bipSeed;
+  }
+
+  private static boolean isMnemonicEmpty(String mnemonic) {
+    return mnemonic == null || mnemonic.trim().isEmpty();
   }
 }
