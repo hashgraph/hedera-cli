@@ -1,5 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.hedera.cli.config.InputReader;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
@@ -22,9 +23,18 @@ public class CryptoTransfer implements Runnable {
     @Option(names = {"-a", "--recipientAmt"}, arity = "1", description = "Amount to transfer")
     private String recipientAmt;
 
+    private String memoString;
+
+    private InputReader inputReader;
+
+    public CryptoTransfer(InputReader inputReader) {
+        this.inputReader = inputReader;
+    }
+
     @Override
     public void run() {
 
+        memoString = inputReader.prompt("Memo field");
         Hedera hedera = new Hedera();
         var operatorId = hedera.getOperatorId();
         var client = hedera.createHederaClient();
@@ -43,10 +53,10 @@ public class CryptoTransfer implements Runnable {
                     // both sides is equivalent
                     .addSender(operatorId, amount.longValue())
                     .addRecipient(recipientId, amount.longValue())
-                    .setMemo("transfer test")
+                    .setMemo(memoString)
                     // As we are sending from the operator we do not need to explicitly sign the
                     // transaction
-                    .executeForRecord();
+                    .executeForReceipt();
 
             System.out.println("transferring " + amount.longValue() + " tinybar...");
             var senderBalanceAfter = client.getAccountBalance(operatorId);

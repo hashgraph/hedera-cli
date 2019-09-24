@@ -98,7 +98,7 @@ public class CryptoTransferMultipleTest {
         assertEquals(Collections.singletonList("1001,1002,1003"), Arrays.asList(ct.recipient));
         assertEquals(Collections.singletonList("100,200,300"), Arrays.asList(ct.recipientAmt));
 
-        CommandLine cmd = new CommandLine(new CryptoTransfer());
+        CommandLine cmd = new CommandLine(new CryptoTransfer(inputReader));
         ParseResult result = cmd.parseArgs("-r=1111,2222,3333", "-a=1000,200,3000");
         assertTrue(result.hasMatchedOption("r"));
         assertTrue(result.hasMatchedOption("a"));

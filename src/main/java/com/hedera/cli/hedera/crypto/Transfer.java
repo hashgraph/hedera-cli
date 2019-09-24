@@ -22,9 +22,9 @@ public class Transfer implements Runnable {
         switch (subCommand) {
             case "single":
                 if (args.length == 0) {
-                    CommandLine.usage(new CryptoTransfer(), System.out);
+                    CommandLine.usage(new CryptoTransfer(inputReader), System.out);
                 } else {
-                    new CommandLine(new CryptoTransfer()).execute(args);
+                    new CommandLine(new CryptoTransfer(inputReader)).execute(args);
                 }
                 break;
             case "multiple":
