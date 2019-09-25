@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.SynchronousQueue;
 
 public class Utils {
@@ -32,12 +33,12 @@ public class Utils {
         String filename;
         try {
             jsonString = ow.writeValueAsString(obj);
-            // ~/.hedera/[network_name]/transaction/[file_name].json
             DataDirectory dataDirectory = new DataDirectory();
             String networkName = dataDirectory.readFile("network.txt");
             String pathToTransactionFolder = networkName + File.separator + "transaction" + File.separator;
             filename = txID + ".json";
             String pathToTransactionFile = pathToTransactionFolder + filename;
+            dataDirectory.mkHederaSubDir(pathToTransactionFolder);
             dataDirectory.writeFile(pathToTransactionFile, jsonString);
 
         } catch (Exception e) {

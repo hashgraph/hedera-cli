@@ -138,6 +138,7 @@ public class CryptoTransferMultiple implements Runnable {
             System.out.println(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
             System.out.println(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
 
+            // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
             saveTransactionToJson(record);
 
         } catch (Exception e) {
