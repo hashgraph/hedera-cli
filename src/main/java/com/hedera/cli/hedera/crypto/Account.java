@@ -63,6 +63,13 @@ public class Account implements Runnable {
                 CommandLine.usage(new AccountList(), System.out);
             }
             break;
+        case "use":
+            if (args.length == 0) {
+                new CommandLine(new AccountUse()).execute(args);
+            } else {
+                CommandLine.usage(new AccountUse(), System.out);
+            }
+                break;
         default:
             this.run();
             break;
