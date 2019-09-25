@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.utils;
+package com.hedera.cli.models;
 
 import java.math.BigInteger;
 import java.time.Instant;
