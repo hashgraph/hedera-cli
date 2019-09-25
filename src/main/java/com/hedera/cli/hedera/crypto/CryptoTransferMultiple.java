@@ -1,8 +1,16 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.Transaction;
+import com.hedera.hashgraph.sdk.TransactionRecord;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import org.apache.commons.lang3.StringUtils;
@@ -10,36 +18,62 @@ import org.apache.commons.lang3.StringUtils;
 import java.math.BigInteger;
 import java.util.*;
 
-@Command(name= "multiple",
-        description = "@|fg(225) Transfer hbars to multiple accounts|@",
+@Command(name = "multiple",
+        description = "@|fg(225) Transfer hbars to multiple accounts with multiple senders"
+                + "%nWhereby default account is the operator, ie the paying account for transaction fees,"
+                + "%nwhile sender is the account transferring the hbars to the recipient(s)|@",
         helpCommand = true)
 public class CryptoTransferMultiple implements Runnable {
 
+    @Spec
+    CommandSpec spec;
+
     @Option(names = {"-r", "--recipient"}, split = " ", arity = "1..*",
             description = "Recipient to transfer to"
-                    +"%n@|bold,underline Usage:|@%n"
+                    + "%n@|bold,underline Usage:|@%n"
                     + "@|fg(yellow) transfer multiple -r=1001,1002,1003,-a=100,100,100|@")
     private String[] recipient;
 
     @Option(names = {"-a", "--recipientAmt"}, split = " ", arity = "1..*", description = "Amount to transfer")
     private String[] recipientAmt;
 
+    @Option(names = {"-s", "--senderAccountID"}, arity = "1", description = "AccountID of sender who is transferring")
+    private String senderAccountIDInString;
+
+    private String memoString;
+
+    private InputReader inputReader;
+    private Ed25519PrivateKey senderPrivKey;
+
+    public CryptoTransferMultiple(InputReader inputReader) {
+        this.inputReader = inputReader;
+    }
+
     @Override
     public void run() {
-
         try {
+            memoString = inputReader.prompt("Memo field");
+            senderAccountIDInString = inputReader.prompt("Input sender accountID");
+            String transferAmountInStr = inputReader.prompt("Input transfer amount");
+            String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
+            senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
             Hedera hedera = new Hedera();
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
             verifiedRecipientMap(recipientList, amountList);
+
             var operatorId = hedera.getOperatorId();
-            var client = hedera.createHederaClient();
+            var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
+
+            var senderAccountID = AccountId.fromString("0.0." + senderAccountIDInString);
+            BigInteger transferAmount = new BigInteger(transferAmountInStr);
 
             var senderTotal = sumOfTransfer(recipientAmt);
             System.out.println("Sender total: " + -senderTotal);
-            var map = verifiedRecipientMap(recipientList,amountList);
+            var map = verifiedRecipientMap(recipientList, amountList);
             CryptoTransferTransaction cryptoTransferTransaction = new CryptoTransferTransaction(client);
-            cryptoTransferTransaction.addTransfer(operatorId, -senderTotal);
+            cryptoTransferTransaction.addTransfer(senderAccountID, -transferAmount.longValue());
+
             map.forEach((key, value) -> {
                 if (map.size() != amountList.size()) {
                     throw new IllegalArgumentException("Please check your recipient list");
@@ -47,23 +81,51 @@ public class CryptoTransferMultiple implements Runnable {
                 var account = value.accountId;
                 var amount = value.amount;
                 cryptoTransferTransaction.addTransfer(account, amount);
-                System.out.println("Recipient "+ key + ":" + "Account: " + value.accountId + " Amount: " + value.amount);
+                System.out.println("Recipient " + key + " = " + "Account: " + value.accountId + " Amount: " + value.amount);
             });
 
-            var senderBalanceBefore = client.getAccountBalance(operatorId);
-            System.out.println(operatorId + " balance = " + senderBalanceBefore);
-                System.out.println("CryptoTransferTransaction");
-                cryptoTransferTransaction.build().execute();
-                System.out.println("transferring...");
-            var senderBalanceAfter = client.getAccountBalance(operatorId);
-            System.out.println(operatorId + " balance = " + senderBalanceAfter);
+            cryptoTransferTransaction.setMemo(memoString);
+            var senderBalanceBefore = client.getAccountBalance(senderAccountID);
+            var operatorBalanceBefore = client.getAccountBalance(operatorId);
+            System.out.println(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
+            System.out.println(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
+
+            System.out.println("CryptoTransferTransaction");
+
+            var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
+
+            TransactionRecord record = Transaction.fromBytes(client, signedTxnBytes)
+                    .executeForRecord();
+
+            System.out.println("transferring...");
+            var operatorBalanceAfter = client.getAccountBalance(operatorId);
+            var senderBalanceAfter = client.getAccountBalance(senderAccountID);
+
+            System.out.println(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
+            System.out.println(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
+
+            System.out.println("Transfer tx ID : " + record.getTransactionId().getAccountId().toString());
+            System.out.println("Transfer tx ID valid start: " + record.getTransactionId().getValidStart().toString());
+            System.out.println("Transfer tx ID valid start epochmilli: " + record.getTransactionId().getValidStart().toEpochMilli());
+            System.out.println("Transfer tx ID valid start milli: " + record.getTransactionId().getValidStart().toEpochMilli());
+            System.out.println("Transfer tx ID valid start nano: " + record.getTransactionId().getValidStart().getNano());
+            System.out.println("Transfer tx fee: " + record.getTransactionFee());
+            System.out.println("Transfer consensus timestamp: " + record.getConsensusTimestamp());
+            System.out.println("Transfer receipt status: " + record.getReceipt().getStatus());
+            System.out.println("Transfer memo: " + record.getMemo());
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public Map<Integer, Recipient> verifiedRecipientMap(List<String > accountList, List<String> amountList) {
+    private byte[] senderSignsTransaction(Client client, Ed25519PrivateKey senderPrivKey, byte[] transactionData) throws InvalidProtocolBufferException {
+        return Transaction.fromBytes(client, transactionData)
+                .sign(senderPrivKey)
+                .toBytes();
+    }
+
+    public Map<Integer, Recipient> verifiedRecipientMap(List<String> accountList, List<String> amountList) {
         AccountId accountId;
         String acc, amt;
         Map<Integer, Recipient> map = new HashMap<>();
@@ -108,7 +170,7 @@ public class CryptoTransferMultiple implements Runnable {
 
     public boolean isNumeric(final String str) {
         // checks null or empty
-        if(str == null || str.isEmpty()) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
         for (char c : str.toCharArray()) {
@@ -121,7 +183,7 @@ public class CryptoTransferMultiple implements Runnable {
 
     public boolean isAccountId(final String str) {
         // checks null or empty
-        if(str == null || str.isEmpty()) {
+        if (str == null || str.isEmpty()) {
             return false;
         }
         // checks if accountId only contains 0
@@ -132,7 +194,7 @@ public class CryptoTransferMultiple implements Runnable {
             // parse string to make sure it can be of type AccountId
             AccountId.fromString("0.0." + str);
             return true;
-        } catch(Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
