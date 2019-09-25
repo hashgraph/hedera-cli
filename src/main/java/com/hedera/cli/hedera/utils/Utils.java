@@ -1,9 +1,15 @@
 package com.hedera.cli.hedera.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.concurrent.SynchronousQueue;
 
 public class Utils {
 
@@ -19,5 +25,23 @@ public class Utils {
         Instant instant = dateWithTime.toInstant();
         System.out.println("Date of File Expiry is: " + instant);
         return instant;
+    }
+
+    public void saveTransactionsToJson(String txID, TransactionObj obj) {
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String jsonString;
+        String filename;
+        try {
+            jsonString = ow.writeValueAsString(obj);
+            DataDirectory dataDirectory = new DataDirectory();
+            String networkName = dataDirectory.readFile("network.txt");
+            String pathToTransactionFolder = networkName + File.separator + "transaction" + File.separator;
+            filename = txID + ".json";
+            String pathToTransactionFile = pathToTransactionFolder + filename;
+            dataDirectory.mkHederaSubDir(pathToTransactionFolder);
+            dataDirectory.writeFile(pathToTransactionFile, jsonString);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
