@@ -40,7 +40,6 @@ public class Utils {
             String pathToTransactionFile = pathToTransactionFolder + filename;
             dataDirectory.mkHederaSubDir(pathToTransactionFolder);
             dataDirectory.writeFile(pathToTransactionFile, jsonString);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
