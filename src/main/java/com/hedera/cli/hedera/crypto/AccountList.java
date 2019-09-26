@@ -6,7 +6,7 @@ import java.io.File;
 
 import com.hedera.cli.hedera.utils.DataDirectory;
 
-@Command(name = "list", description = "@|fg(225) List of all accounts for the current network.|@")
+@Command(name = "ls", description = "@|fg(225) List of all accounts for the current network.|@")
 public class AccountList implements Runnable {
 
   @Override
