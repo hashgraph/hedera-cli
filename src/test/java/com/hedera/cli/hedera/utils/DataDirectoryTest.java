@@ -83,7 +83,7 @@ public class DataDirectoryTest {
     }
 
     @Test
-    public void testReadFileHashmap() throws IOException {
+    public void testReadWriteFileHashmap() throws IOException {
 
         // create new file with a single key value pair
         String pathToFile = "index.txt";

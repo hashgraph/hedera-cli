@@ -158,7 +158,7 @@ public class DataDirectory {
     return defaultValue;
   }
 
-  public HashMap<String, String> readFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
+  public HashMap<String, String> readWriteFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
     // check if index.txt exists, if not, create one
     Path filePath = Paths.get(userHome, directoryName, pathToFile);
     File file = new File(filePath.toString());
@@ -199,6 +199,31 @@ public class DataDirectory {
         e.printStackTrace();
       }
       return defaultValue;
+  }
+
+  public HashMap<String, String> readFileHashmap(String pathToFile) {
+    // check if index.txt exists, if not, create one
+    Path filePath = Paths.get(userHome, directoryName, pathToFile);
+    File file = new File(filePath.toString());
+    HashMap<String, String> mHashmap = new HashMap<>();
+
+    try {
+      // file exist
+      Scanner reader = new Scanner(file);
+      while (reader.hasNext()) {
+        // checks the old map
+        String line = reader.nextLine();
+        String sliceLine = line.substring(1, line.length()-1);
+        String[] splitLines = sliceLine.split(", ");
+        for (int i = 0; i< splitLines.length; i++) {
+          String[] keyValuePairs = splitLines[i].split("=");
+          mHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+        }
+      }
+    } catch (Exception e ) {
+      e.printStackTrace();
+    }
+    return mHashmap;
   }
 
   public HashMap jsonToHashmap(String pathToFile) {

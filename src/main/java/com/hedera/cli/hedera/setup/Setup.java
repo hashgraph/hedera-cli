@@ -5,15 +5,9 @@ import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.bip39.Mnemonic;
-import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicChecksumException;
-import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicLengthException;
-import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
 import com.hedera.cli.hedera.botany.AdjectivesWordList;
 import com.hedera.cli.hedera.botany.BotanyWordList;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
-import com.hedera.cli.hedera.keygen.CryptoUtils;
-import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
@@ -101,7 +95,7 @@ public class Setup implements Runnable {
       dataDirectory.writeFile(pathToAccountFile, accountValue);
       dataDirectory.readFile(pathToDefaultTxt,fileName + ":" + accountId);
       // mark this account as the default
-      dataDirectory.readFileHashmap(pathToIndexTxt, mHashMap);
+      dataDirectory.readWriteFileHashmap(pathToIndexTxt, mHashMap);
     } catch (Exception e) {
       e.printStackTrace();
     }
