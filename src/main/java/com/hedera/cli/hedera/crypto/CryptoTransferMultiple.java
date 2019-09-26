@@ -1,12 +1,13 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.TransactionObj;
+import com.hedera.cli.models.Recipient;
+import com.hedera.cli.models.Sender;
+import com.hedera.cli.models.TransactionObj;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.Transaction;
@@ -14,7 +15,6 @@ import com.hedera.hashgraph.sdk.TransactionRecord;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-import jdk.jshell.execution.Util;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Command;
@@ -49,6 +49,8 @@ public class CryptoTransferMultiple implements Runnable {
     private InputReader inputReader;
     private Ed25519PrivateKey senderPrivKey;
 
+    private String isInfoCorrect;
+
     public CryptoTransferMultiple(InputReader inputReader) {
         this.inputReader = inputReader;
     }
@@ -64,12 +66,9 @@ public class CryptoTransferMultiple implements Runnable {
             String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
             senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
 
-            System.out.println(senderPrivKey);
             Hedera hedera = new Hedera();
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
-            verifiedRecipientMap(recipientList, amountList);
-
             // Operator is the current default account user
             var operatorId = hedera.getOperatorId();
 
@@ -103,7 +102,6 @@ public class CryptoTransferMultiple implements Runnable {
                 var account = value.accountId;
                 var amount = value.amount;
                 cryptoTransferTransaction.addTransfer(account, amount);
-                System.out.println("Recipient " + key + " = " + "Account: " + value.accountId + " Amount: " + value.amount);
             });
 
             if (StringUtils.isEmpty(memoString)) {
@@ -112,12 +110,25 @@ public class CryptoTransferMultiple implements Runnable {
             // Sets the memo that is required in some transactions
             cryptoTransferTransaction.setMemo(memoString);
 
+            // Save info
+            Sender sender = new Sender();
+            sender.setAccountId(senderAccountID);
+            sender.setAmount(transferAmount);
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            String jsonStringSender = ow.writeValueAsString(sender);
+            String jsonStringRecipient = ow.writeValueAsString(map);
+
+            isInfoCorrect = inputReader.prompt("\nOperator\n" + operatorId
+                    + "\nSender\n" + jsonStringSender
+                    + "\nRecipient\n" + jsonStringRecipient
+                    + "\n\n yes/no \n" );
+            if (isInfoCorrect.contains("yes")) {
+                System.out.println("Info is correct, let's go!");
             // Get balance is always free, does not require any keys
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
             var operatorBalanceBefore = client.getAccountBalance(operatorId);
             System.out.println(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
             System.out.println(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
-
             System.out.println("CryptoTransferTransaction");
 
             // Since there is more than 1 sender in this multi-sender transaction example
@@ -140,7 +151,10 @@ public class CryptoTransferMultiple implements Runnable {
 
             // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
             saveTransactionToJson(record);
-
+            }
+            else {
+                System.out.println("Nope, incorrect, let's make some changes");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -184,8 +198,6 @@ public class CryptoTransferMultiple implements Runnable {
         long sum = 0;
 
         try {
-            System.out.println(accountList);
-            System.out.println(amountList);
             if (accountList.size() != amountList.size())
                 throw new IllegalArgumentException("Lists aren't the same size");
             else {
@@ -248,17 +260,6 @@ public class CryptoTransferMultiple implements Runnable {
             return true;
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    private class Recipient {
-
-        private AccountId accountId;
-        private Long amount;
-
-        private Recipient(AccountId accountId, Long amount) {
-            this.accountId = accountId;
-            this.amount = amount;
         }
     }
 }

@@ -2,14 +2,13 @@ package com.hedera.cli.hedera.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.hedera.cli.models.TransactionObj;
 
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.concurrent.SynchronousQueue;
 
 public class Utils {
 
