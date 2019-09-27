@@ -56,9 +56,9 @@ public class AccountCreate implements Runnable {
     private String strMethod = "bip";
 
     private String setMethod(String method) {
-        if (method.contains("bip")) {
+        if (method.equals("bip")) {
             strMethod = method;
-        } else if (method.contains("hgc")) {
+        } else if (method.equals("hgc")) {
             strMethod = method;
         } else {
             throw new ParameterException(spec.commandLine(), "Method must either been hgc or bip");

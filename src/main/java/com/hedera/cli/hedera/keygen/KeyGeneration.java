@@ -30,9 +30,9 @@ public class KeyGeneration implements Runnable {
           + "%nor account creations are after 13 September 2019")
   private String strMethod = "bip";
   private String setMethod(String method) {
-    if (method.contains("bip")) {
+    if (method.equals("bip")) {
       strMethod = method;
-    } else if (method.contains("hgc")) {
+    } else if (method.equals("hgc")) {
       strMethod = method;
     } else {
       throw new CommandLine.ParameterException(spec.commandLine(), "Method must either been hgc or bip");

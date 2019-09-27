@@ -13,7 +13,7 @@ import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 
 import com.hedera.cli.hedera.keygen.KeyPair;
-import picocli.CommandLine;
+import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
@@ -51,12 +51,15 @@ public class AccountRecovery implements Runnable {
     System.out.println(phraseList);
     // recover key from phrase
     KeyPair keyPair;
-    if (strMethod.contains("bip")) {
+    if (strMethod.equals("bip")) {
       keyPair =  recoverEDKeypairPostBipMigration(phraseList);
-    } else {
+      printKeyPair(keyPair);
+    } else if (strMethod.equals("hgc")) {
       keyPair = recoverEd25519AccountKeypair(phraseList);
+      printKeyPair(keyPair);
+    } else {
+      throw new ParameterException(spec.commandLine(), "Method must either been hgc or bip");
     }
-    printKeyPair(keyPair);
   }
 
   public KeyPair recoverEd25519AccountKeypair(List<String> phraseList) {

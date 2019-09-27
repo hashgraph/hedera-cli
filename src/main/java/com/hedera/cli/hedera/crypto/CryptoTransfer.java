@@ -8,8 +8,12 @@ import com.hedera.cli.hedera.Hedera;
 
 import java.math.BigInteger;
 
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
+import picocli.CommandLine.ParameterException;
 
 @Command(name = "single",
         description = "@|fg(225) Transfer hbars to a single account|@%n",
@@ -33,6 +37,9 @@ public class CryptoTransfer implements Runnable {
         this.inputReader = inputReader;
     }
 
+    @Spec
+    CommandSpec spec;
+
     @Override
     public void run() {
         try {
@@ -47,7 +54,7 @@ public class CryptoTransfer implements Runnable {
             isInfoCorrect = inputReader.prompt("\nOperator: " + operatorId
                     + "\nRecipient: " + recipientId + "\nAmount: " + amount
                     + "\n\n yes/no \n");
-            if (isInfoCorrect.contains("yes")) {
+            if (isInfoCorrect.equals("yes")) {
                 System.out.println("Info is correct, let's go!");
 
                 var senderBalanceBefore = client.getAccountBalance(operatorId);
@@ -71,8 +78,10 @@ public class CryptoTransfer implements Runnable {
                 System.out.println("" + operatorId + " balance = " + senderBalanceAfter +
                         "\n" + recipientId + " balance = " + receiptBalanceAfter);
 
-            } else {
+            } else if (isInfoCorrect.equals("no")){
                 System.out.println("Nope, incorrect, let's make some changes");
+            } else {
+                throw new ParameterException(spec.commandLine(), "Input must either been yes or no");
             }
         } catch (HederaException e) {
             e.printStackTrace();

@@ -122,7 +122,7 @@ public class CryptoTransferMultiple implements Runnable {
                     + "\nSender\n" + jsonStringSender
                     + "\nRecipient\n" + jsonStringRecipient
                     + "\n\n yes/no \n" );
-            if (isInfoCorrect.contains("yes")) {
+            if (isInfoCorrect.equals("yes")) {
                 System.out.println("Info is correct, let's go!");
             // Get balance is always free, does not require any keys
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
