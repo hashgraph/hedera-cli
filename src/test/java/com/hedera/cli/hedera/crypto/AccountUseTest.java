@@ -4,9 +4,9 @@ import org.junit.Test;
 
 public class AccountUseTest {
 
-    @Test
-    public void testAccountSwitch() {
-        AccountUse accountUse = new AccountUse();
-        accountUse.switchAccount();
-    }
+//    @Test
+//    public void testAccountSwitch() {
+//        AccountUse accountUse = new AccountUse();
+//        accountUse.switchAccount();
+//    }
 }
