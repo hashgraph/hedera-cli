@@ -1,7 +1,10 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -9,23 +12,33 @@ import java.util.Arrays;
 
 @Command(name = "info",
         description = "@|fg(225) Gets the information of the paying/operator account"
-                + "modification returns a stateproof if requested|@")
+                + " returns a stateproof if requested|@")
 public class AccountInfo implements Runnable {
 
-    @Option(names = {"-o", "--operator"}, description = "Get current paying/operator account"
-            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account info -o=0.0.xxxx|@")
-    private String operator;
+    private Ed25519PrivateKey accPrivKey;
+    private InputReader inputReader;
+
+    @Option(names = { "-a", "--account-id" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
+    private String accountIDInString;
+
+    public AccountInfo(InputReader inputReader) {
+        this.inputReader = inputReader;
+    }
 
     @Override
     public void run() {
         try {
+            String accPrivKeyInString = inputReader.prompt("Input account's private key", "secret", false);
+            accPrivKey = Ed25519PrivateKey.fromString(accPrivKeyInString);
+
             Hedera hedera = new Hedera();
-            var operatorId = hedera.getOperatorId();
+            var accountId = AccountId.fromString(accountIDInString);
             var client = hedera.createHederaClient()
-                    .setMaxTransactionFee(100000000);
-            AccountInfoQuery q = null;
+                    .setMaxTransactionFee(100000000)
+                    .setOperator(accountId, accPrivKey);
+            AccountInfoQuery q;
             q = new AccountInfoQuery(client)
-                    .setAccountId(operatorId);
+                    .setAccountId(accountId);
             var accountRes = q.execute();
             String[] accountInfo =
                     {

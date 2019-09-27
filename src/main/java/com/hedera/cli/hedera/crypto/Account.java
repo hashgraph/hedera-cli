@@ -37,9 +37,9 @@ public class Account implements Runnable {
                 break;
             case "info":
                 if (args.length == 0) {
-                    CommandLine.usage(new AccountInfo(), System.out);
+                    CommandLine.usage(new AccountInfo(inputReader), System.out);
                 } else {
-                    new CommandLine(new AccountInfo()).execute(args);
+                    new CommandLine(new AccountInfo(inputReader)).execute(args);
                 }
                 break;
             case "delete":
