@@ -3,6 +3,7 @@ package com.hedera.cli.hedera.crypto;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.Setup;
+import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.hjson.JsonObject;
@@ -38,8 +39,8 @@ public class AccountUse implements Runnable {
 
     @Override
     public void run() {
-        Object key = retrieveIndexAccount();
-
+        DataDirectory dataDirectory = new DataDirectory();
+        Object key = retrieveIndexAccount(dataDirectory);
         if (key.toString().equals(accountId)) {
             System.out.println("Account exists in index.txt, so switch the account");
             // If account already exist in index.txt and is default account?
@@ -54,7 +55,8 @@ public class AccountUse implements Runnable {
                     Setup setup = new Setup();
                     JsonObject account = setup.addAccountToJsonWithPrivateKey(accountId, accPrivKey);
                     setup.saveToJson(accountId, account);
-
+                    AccountUtils accountUtils = new AccountUtils();
+                    // TODO
                 } else if (setAsCurrentAccount.equals(NO)) {
                     System.out.println("Using default account");
                 } else {
@@ -69,8 +71,7 @@ public class AccountUse implements Runnable {
         // do we want to return anything here?
     }
 
-    private Object retrieveIndexAccount() {
-        DataDirectory dataDirectory = new DataDirectory();
+    private Object retrieveIndexAccount(DataDirectory dataDirectory) {
         String networkName = dataDirectory.readFile("network.txt");
         String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
         String pathToDefaultTxt = pathToAccountsFolder + "default.txt";

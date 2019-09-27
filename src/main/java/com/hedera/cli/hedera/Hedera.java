@@ -1,5 +1,6 @@
 package com.hedera.cli.hedera;
 
+import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.Network;
 import com.hedera.cli.models.AddressBook;
@@ -40,54 +41,22 @@ public class Hedera {
     }
 
     public AccountId getOperatorId() {
-       return retrieveDefaultAccountID();
+        AccountUtils accountUtils = new AccountUtils();
+        return accountUtils.retrieveDefaultAccountID();
+    }
+
+    public void checkCurrentOrDefaultAccount() {
+        AccountUtils accountUtils = new AccountUtils();
+        String pathToAccountsFolder =  accountUtils.pathToAccountsFolder();
+
+        String checkDefaultAccountExist = accountUtils.defaultAccountString()[1];
+        String checkCurrentAccountExist = accountUtils.currentAccountString()[1];
     }
 
     public Ed25519PrivateKey getOperatorKey() {
-        return Ed25519PrivateKey.fromString(retrieveDefaultAccountKeyInHexString());
+        AccountUtils accountUtils = new AccountUtils();
+        return Ed25519PrivateKey.fromString(accountUtils.retrieveDefaultAccountKeyInHexString());
     }
-
-    private String pathToAccountsFolder() {
-        DataDirectory dataDirectory = new DataDirectory();
-        String networkName = dataDirectory.readFile("network.txt");
-        return networkName + File.separator + "accounts" + File.separator;
-    }
-
-    private String[] defaultAccountString() {
-        String pathToAccountsFolder = pathToAccountsFolder();
-        String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
-
-        // read the key value, the associated file in the list
-        DataDirectory dataDirectory = new DataDirectory();
-        String fileString = dataDirectory.readFile(pathToDefaultTxt);
-        return fileString.split(":");
-    }
-
-    public AccountId retrieveDefaultAccountID() {
-        String pathToAccountsFolder = pathToAccountsFolder();
-        String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
-
-        // read the key value, the associated file in the list
-        DataDirectory dataDirectory = new DataDirectory();
-        String fileString = dataDirectory.readFile(pathToDefaultTxt);
-        String[] accountString = fileString.split(":");
-        return AccountId.fromString(accountString[1]);
-    }
-
-    public String retrieveDefaultAccountKeyInHexString() {
-        DataDirectory dataDirectory = new DataDirectory();
-        String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
-        return defaultJsonAccount.get("privateKey").toString();
-    }
-
-    public String retrieveDefaultAccountPublicKeyInHexString() {
-        DataDirectory dataDirectory = new DataDirectory();
-        String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
-        return defaultJsonAccount.get("publicKey").toString();
-    }
-
 
     public Client createHederaClient() {
         // To connect to a network with more nodes, add additional entries to the

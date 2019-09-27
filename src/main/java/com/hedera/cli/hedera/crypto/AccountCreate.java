@@ -7,6 +7,7 @@ import java.util.List;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.keygen.*;
 import com.hedera.cli.hedera.setup.Setup;
+import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -68,6 +69,7 @@ public class AccountCreate implements Runnable {
 
     private AccountId accountID;
     private Hedera hedera = new Hedera();
+    private AccountUtils accountUtils = new AccountUtils();
 
     @Override
     public void run() {
@@ -103,8 +105,8 @@ public class AccountCreate implements Runnable {
             System.out.println("AccountID = " + accountID);
             JsonObject account = new JsonObject();
             account.add("accountId", accountID.toString());
-            account.add("privateKey", hedera.retrieveDefaultAccountKeyInHexString());
-            account.add("publicKey", hedera.retrieveDefaultAccountPublicKeyInHexString());
+            account.add("privateKey", accountUtils.retrieveDefaultAccountKeyInHexString());
+            account.add("publicKey", accountUtils.retrieveDefaultAccountPublicKeyInHexString());
 //                account.add("privateKey_ASN1", origKey.toString());
 //                account.add("publicKey_ASN1", origPublicKey.toString());
             System.out.println(account);
