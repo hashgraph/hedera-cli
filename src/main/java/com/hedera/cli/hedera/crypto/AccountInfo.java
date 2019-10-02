@@ -1,15 +1,18 @@
 package com.hedera.cli.hedera.crypto;
 
+import java.util.Arrays;
+
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+
+import lombok.NoArgsConstructor;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-import java.util.Arrays;
-
+@NoArgsConstructor
 @Command(name = "info",
         description = "@|fg(225) Gets the information of the paying/operator account"
                 + " returns a stateproof if requested|@")

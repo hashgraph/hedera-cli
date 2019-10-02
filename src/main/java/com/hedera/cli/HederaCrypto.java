@@ -5,7 +5,9 @@ import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.crypto.Account;
 import com.hedera.cli.hedera.crypto.Transfer;
 import com.hedera.cli.shell.ShellHelper;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
@@ -13,6 +15,9 @@ import org.springframework.shell.standard.ShellOption;
 
 @ShellComponent
 public class HederaCrypto extends CliDefaults {
+
+    @Autowired
+    ApplicationContext context;
 
     @Autowired
     ShellHelper shellHelper;
@@ -31,7 +36,10 @@ public class HederaCrypto extends CliDefaults {
         @ShellOption(defaultValue = "") String subCommand,
         @ShellOption(defaultValue = "", arity = -1) String... args) {
         Account account = new Account();
-        account.handle(inputReader, subCommand, args);
+
+        System.out.println("In HederaCrypto, is our context null? " + context);
+
+        account.handle(context, inputReader, subCommand, args);
     }
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")

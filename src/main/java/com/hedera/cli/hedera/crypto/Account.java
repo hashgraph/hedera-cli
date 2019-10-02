@@ -2,7 +2,10 @@ package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.config.InputReader;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
@@ -18,7 +21,7 @@ public class Account implements Runnable {
         CommandLine.usage(this, System.out);
     }
 
-    public void handle(InputReader inputReader, String subCommand, String... args) {
+    public void handle(ApplicationContext context, InputReader inputReader, String subCommand, String... args) {
         // Check subcommand before parsing args
         switch (subCommand) {
             case "create":
@@ -65,9 +68,15 @@ public class Account implements Runnable {
                 break;
             case "use":
                 if (args.length == 0) {
-                    CommandLine.usage(new AccountUse(inputReader), System.out);
+                    CommandLine.usage(new AccountUse(), System.out);
                 } else {
-                    new CommandLine(new AccountUse(inputReader)).execute(args);
+                    System.out.println("Is our context already null? " + context);
+                    try {
+                        AccountUse accountUse = new PicocliSpringFactory(context).create(AccountUse.class);
+                        new CommandLine(accountUse).execute(args);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             default:
