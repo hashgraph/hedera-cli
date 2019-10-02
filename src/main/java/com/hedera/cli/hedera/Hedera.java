@@ -5,9 +5,13 @@ import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.Network;
 import com.hedera.cli.models.AddressBook;
 import com.hedera.cli.models.HederaNode;
+import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import java.io.File;
 import java.util.HashMap;
@@ -18,6 +22,9 @@ public class Hedera {
 
     private AddressBook addressBook;
     private HederaNode node;
+
+    @Autowired
+    ApplicationContext context;
 
     public Hedera() {
         addressBook = AddressBook.init();
@@ -41,16 +48,29 @@ public class Hedera {
     }
 
     public AccountId getOperatorId() {
-        AccountUtils accountUtils = new AccountUtils();
-        return accountUtils.retrieveDefaultAccountID();
+        AccountId operatorId;
+        boolean currentAccountExist = currentAccountExist();
+        if (currentAccountExist) {
+            CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount");
+            String accountNumber = currentAccountService.getAccountNumber();
+            operatorId = AccountId.fromString(accountNumber);
+        } else {
+            AccountUtils accountUtils = new AccountUtils();
+            String defaultAccount = accountUtils.defaultAccountString()[1];
+            operatorId = AccountId.fromString(defaultAccount);
+        }
+        return operatorId;
     }
 
-    public void checkCurrentOrDefaultAccount() {
-        AccountUtils accountUtils = new AccountUtils();
-        String pathToAccountsFolder =  accountUtils.pathToAccountsFolder();
-
-        String checkDefaultAccountExist = accountUtils.defaultAccountString()[1];
-        String checkCurrentAccountExist = accountUtils.currentAccountString()[1];
+    public boolean currentAccountExist() {
+        CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount");
+        String accountNumber = currentAccountService.getAccountNumber();
+        if (!StringUtil.isNullOrEmpty(accountNumber)) {
+            // current account exists
+            System.out.println("We have an in-memory current account : " + accountNumber);
+            return true;
+        }
+        return false;
     }
 
     public Ed25519PrivateKey getOperatorKey() {

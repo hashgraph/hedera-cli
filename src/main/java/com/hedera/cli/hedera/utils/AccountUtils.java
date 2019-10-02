@@ -57,43 +57,4 @@ public class AccountUtils {
         HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
         return defaultJsonAccount.get(PUBLICKEY).toString();
     }
-
-    /**
-     * Current Account ID found in current.txt
-     * @return
-     */
-    public String[] currentAccountString() {
-        String pathToAccountsFolder = pathToAccountsFolder();
-        String pathToCurrentTxt = pathToAccountsFolder +  CURRENT;
-
-        // read the key value, the associated file in the list
-        DataDirectory dataDirectory = new DataDirectory();
-        String fileString = dataDirectory.readFile(pathToCurrentTxt);
-        return fileString.split(":");
-    }
-
-    public AccountId retrieveCurrentAccountID() {
-        String pathToAccountsFolder = pathToAccountsFolder();
-        String pathToCurrentTxt = pathToAccountsFolder +  CURRENT;
-
-        // read the key value, the associated file in the list
-        DataDirectory dataDirectory = new DataDirectory();
-        String fileString = dataDirectory.readFile(pathToCurrentTxt);
-        String[] accountString = fileString.split(":");
-        return AccountId.fromString(accountString[1]);
-    }
-
-    public String retrieveCurrentAccountKeyInHexString() {
-        DataDirectory dataDirectory = new DataDirectory();
-        String pathToCurrentJsonAccount = pathToAccountsFolder() + currentAccountString()[0] + ".json";
-        HashMap currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
-        return currentJsonAccount.get(PRIVATEKEY).toString();
-    }
-
-    public String retrieveCurrentAccountPublicKeyInHexString() {
-        DataDirectory dataDirectory = new DataDirectory();
-        String pathToCurrentJsonAccount = pathToAccountsFolder() + currentAccountString()[0] + ".json";
-        HashMap currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
-        return currentJsonAccount.get(PUBLICKEY).toString();
-    }
 }

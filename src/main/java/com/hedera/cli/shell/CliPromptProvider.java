@@ -73,10 +73,8 @@ public class CliPromptProvider implements PromptProvider {
         String currAccount = defaultAccount.split(":")[1];
         CurrentAccountService currentAccountService = context.getBean("currentAccount", CurrentAccountService.class);
         String accountNumber = currentAccountService.getAccountNumber();
-        if (!StringUtil.isNullOrEmpty(accountNumber)) {
-            System.out.println("We have an in-memory current account");
-            currAccount = accountNumber;
-        } 
+
+
         AttributedString currentAccountAttr = new AttributedString("[" + currAccount + "]",
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
 
