@@ -52,7 +52,7 @@ public class AccountUse implements Runnable {
                     CurrentAccountService.class);
             currentAccountService.setAccountNumber(accountId);
         } else {
-            System.out.println("This account does not exist, please set it up");
+            System.out.println("This account does not exist, please add new account using `account recovery`");
         }
         // if (key.toString().equals(accountId)) {
         // System.out.println("Account exists in index.txt, so switch the account");

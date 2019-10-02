@@ -56,8 +56,7 @@ public class Hedera {
             operatorId = AccountId.fromString(accountNumber);
         } else {
             AccountUtils accountUtils = new AccountUtils();
-            String defaultAccount = accountUtils.defaultAccountString()[1];
-            operatorId = AccountId.fromString(defaultAccount);
+            operatorId = accountUtils.retrieveDefaultAccountID();
         }
         return operatorId;
     }
