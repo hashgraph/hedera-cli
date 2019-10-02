@@ -1,7 +1,5 @@
 package com.hedera.cli.hedera.crypto;
 
-import org.junit.Test;
-
 public class AccountUseTest {
 
 //    @Test

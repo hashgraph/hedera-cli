@@ -3,12 +3,10 @@ package com.hedera.cli.hedera;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-import com.hedera.cli.models.Network;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.AddressBook;
+import com.hedera.cli.models.Network;
 
-import com.hedera.hashgraph.sdk.account.AccountId;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;

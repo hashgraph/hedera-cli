@@ -37,7 +37,7 @@ public class DataDirectory {
       AddressBook addressBook = mapper.readValue(addressBookInputStream, AddressBook.class);
       List<Network> networks = addressBook.getNetworks();
       DataDirectory dataDirectory = new DataDirectory();
-      for (Network network: networks) {
+      for (Network network : networks) {
         String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
         if (currentNetwork != null) {
           if (currentNetwork.equals(network.getName())) {
@@ -67,8 +67,7 @@ public class DataDirectory {
           }
         }
       }
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       e.printStackTrace();
     }
     return nodeName;
@@ -162,43 +161,44 @@ public class DataDirectory {
     // check if index.txt exists, if not, create one
     Path filePath = Paths.get(userHome, directoryName, pathToFile);
     File file = new File(filePath.toString());
-      boolean fileExists = Files.exists(filePath);
-      if (!fileExists) {
-        // file does not exist so create a new file and write value
-        writeFile(pathToFile, defaultValue.toString());
-        return defaultValue;
-      }
-      try {
-        // file exist
-        Scanner reader = new Scanner(file);
-        // read the new value
-        String key = "";
-        String value = "";
-        for(Map.Entry<String, String> entry : defaultValue.entrySet()) {
-          key = entry.getKey();
-          value = entry.getValue();
-        }
-        // creates a new map
-        HashMap<String, String> updatedHashmap = new HashMap<>();
-        while (reader.hasNext()) {
-          // checks the old map
-          String line = reader.nextLine();
-          String sliceLine = line.substring(1, line.length()-1);
-          String[] splitLines = sliceLine.split(", ");
-          for (int i = 0; i< splitLines.length; i++) {
-            String[] keyValuePairs = splitLines[i].split("=");
-            updatedHashmap.put(keyValuePairs[0], keyValuePairs[1]);
-          }
-        }
-        // appends old map with new value
-        updatedHashmap.put(key,value);
-        // write to file
-        writeFile(pathToFile, updatedHashmap.toString());
-        return updatedHashmap;
-      } catch (Exception e ) {
-        e.printStackTrace();
-      }
+    boolean fileExists = Files.exists(filePath);
+    if (!fileExists) {
+      // file does not exist so create a new file and write value
+      writeFile(pathToFile, defaultValue.toString());
       return defaultValue;
+    }
+
+    try {
+      // file exist
+      Scanner reader = new Scanner(file);
+      // read the new value
+      String key = "";
+      String value = "";
+      for (Map.Entry<String, String> entry : defaultValue.entrySet()) {
+        key = entry.getKey();
+        value = entry.getValue();
+      }
+      // creates a new map
+      HashMap<String, String> updatedHashmap = new HashMap<>();
+      while (reader.hasNext()) {
+        // checks the old map
+        String line = reader.nextLine();
+        String sliceLine = line.substring(1, line.length() - 1);
+        String[] splitLines = sliceLine.split(", ");
+        for (int i = 0; i < splitLines.length; i++) {
+          String[] keyValuePairs = splitLines[i].split("=");
+          updatedHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+        }
+      }
+      // appends old map with new value
+      updatedHashmap.put(key, value);
+      // write to file
+      writeFile(pathToFile, updatedHashmap.toString());
+      return updatedHashmap;
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return defaultValue;
   }
 
   public HashMap<String, String> readFileHashmap(String pathToFile) {
@@ -213,14 +213,14 @@ public class DataDirectory {
       while (reader.hasNext()) {
         // checks the old map
         String line = reader.nextLine();
-        String sliceLine = line.substring(1, line.length()-1);
+        String sliceLine = line.substring(1, line.length() - 1);
         String[] splitLines = sliceLine.split(", ");
-        for (int i = 0; i< splitLines.length; i++) {
+        for (int i = 0; i < splitLines.length; i++) {
           String[] keyValuePairs = splitLines[i].split("=");
           mHashmap.put(keyValuePairs[0], keyValuePairs[1]);
         }
       }
-    } catch (Exception e ) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
     return mHashmap;
@@ -248,8 +248,7 @@ public class DataDirectory {
 
     try {
       Stream<Path> walk = Files.walk(path);
-      List<String> result = walk.map(x -> x.toString())
-              .filter(f -> f.endsWith(".json")).collect(Collectors.toList());
+      List<String> result = walk.map(x -> x.toString()).filter(f -> f.endsWith(".json")).collect(Collectors.toList());
       if (result.isEmpty()) {
         System.out.println("No Hedera accounts have created in the current network");
       }

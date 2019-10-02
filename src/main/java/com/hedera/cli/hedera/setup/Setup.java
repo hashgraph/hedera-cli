@@ -1,7 +1,10 @@
 package com.hedera.cli.hedera.setup;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.config.InputReader;
@@ -11,18 +14,17 @@ import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
-
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
+
 import org.hjson.JsonObject;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
-import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Spec;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Spec;
 
 @Component
 @Command(name = "setup", description = "")
