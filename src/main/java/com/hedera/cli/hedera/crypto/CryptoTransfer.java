@@ -4,7 +4,6 @@ import java.math.BigInteger;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
@@ -49,13 +48,6 @@ public class CryptoTransfer implements Runnable {
 
     @Override
     public void run() {
-
-        System.out.println(context);
-        CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount",
-                CurrentAccountService.class);
-        System.out.println(currentAccountService.getAccountNumber());
-
-
         try {
             memoString = inputReader.prompt("Memo field");
             Hedera hedera = new Hedera(context);

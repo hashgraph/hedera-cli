@@ -64,7 +64,6 @@ public class Hedera {
         String accountNumber = currentAccountService.getAccountNumber();
         if (!StringUtil.isNullOrEmpty(accountNumber)) {
             // current account exists
-            System.out.println("We have an in-memory current account : " + accountNumber);
             return true;
         }
         return false;

@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 public class AccountUtils {
 
-    private static final String CURRENT = "current.txt";
     private static final String DEFAULT = "default.txt";
     private static final String PRIVATEKEY = "privateKey";
     private static final String PUBLICKEY = "publicKey";
