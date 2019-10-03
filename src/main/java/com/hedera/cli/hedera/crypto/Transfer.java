@@ -44,9 +44,6 @@ public class Transfer implements Runnable {
                 CommandLine.usage(cryptoTransferMultiple, System.out);
             } else {
                 try {
-                    // This way, we can not only able to pass application context of spring boot to
-                    // picocli via ifactory,
-                    // we can also pass in constructor arguments ie inputreader
                     new CommandLine(cryptoTransferMultiple).execute(args);
                 } catch (Exception e) {
                     e.printStackTrace();
