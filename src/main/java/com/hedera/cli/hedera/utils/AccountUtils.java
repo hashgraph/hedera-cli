@@ -46,14 +46,14 @@ public class AccountUtils {
     public String retrieveDefaultAccountKeyInHexString() {
         DataDirectory dataDirectory = new DataDirectory();
         String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
+        HashMap<String, String> defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
         return defaultJsonAccount.get(PRIVATEKEY).toString();
     }
 
     public String retrieveDefaultAccountPublicKeyInHexString() {
         DataDirectory dataDirectory = new DataDirectory();
         String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
+        HashMap<String, String> defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
         return defaultJsonAccount.get(PUBLICKEY).toString();
     }
 }

@@ -9,7 +9,6 @@ import java.util.List;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,9 +20,8 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan("com.hedera.cli")
 public class Application {
 
-    @Autowired
-    static ApplicationContext context;
     public static void main(String[] args) {
+        ApplicationContext context = SpringApplication.run(Application.class, args);
         // set defaults
         DataDirectory dataDirectory = new DataDirectory();
         dataDirectory.readFile("network.txt", "aspen");
@@ -34,7 +32,10 @@ public class Application {
             dataDirectory.mkHederaSubDir(accountsDirForNetwork);
         }
 
+        // Application app = new Application();
+        // app.run
+
         // let Spring instantiate and inject dependencies
-        System.exit(SpringApplication.exit(SpringApplication.run(Application.class, args)));
+        // System.exit(SpringApplication.exit(SpringApplication.run(Application.class, args)));
     }
 }

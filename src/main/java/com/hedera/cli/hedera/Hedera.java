@@ -29,6 +29,8 @@ public class Hedera {
         addressBook = AddressBook.init();
         this.node = this.getRandomNode();
         this.context = context;
+        System.out.println("WHAT IS MY CONTEXT?");
+        System.out.println(context);
     }
 
     private HederaNode getRandomNode() {
