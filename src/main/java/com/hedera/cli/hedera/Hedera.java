@@ -29,8 +29,6 @@ public class Hedera {
         addressBook = AddressBook.init();
         this.node = this.getRandomNode();
         this.context = context;
-        System.out.println("WHAT IS MY CONTEXT?");
-        System.out.println(context);
     }
 
     private HederaNode getRandomNode() {
@@ -81,34 +79,57 @@ public class Hedera {
         AccountUtils accountUtils = new AccountUtils();
         String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
 
-        String key = "";
+        String accountId;
+        String value;
+        String privateKey = "";
+
+        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        for(Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
+            accountId = entry.getKey(); // key refers to the account id
+            value = entry.getValue(); // value refers to the filename json
+            String currentAccountId = currentAccountId();
+            if (accountId.equals(currentAccountId)) {
+                String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
+                HashMap currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
+                privateKey = currentJsonAccount.get("privateKey").toString();
+            }
+        }
+        return privateKey;
+    }
+
+    public String retrieveIndexAccountPublicKeyInHexString() {
+        DataDirectory dataDirectory = new DataDirectory();
+        AccountUtils accountUtils = new AccountUtils();
+        String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
+
+        String publicKey = "";
+        String accountId;
         String value;
 
         HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
         for(Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
-            key = entry.getKey(); // key refers to the account id
+            accountId = entry.getKey(); // key refers to the account id
             value = entry.getValue(); // value refers to the filename json
             String currentAccountId = currentAccountId();
-            if (key.equals(currentAccountId)) {
-                System.out.println(key);
-                System.out.println(value);
+            if (accountId.equals(currentAccountId)) {
                 String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
-                System.out.println("pathToCurrentJsonAccount" + pathToCurrentJsonAccount);
                 HashMap currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
-                key = currentJsonAccount.get("privateKey").toString();
-                System.out.println("key" + key);
+                publicKey = currentJsonAccount.get("publicKey").toString();
             }
         }
-        return key;
-    }
-
-    public String retrieveIndexAccountPublicKeyInHexString() {
-        return "";
+        return publicKey;
     }
 
     public Ed25519PrivateKey getOperatorKey() {
         AccountUtils accountUtils = new AccountUtils();
-        return Ed25519PrivateKey.fromString(accountUtils.retrieveDefaultAccountKeyInHexString());
+        String privateKeyInHexString;
+        boolean currentAccountExist = currentAccountExist();
+        if (currentAccountExist) {
+            privateKeyInHexString = retrieveIndexAccountKeyInHexString();
+        } else {
+            privateKeyInHexString = accountUtils.retrieveDefaultAccountKeyInHexString();
+        }
+        return Ed25519PrivateKey.fromString(privateKeyInHexString);
     }
 
     public Client createHederaClient() {
@@ -120,8 +141,7 @@ public class Hedera {
         // Defaults the operator account ID and key such that all generated transactions
         // will be paid for
         // by this account and be signed by this key
-        client.setOperator(getOperatorId(), getOperatorKey());
-
+        client.setOperator(getOperatorId(), getOperatorKey()).setMaxTransactionFee(100000000);
         return client;
     }
 
