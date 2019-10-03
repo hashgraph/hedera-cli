@@ -226,10 +226,10 @@ public class DataDirectory {
     return mHashmap;
   }
 
-  public HashMap jsonToHashmap(String pathToFile) {
+  public HashMap<String, String> jsonToHashmap(String pathToFile) {
     Path filePath = Paths.get(userHome, directoryName, pathToFile);
     File file = new File(filePath.toString());
-    HashMap newHashmap = new HashMap<>();
+    HashMap<String, String> newHashmap = new HashMap<>();
     ObjectMapper mapper = new ObjectMapper();
     try {
       String json = new Scanner(file).useDelimiter("\\Z").next();

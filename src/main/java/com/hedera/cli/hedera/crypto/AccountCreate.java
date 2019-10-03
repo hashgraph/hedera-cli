@@ -80,7 +80,7 @@ public class AccountCreate implements Runnable {
     }
 
     private AccountId accountID;
-    private Hedera hedera;
+    
     private AccountUtils accountUtils = new AccountUtils();
 
     @Override
