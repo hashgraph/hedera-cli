@@ -22,12 +22,10 @@ public class CliPromptProvider implements PromptProvider {
     ApplicationContext context;
 
     private String defaultNetworkName = "aspen";
+    private AttributedString currentAccountAttr;
 
     @Override
     public AttributedString getPrompt() {
-
-        System.out.println("Check on our context");
-        System.out.println(context);
 
         DataDirectory dataDirectory = new DataDirectory();
         String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
@@ -59,9 +57,8 @@ public class CliPromptProvider implements PromptProvider {
 
         // one more: current operator account
 
-        // builder returns different AttributedString depending on whether default
-        // operator account for this
-        // network has been set or not
+        // builder returns different AttributedString depending on whether
+        // default operator account for this network has been set or not
         AttributedStringBuilder builder = new AttributedStringBuilder();
 
         if (defaultAccount.isEmpty()) {
@@ -73,10 +70,15 @@ public class CliPromptProvider implements PromptProvider {
         String currAccount = defaultAccount.split(":")[1];
         CurrentAccountService currentAccountService = context.getBean("currentAccount", CurrentAccountService.class);
         String accountNumber = currentAccountService.getAccountNumber();
-
-
-        AttributedString currentAccountAttr = new AttributedString("[" + currAccount + "]",
-                AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+        if (!StringUtil.isNullOrEmpty(accountNumber)) {
+            currentAccountAttr = new AttributedString("[" + accountNumber + "]",
+                    AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+        } else {
+            currentAccountAttr = new AttributedString("[" + currAccount + "]",
+                    AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
+        }
+        System.out.println("who is this curr  " + currAccount);
+        System.out.println("who is this acc  " + accountNumber);
 
         return builder.append(hederaAttr).append(currentNetworkAttr).append(currentAccountAttr).append(promptAttr)
                 .toAttributedString();
