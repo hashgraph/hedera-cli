@@ -1,7 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
 import java.lang.reflect.Constructor;
-
 import org.springframework.context.ApplicationContext;
 
 import picocli.CommandLine;
@@ -19,7 +18,7 @@ public class PicocliSpringFactory implements CommandLine.IFactory {
           return applicationContext.getBean(aClass);
       } catch (Exception e) {
           try {
-              return aClass.newInstance();
+              return aClass.getConstructor().newInstance();
           } catch (Exception ex) {
               Constructor<K> constructor = aClass.getDeclaredConstructor();
               constructor.setAccessible(true);
