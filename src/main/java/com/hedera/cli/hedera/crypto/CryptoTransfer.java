@@ -4,20 +4,36 @@ import java.math.BigInteger;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Spec;
 
+@NoArgsConstructor
+@Setter
+@Component
 @Command(name = "single",
         description = "@|fg(225) Transfer hbars to a single account|@%n",
         helpCommand = true)
 public class CryptoTransfer implements Runnable {
+
+    @Autowired
+    ApplicationContext context;
+
+    @Spec
+    CommandSpec spec;
 
     @Option(names = {"-r", "--recipient"}, arity = "1", description = "Recipient to transfer to"
             + "%n@|bold,underline Usage:|@%n"
@@ -28,22 +44,21 @@ public class CryptoTransfer implements Runnable {
     private String recipientAmt;
 
     private String memoString;
-
     private InputReader inputReader;
     private String isInfoCorrect;
 
-    public CryptoTransfer(InputReader inputReader) {
-        this.inputReader = inputReader;
-    }
-
-    @Spec
-    CommandSpec spec;
-
     @Override
     public void run() {
+
+        System.out.println(context);
+        CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount",
+                CurrentAccountService.class);
+        System.out.println(currentAccountService.getAccountNumber());
+
+
         try {
             memoString = inputReader.prompt("Memo field");
-            Hedera hedera = new Hedera();
+            Hedera hedera = new Hedera(context);
             var operatorId = hedera.getOperatorId();
             var client = hedera.createHederaClient();
             var recipientId = AccountId.fromString("0.0." + recipient);
@@ -86,5 +101,6 @@ public class CryptoTransfer implements Runnable {
             e.printStackTrace();
         }
     }
+
 }
 

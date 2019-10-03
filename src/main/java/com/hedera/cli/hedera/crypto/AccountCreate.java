@@ -5,7 +5,10 @@ import java.time.Duration;
 import java.util.List;
 
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.keygen.*;
+import com.hedera.cli.hedera.keygen.CryptoUtils;
+import com.hedera.cli.hedera.keygen.HGCSeed;
+import com.hedera.cli.hedera.keygen.KeyGeneration;
+import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
@@ -13,19 +16,28 @@ import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
-import org.hjson.JsonObject;
-import picocli.CommandLine.ParameterException;
-import picocli.CommandLine.Model.*;
-import picocli.CommandLine.Spec;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 
+import org.hjson.JsonObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Spec;
+
+@Component
 @Command(name = "create",
         description = "@|fg(225) Generates a new Ed25519 Keypair compatible with java and wallet,"
                 + "%ntogether with 24 recovery words (bip39 compatible),"
                 + "%nCreates a new Hedera account and "
                 + "%nReturns an accountID in the form of shardNum.realmNum.accountNum.|@", helpCommand = true)
 public class AccountCreate implements Runnable {
+
+    @Autowired
+    ApplicationContext context;
 
     @Spec
     CommandSpec spec;
@@ -68,11 +80,13 @@ public class AccountCreate implements Runnable {
     }
 
     private AccountId accountID;
-    private Hedera hedera = new Hedera();
+    private Hedera hedera;
     private AccountUtils accountUtils = new AccountUtils();
 
     @Override
     public void run() {
+
+        Hedera hedera = new Hedera(context);
 
         setMinimum(initBal);
 
@@ -119,7 +133,7 @@ public class AccountCreate implements Runnable {
         System.out.println("private key = " + privateKey);
         System.out.println("public key = " + publicKey);
         AccountId accountId = null;
-        Hedera hedera = new Hedera();
+        Hedera hedera = new Hedera(context);
         var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
         var tx = new AccountCreateTransaction(client)
                 // The only _required_ property here is `key`

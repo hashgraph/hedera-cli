@@ -28,13 +28,13 @@ public class HederaCrypto extends CliDefaults {
     @Autowired
     Account account;
 
-    public HederaCrypto() {}
+    public HederaCrypto() {
+    }
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "manage Hedera account")
-    public void account(
-        @ShellOption(defaultValue = "") String subCommand,
-        @ShellOption(defaultValue = "", arity = -1) String... args) {
+    public void account(@ShellOption(defaultValue = "") String subCommand,
+            @ShellOption(defaultValue = "", arity = -1) String... args) {
         Account account = new Account();
 
         System.out.println("In HederaCrypto, is our context null? " + context);
@@ -44,11 +44,15 @@ public class HederaCrypto extends CliDefaults {
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "transfer hbars from one hedera account to another")
-    public void transfer(
-        @ShellOption(defaultValue = "") String subCommand,
-        @ShellOption(defaultValue = "", arity = -1) String... args) {
+    public void transfer(@ShellOption(defaultValue = "") String subCommand,
+            @ShellOption(defaultValue = "", arity = -1) String... args) {
         Transfer transfer = new Transfer();
-        transfer.handle(inputReader, subCommand, args);
+        try {
+            transfer.handle(context, inputReader, subCommand, args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // print out a useful message for end user here
+        }
     }
 
 }

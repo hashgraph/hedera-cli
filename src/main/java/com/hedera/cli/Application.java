@@ -9,20 +9,25 @@ import java.util.List;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableAutoConfiguration
 @ComponentScan("com.hedera.cli")
 public class Application {
+
+    @Autowired
+    static ApplicationContext context;
     public static void main(String[] args) {
         // set defaults
         DataDirectory dataDirectory = new DataDirectory();
         dataDirectory.readFile("network.txt", "aspen");
-        Hedera hedera = new Hedera();
+        Hedera hedera = new Hedera(context);
         List<String> networkList = hedera.getNetworksStrings();
         for (String network: networkList) {
             String accountsDirForNetwork = network + File.separator + "accounts";

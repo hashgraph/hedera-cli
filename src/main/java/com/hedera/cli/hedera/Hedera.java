@@ -1,34 +1,32 @@
 package com.hedera.cli.hedera;
 
+import java.util.List;
+import java.util.Map;
+
 import com.hedera.cli.hedera.utils.AccountUtils;
-import com.hedera.cli.hedera.utils.DataDirectory;
-import com.hedera.cli.models.Network;
 import com.hedera.cli.models.AddressBook;
 import com.hedera.cli.models.HederaNode;
+import com.hedera.cli.models.Network;
 import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.context.ApplicationContext;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 
 public class Hedera {
+
+    ApplicationContext context;
 
     private AddressBook addressBook;
     private HederaNode node;
 
-    @Autowired
-    ApplicationContext context;
-
-    public Hedera() {
+    public Hedera(ApplicationContext context) {
         addressBook = AddressBook.init();
         this.node = this.getRandomNode();
+        this.context = context;
     }
 
     private HederaNode getRandomNode() {

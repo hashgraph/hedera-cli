@@ -1,35 +1,51 @@
 package com.hedera.cli.hedera.crypto;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.cli.models.Recipient;
 import com.hedera.cli.models.Sender;
 import com.hedera.cli.models.TransactionObj;
-import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.Transaction;
 import com.hedera.hashgraph.sdk.TransactionRecord;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Spec;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
+
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
-import java.util.*;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Spec;
 
+@NoArgsConstructor
+@Setter
+@Component
 @Command(name = "multiple",
         description = "@|fg(225) Transfer hbars to multiple accounts with multiple senders"
                 + "%nWhereby default account is the operator, ie the paying account for transaction fees,"
                 + "%nwhile sender is the account transferring the hbars to the recipient(s)|@",
         helpCommand = true)
 public class CryptoTransferMultiple implements Runnable {
+
+    @Autowired
+    ApplicationContext context;
 
     @Spec
     CommandSpec spec;
@@ -51,10 +67,6 @@ public class CryptoTransferMultiple implements Runnable {
 
     private String isInfoCorrect;
 
-    public CryptoTransferMultiple(InputReader inputReader) {
-        this.inputReader = inputReader;
-    }
-
     @Override
     public void run() {
         try {
@@ -66,7 +78,7 @@ public class CryptoTransferMultiple implements Runnable {
             String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
             senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
 
-            Hedera hedera = new Hedera();
+            Hedera hedera = new Hedera(context);
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
             // Operator is the current default account user

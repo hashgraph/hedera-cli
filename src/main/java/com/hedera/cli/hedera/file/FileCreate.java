@@ -1,13 +1,5 @@
 package com.hedera.cli.hedera.file;
 
-import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.Utils;
-import com.hedera.hashgraph.sdk.TransactionReceipt;
-import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,9 +7,26 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 
+import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.utils.Utils;
+import com.hedera.hashgraph.sdk.TransactionReceipt;
+import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+
+@Component
 @Command(name = "create", description = "@|fg(225) Creates a new File and returns a FileID in the format of%n"
         + "shardNum.realmNum.fileNum|@")
 public class FileCreate implements Runnable {
+
+    @Autowired
+    ApplicationContext context;
 
     @Option(names = { "-d", "--date" }, arity = "0..2", description = "Enter file expiry date in the format of%n"
             + "dd-MM-yyyy hh:mm:ss%n" + "%n@|bold,underline Usage:|@%n"
@@ -84,7 +93,7 @@ public class FileCreate implements Runnable {
     public void run() {
         CommandLine.usage(this, System.out);
         try {
-            Hedera hedera = new Hedera();
+            Hedera hedera = new Hedera(context);
             var operatorKey = hedera.getOperatorKey();
             var client = hedera.createHederaClient().setMaxTransactionFee(maxTransactionFee);
             System.out.println(maxTransactionFee);

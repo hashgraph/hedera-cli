@@ -28,18 +28,6 @@ public class AccountUse implements Runnable {
     @Option(names = { "-a", "--account-id" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
     private String accountId;
 
-    // private Ed25519PrivateKey accPrivKey;
-    // private InputReader inputReader;
-    // private String setAsCurrentAccount;
-    // private String addNewAccount;
-    // private static final String YES = "yes";
-    // private static final String NO = "no";
-
-    // public AccountUse(InputReader inputReader) {
-    // this.inputReader = inputReader;
-    // }
-
-    // account use -a=0.0.1001
     @Override
     public void run() {
         DataDirectory dataDirectory = new DataDirectory();
@@ -54,41 +42,6 @@ public class AccountUse implements Runnable {
         } else {
             System.out.println("This account does not exist, please add new account using `account recovery`");
         }
-        // if (key.toString().equals(accountId)) {
-        // System.out.println("Account exists in index.txt, so switch the account");
-        // If account already exist in index.txt and is default account?
-        // }
-        // } else {
-        // addNewAccount = inputReader.prompt("Account does not exist, add new account?
-        // yes/no \n");
-        // if (addNewAccount.equals(YES)) {
-        // String accPrivKeyInString = inputReader.prompt("Input account's private key",
-        // "secret", false);
-        // accPrivKey = Ed25519PrivateKey.fromString(accPrivKeyInString);
-        // setAsCurrentAccount = inputReader.prompt("Do you want to set as current
-        // account? yes/no \n");
-        // if (setAsCurrentAccount.equals(YES)) {
-        // // set network and curr account here
-        // Setup setup = new Setup();
-        // JsonObject account = setup.addAccountToJsonWithPrivateKey(accountId,
-        // accPrivKey);
-        // setup.saveToJson(accountId, account);
-        // // AccountUtils accountUtils = new AccountUtils();
-        // // TODO
-        // } else if (setAsCurrentAccount.equals(NO)) {
-        // System.out.println("Using default account");
-        // } else {
-        // throw new ParameterException(spec.commandLine(), "Input must either been yes
-        // or no");
-        // }
-        // } else if (addNewAccount.equals(NO)) {
-        // System.out.println("No changes made");
-        // } else {
-        // throw new ParameterException(spec.commandLine(), "Input must either been yes
-        // or no");
-        // }
-        // }
-        // do we want to return anything here?
     }
 
     /**
