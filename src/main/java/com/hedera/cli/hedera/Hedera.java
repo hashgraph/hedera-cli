@@ -1,9 +1,11 @@
 package com.hedera.cli.hedera;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.AddressBook;
 import com.hedera.cli.models.HederaNode;
 import com.hedera.cli.models.Network;
@@ -49,8 +51,7 @@ public class Hedera {
         AccountId operatorId;
         boolean currentAccountExist = currentAccountExist();
         if (currentAccountExist) {
-            CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount");
-            String accountNumber = currentAccountService.getAccountNumber();
+            String accountNumber = currentAccountId();
             operatorId = AccountId.fromString(accountNumber);
         } else {
             AccountUtils accountUtils = new AccountUtils();
@@ -60,13 +61,47 @@ public class Hedera {
     }
 
     public boolean currentAccountExist() {
-        CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount");
-        String accountNumber = currentAccountService.getAccountNumber();
+        String accountNumber = currentAccountId();
         if (!StringUtil.isNullOrEmpty(accountNumber)) {
             // current account exists
             return true;
         }
         return false;
+    }
+
+    public String currentAccountId() {
+        CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount");
+        return currentAccountService.getAccountNumber();
+    }
+
+    public String retrieveIndexAccountKeyInHexString() {
+        DataDirectory dataDirectory = new DataDirectory();
+        AccountUtils accountUtils = new AccountUtils();
+        String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
+
+        String key = "";
+        String value;
+
+        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        for(Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
+            key = entry.getKey(); // key refers to the account id
+            value = entry.getValue(); // value refers to the filename json
+            String currentAccountId = currentAccountId();
+            if (key.equals(currentAccountId)) {
+                System.out.println(key);
+                System.out.println(value);
+                String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
+                System.out.println("pathToCurrentJsonAccount" + pathToCurrentJsonAccount);
+                HashMap currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
+                key = currentJsonAccount.get("privateKey").toString();
+                System.out.println("key" + key);
+            }
+        }
+        return key;
+    }
+
+    public String retrieveIndexAccountPublicKeyInHexString() {
+        return "";
     }
 
     public Ed25519PrivateKey getOperatorKey() {

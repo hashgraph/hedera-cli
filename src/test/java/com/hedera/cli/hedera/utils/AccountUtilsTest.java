@@ -1,14 +1,27 @@
 package com.hedera.cli.hedera.utils;
 
+import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {CurrentAccountService.class})
 public class AccountUtilsTest {
 
+    @Autowired
+    ApplicationContext context;
 //    @Test
 //    public void testCurrentOrDefaultAccountString() {
 //        String defaultPath = "default.txt";
@@ -58,4 +71,16 @@ public class AccountUtilsTest {
         String privateKey = accountUtils.retrieveDefaultAccountKeyInHexString();
         assertEquals("privateKeyInStringDerOrASN1Format", privateKey);
     }
+
+//    @Test
+//    public void testRetrieveIndexAccountKeyInHexString() {
+//
+//        HashMap<String, String> mHashmap = new HashMap<>();
+//        mHashmap.put("0.0.9998", "filename_001");
+//        mHashmap.put("0.0.7777", "filename_007");
+//
+//        Hedera hedera = new Hedera(context);
+//        hedera.retrieveIndexAccountKeyInHexString();
+//
+//    }
 }
