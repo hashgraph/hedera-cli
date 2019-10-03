@@ -4,6 +4,8 @@ import com.hedera.cli.hedera.bip39.Mnemonic;
 import com.hedera.cli.hedera.bip39.MnemonicException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
+import lombok.NoArgsConstructor;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
@@ -13,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor
 @Component
 @Command(name = "generate",
          description = "@|fg(225) Transfer hbars to a single account|@%n",
@@ -29,7 +32,12 @@ public class KeyGeneration implements Runnable {
           + "%nor account creations are before 13 September 2019. Input -m=bip if passphrases have been migrated on the wallet,"
           + "%nor account creations are after 13 September 2019")
   private String strMethod = "bip";
-  private String setMethod(String method) {
+
+  public KeyGeneration(String strMethod) {
+    setMethod(strMethod);
+  }
+  
+  public String setMethod(String method) {
     if (method.equals("bip")) {
       strMethod = method;
     } else if (method.equals("hgc")) {
@@ -45,7 +53,7 @@ public class KeyGeneration implements Runnable {
     System.out.println("KeyGeneration");
     hgcSeed = new HGCSeed(CryptoUtils.getSecureRandomData(32));
     mnemonic = generateMnemonic(hgcSeed);
-    generateKeysAndWords(hgcSeed, strMethod, mnemonic);
+    generateKeysAndWords(hgcSeed, mnemonic);
   }
 
   public List<String> generateMnemonic(HGCSeed hgcSeed) {
@@ -54,7 +62,7 @@ public class KeyGeneration implements Runnable {
     return mnemonic;
   }
 
-  public KeyPair generateKeysAndWords(HGCSeed hgcSeed, String strMethod, List<String> wordList) {
+  public KeyPair generateKeysAndWords(HGCSeed hgcSeed, List<String> wordList) {
     KeyPair keyPair;
     if (strMethod.contains("bip")) {
 //      keyPair = keyPairAfterBipMigration(hgcSeed);

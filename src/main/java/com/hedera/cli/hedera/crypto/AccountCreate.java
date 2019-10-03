@@ -68,19 +68,8 @@ public class AccountCreate implements Runnable {
             + "%nor account creations are after 13 September 2019")
     private String strMethod = "bip";
 
-    private String setMethod(String method) {
-        if (method.equals("bip")) {
-            strMethod = method;
-        } else if (method.equals("hgc")) {
-            strMethod = method;
-        } else {
-            throw new ParameterException(spec.commandLine(), "Method must either been hgc or bip");
-        }
-        return strMethod;
-    }
-
     private AccountId accountID;
-    
+
     private AccountUtils accountUtils = new AccountUtils();
 
     @Override
@@ -92,10 +81,11 @@ public class AccountCreate implements Runnable {
 
         if (keyGen) {
             // If keyGen via args is set to true, generate new keys
-            KeyGeneration keyGeneration = new KeyGeneration();
+            KeyGeneration keyGeneration = new KeyGeneration(strMethod);
             HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
             List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
-            KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, setMethod(strMethod), mnemonic);
+
+            KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
             System.out.println("AccountCreate subcommand");
             var newKey = Ed25519PrivateKey.fromString(keypair.getPrivateKeyEncodedHex());
             var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());

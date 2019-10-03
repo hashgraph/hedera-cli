@@ -18,11 +18,11 @@ public class KeyGenerationTest {
     public void testHGCSeedAndEntropyKeyGenPriorToBipMigration() {
 
         // Generate new keys prior to bip migration
-        KeyGeneration keyGeneration = new KeyGeneration();
+        String hgcMethod = "hgc";
+        KeyGeneration keyGeneration = new KeyGeneration(hgcMethod);
         HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
         List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
-        String hgcMethod = "hgc";
-        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, hgcMethod, mnemonic);
+        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
 
         int index = 0;
         // Compare with entropy
@@ -56,8 +56,9 @@ public class KeyGenerationTest {
         KeyPair kp2 = kc2.keyPairFromWordList(0, mnemonic);
 
         String bipMethod = "bip";
+        keyGeneration.setMethod(bipMethod);
         // Use Mnemonic to feed as "password" to derive bipSeed
-        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, bipMethod, mnemonic);
+        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
         Assert.assertEquals(kp2.getPrivateKeyHex(), keypair.getPrivateKeyHex());
         Assert.assertEquals(kp2.getPublicKeyHex(), keypair.getPublicKeyHex());
 

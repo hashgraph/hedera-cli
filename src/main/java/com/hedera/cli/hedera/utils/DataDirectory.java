@@ -1,18 +1,28 @@
 package com.hedera.cli.hedera.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedera.cli.hedera.setup.Setup;
-import com.hedera.cli.models.AddressBook;
-import com.hedera.cli.models.Network;
-import org.springframework.stereotype.Component;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedera.cli.models.AddressBook;
+import com.hedera.cli.models.Network;
+
+import org.springframework.stereotype.Component;
 
 @Component
 public class DataDirectory {
@@ -194,6 +204,7 @@ public class DataDirectory {
       updatedHashmap.put(key, value);
       // write to file
       writeFile(pathToFile, updatedHashmap.toString());
+      reader.close();
       return updatedHashmap;
     } catch (Exception e) {
       e.printStackTrace();
@@ -220,6 +231,7 @@ public class DataDirectory {
           mHashmap.put(keyValuePairs[0], keyValuePairs[1]);
         }
       }
+      reader.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -232,8 +244,11 @@ public class DataDirectory {
     HashMap<String, String> newHashmap = new HashMap<>();
     ObjectMapper mapper = new ObjectMapper();
     try {
-      String json = new Scanner(file).useDelimiter("\\Z").next();
-      newHashmap = mapper.readValue(json, HashMap.class);
+      Scanner reader = new Scanner(file);
+      String json = reader.useDelimiter("\\Z").next();
+      TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
+      newHashmap = mapper.readValue(json, typeRef);
+      reader.close();
     } catch (Exception e) {
       e.printStackTrace();
     }

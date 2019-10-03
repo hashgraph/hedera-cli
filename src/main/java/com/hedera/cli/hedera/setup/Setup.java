@@ -38,9 +38,6 @@ public class Setup implements Runnable {
           + "%nor account creations are after 13 September 2019")
   private String strMethod = "bip";
 
-  // default index 0 is compatible with Hedera wallet apps
-  private int index = 0;
-
   @Override
   public void run() {
     CommandLine.usage(this, System.out);
