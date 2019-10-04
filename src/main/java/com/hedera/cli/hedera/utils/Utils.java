@@ -34,7 +34,7 @@ public class Utils {
             jsonString = ow.writeValueAsString(obj);
             DataDirectory dataDirectory = new DataDirectory();
             String networkName = dataDirectory.readFile("network.txt");
-            String pathToTransactionFolder = networkName + File.separator + "transaction" + File.separator;
+            String pathToTransactionFolder = networkName + File.separator + "transactions" + File.separator;
             filename = txID + ".json";
             String pathToTransactionFile = pathToTransactionFolder + filename;
             dataDirectory.mkHederaSubDir(pathToTransactionFolder);
