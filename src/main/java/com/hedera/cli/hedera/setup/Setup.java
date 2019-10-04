@@ -99,7 +99,6 @@ public class Setup implements Runnable {
     String pathToAccountFile =  pathToAccountsFolder +  fileNameWithExt;
 
     String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
-    String pathToCurrentTxt = pathToAccountsFolder + "current.txt";
     String pathToIndexTxt = pathToAccountsFolder + "index.txt";
 
     HashMap<String, String> mHashMap = new HashMap<>();
@@ -115,7 +114,6 @@ public class Setup implements Runnable {
       // default account
       dataDirectory.readFile(pathToDefaultTxt,fileName + ":" + accountId);
       // current account
-      dataDirectory.readFile(pathToCurrentTxt, fileName + ":" + accountId);
       // write to index if account does not yet exist in index
       dataDirectory.readWriteFileHashmap(pathToIndexTxt, mHashMap);
     } catch (Exception e) {

@@ -11,6 +11,7 @@ import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -89,13 +90,8 @@ public class AccountCreate implements Runnable {
             System.out.println("AccountID = " + accountID);
             System.out.println("mnemonic = " + mnemonic);
             // save to local disk
-            JsonObject account = new JsonObject();
-            account.add("accountId", accountID.toString());
-            account.add("privateKey", keypair.getPrivateKeyHex());
-            account.add("publicKey", keypair.getPublicKeyHex());
-            System.out.println(account);
-            Setup setup = new Setup();
-            setup.saveToJson(accountID.toString(), account);
+            Utils utils = new Utils();
+            utils.saveAccountsToJson(keypair, AccountId.fromString(accountID.toString()));
         } else {
             // Else keyGen always set to false and read from default.txt which contains operator keys
             var origKey = hedera.getOperatorKey();
@@ -107,8 +103,7 @@ public class AccountCreate implements Runnable {
             account.add("accountId", accountID.toString());
             account.add("privateKey", accountUtils.retrieveDefaultAccountKeyInHexString());
             account.add("publicKey", accountUtils.retrieveDefaultAccountPublicKeyInHexString());
-//                account.add("privateKey_ASN1", origKey.toString());
-//                account.add("publicKey_ASN1", origPublicKey.toString());
+
             System.out.println(account);
             Setup setup = new Setup();
             setup.saveToJson(accountID.toString(), account);

@@ -36,33 +36,37 @@ public class AccountInfo implements Runnable {
 
     @Override
     public void run() {
-        try {
-            String accPrivKeyInString = inputReader.prompt("Input account's private key", "secret", false);
-            accPrivKey = Ed25519PrivateKey.fromString(accPrivKeyInString);
+        String accPrivKeyInString = inputReader.prompt("Input account's private key", "secret", false);
+        accPrivKey = Ed25519PrivateKey.fromString(accPrivKeyInString);
+        Hedera hedera = new Hedera(context);
+        com.hedera.hashgraph.sdk.account.AccountInfo accountRes = getAccountInfo(hedera, accountIDInString, accPrivKey);
+        String[] accountInfo =
+                {
+                        "accountId: " + accountRes.getAccountId() +
+                                "\n contractId: " + accountRes.getContractAccountId() +
+                                "\n balance: " + accountRes.getBalance() +
+                                "\n claim: " + accountRes.getClaims() +
+                                "\n autoRenewPeriod: " + accountRes.getAutoRenewPeriod() +
+                                "\n expirationTime: " + accountRes.getExpirationTime() +
+                                "\n receivedRecordThreshold: " + accountRes.getGenerateReceiveRecordThreshold() +
+                                "\n proxyAccountId: " + accountRes.getProxyAccountId()
+                };
+        System.out.println(Arrays.asList(accountInfo));
+    }
 
-            Hedera hedera = new Hedera(context);
+    public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfo(Hedera hedera, String accountIDInString, Ed25519PrivateKey accPrivKey) {
+        com.hedera.hashgraph.sdk.account.AccountInfo accountRes = null;
+        try {
             var accountId = AccountId.fromString(accountIDInString);
             var client = hedera.createHederaClient()
-                    .setMaxTransactionFee(100000000)
                     .setOperator(accountId, accPrivKey);
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)
                     .setAccountId(accountId);
-            var accountRes = q.execute();
-            String[] accountInfo =
-                    {
-                            "accountId: " + accountRes.getAccountId() +
-                                    "\n contractId: " + accountRes.getContractAccountId() +
-                                    "\n balance: " + accountRes.getBalance() +
-                                    "\n claim: " + accountRes.getClaims() +
-                                    "\n autoRenewPeriod: " + accountRes.getAutoRenewPeriod() +
-                                    "\n expirationTime: " + accountRes.getExpirationTime() +
-                                    "\n receivedRecordThreshold: " + accountRes.getGenerateReceiveRecordThreshold() +
-                                    "\n proxyAccountId: " + accountRes.getProxyAccountId()
-                    };
-            System.out.println(Arrays.asList(accountInfo));
+            accountRes = q.execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return  accountRes;
     }
 }
