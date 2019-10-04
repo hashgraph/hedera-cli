@@ -45,9 +45,7 @@ public class AccountCreate implements Runnable {
     @Option(names = {"-r", "--record"}, description = "Generates a record that lasts 25hrs")
     private boolean generateRecord = false;
 
-    @Option(names = {"-b", "--balance"}, description = "Initial balance of new account created in hbars "
-            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b=100 OR%n"
-            + "account create --balance=100|@")
+    @Option(names = {"-b", "--balance"}, description = "Initial balance of new account created in hbars")
     private int initBal = 0;
 
     private void setMinimum(int min) {
@@ -57,15 +55,13 @@ public class AccountCreate implements Runnable {
         initBal = min;
     }
 
-    @Option(names = {"-k", "--keygen"}, description = "Creates a brand new key associated with account creation"
-            + "default is false"
-            + "%n@|bold,underline Usage:|@"
-            + "%n@|fg(yellow) account create -k=true,-b=100000|@")
-    private boolean keyGen = false;
+    @Option(names = {"-k", "--keygen"}, description = "Default generates a brand new key pair associated with account creation"
+            + "%n@|bold,underline Usage:|@")
+    private boolean keyGen = true;
 
-    @Option(names = {"-m", "--method"}, description = "Input -m=hgc if passphrases have not been migrated on wallet "
-            + "%nor account creations are before 13 September 2019. Input -m=bip if passphrases have been migrated on the wallet,"
-            + "%nor account creations are after 13 September 2019")
+    @Option(names = {"-m", "--method"}, defaultValue = "bip", description = "Default set for passphrases and keypairs that are bip compatible"
+            + "%n@|bold,underline Usage:|@"
+            + "%n@|fg(yellow) account create -b=100000000|@")
     private String strMethod = "bip";
 
     private AccountId accountID;
