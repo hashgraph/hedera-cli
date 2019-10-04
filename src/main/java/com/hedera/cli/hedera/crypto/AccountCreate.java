@@ -31,7 +31,7 @@ import picocli.CommandLine.Spec;
 @Component
 @Command(name = "create",
         description = "@|fg(225) Generates a new Ed25519 Keypair compatible with java and wallet,"
-                + "%ntogether with 24 recovery words (bip39 compatible),"
+                + "%ntogether with 24 recovery words (bip compatible),"
                 + "%nCreates a new Hedera account and "
                 + "%nReturns an accountID in the form of shardNum.realmNum.accountNum.|@", helpCommand = true)
 public class AccountCreate implements Runnable {

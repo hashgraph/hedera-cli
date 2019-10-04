@@ -98,7 +98,6 @@ public class Account implements Runnable {
                 if (args.length == 0) {
                     CommandLine.usage(new AccountUse(), System.out);
                 } else {
-                    System.out.println("Is our context already null? " + context);
                     try {
                         AccountUse accountUse = factory.create(AccountUse.class);
                         new CommandLine(accountUse).execute(args);

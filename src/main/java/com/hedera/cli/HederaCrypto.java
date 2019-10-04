@@ -36,9 +36,6 @@ public class HederaCrypto extends CliDefaults {
     public void account(@ShellOption(defaultValue = "") String subCommand,
             @ShellOption(defaultValue = "", arity = -1) String... args) {
         Account account = new Account();
-
-        System.out.println("In HederaCrypto, is our context null? " + context);
-
         account.handle(context, inputReader, subCommand, args);
     }
 

@@ -39,7 +39,7 @@ public class AccountRecovery implements Runnable {
   @Option(names = { "-a", "--account-id" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
   private String accountId;
 
-  @Option(names = {"-m", "--method"}, arity= "1", description = "Recovers keypair from recovery phrase")
+  @Option(names = {"-m", "--method"}, arity= "1", defaultValue = "bip", description = "Recovers keypair from recovery phrase")
   private String strMethod = "bip";
 
   private int index = 0;
