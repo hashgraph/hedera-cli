@@ -13,34 +13,37 @@ import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 
 import com.hedera.cli.hedera.keygen.KeyPair;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
 
+@NoArgsConstructor
+@Setter
+@Component
 @Command(name = "recovery", description = "@|fg(225) Recovers a Hedera account via the 24 recovery words.|@", helpCommand = true)
 public class AccountRecovery implements Runnable {
-
-  private int index = 0;
-
-  @Option(names = { "-a", "--account-id" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
-  private String accountId;
 
   @Spec
   CommandSpec spec;
 
+  @Autowired
+  ApplicationContext context;
+
+  @Option(names = { "-a", "--account-id" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
+  private String accountId;
+
   @Option(names = {"-m", "--method"}, arity= "1", description = "Recovers keypair from recovery phrase")
   private String strMethod = "bip";
 
+  private int index = 0;
   private InputReader inputReader;
-
-  public AccountRecovery() {
-  }
-
-  public AccountRecovery(InputReader inputReader) {
-    this.inputReader = inputReader;
-  }
 
   @Override
   public void run() {

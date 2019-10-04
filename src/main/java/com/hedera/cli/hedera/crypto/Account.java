@@ -21,41 +21,70 @@ public class Account implements Runnable {
     }
 
     public void handle(ApplicationContext context, InputReader inputReader, String subCommand, String... args) {
+        PicocliSpringFactory factory = new PicocliSpringFactory(context);
+
         // Check subcommand before parsing args
         switch (subCommand) {
             case "create":
                 if (args.length == 0) {
                     CommandLine.usage(new AccountCreate(), System.out);
                 } else {
-                    new CommandLine(new AccountCreate()).execute(args);
+                    try {
+                        AccountCreate accountCreate = factory.create(AccountCreate.class);
+                        new CommandLine(accountCreate).execute(args);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case "update":
                 if (args.length == 0) {
                     CommandLine.usage(new AccountUpdate(), System.out);
                 } else {
-                    new CommandLine(new AccountUpdate()).execute(args);
+                    try {
+                        AccountUpdate accountUpdate = factory.create(AccountUpdate.class);
+                        new CommandLine(accountUpdate).execute(args);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case "info":
                 if (args.length == 0) {
-                    CommandLine.usage(new AccountInfo(inputReader), System.out);
+                    CommandLine.usage(new AccountInfo(), System.out);
                 } else {
-                    new CommandLine(new AccountInfo(inputReader)).execute(args);
+                    try {
+                        AccountInfo accountInfo = factory.create(AccountInfo.class);
+                        accountInfo.setInputReader(inputReader);
+                        new CommandLine(accountInfo).execute(args);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case "delete":
                 if (args.length == 0) {
                     CommandLine.usage(new AccountDelete(), System.out);
                 } else {
-                    new CommandLine(new AccountDelete()).execute(args);
+                    try {
+                        AccountDelete accountDelete = factory.create(AccountDelete.class);
+                        new CommandLine(accountDelete).execute(args);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case "recovery":
                 if (args.length == 0) {
-                    CommandLine.usage(new AccountRecovery(inputReader), System.out);
+                    CommandLine.usage(new AccountRecovery(), System.out);
                 } else {
-                    new CommandLine(new AccountRecovery(inputReader)).execute(args);
+                    try {
+                        AccountRecovery accountRecovery = factory.create(AccountRecovery.class);
+                        accountRecovery.setInputReader(inputReader);
+                        new CommandLine(accountRecovery).execute(args);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case "ls":
@@ -71,7 +100,7 @@ public class Account implements Runnable {
                 } else {
                     System.out.println("Is our context already null? " + context);
                     try {
-                        AccountUse accountUse = new PicocliSpringFactory(context).create(AccountUse.class);
+                        AccountUse accountUse = factory.create(AccountUse.class);
                         new CommandLine(accountUse).execute(args);
                     } catch (Exception e) {
                         e.printStackTrace();

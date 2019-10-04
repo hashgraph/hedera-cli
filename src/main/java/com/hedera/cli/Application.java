@@ -31,11 +31,5 @@ public class Application {
             String accountsDirForNetwork = network + File.separator + "accounts";
             dataDirectory.mkHederaSubDir(accountsDirForNetwork);
         }
-
-        // Application app = new Application();
-        // app.run
-
-        // let Spring instantiate and inject dependencies
-        // System.exit(SpringApplication.exit(SpringApplication.run(Application.class, args)));
     }
 }

@@ -8,6 +8,7 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @NoArgsConstructor
+@Setter
 @Component
 @Command(name = "info",
         description = "@|fg(225) Gets the information of the paying/operator account"
@@ -31,10 +33,6 @@ public class AccountInfo implements Runnable {
 
     @Option(names = { "-a", "--account-id" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
     private String accountIDInString;
-
-    public AccountInfo(InputReader inputReader) {
-        this.inputReader = inputReader;
-    }
 
     @Override
     public void run() {
