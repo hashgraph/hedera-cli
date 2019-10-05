@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -58,6 +59,25 @@ public class CryptoTransferMultiple implements Runnable {
 
     @Option(names = {"-a", "--recipientAmt"}, split = " ", arity = "1..*", description = "Amount to transfer")
     private String[] recipientAmt;
+
+    @Option(names = {"-n", "noPreview"}, arity = "0..1",
+            defaultValue = "yes",
+            fallbackValue = "no",
+            description = "Cryptotransfer preview option with optional parameter\n" +
+                    "Default: ${DEFAULT-VALUE},\n" +
+                    "if specified without parameters: ${FALLBACK-VALUE}")
+    private String mPreview = "no";
+
+    private String noPreview(String preview) {
+        if (preview.equals("no")) {
+            mPreview = preview;
+        } else if (preview.equals("yes")) {
+            mPreview = preview;
+        } else {
+            throw new CommandLine.ParameterException(spec.commandLine(), "Option -y removes preview");
+        }
+        return mPreview;
+    }
 
     private String senderAccountIDInString;
     private String memoString = "";
@@ -130,14 +150,42 @@ public class CryptoTransferMultiple implements Runnable {
             String jsonStringSender = ow.writeValueAsString(sender);
             String jsonStringRecipient = ow.writeValueAsString(map);
 
-            isInfoCorrect = inputReader.prompt("\nOperator\n" + operatorId
-                    + "\nSender\n" + jsonStringSender
-                    + "\nRecipient\n" + jsonStringRecipient
-                    + "\n\nyes/no \n" );
-            if (isInfoCorrect.equals("yes")) {
-                System.out.println("Info is correct, let's go!");
-            // Get balance is always free, does not require any keys
+            // handle preview error gracefully here
+            if (noPreview(mPreview).equals("no")) {
+                // do not show preview
+                executeCryptoTransferMultiple(client, senderAccountID, operatorId, cryptoTransferTransaction);
+            } else if (noPreview(mPreview).equals("yes")) {
+                // show preview and execute cryptotransfer
+                isInfoCorrect = promptPreview(operatorId, jsonStringSender, jsonStringRecipient);
+                if (isInfoCorrect.equals("yes")) {
+                    System.out.println("Info is correct, let's go!");
+                    executeCryptoTransferMultiple(client, senderAccountID, operatorId, cryptoTransferTransaction);
+                } else if (isInfoCorrect.equals("no")) {
+                    System.out.println("Nope, incorrect, let's make some changes");
+                } else {
+                    throw new CommandLine.ParameterException(spec.commandLine(), "Input must either been yes or no");
+                }
+            } else {
+                throw new CommandLine.ParameterException(spec.commandLine(), "Error in commandline");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String promptPreview(AccountId operatorId, String jsonStringSender, String jsonStringRecipient) {
+        return inputReader.prompt("\nOperator\n" + operatorId
+                + "\nSender\n" + jsonStringSender
+                + "\nRecipient\n" + jsonStringRecipient
+                + "\n\nyes/no \n");
+    }
+
+    private void executeCryptoTransferMultiple(Client client, AccountId senderAccountID, AccountId operatorId,
+                                               CryptoTransferTransaction cryptoTransferTransaction) {
+        try {
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
+
             var operatorBalanceBefore = client.getAccountBalance(operatorId);
             System.out.println(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
             System.out.println(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
@@ -158,15 +206,12 @@ public class CryptoTransferMultiple implements Runnable {
             var operatorBalanceAfter = client.getAccountBalance(operatorId);
             var senderBalanceAfter = client.getAccountBalance(senderAccountID);
 
+            // Get balance is always free, does not require any keys
             System.out.println(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
             System.out.println(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
 
             // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
             saveTransactionToJson(record);
-            }
-            else {
-                System.out.println("Nope, incorrect, let's make some changes");
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -77,14 +77,10 @@ public class CryptoTransfer implements Runnable {
         var recipientId = AccountId.fromString("0.0." + recipient);
         var amount = new BigInteger(recipientAmt);
 
-        System.out.println("What's this here " + mPreview);
         if (noPreview(mPreview).equals("no")) {
             executeCryptoTransfer(client, operatorId, recipientId, amount);
         } else if (noPreview(mPreview).equals("yes")) {
-            isInfoCorrect = inputReader.prompt("\nOperator: " + operatorId
-                    + "\nRecipient: " + recipientId + "\nAmount: " + amount
-                    + "\n\nIs this correct? \n"
-                    + "\n\nyes / no \n\n");
+            isInfoCorrect = promptPreview(operatorId, recipientId, amount);
             if (isInfoCorrect.equals("yes")) {
                 System.out.println("Info is correct, let's go!");
                 executeCryptoTransfer(client, operatorId, recipientId, amount);
@@ -94,9 +90,15 @@ public class CryptoTransfer implements Runnable {
                 throw new ParameterException(spec.commandLine(), "Input must either been yes or no");
             }
         } else {
-            System.out.println(" Kicked out?? " + mPreview);
-            // do nothing and exit
+            throw new CommandLine.ParameterException(spec.commandLine(), "Error in commandline");
         }
+    }
+
+    private String promptPreview(AccountId operatorId, AccountId recipientId, BigInteger amount) {
+        return inputReader.prompt("\nOperator: " + operatorId
+                + "\nRecipient: " + recipientId + "\nAmount: " + amount
+                + "\n\nIs this correct? \n"
+                + "\n\nyes / no \n\n");
     }
 
     public void executeCryptoTransfer(Client client, AccountId operatorId, AccountId recipientId, BigInteger amount) {
