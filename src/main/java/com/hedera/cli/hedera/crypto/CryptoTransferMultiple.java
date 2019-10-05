@@ -133,7 +133,7 @@ public class CryptoTransferMultiple implements Runnable {
             isInfoCorrect = inputReader.prompt("\nOperator\n" + operatorId
                     + "\nSender\n" + jsonStringSender
                     + "\nRecipient\n" + jsonStringRecipient
-                    + "\n\n yes/no \n" );
+                    + "\n\nyes/no \n" );
             if (isInfoCorrect.equals("yes")) {
                 System.out.println("Info is correct, let's go!");
             // Get balance is always free, does not require any keys
