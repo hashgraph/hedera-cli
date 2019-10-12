@@ -25,7 +25,7 @@ public class AccountUse implements Runnable {
     @Spec
     CommandSpec spec;
 
-    @Option(names = { "-a", "--account-id" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
+    @Option(names = { "-a", "--accountId" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
     private String accountId;
 
     @Override

@@ -37,12 +37,12 @@ public class CryptoTransfer implements Runnable {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"-r", "--recipient"}, arity = "1", description = "Recipient to transfer to"
+    @Option(names = {"-a", "--accountId"}, arity = "1", description = "Recipient's accountID to transfer to, shardNum and realmNum not needed"
             + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) transfer single -r=1234,-a=100|@")
+            + "@|fg(yellow) transfer single -a=1234,-r=100|@")
     private String recipient;
 
-    @Option(names = {"-a", "--recipientAmt"}, arity = "1", description = "Amount to transfer")
+    @Option(names = {"-r", "--recipientAmt"}, arity = "1", description = "Amount to transfer in tinybars")
     private String recipientAmt;
 
     @Option(names = {"-n", "--noPreview"}, arity = "0..1",
@@ -97,8 +97,8 @@ public class CryptoTransfer implements Runnable {
     private String promptPreview(AccountId operatorId, AccountId recipientId, BigInteger amount) {
         return inputReader.prompt("\nOperator: " + operatorId
                 + "\nRecipient: " + recipientId + "\nAmount: " + amount
-                + "\n\nIs this correct? \n"
-                + "\n\nyes / no \n\n");
+                + "\n\nIs this correct?"
+                + " \nyes/no");
     }
 
     public void executeCryptoTransfer(Client client, AccountId operatorId, AccountId recipientId, BigInteger amount) {

@@ -17,25 +17,25 @@ public class CryptoTransferTests {
 
         @Command class CryptoTransfer {
 
-            @Option(names = {"-r", "--recipient"}, arity = "0..1")
+            @Option(names = {"-a", "--accountId"}, arity = "0..1")
             private String recipient;
 
-            @Option(names = {"-a", "--recipientAmt"}, arity = "0..1")
+            @Option(names = {"-r", "--recipientAmt"}, arity = "0..1")
             private String recipientAmt;
 
         }
 
-        CryptoTransfer ct = CommandLine.populateCommand(new CryptoTransfer(), "-r=1234","-a=100");
+        CryptoTransfer ct = CommandLine.populateCommand(new CryptoTransfer(), "-a=1234","-r=100");
         assertEquals("1234", ct.recipient);
         assertEquals("100", ct.recipientAmt);
 
         CommandLine cmd = new CommandLine(new CryptoTransfer());
-        ParseResult result = cmd.parseArgs("-r=1111", "-a=1000");
-        assertTrue(result.hasMatchedOption("r"));
+        ParseResult result = cmd.parseArgs("-a=1111", "-r=1000");
         assertTrue(result.hasMatchedOption("a"));
-        assertEquals("1111", result.matchedOptionValue("r", "1111"));
-        assertEquals("1000", result.matchedOptionValue("a", "1000"));
-        assertEquals(Arrays.asList("-r=1111", "-a=1000"), result.originalArgs());
+        assertTrue(result.hasMatchedOption("r"));
+        assertEquals("1111", result.matchedOptionValue("a", "1111"));
+        assertEquals("1000", result.matchedOptionValue("r", "1000"));
+        assertEquals(Arrays.asList("-a=1111", "-r=1000"), result.originalArgs());
 
     }
 }

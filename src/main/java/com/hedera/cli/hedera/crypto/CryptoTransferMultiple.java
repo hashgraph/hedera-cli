@@ -51,13 +51,13 @@ public class CryptoTransferMultiple implements Runnable {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"-r", "--recipient"}, split = " ", arity = "1..*",
+    @Option(names = {"-a", "--accountId"}, split = " ", arity = "1..*",
             description = "Recipient accountID to transfer to, shardNum and realmNum not needed"
                     + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) transfer multiple -r=1001,1002,1003,-a=100,100,100|@")
+                    + "@|fg(yellow) transfer multiple -a=1001,1002,1003,-r=100,100,100|@")
     private String[] recipient;
 
-    @Option(names = {"-a", "--recipientAmt"}, split = " ", arity = "1..*", description = "Amount to transfer")
+    @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", description = "Amount to transfer in tinybar")
     private String[] recipientAmt;
 
     @Option(names = {"-n", "noPreview"}, arity = "0..1",
@@ -178,7 +178,8 @@ public class CryptoTransferMultiple implements Runnable {
         return inputReader.prompt("\nOperator\n" + operatorId
                 + "\nSender\n" + jsonStringSender
                 + "\nRecipient\n" + jsonStringRecipient
-                + "\n\nyes/no \n");
+                + "\n\nIs this correct?"
+                + "\nyes/no");
     }
 
     private void executeCryptoTransferMultiple(Client client, AccountId senderAccountID, AccountId operatorId,
