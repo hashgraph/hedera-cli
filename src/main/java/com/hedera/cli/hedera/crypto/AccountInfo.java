@@ -2,13 +2,17 @@ package com.hedera.cli.hedera.crypto;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.models.HederaAccount;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import lombok.Setter;
+import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -31,7 +35,7 @@ public class AccountInfo implements Runnable {
     private Ed25519PrivateKey accPrivKey;
     private InputReader inputReader;
 
-    @Option(names = { "-a", "--accountId" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
+    @Option(names = {"-a", "--accountId"}, description = "Account ID in %nshardNum.realmNum.accountNum format")
     private String accountIDInString;
 
     @Override
@@ -40,18 +44,23 @@ public class AccountInfo implements Runnable {
         accPrivKey = Ed25519PrivateKey.fromString(accPrivKeyInString);
         Hedera hedera = new Hedera(context);
         com.hedera.hashgraph.sdk.account.AccountInfo accountRes = getAccountInfo(hedera, accountIDInString, accPrivKey);
-        String[] accountInfo =
-                {
-                        "accountId: " + accountRes.getAccountId() +
-                                "\n contractId: " + accountRes.getContractAccountId() +
-                                "\n balance: " + accountRes.getBalance() +
-                                "\n claim: " + accountRes.getClaims() +
-                                "\n autoRenewPeriod: " + accountRes.getAutoRenewPeriod() +
-                                "\n expirationTime: " + accountRes.getExpirationTime() +
-                                "\n receivedRecordThreshold: " + accountRes.getGenerateReceiveRecordThreshold() +
-                                "\n proxyAccountId: " + accountRes.getProxyAccountId()
-                };
-        System.out.println(Arrays.asList(accountInfo));
+
+        JsonObject accountInfo = new JsonObject();
+        accountInfo.add("accountId", accountRes.getAccountId().toString());
+        accountInfo.add("contractId", accountRes.getContractAccountId());
+        accountInfo.add("balance", accountRes.getBalance());
+        accountInfo.add("claim", String.valueOf(accountRes.getClaims()));
+        accountInfo.add("autoRenewPeriod", accountRes.getAutoRenewPeriod().toMillis());
+        accountInfo.add("expirationTime", String.valueOf(accountRes.getExpirationTime()));
+        accountInfo.add("receivedRecordThreshold", accountRes.getGenerateReceiveRecordThreshold());
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+            mapper.writeValueAsString(accountInfo);
+            System.out.println(accountInfo);
+        } catch (Exception e) {
+            e.getMessage();
+        }
     }
 
     public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfo(Hedera hedera, String accountIDInString, Ed25519PrivateKey accPrivKey) {
@@ -67,6 +76,6 @@ public class AccountInfo implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  accountRes;
+        return accountRes;
     }
 }

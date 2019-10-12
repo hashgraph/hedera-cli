@@ -109,7 +109,6 @@ public class Setup implements Runnable {
       // create the account json and write it to disk
       Object jsonObject = mapper.readValue(account.toString(), HederaAccount.class);
       String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
-      System.out.println(accountValue);
       dataDirectory.writeFile(pathToAccountFile, accountValue);
       // default account
       dataDirectory.readFile(pathToDefaultTxt,fileName + ":" + accountId);
