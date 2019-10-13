@@ -14,6 +14,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @Component
@@ -58,7 +59,11 @@ public class KeyGeneration implements Runnable {
 
   public List<String> generateMnemonic(HGCSeed hgcSeed) {
     mnemonic = hgcSeed.toWordsList();
-    System.out.println("Your recovery words (store it safely): " + mnemonic);
+    // print
+    String result = mnemonic.stream()
+            .map(String::valueOf)
+            .collect(Collectors.joining(" ", "", ""));
+    System.out.println("Your recovery words (store it safely): " + result);
     return mnemonic;
   }
 
@@ -71,11 +76,6 @@ public class KeyGeneration implements Runnable {
       System.out.println(strMethod);
       keyPair = keyPairPriorToBipMigration(hgcSeed);
     }
-    System.out.println("Private key ASN.1 encoded: " + keyPair.getPrivateKeyEncodedHex()); // encoded works with index 0
-    System.out.println("Public key ASN.1 encoded: " + keyPair.getPublicKeyEncodedHex()); // encoded works with index 0
-    System.out.println("Private key HEX: " + keyPair.getPrivateKeyHex());
-    System.out.println("Public key HEX: " + keyPair.getPublicKeyHex());
-    System.out.println("Private key wallet/extension: " + keyPair.getSeedAndPublicKeyHex());
     return keyPair;
   }
 
