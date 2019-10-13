@@ -1,8 +1,9 @@
 package com.hedera.cli.hedera.crypto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.models.AccountInfoModel;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
@@ -44,20 +45,17 @@ public class AccountInfo implements Runnable {
         }
         com.hedera.hashgraph.sdk.account.AccountInfo accountRes = getAccountInfo(hedera, accountIDInString);
 
-        JsonObject accountInfo = new JsonObject();
-        accountInfo.add("accountId", accountRes.getAccountId().toString());
-        accountInfo.add("contractId", accountRes.getContractAccountId());
-        accountInfo.add("balance", accountRes.getBalance());
-        accountInfo.add("claim", String.valueOf(accountRes.getClaims()));
-        accountInfo.add("autoRenewPeriod(millisecond)", accountRes.getAutoRenewPeriod().toMillis() + "millisecond");
-        accountInfo.add("autoRenewPeriod(days)", accountRes.getAutoRenewPeriod().toDays() + " days");
-        accountInfo.add("expirationTime", String.valueOf(accountRes.getExpirationTime()));
-        accountInfo.add("receivedRecordThreshold", accountRes.getGenerateReceiveRecordThreshold());
+        AccountInfoModel accountInfo = new AccountInfoModel();
+        accountInfo.setAccountId(accountRes.getAccountId());
+        accountInfo.setContractId(accountRes.getContractAccountId());
+        accountInfo.setBalance(accountRes.getBalance());
+        accountInfo.setClaim(accountRes.getClaims());
+        accountInfo.setAutoRenewPeriod(accountRes.getAutoRenewPeriod());
+        accountInfo.setExpirationTime(accountRes.getExpirationTime());
+        accountInfo.setReceivedRecordThreshold(accountRes.getGenerateReceiveRecordThreshold());
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-            mapper.writeValueAsString(accountInfo);
-            shellHelper.printSuccess(String.valueOf(accountInfo));
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            shellHelper.printSuccess(ow.writeValueAsString(accountInfo));
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.bip39.Mnemonic;
@@ -18,22 +18,19 @@ import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.hedera.utils.Utils;
-import com.hedera.cli.models.HederaAccount;
+import com.hedera.cli.models.RecoveredAccountModel;
+import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
@@ -51,6 +48,9 @@ public class AccountRecovery implements Runnable {
     @Autowired
     ApplicationContext context;
 
+    @Autowired
+    ShellHelper shellHelper;
+
     @Option(names = {"-a", "--accountId"}, description = "Account ID in %nshardNum.realmNum.accountNum format")
     private String accountId;
 
@@ -60,7 +60,6 @@ public class AccountRecovery implements Runnable {
     private int index = 0;
     private InputReader inputReader;
     private Utils utils;
-    private AccountInfo accountInfo;
     private Hedera hedera;
     private com.hedera.hashgraph.sdk.account.AccountInfo accountRes;
     private KeyPair keyPair;
@@ -68,13 +67,11 @@ public class AccountRecovery implements Runnable {
     @Override
     public void run() {
         utils = new Utils();
-        accountInfo = new AccountInfo();
         hedera = new Hedera(context);
-        System.out.println("Recovering accountID in the format of 0.0.xxxx" + accountId);
+        shellHelper.print("Recovering accountID in the format of 0.0.xxxx" + accountId);
         strMethod = inputReader.prompt("Have you updated your account on Hedera wallet? If updated, enter `bip`, else enter `hgc`");
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = Arrays.asList(phrase.split(" "));
-        System.out.println(phraseList);
         // recover key from phrase
 
         if (strMethod.equals("bip")) {
@@ -84,7 +81,7 @@ public class AccountRecovery implements Runnable {
             keyPair = recoverEd25519AccountKeypair(phraseList);
             verifyAndSaveAccount();
         } else {
-            throw new ParameterException(spec.commandLine(), "Method must either been hgc or bip");
+            shellHelper.printError("Method must either been hgc or bip");
         }
     }
 
@@ -96,13 +93,13 @@ public class AccountRecovery implements Runnable {
                 if (!retrieveIndex()) {
                     printKeyPair(keyPair);
                     utils.saveAccountsToJson(keyPair, AccountId.fromString(accountId));
-                    System.out.println("Account recovered and saved in ~/.hedera");
+                    shellHelper.printSuccess("Account recovered and saved in ~/.hedera");
                 } else {
-                    System.out.println("This account already exists!");
+                    shellHelper.printWarning("This account already exists!");
                 }
             }
         } catch (Exception e) {
-            System.out.println("AccountId and Recovery words do not match");
+            shellHelper.printError("AccountId and Recovery words do not match");
         }
     }
 
@@ -115,7 +112,7 @@ public class AccountRecovery implements Runnable {
                     .setAccountId(AccountId.fromString(accountId));
             accountRes = q.execute();
         } catch (Exception e) {
-            e.getMessage();
+            shellHelper.printError(e.getMessage());
         }
         return accountRes;
     }
@@ -143,7 +140,7 @@ public class AccountRecovery implements Runnable {
             keyPair = new EDKeyPair(seed);
             printKeyPair(keyPair);
         } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
-            e.printStackTrace();
+            shellHelper.printError(e.getMessage());
         }
         return keyPair;
     }
@@ -154,21 +151,18 @@ public class AccountRecovery implements Runnable {
     }
 
     public void printKeyPair(KeyPair keyPair) {
-
-        JsonObject recoveredAccount = new JsonObject();
-        recoveredAccount.add("accountId", accountId);
-        recoveredAccount.add("privateKey", keyPair.getPrivateKeyHex());
-        recoveredAccount.add("publicKey", keyPair.getPublicKeyHex());
-        recoveredAccount.add("privateKeyEncoded", keyPair.getPrivateKeyEncodedHex());
-        recoveredAccount.add("publicKeyEncoded", keyPair.getPublicKeyEncodedHex());
-        recoveredAccount.add("privateKeyBrowserCompatible", keyPair.getSeedAndPublicKeyHex());
+        RecoveredAccountModel recoveredAccountModel = new RecoveredAccountModel();
+        recoveredAccountModel.setAccountId(accountId);
+        recoveredAccountModel.setPrivateKey(keyPair.getPrivateKeyHex());
+        recoveredAccountModel.setPublicKey(keyPair.getPublicKeyHex());
+        recoveredAccountModel.setPrivateKeyEncoded(keyPair.getPrivateKeyEncodedHex());
+        recoveredAccountModel.setPublicKeyEncoded(keyPair.getPublicKeyEncodedHex());
+        recoveredAccountModel.setPrivateKeyBrowserCompatible(keyPair.getSeedAndPublicKeyHex());
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-            mapper.writeValueAsString(recoveredAccount);
-            System.out.println(recoveredAccount);
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            shellHelper.print(ow.writeValueAsString(recoveredAccountModel));
         } catch (Exception e) {
-            e.getMessage();
+            shellHelper.printError(e.getMessage());
         }
     }
 }
