@@ -87,22 +87,22 @@ public class CryptoTransferMultipleTest {
         @Command
         class CryptoTransferMultiple {
 
-            @Option(names = {"-r", "--recipient"}, split = " ", arity = "0..*")
+            @Option(names = {"-a", "--accountId"}, split = " ", arity = "0..*")
             private String[] recipient;
 
-            @Option(names = {"-a", "--recipientAmt"}, split = " ", arity = "0..*")
+            @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "0..*")
             private String[] recipientAmt;
 
         }
 
-        CryptoTransferMultiple ct = CommandLine.populateCommand(new CryptoTransferMultiple(), "-r=1001,1002,1003","-a=100,200,300");
+        CryptoTransferMultiple ct = CommandLine.populateCommand(new CryptoTransferMultiple(), "-a=1001,1002,1003","-r=100,200,300");
         assertEquals(Collections.singletonList("1001,1002,1003"), Arrays.asList(ct.recipient));
         assertEquals(Collections.singletonList("100,200,300"), Arrays.asList(ct.recipientAmt));
 
         CommandLine cmd = new CommandLine(new CryptoTransfer());
-        ParseResult result = cmd.parseArgs("-r=1111,2222,3333", "-a=1000,200,3000");
-        assertTrue(result.hasMatchedOption("r"));
+        ParseResult result = cmd.parseArgs("-a=1111,2222,3333", "-r=1000,200,3000");
         assertTrue(result.hasMatchedOption("a"));
-        assertEquals(Arrays.asList("-r=1111,2222,3333","-a=1000,200,3000"), result.originalArgs());
+        assertTrue(result.hasMatchedOption("r"));
+        assertEquals(Arrays.asList("-a=1111,2222,3333","-r=1000,200,3000"), result.originalArgs());
     }
 }

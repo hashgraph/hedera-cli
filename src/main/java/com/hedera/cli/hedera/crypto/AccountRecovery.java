@@ -45,7 +45,7 @@ public class AccountRecovery implements Runnable {
     @Autowired
     ApplicationContext context;
 
-    @Option(names = {"-a", "--account-id"}, description = "Account ID in %nshardNum.realmNum.accountNum format")
+    @Option(names = {"-a", "--accountId"}, description = "Account ID in %nshardNum.realmNum.accountNum format")
     private String accountId;
 
     @Option(names = {"-m", "--method"}, arity = "1", defaultValue = "bip", description = "Recovers keypair from recovery phrase")
