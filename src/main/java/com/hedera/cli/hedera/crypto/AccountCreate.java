@@ -120,7 +120,6 @@ public class AccountCreate implements Runnable {
                 // The only _required_ property here is `key`
                 .setKey(privateKey.getPublicKey()).setInitialBalance(initBal)
                 .setAutoRenewPeriod(Duration.ofSeconds(7890000));
-
         // This will wait for the receipt to become available
         TransactionReceipt receipt = null;
         try {
