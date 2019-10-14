@@ -14,27 +14,24 @@ import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
-
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.hashgraph.sdk.account.AccountId;
-import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hjson.JsonObject;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import picocli.CommandLine.ParameterException;
+
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Spec;
 
 @NoArgsConstructor
 @Setter

@@ -90,7 +90,7 @@ public class Hedera {
             String currentAccountId = currentAccountId();
             if (accountId.equals(currentAccountId)) {
                 String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
-                HashMap currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
+                Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
                 privateKey = currentJsonAccount.get("privateKey").toString();
             }
         }
@@ -113,7 +113,7 @@ public class Hedera {
             String currentAccountId = currentAccountId();
             if (accountId.equals(currentAccountId)) {
                 String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
-                HashMap currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
+                Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
                 publicKey = currentJsonAccount.get("publicKey").toString();
             }
         }
