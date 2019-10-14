@@ -60,7 +60,7 @@ public class CryptoTransfer implements Runnable {
         } else if (preview.equals("yes")) {
             mPreview = preview;
         } else {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Option -y removes preview");
+            throw new CommandLine.ParameterException(spec.commandLine(), "Option -n removes preview");
         }
         return mPreview;
     }

@@ -46,23 +46,25 @@ public class AccountGetInfo implements Runnable {
             accountIDInString = hedera.getOperatorId().toString();
         }
         AccountInfo accountRes = getAccountInfo(hedera, accountIDInString);
+        if (accountRes != null) {
+            AccountInfoModel accountInfo = new AccountInfoModel();
+            accountInfo.setAccountId(accountRes.getAccountId());
+            accountInfo.setContractId(accountRes.getContractAccountId());
+            accountInfo.setBalance(accountRes.getBalance());
+            accountInfo.setClaim(accountRes.getClaims());
+            accountInfo.setAutoRenewPeriod(accountRes.getAutoRenewPeriod());
+            accountInfo.setExpirationTime(accountRes.getExpirationTime());
+            accountInfo.setReceivedRecordThreshold(accountRes.getGenerateReceiveRecordThreshold());
+            // accountInfo.setKey(accountRes.getKey());
 
-        AccountInfoModel accountInfo = new AccountInfoModel();
-        accountInfo.setAccountId(accountRes.getAccountId());
-        accountInfo.setContractId(accountRes.getContractAccountId());
-        accountInfo.setBalance(accountRes.getBalance());
-        accountInfo.setClaim(accountRes.getClaims());
-        accountInfo.setAutoRenewPeriod(accountRes.getAutoRenewPeriod());
-        accountInfo.setExpirationTime(accountRes.getExpirationTime());
-        accountInfo.setReceivedRecordThreshold(accountRes.getGenerateReceiveRecordThreshold());
-        // accountInfo.setKey(accountRes.getKey());
-
-        try {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            shellHelper.printSuccess(ow.writeValueAsString(accountInfo));
-        } catch (Exception e) {
-            shellHelper.printError(e.getMessage());
+            try {
+                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                shellHelper.printSuccess(ow.writeValueAsString(accountInfo));
+            } catch (Exception e) {
+                shellHelper.printError(e.getMessage());
+            }
         }
+        // do nothing
     }
 
     public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfo(Hedera hedera, String accountIDInString) {

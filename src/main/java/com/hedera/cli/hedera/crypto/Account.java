@@ -67,6 +67,7 @@ public class Account implements Runnable {
                 } else {
                     try {
                         AccountDelete accountDelete = factory.create(AccountDelete.class);
+                        accountDelete.setInputReader(inputReader);
                         new CommandLine(accountDelete).execute(args);
                     } catch (Exception e) {
                         e.printStackTrace();
