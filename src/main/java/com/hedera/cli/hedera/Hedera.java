@@ -1,26 +1,34 @@
 package com.hedera.cli.hedera;
 
-import com.hedera.cli.hedera.utils.DataDirectory;
-import com.hedera.cli.models.Network;
-import com.hedera.cli.models.AddressBook;
-import com.hedera.cli.models.HederaNode;
-import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.account.AccountId;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.models.AddressBook;
+import com.hedera.cli.models.HederaNode;
+import com.hedera.cli.models.Network;
+import com.hedera.cli.services.CurrentAccountService;
+import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+
+import org.springframework.context.ApplicationContext;
+
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+
 public class Hedera {
+
+    ApplicationContext context;
 
     private AddressBook addressBook;
     private HederaNode node;
 
-    public Hedera() {
+    public Hedera(ApplicationContext context) {
         addressBook = AddressBook.init();
         this.node = this.getRandomNode();
+        this.context = context;
     }
 
     private HederaNode getRandomNode() {
@@ -40,54 +48,89 @@ public class Hedera {
     }
 
     public AccountId getOperatorId() {
-       return retrieveDefaultAccountID();
+        AccountId operatorId;
+        boolean currentAccountExist = currentAccountExist();
+        if (currentAccountExist) {
+            String accountNumber = currentAccountId();
+            operatorId = AccountId.fromString(accountNumber);
+        } else {
+            AccountUtils accountUtils = new AccountUtils();
+            operatorId = accountUtils.retrieveDefaultAccountID();
+        }
+        return operatorId;
+    }
+
+    public boolean currentAccountExist() {
+        String accountNumber = currentAccountId();
+        if (!StringUtil.isNullOrEmpty(accountNumber)) {
+            // current account exists
+            return true;
+        }
+        return false;
+    }
+
+    public String currentAccountId() {
+        CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount");
+        return currentAccountService.getAccountNumber();
+    }
+
+    public String retrieveIndexAccountKeyInHexString() {
+        DataDirectory dataDirectory = new DataDirectory();
+        AccountUtils accountUtils = new AccountUtils();
+        String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
+
+        String accountId;
+        String value;
+        String privateKey = "";
+
+        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        for(Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
+            accountId = entry.getKey(); // key refers to the account id
+            value = entry.getValue(); // value refers to the filename json
+            String currentAccountId = currentAccountId();
+            if (accountId.equals(currentAccountId)) {
+                String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
+                Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
+                privateKey = currentJsonAccount.get("privateKey").toString();
+            }
+        }
+        return privateKey;
+    }
+
+    public String retrieveIndexAccountPublicKeyInHexString() {
+        DataDirectory dataDirectory = new DataDirectory();
+        AccountUtils accountUtils = new AccountUtils();
+        String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
+
+        String publicKey = "";
+        String accountId;
+        String value;
+
+        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        for(Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
+            accountId = entry.getKey(); // key refers to the account id
+            value = entry.getValue(); // value refers to the filename json
+            String currentAccountId = currentAccountId();
+            if (accountId.equals(currentAccountId)) {
+                String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
+                Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
+                publicKey = currentJsonAccount.get("publicKey").toString();
+            }
+        }
+        return publicKey;
     }
 
     public Ed25519PrivateKey getOperatorKey() {
-        return Ed25519PrivateKey.fromString(retrieveDefaultAccountKeyInHexString());
+        AccountUtils accountUtils = new AccountUtils();
+        String privateKeyInHexString;
+        boolean currentAccountExist = currentAccountExist();
+        if (currentAccountExist) {
+            privateKeyInHexString = retrieveIndexAccountKeyInHexString();
+        } else {
+            privateKeyInHexString = accountUtils.retrieveDefaultAccountKeyInHexString();
+        }
+        return Ed25519PrivateKey.fromString(privateKeyInHexString);
     }
-
-    private String pathToAccountsFolder() {
-        DataDirectory dataDirectory = new DataDirectory();
-        String networkName = dataDirectory.readFile("network.txt");
-        return networkName + File.separator + "accounts" + File.separator;
-    }
-
-    private String[] defaultAccountString() {
-        String pathToAccountsFolder = pathToAccountsFolder();
-        String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
-
-        // read the key value, the associated file in the list
-        DataDirectory dataDirectory = new DataDirectory();
-        String fileString = dataDirectory.readFile(pathToDefaultTxt);
-        return fileString.split(":");
-    }
-
-    public AccountId retrieveDefaultAccountID() {
-        String pathToAccountsFolder = pathToAccountsFolder();
-        String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
-
-        // read the key value, the associated file in the list
-        DataDirectory dataDirectory = new DataDirectory();
-        String fileString = dataDirectory.readFile(pathToDefaultTxt);
-        String[] accountString = fileString.split(":");
-        return AccountId.fromString(accountString[1]);
-    }
-
-    public String retrieveDefaultAccountKeyInHexString() {
-        DataDirectory dataDirectory = new DataDirectory();
-        String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
-        return defaultJsonAccount.get("privateKey").toString();
-    }
-
-    public String retrieveDefaultAccountPublicKeyInHexString() {
-        DataDirectory dataDirectory = new DataDirectory();
-        String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
-        return defaultJsonAccount.get("publicKey").toString();
-    }
-
 
     public Client createHederaClient() {
         // To connect to a network with more nodes, add additional entries to the
@@ -98,8 +141,7 @@ public class Hedera {
         // Defaults the operator account ID and key such that all generated transactions
         // will be paid for
         // by this account and be signed by this key
-        client.setOperator(getOperatorId(), getOperatorKey());
-
+        client.setOperator(getOperatorId(), getOperatorKey()).setMaxTransactionFee(100000000);
         return client;
     }
 

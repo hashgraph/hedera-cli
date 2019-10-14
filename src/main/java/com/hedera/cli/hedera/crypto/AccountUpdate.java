@@ -4,7 +4,11 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.account.AccountUpdateTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -13,6 +17,9 @@ import picocli.CommandLine.Option;
         description = "@|fg(225) Updates the account public key|@",
         subcommands = {})
 public class AccountUpdate implements Runnable {
+
+    @Autowired
+    ApplicationContext context;
 
     @Option(names = {"-a", "--account"}, description = "AccountId of public key to be updated")
     private String accountId;
@@ -23,7 +30,7 @@ public class AccountUpdate implements Runnable {
     @Override
     public void run() {
         try {
-            Hedera hedera = new Hedera();
+            Hedera hedera = new Hedera(context);
             var client = hedera.createHederaClient();
 
             boolean update = false;

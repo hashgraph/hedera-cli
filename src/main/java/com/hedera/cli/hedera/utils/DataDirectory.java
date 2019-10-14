@@ -1,18 +1,28 @@
 package com.hedera.cli.hedera.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedera.cli.hedera.setup.Setup;
-import com.hedera.cli.models.AddressBook;
-import com.hedera.cli.models.Network;
-import org.springframework.stereotype.Component;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedera.cli.models.AddressBook;
+import com.hedera.cli.models.Network;
+
+import org.springframework.stereotype.Component;
 
 @Component
 public class DataDirectory {
@@ -37,7 +47,7 @@ public class DataDirectory {
       AddressBook addressBook = mapper.readValue(addressBookInputStream, AddressBook.class);
       List<Network> networks = addressBook.getNetworks();
       DataDirectory dataDirectory = new DataDirectory();
-      for (Network network: networks) {
+      for (Network network : networks) {
         String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
         if (currentNetwork != null) {
           if (currentNetwork.equals(network.getName())) {
@@ -67,8 +77,7 @@ public class DataDirectory {
           }
         }
       }
-    }
-    catch (IOException e) {
+    } catch (IOException e) {
       e.printStackTrace();
     }
     return nodeName;
@@ -158,57 +167,88 @@ public class DataDirectory {
     return defaultValue;
   }
 
-  public HashMap<String, String> readFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
+  public HashMap<String, String> readWriteFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
     // check if index.txt exists, if not, create one
     Path filePath = Paths.get(userHome, directoryName, pathToFile);
     File file = new File(filePath.toString());
-      boolean fileExists = Files.exists(filePath);
-      if (!fileExists) {
-        // file does not exist so create a new file and write value
-        writeFile(pathToFile, defaultValue.toString());
-        return defaultValue;
-      }
-      try {
-        // file exist
-        Scanner reader = new Scanner(file);
-        // read the new value
-        String key = "";
-        String value = "";
-        for(Map.Entry<String, String> entry : defaultValue.entrySet()) {
-          key = entry.getKey();
-          value = entry.getValue();
-        }
-        // creates a new map
-        HashMap<String, String> updatedHashmap = new HashMap<>();
-        while (reader.hasNext()) {
-          // checks the old map
-          String line = reader.nextLine();
-          String sliceLine = line.substring(1, line.length()-1);
-          String[] splitLines = sliceLine.split(", ");
-          for (int i = 0; i< splitLines.length; i++) {
-            String[] keyValuePairs = splitLines[i].split("=");
-            updatedHashmap.put(keyValuePairs[0], keyValuePairs[1]);
-          }
-        }
-        // appends old map with new value
-        updatedHashmap.put(key,value);
-        // write to file
-        writeFile(pathToFile, updatedHashmap.toString());
-        return updatedHashmap;
-      } catch (Exception e ) {
-        e.printStackTrace();
-      }
+    boolean fileExists = Files.exists(filePath);
+    if (!fileExists) {
+      // file does not exist so create a new file and write value
+      writeFile(pathToFile, defaultValue.toString());
       return defaultValue;
+    }
+
+    try {
+      // file exist
+      Scanner reader = new Scanner(file);
+      // read the new value
+      String key = "";
+      String value = "";
+      for (Map.Entry<String, String> entry : defaultValue.entrySet()) {
+        key = entry.getKey();
+        value = entry.getValue();
+      }
+      // creates a new map
+      HashMap<String, String> updatedHashmap = new HashMap<>();
+      while (reader.hasNext()) {
+        // checks the old map
+        String line = reader.nextLine();
+        String sliceLine = line.substring(1, line.length() - 1);
+        String[] splitLines = sliceLine.split(", ");
+        for (int i = 0; i < splitLines.length; i++) {
+          String[] keyValuePairs = splitLines[i].split("=");
+          updatedHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+        }
+      }
+      // appends old map with new value
+      updatedHashmap.put(key, value);
+      // write to file
+      writeFile(pathToFile, updatedHashmap.toString());
+      reader.close();
+      return updatedHashmap;
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return defaultValue;
   }
 
-  public HashMap jsonToHashmap(String pathToFile) {
+  public HashMap<String, String> readFileHashmap(String pathToFile) {
+    // check if index.txt exists, if not, create one
     Path filePath = Paths.get(userHome, directoryName, pathToFile);
     File file = new File(filePath.toString());
-    HashMap newHashmap = new HashMap<>();
+    HashMap<String, String> mHashmap = new HashMap<>();
+
+    try {
+      // file exist
+      Scanner reader = new Scanner(file);
+      while (reader.hasNext()) {
+        // checks the old map
+        String line = reader.nextLine();
+        String sliceLine = line.substring(1, line.length() - 1);
+        String[] splitLines = sliceLine.split(", ");
+        for (int i = 0; i < splitLines.length; i++) {
+          String[] keyValuePairs = splitLines[i].split("=");
+          mHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+        }
+      }
+      reader.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return mHashmap;
+  }
+
+  public HashMap<String, String> jsonToHashmap(String pathToFile) {
+    Path filePath = Paths.get(userHome, directoryName, pathToFile);
+    File file = new File(filePath.toString());
+    HashMap<String, String> newHashmap = new HashMap<>();
     ObjectMapper mapper = new ObjectMapper();
     try {
-      String json = new Scanner(file).useDelimiter("\\Z").next();
-      newHashmap = mapper.readValue(json, HashMap.class);
+      Scanner reader = new Scanner(file);
+      String json = reader.useDelimiter("\\Z").next();
+      TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {};
+      newHashmap = mapper.readValue(json, typeRef);
+      reader.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -223,8 +263,7 @@ public class DataDirectory {
 
     try {
       Stream<Path> walk = Files.walk(path);
-      List<String> result = walk.map(x -> x.toString())
-              .filter(f -> f.endsWith(".json")).collect(Collectors.toList());
+      List<String> result = walk.map(x -> x.toString()).filter(f -> f.endsWith(".json")).collect(Collectors.toList());
       if (result.isEmpty()) {
         System.out.println("No Hedera accounts have created in the current network");
       }

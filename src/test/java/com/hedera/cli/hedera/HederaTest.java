@@ -3,20 +3,27 @@ package com.hedera.cli.hedera;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-import com.hedera.cli.models.Network;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.AddressBook;
+import com.hedera.cli.models.Network;
+import com.hedera.cli.services.CurrentAccountService;
 
-import com.hedera.hashgraph.sdk.account.AccountId;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.context.ContextConfiguration;
 
 
 @RunWith(MockitoJUnitRunner.class)
+@ContextConfiguration(classes = { CurrentAccountService.class })
 public class HederaTest {
+
+
+    @Mock
+    CurrentAccountService currentAccountService;
+
 
     @Test
     public void testGetRandomNode() {
@@ -30,24 +37,26 @@ public class HederaTest {
         assertEquals("mainnet", network.getName());
     }
 
-//    @Test
-//    public void testRetrieveDefaultAccountKeyInHexString() {
-//        Hedera hedera = new Hedera();
-//        String privateKey = hedera.retrieveDefaultAccountKeyInHexString();
-//        System.out.println(privateKey);
-//    }
+    @Test
+    public void testGetOperatorId() {
+        // AccountId operatorAccount;
+        // AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
+        // when(accountUtils
+        //         .retrieveDefaultAccountID())
+        //         .thenReturn(AccountId.fromString("0.0.1234"));
+
+
+//        String testAccountNumber = "0.0.1001";
+//        // retrieve our singleton and set our test value in it
+//        currentAccountService = (CurrentAccountService) context.getBean("currentAccount", CurrentAccountService.class);
+//        accountService.setAccountNumber(testAccountNumber);
+//        CurrentAccountService accountServiceAgain = context.getBean("currentAccount", CurrentAccountService.class);
+//        String currentAccount = accountServiceAgain.getAccountNumber();
+
+//        Hedera hedera = Mockito.mock(Hedera.class);
+//        when(hedera.currentAccountExist()).thenReturn(true);
 //
-//    @Test
-//    public void testRetrieveDefaultAccountPublicKeyInHexString() {
-//        Hedera hedera = new Hedera();
-//        String publicKey = hedera.retrieveDefaultAccountPublicKeyInHexString();
-//        System.out.println(publicKey);
-//    }
-//
-//    @Test
-//    public void testRetrieveDefaultAccountID() {
-//        Hedera hedera = new Hedera();
-//        AccountId accountId = hedera.retrieveDefaultAccountID();
-//        System.out.println(accountId);
-//    }
+//        operatorAccount = hedera.getOperatorId();
+//        assertEquals(AccountId.fromString(currentAccount), operatorAccount);
+    }
 }

@@ -13,9 +13,9 @@ public class SetupTest {
 
     @Test
     public void testSaveToJson() {
-        Setup setup = new Setup();
-        String accountId = "";
-        String phrase = "";
+        // Setup setup = new Setup();
+        // String accountId = "";
+        // String phrase = "";
 //        setup.saveToJson(accountId, phrase);
     }
 

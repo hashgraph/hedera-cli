@@ -2,7 +2,11 @@ package com.hedera.cli.hedera.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.hedera.cli.hedera.keygen.KeyPair;
+import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.models.TransactionObj;
+import com.hedera.hashgraph.sdk.account.AccountId;
+import org.hjson.JsonObject;
 
 import java.io.File;
 import java.text.ParseException;
@@ -34,7 +38,7 @@ public class Utils {
             jsonString = ow.writeValueAsString(obj);
             DataDirectory dataDirectory = new DataDirectory();
             String networkName = dataDirectory.readFile("network.txt");
-            String pathToTransactionFolder = networkName + File.separator + "transaction" + File.separator;
+            String pathToTransactionFolder = networkName + File.separator + "transactions" + File.separator;
             filename = txID + ".json";
             String pathToTransactionFile = pathToTransactionFolder + filename;
             dataDirectory.mkHederaSubDir(pathToTransactionFolder);
@@ -42,5 +46,15 @@ public class Utils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void saveAccountsToJson(KeyPair keyPair, AccountId accountId) {
+        JsonObject account = new JsonObject();
+        account.add("accountId", accountId.toString());
+        account.add("privateKey", keyPair.getPrivateKeyHex());
+        account.add("publicKey", keyPair.getPublicKeyHex());
+        System.out.println(account);
+        Setup setup = new Setup();
+        setup.saveToJson(accountId.toString(), account);
     }
 }

@@ -1,31 +1,30 @@
 package com.hedera.cli.hedera.setup;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.bip39.Mnemonic;
-import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicChecksumException;
-import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicLengthException;
-import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
 import com.hedera.cli.hedera.botany.AdjectivesWordList;
 import com.hedera.cli.hedera.botany.BotanyWordList;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
-import com.hedera.cli.hedera.keygen.CryptoUtils;
-import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.hjson.JsonObject;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Spec;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.ParameterException;
+import picocli.CommandLine.Spec;
 
 @Component
 @Command(name = "setup", description = "")
@@ -38,9 +37,6 @@ public class Setup implements Runnable {
           + "%nor account creations are before 13 September 2019. Input -m=bip if passphrases have been migrated on the wallet,"
           + "%nor account creations are after 13 September 2019")
   private String strMethod = "bip";
-
-  // default index 0 is compatible with Hedera wallet apps
-  private int index = 0;
 
   @Override
   public void run() {
@@ -57,14 +53,19 @@ public class Setup implements Runnable {
     // recover key from phrase
     KeyPair keyPair;
     AccountRecovery ac = new AccountRecovery();
-    if (strMethod.contains("bip")) {
+    if (strMethod.equals("bip")) {
       keyPair =  ac.recoverEDKeypairPostBipMigration(phraseList);
-    } else {
+      ac.printKeyPair(keyPair);
+      JsonObject account = addAccountToJson(accountId, keyPair);
+      saveToJson(accountId, account);
+    } else if (strMethod.equals("hgc")){
       keyPair = ac.recoverEd25519AccountKeypair(phraseList);
+      ac.printKeyPair(keyPair);
+      JsonObject account = addAccountToJson(accountId, keyPair);
+      saveToJson(accountId, account);
+    } else {
+      throw new ParameterException(spec.commandLine(), "Method must either been bip or hgc");
     }
-    ac.printKeyPair(keyPair);
-    JsonObject account = addAccountToJson(accountId, keyPair);
-    saveToJson(accountId, account);
   }
 
   public JsonObject addAccountToJson(String accountId, KeyPair keyPair ) {
@@ -77,6 +78,16 @@ public class Setup implements Runnable {
     return account;
   }
 
+  public JsonObject addAccountToJsonWithPrivateKey(String accountId, Ed25519PrivateKey privateKey) {
+    JsonObject account = new JsonObject();
+    System.out.println("private key " + privateKey);
+    System.out.println("public key " + privateKey.getPublicKey().toString());
+    account.add("accountId", accountId);
+    account.add("privateKey", privateKey.toString());
+    account.add("publicKey", privateKey.getPublicKey().toString());
+    return account;
+  }
+
   public void saveToJson(String accountId, JsonObject account) {
     // ~/.hedera/[network_name]/accounts/[account_name].json
     DataDirectory dataDirectory = new DataDirectory();
@@ -86,9 +97,10 @@ public class Setup implements Runnable {
 
     String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
     String pathToAccountFile =  pathToAccountsFolder +  fileNameWithExt;
-    String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
 
+    String pathToDefaultTxt = pathToAccountsFolder +  "default.txt";
     String pathToIndexTxt = pathToAccountsFolder + "index.txt";
+
     HashMap<String, String> mHashMap = new HashMap<>();
     mHashMap.put(accountId, fileName);
     ObjectMapper mapper = new ObjectMapper();
@@ -99,9 +111,11 @@ public class Setup implements Runnable {
       String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
       System.out.println(accountValue);
       dataDirectory.writeFile(pathToAccountFile, accountValue);
+      // default account
       dataDirectory.readFile(pathToDefaultTxt,fileName + ":" + accountId);
-      // mark this account as the default
-      dataDirectory.readFileHashmap(pathToIndexTxt, mHashMap);
+      // current account
+      // write to index if account does not yet exist in index
+      dataDirectory.readWriteFileHashmap(pathToIndexTxt, mHashMap);
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -1,9 +1,17 @@
 package com.hedera.cli.hedera.file;
 
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
 import java.util.Arrays;
 
+import com.hedera.cli.config.InputReader;
+import com.hedera.cli.hedera.crypto.PicocliSpringFactory;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+
+@Component
 @Command(name = "file", description = "@|fg(225) Create, update, delete file.|@"
         + "%n@|fg(yellow) file create <args> OR"
         + "%nfile update <args> OR"
@@ -17,14 +25,21 @@ public class File implements Runnable {
         CommandLine.usage(this, System.out);
     }
 
-    public void handle(String subCommand, String... args) {
+    public void handle(ApplicationContext context, InputReader inputReader, String subCommand, String... args) {
+        PicocliSpringFactory factory = new PicocliSpringFactory(context);
+
         switch (subCommand) {
             case "create":
                 System.out.println(Arrays.asList(args));
                 if (args.length == 0) {
                     CommandLine.usage(new FileCreate(), System.out);
                 } else {
-                    new CommandLine(new FileCreate()).execute(args);
+                    try {
+                        FileCreate fileCreate = factory.create(FileCreate.class);
+                        new CommandLine(fileCreate).execute(args);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case "delete":
@@ -32,7 +47,12 @@ public class File implements Runnable {
                 if (args.length == 0) {
                     CommandLine.usage(new FileDelete(), System.out);
                 } else {
-                    new CommandLine(new FileDelete()).execute(args);
+                    try {
+                        FileDelete fileDelete = factory.create(FileDelete.class);
+                        new CommandLine(fileDelete).execute(args);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
                 break;
             case "update":

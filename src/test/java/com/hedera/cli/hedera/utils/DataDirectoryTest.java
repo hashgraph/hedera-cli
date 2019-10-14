@@ -83,7 +83,7 @@ public class DataDirectoryTest {
     }
 
     @Test
-    public void testReadFileHashmap() throws IOException {
+    public void testReadWriteFileHashmap() throws IOException {
 
         // create new file with a single key value pair
         String pathToFile = "index.txt";
@@ -105,9 +105,9 @@ public class DataDirectoryTest {
         if (!fileExists) {
             // do nothing here
         }
+        Scanner reader = new Scanner(file);;
         try {
             // file exist
-            Scanner reader = new Scanner(file);
             // read the new value
             String key = "";
             String value = "";
@@ -137,6 +137,8 @@ public class DataDirectoryTest {
             assertEquals(updatedHashmap,expectedHashmap);
         } catch (Exception e ) {
             e.printStackTrace();
+        } finally {
+            reader.close();
         }
     }
 
@@ -164,6 +166,7 @@ public class DataDirectoryTest {
                 newHashmap.put(keyValuePairs[0], keyValuePairs[1]);
             }
         }
+        reader.close();
         System.out.println(newHashmap);
     }
 }
