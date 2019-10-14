@@ -15,6 +15,7 @@ import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.cli.models.Recipient;
 import com.hedera.cli.models.Sender;
 import com.hedera.cli.models.TransactionObj;
+import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.Transaction;
 import com.hedera.hashgraph.sdk.TransactionRecord;
@@ -47,6 +48,9 @@ public class CryptoTransferMultiple implements Runnable {
 
     @Autowired
     ApplicationContext context;
+
+    @Autowired
+    ShellHelper shellHelper;
 
     @Spec
     CommandSpec spec;
@@ -105,7 +109,7 @@ public class CryptoTransferMultiple implements Runnable {
             var operatorId = hedera.getOperatorId();
 
             // Currently set max fee as 1 hbar = 100,000,000 tinybars
-            var client = hedera.createHederaClient().setMaxTransactionFee(100000000);
+            var client = hedera.createHederaClient();
 
             // Create a multi-sender crypto transfer where sender does not have to pay
             // transaction fees = network fee + node fee
@@ -113,8 +117,10 @@ public class CryptoTransferMultiple implements Runnable {
             BigInteger transferAmount = new BigInteger(transferAmountInStr);
 
             // Sender and recipient's total must always be zero
-            var senderTotal = sumOfTransfer(recipientAmt);
-            System.out.println("Sender total: " + -senderTotal);
+            long senderTotal = sumOfTransfer(recipientAmt) - transferAmount.longValue();
+            if (senderTotal != 0) {
+                shellHelper.printError("Transaction total amount must add up to a zero sum!");
+            }
 
             // Simple check, can be more comprehensive
             var map = verifiedRecipientMap(recipientList, amountList);
@@ -129,7 +135,7 @@ public class CryptoTransferMultiple implements Runnable {
             // Dynamic population of recipient List
             map.forEach((key, value) -> {
                 if (map.size() != amountList.size()) {
-                    throw new IllegalArgumentException("Please check your recipient list");
+                    shellHelper.printError("Please check your recipient list");
                 }
                 var account = value.accountId;
                 var amount = value.amount;
@@ -158,19 +164,19 @@ public class CryptoTransferMultiple implements Runnable {
                 // show preview and execute cryptotransfer
                 isInfoCorrect = promptPreview(operatorId, jsonStringSender, jsonStringRecipient);
                 if (isInfoCorrect.equals("yes")) {
-                    System.out.println("Info is correct, let's go!");
+                    shellHelper.print("Info is correct, let's go!");
                     executeCryptoTransferMultiple(client, senderAccountID, operatorId, cryptoTransferTransaction);
                 } else if (isInfoCorrect.equals("no")) {
-                    System.out.println("Nope, incorrect, let's make some changes");
+                    shellHelper.print("Nope, incorrect, let's make some changes");
                 } else {
-                    throw new CommandLine.ParameterException(spec.commandLine(), "Input must either been yes or no");
+                    shellHelper.printError("Input must either been yes or no");
                 }
             } else {
-                throw new CommandLine.ParameterException(spec.commandLine(), "Error in commandline");
+                shellHelper.printError("Error in commandline");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            shellHelper.printError(e.getMessage());
         }
     }
 
@@ -188,9 +194,8 @@ public class CryptoTransferMultiple implements Runnable {
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
 
             var operatorBalanceBefore = client.getAccountBalance(operatorId);
-            System.out.println(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
-            System.out.println(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
-            System.out.println("CryptoTransferTransaction");
+            shellHelper.print(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
+            shellHelper.print(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
 
             // Since there is more than 1 sender in this multi-sender transaction example
             // ie operator and sender,
@@ -203,30 +208,30 @@ public class CryptoTransferMultiple implements Runnable {
             TransactionRecord record = Transaction.fromBytes(client, signedTxnBytes)
                     .executeForRecord();
 
-            System.out.println("transferring...");
+            shellHelper.printInfo("transferring...");
             var operatorBalanceAfter = client.getAccountBalance(operatorId);
             var senderBalanceAfter = client.getAccountBalance(senderAccountID);
 
             // Get balance is always free, does not require any keys
-            System.out.println(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
-            System.out.println(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
-
+            shellHelper.print(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
+            shellHelper.print(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
             // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
             saveTransactionToJson(record);
         } catch (Exception e) {
-            e.printStackTrace();
+            shellHelper.printError(e.getMessage());
         }
     }
 
     private void saveTransactionToJson(TransactionRecord record) {
-        System.out.println("Transfer tx ID : " + record.getTransactionId().getAccountId().toString());
-        System.out.println("Transfer tx ID valid start: " + record.getTransactionId().getValidStart().toString());
-        System.out.println("Transfer tx ID valid start seconds: " + record.getTransactionId().getValidStart().getEpochSecond());
-        System.out.println("Transfer tx ID valid start nano: " + record.getTransactionId().getValidStart().getNano());
-        System.out.println("Transfer tx fee: " + record.getTransactionFee());
-        System.out.println("Transfer consensus timestamp: " + record.getConsensusTimestamp());
-        System.out.println("Transfer receipt status: " + record.getReceipt().getStatus());
-        System.out.println("Transfer memo: " + record.getMemo());
+        shellHelper.printSuccess("Success!");
+        shellHelper.printSuccess("Transfer tx ID : " + record.getTransactionId().getAccountId().toString());
+        shellHelper.printSuccess("Transfer tx ID valid start: " + record.getTransactionId().getValidStart().toString());
+        shellHelper.printSuccess("Transfer tx ID valid start seconds: " + record.getTransactionId().getValidStart().getEpochSecond());
+        shellHelper.printSuccess("Transfer tx ID valid start nano: " + record.getTransactionId().getValidStart().getNano());
+        shellHelper.printSuccess("Transfer tx fee: " + record.getTransactionFee());
+        shellHelper.printSuccess("Transfer consensus timestamp: " + record.getConsensusTimestamp());
+        shellHelper.printSuccess("Transfer receipt status: " + record.getReceipt().getStatus());
+        shellHelper.printSuccess("Transfer memo: " + record.getMemo());
 
         String txTimestamp = record.getTransactionId().getValidStart().getEpochSecond() + "-"
                 + record.getTransactionId().getValidStart().getNano();
@@ -253,11 +258,12 @@ public class CryptoTransferMultiple implements Runnable {
         AccountId accountId;
         String acc, amt;
         Map<Integer, Recipient> map = new HashMap<>();
+        // TODO: unused local variable?
         long sum = 0;
 
         try {
             if (accountList.size() != amountList.size())
-                throw new IllegalArgumentException("Lists aren't the same size");
+                shellHelper.printError("Lists aren't the same size");
             else {
                 for (int i = 0; i < accountList.size(); ++i) {
                     acc = accountList.get(i);
@@ -267,16 +273,15 @@ public class CryptoTransferMultiple implements Runnable {
                             accountId = AccountId.fromString("0.0." + acc);
                             var amount = new BigInteger(amt);
                             sum += amount.longValue();
-                            Recipient recipient = new Recipient(accountId, amount.longValue());
-                            map.put(i, recipient);
+                            Recipient recipient1 = new Recipient(accountId, amount.longValue());
+                            map.put(i, recipient1);
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            shellHelper.printError(e.getMessage());
         }
-        System.out.println("Recipients total is " + sum);
         return map;
     }
 

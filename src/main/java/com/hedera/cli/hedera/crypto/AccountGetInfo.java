@@ -1,15 +1,14 @@
 package com.hedera.cli.hedera.crypto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.hedera.cli.config.InputReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.models.AccountInfoModel;
+import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
-import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -33,8 +32,8 @@ public class AccountGetInfo implements Runnable {
     @Autowired
     ApplicationContext context;
 
-    private Ed25519PrivateKey accPrivKey;
-    private InputReader inputReader;
+    @Autowired
+    ShellHelper shellHelper;
 
     @Option(names = {"-a", "--accountId"}, arity = "0..1", description = "Account ID in %nshardNum.realmNum.accountNum format")
     private String accountIDInString;
@@ -48,22 +47,21 @@ public class AccountGetInfo implements Runnable {
         }
         AccountInfo accountRes = getAccountInfo(hedera, accountIDInString);
 
-        JsonObject accountInfo = new JsonObject();
-        accountInfo.add("accountId", accountRes.getAccountId().toString());
-        accountInfo.add("contractId", accountRes.getContractAccountId());
-        accountInfo.add("balance", accountRes.getBalance());
-        accountInfo.add("claim", String.valueOf(accountRes.getClaims()));
-        accountInfo.add("autoRenewPeriod", accountRes.getAutoRenewPeriod().toMillis() + "millisecond");
-        accountInfo.add("autoRenewPeriod1", accountRes.getAutoRenewPeriod().toDays() + " days");
-        accountInfo.add("expirationTime", String.valueOf(accountRes.getExpirationTime()));
-        accountInfo.add("receivedRecordThreshold", accountRes.getGenerateReceiveRecordThreshold());
+        AccountInfoModel accountInfo = new AccountInfoModel();
+        accountInfo.setAccountId(accountRes.getAccountId());
+        accountInfo.setContractId(accountRes.getContractAccountId());
+        accountInfo.setBalance(accountRes.getBalance());
+        accountInfo.setClaim(accountRes.getClaims());
+        accountInfo.setAutoRenewPeriod(accountRes.getAutoRenewPeriod());
+        accountInfo.setExpirationTime(accountRes.getExpirationTime());
+        accountInfo.setReceivedRecordThreshold(accountRes.getGenerateReceiveRecordThreshold());
+        // accountInfo.setKey(accountRes.getKey());
+
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-            mapper.writeValueAsString(accountInfo);
-            System.out.println(accountInfo);
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            shellHelper.printSuccess(ow.writeValueAsString(accountInfo));
         } catch (Exception e) {
-            e.getMessage();
+            shellHelper.printError(e.getMessage());
         }
     }
 
@@ -78,7 +76,7 @@ public class AccountGetInfo implements Runnable {
                     .setAccountId(AccountId.fromString(accountIDInString));
             accountRes = q.execute();
         } catch (Exception e) {
-            e.printStackTrace();
+            shellHelper.printError(e.getMessage());
         }
         return accountRes;
     }
