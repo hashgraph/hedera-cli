@@ -55,7 +55,6 @@ public class Account implements Runnable {
                 } else {
                     try {
                         AccountGetInfo accountInfo = factory.create(AccountGetInfo.class);
-                        accountInfo.setInputReader(inputReader);
                         new CommandLine(accountInfo).execute(args);
                     } catch (Exception e) {
                         e.printStackTrace();
