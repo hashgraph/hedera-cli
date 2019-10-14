@@ -2,6 +2,7 @@ package com.hedera.cli.models;
 
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.Claim;
+import com.hedera.hashgraph.sdk.crypto.Key;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,4 +21,5 @@ public class AccountInfoModel {
     Duration autoRenewPeriod;
     Instant expirationTime;
     long receivedRecordThreshold;
+    Key key;
 }

@@ -106,7 +106,7 @@ public class AccountRecovery implements Runnable {
     public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId, Ed25519PrivateKey accPrivKey) {
         try {
             var client = hedera.createHederaClient()
-                    .setOperator(AccountId.fromString(accountId), accPrivKey);
+                    .setOperator(hedera.getOperatorId(), hedera.getOperatorKey());
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)
                     .setAccountId(AccountId.fromString(accountId));
