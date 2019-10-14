@@ -1,6 +1,5 @@
 package com.hedera.cli.hedera;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,7 +82,7 @@ public class Hedera {
         String value;
         String privateKey = "";
 
-        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        Map<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
         for(Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
             accountId = entry.getKey(); // key refers to the account id
             value = entry.getValue(); // value refers to the filename json
@@ -106,7 +105,7 @@ public class Hedera {
         String accountId;
         String value;
 
-        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        Map<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
         for(Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
             accountId = entry.getKey(); // key refers to the account id
             value = entry.getValue(); // value refers to the filename json

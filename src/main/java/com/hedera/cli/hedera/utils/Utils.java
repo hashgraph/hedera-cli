@@ -53,7 +53,6 @@ public class Utils {
         account.add("accountId", accountId.toString());
         account.add("privateKey", keyPair.getPrivateKeyHex());
         account.add("publicKey", keyPair.getPublicKeyHex());
-        System.out.println(account);
         Setup setup = new Setup();
         setup.saveToJson(accountId.toString(), account);
     }
