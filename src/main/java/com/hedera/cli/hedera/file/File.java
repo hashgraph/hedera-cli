@@ -1,13 +1,15 @@
 package com.hedera.cli.hedera.file;
 
+import java.util.Arrays;
+
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.crypto.AccountCreate;
 import com.hedera.cli.hedera.crypto.PicocliSpringFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import java.util.Arrays;
 
 @Component
 @Command(name = "file", description = "@|fg(225) Create, update, delete file.|@"
