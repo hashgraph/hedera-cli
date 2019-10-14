@@ -7,17 +7,14 @@ import com.hedera.cli.models.AccountInfoModel;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
-import com.hedera.hashgraph.sdk.proto.Key;
 
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
-import lombok.Setter;
-import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 

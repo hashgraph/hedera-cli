@@ -258,6 +258,7 @@ public class CryptoTransferMultiple implements Runnable {
         AccountId accountId;
         String acc, amt;
         Map<Integer, Recipient> map = new HashMap<>();
+        // TODO: unused local variable?
         long sum = 0;
 
         try {

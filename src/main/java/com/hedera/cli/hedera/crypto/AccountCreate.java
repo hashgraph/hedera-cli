@@ -3,7 +3,6 @@ package com.hedera.cli.hedera.crypto;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.Hedera;
@@ -12,14 +11,12 @@ import com.hedera.cli.hedera.keygen.HGCSeed;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.Setup;
-import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
 import org.hjson.JsonObject;
@@ -73,7 +70,6 @@ public class AccountCreate implements Runnable {
     private String strMethod = "bip";
 
     private AccountId accountID;
-    private AccountUtils accountUtils = new AccountUtils();
     private JsonObject account;
 
     @Override

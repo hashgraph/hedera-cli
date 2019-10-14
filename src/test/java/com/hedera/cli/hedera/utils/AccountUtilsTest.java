@@ -1,8 +1,11 @@
 package com.hedera.cli.hedera.utils;
 
-import com.hedera.cli.hedera.Hedera;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
 import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.hashgraph.sdk.account.AccountId;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -10,11 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.HashMap;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {CurrentAccountService.class})
