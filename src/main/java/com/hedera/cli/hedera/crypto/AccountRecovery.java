@@ -16,7 +16,6 @@ import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
-
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
@@ -26,17 +25,21 @@ import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
-import picocli.CommandLine.Model.CommandSpec;
 
 @NoArgsConstructor
+@Getter
 @Setter
 @Component
 @Command(name = "recovery", description = "@|fg(225) Recovers a Hedera account via the 24 recovery words.|@", helpCommand = true)
@@ -60,6 +63,7 @@ public class AccountRecovery implements Runnable {
     private int index = 0;
     private InputReader inputReader;
     private Utils utils;
+    private AccountGetInfo accountInfo;
     private Hedera hedera;
     private com.hedera.hashgraph.sdk.account.AccountInfo accountRes;
     private KeyPair keyPair;
@@ -67,6 +71,7 @@ public class AccountRecovery implements Runnable {
     @Override
     public void run() {
         utils = new Utils();
+        accountInfo = new AccountGetInfo();
         hedera = new Hedera(context);
         shellHelper.print("Recovering accountID in the format of 0.0.xxxx" + accountId);
         strMethod = inputReader.prompt("Have you updated your account on Hedera wallet? If updated, enter `bip`, else enter `hgc`");

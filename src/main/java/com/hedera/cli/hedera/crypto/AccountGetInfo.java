@@ -6,6 +6,7 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountInfoModel;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,18 +14,20 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @NoArgsConstructor
+@Getter
 @Setter
 @Component
 @Command(name = "info",
         description = "@|fg(225) Gets the information of the paying/operator account"
                 + " returns a stateproof if requested|@")
-public class AccountInfo implements Runnable {
+public class AccountGetInfo implements Runnable {
 
     @Autowired
     ApplicationContext context;
@@ -42,7 +45,7 @@ public class AccountInfo implements Runnable {
         if (StringUtil.isNullOrEmpty(accountIDInString)) {
             accountIDInString = hedera.getOperatorId().toString();
         }
-        com.hedera.hashgraph.sdk.account.AccountInfo accountRes = getAccountInfo(hedera, accountIDInString);
+        AccountInfo accountRes = getAccountInfo(hedera, accountIDInString);
 
         AccountInfoModel accountInfo = new AccountInfoModel();
         accountInfo.setAccountId(accountRes.getAccountId());
