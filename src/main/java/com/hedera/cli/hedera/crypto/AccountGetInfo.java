@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
@@ -14,18 +15,20 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @NoArgsConstructor
+@Getter
 @Setter
 @Component
 @Command(name = "info",
         description = "@|fg(225) Gets the information of the paying/operator account"
                 + " returns a stateproof if requested|@")
-public class AccountInfo implements Runnable {
+public class AccountGetInfo implements Runnable {
 
     @Autowired
     ApplicationContext context;
@@ -43,7 +46,7 @@ public class AccountInfo implements Runnable {
         if (StringUtil.isNullOrEmpty(accountIDInString)) {
             accountIDInString = hedera.getOperatorId().toString();
         }
-        com.hedera.hashgraph.sdk.account.AccountInfo accountRes = getAccountInfo(hedera, accountIDInString);
+        AccountInfo accountRes = getAccountInfo(hedera, accountIDInString);
 
         JsonObject accountInfo = new JsonObject();
         accountInfo.add("accountId", accountRes.getAccountId().toString());

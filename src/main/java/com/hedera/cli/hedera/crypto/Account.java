@@ -11,7 +11,7 @@ import picocli.CommandLine.Command;
 @Component
 @Command(name = "account", description = "@|fg(225) Create, update, delete or querying an account by providing the <args>|@"
         + "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. account create <args>|@", subcommands = {
-        AccountCreate.class, AccountUpdate.class, AccountInfo.class, AccountDefault.class, AccountDelete.class,
+        AccountCreate.class, AccountUpdate.class, AccountGetInfo.class, AccountDefault.class, AccountDelete.class,
         AccountRecovery.class, AccountList.class, AccountUse.class})
 public class Account implements Runnable {
 
@@ -51,10 +51,10 @@ public class Account implements Runnable {
                 break;
             case "info":
                 if (args.length == 0) {
-                    CommandLine.usage(new AccountInfo(), System.out);
+                    CommandLine.usage(new AccountGetInfo(), System.out);
                 } else {
                     try {
-                        AccountInfo accountInfo = factory.create(AccountInfo.class);
+                        AccountGetInfo accountInfo = factory.create(AccountGetInfo.class);
                         accountInfo.setInputReader(inputReader);
                         new CommandLine(accountInfo).execute(args);
                     } catch (Exception e) {

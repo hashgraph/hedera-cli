@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import picocli.CommandLine.Command;
@@ -38,6 +39,7 @@ import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Spec;
 
 @NoArgsConstructor
+@Getter
 @Setter
 @Component
 @Command(name = "recovery", description = "@|fg(225) Recovers a Hedera account via the 24 recovery words.|@", helpCommand = true)
@@ -58,7 +60,7 @@ public class AccountRecovery implements Runnable {
     private int index = 0;
     private InputReader inputReader;
     private Utils utils;
-    private AccountInfo accountInfo;
+    private AccountGetInfo accountInfo;
     private Hedera hedera;
     private com.hedera.hashgraph.sdk.account.AccountInfo accountRes;
     private KeyPair keyPair;
@@ -66,7 +68,7 @@ public class AccountRecovery implements Runnable {
     @Override
     public void run() {
         utils = new Utils();
-        accountInfo = new AccountInfo();
+        accountInfo = new AccountGetInfo();
         hedera = new Hedera(context);
         System.out.println("Recovering accountID in the format of 0.0.xxxx" + accountId);
         strMethod = inputReader.prompt("Have you updated your account on Hedera wallet? If updated, enter `bip`, else enter `hgc`");
