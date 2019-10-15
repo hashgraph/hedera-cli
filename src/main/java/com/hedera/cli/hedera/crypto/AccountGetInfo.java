@@ -2,12 +2,15 @@ package com.hedera.cli.hedera.crypto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountInfoModel;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
+import com.hedera.hashgraph.sdk.crypto.Key;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -55,10 +58,14 @@ public class AccountGetInfo implements Runnable {
         accountInfo.setAutoRenewPeriod(accountRes.getAutoRenewPeriod());
         accountInfo.setExpirationTime(accountRes.getExpirationTime());
         accountInfo.setReceivedRecordThreshold(accountRes.getGenerateReceiveRecordThreshold());
-        // accountInfo.setKey(accountRes.getKey());
+        // Using String for the time being because we need a custom serializer for ObjectMapper to handle Key serialization 
+        Key publicKey = accountRes.getKey();
+        Key key = Key.fromString(publicKey.toString());
+        accountInfo.setKey(key.toString());
 
         try {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
             shellHelper.printSuccess(ow.writeValueAsString(accountInfo));
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
