@@ -1,12 +1,12 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.TransactionReceipt;
+import com.hedera.hashgraph.sdk.*;
 import com.hedera.hashgraph.sdk.account.AccountDeleteTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 
@@ -65,7 +65,6 @@ public class AccountDelete implements Runnable {
     public void run() {
         try {
             Hedera hedera = new Hedera(context);
-            var client = hedera.createHederaClient();
             var oldAccount = AccountId.fromString(oldAccountInString);
             var newAccount = AccountId.fromString(newAccountInString);
 
@@ -75,7 +74,7 @@ public class AccountDelete implements Runnable {
             isInfoCorrect = promptPreview(oldAccount, newAccount);
             if (isInfoCorrect.equals("yes")) {
                 shellHelper.print("Info is correct, let's go!");
-                boolean accountDeleted = executeAccountDelete(client, oldAccount, oldAccountPrivKey, newAccount);
+                boolean accountDeleted = executeAccountDelete(hedera, oldAccount, oldAccountPrivKey, newAccount);
                 if (accountDeleted) {
                     getReceiptWithOperator(hedera, newAccount);
                     shellHelper.print("after get receipt : ");
@@ -101,19 +100,51 @@ public class AccountDelete implements Runnable {
                 + "\nyes/no");
     }
 
-    public boolean executeAccountDelete(Client client, AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey, AccountId newAccount) {
+    public boolean executeAccountDelete(Hedera hedera, AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey, AccountId newAccount) {
         boolean accountDeleted = false;
+        var client = hedera.createHederaClient();
+        var operatorId = hedera.getOperatorId();
+        var operatorKey = hedera.getOperatorKey();
+        client.setOperator(operatorId, operatorKey);
+        // account that is to be deleted must sign the transaction
         try {
-            new AccountDeleteTransaction(client.setOperator(oldAccount, oldAccountPrivKey))
-                    .setDeleteAccountId(oldAccount)
-                    .setTransferAccountId(newAccount)
-                    .execute();
-            shellHelper.printInfo("deleting old account... ");
-            accountDeleted = true;
+            // if accountId for funds to be transferred is the same as the operatorId, only sign once
+            if (newAccount.toString().equals(hedera.getOperatorId().toString())) {
+                TransactionId txId = new AccountDeleteTransaction(client)
+                        .setDeleteAccountId(oldAccount)
+                        .setTransferAccountId(newAccount)
+                        .execute();
+                printTxId(txId);
+                accountDeleted = true;
+            } else {
+                // if accountId for funds to be transferred is different from the the operatorId,
+                // both accounts must sign
+                AccountDeleteTransaction accountDeleteTransaction = new AccountDeleteTransaction(client)
+                        .setDeleteAccountId(oldAccount)
+                        .setTransferAccountId(newAccount);
+                var signedTxnBytes = oldAccountSignsTransaction(client, oldAccountPrivKey, accountDeleteTransaction.toBytes());
+                TransactionId txId = Transaction.fromBytes(client, signedTxnBytes)
+                        .execute();
+                printTxId(txId);
+                accountDeleted = true;
+            }
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
         return accountDeleted;
+    }
+
+    private void printTxId(TransactionId txId) {
+        shellHelper.printInfo("Deleting old account... ");
+        String txTimestamp = txId.getValidStart().getEpochSecond() + "-"
+                + txId.getValidStart().getNano();
+        shellHelper.printSuccess("TransactionId: " + txId.getAccountId().toString() + "-" + txTimestamp);
+    }
+
+    private byte[] oldAccountSignsTransaction(Client client, Ed25519PrivateKey oldAccountPrivKey, byte[] transactionData) throws InvalidProtocolBufferException {
+        return Transaction.fromBytes(client, transactionData)
+                .sign(oldAccountPrivKey)
+                .toBytes();
     }
 
     public void getReceiptWithOperator(Hedera hedera, AccountId newAccount) {
