@@ -2,10 +2,16 @@
 
 Getting Started
 ===
+
 ```bash
+# macOS
 brew tap hashgraph/tap
 brew install hedera-cli
+
+# unix / linux
+curl -s https://raw.githubusercontent.com/hashgraph/hedera-cli/master/install.sh | bash
 ```
+
 Run
 ===
 ```bash
