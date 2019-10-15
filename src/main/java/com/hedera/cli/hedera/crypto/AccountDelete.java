@@ -48,13 +48,13 @@ public class AccountDelete implements Runnable {
     @Autowired
     ShellHelper shellHelper;
 
-    @Option(names = {"-o", "--oldAcc"}, description = "Old account ID to be deleted."
+    @Option(names = {"-o", "--oldAcc"}, required = true, description = "Old account ID in %nshardNum.realmNum.accountNum format to be deleted."
             + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) account delete -o=1001,-n=1002|@")
+            + "@|fg(yellow) account delete -o=0.0.1001,-n=0.0.1002|@")
     private String oldAccountInString;
 
-    @Option(names = {"-n", "--newAcc"}, description = "Account ID where funds from old account" +
-            "%nare to be transferred over to")
+    @Option(names = {"-n", "--newAcc"}, required = true, description = "Account ID in %nshardNum.realmNum.accountNum format," +
+            "%nwhere funds from old account are transferred to")
     private String newAccountInString;
 
     private InputReader inputReader;
@@ -63,31 +63,34 @@ public class AccountDelete implements Runnable {
 
     @Override
     public void run() {
+        try {
+            Hedera hedera = new Hedera(context);
+            var client = hedera.createHederaClient();
+            var oldAccount = AccountId.fromString(oldAccountInString);
+            var newAccount = AccountId.fromString(newAccountInString);
 
-        Hedera hedera = new Hedera(context);
-        var client = hedera.createHederaClient();
-        var oldAccount = AccountId.fromString("0.0." + oldAccountInString);
-        var newAccount = AccountId.fromString("0.0." + newAccountInString);
+            String privKeyOfAccountToBeDeleted = inputReader.prompt("Enter the private key of the account to be deleted", "secret", false);
+            oldAccountPrivKey = Ed25519PrivateKey.fromString(privKeyOfAccountToBeDeleted);
 
-        String privKeyOfAccountToBeDeleted = inputReader.prompt("Enter the private key of the account to be deleted", "secret", false);
-        oldAccountPrivKey = Ed25519PrivateKey.fromString(privKeyOfAccountToBeDeleted);
-
-        isInfoCorrect = promptPreview(oldAccount, newAccount);
-        if (isInfoCorrect.equals("yes")) {
-            shellHelper.print("Info is correct, let's go!");
-            boolean accountDeleted = executeAccountDelete(client, oldAccount, oldAccountPrivKey, newAccount);
-            if (accountDeleted) {
-                getReceiptWithOperator(hedera, newAccount);
-                shellHelper.print("after get receipt : ");
-                boolean fileDeleted = deleteJsonAccountFromDisk(oldAccount);
-                shellHelper.printSuccess("File deleted: " + fileDeleted);
+            isInfoCorrect = promptPreview(oldAccount, newAccount);
+            if (isInfoCorrect.equals("yes")) {
+                shellHelper.print("Info is correct, let's go!");
+                boolean accountDeleted = executeAccountDelete(client, oldAccount, oldAccountPrivKey, newAccount);
+                if (accountDeleted) {
+                    getReceiptWithOperator(hedera, newAccount);
+                    shellHelper.print("after get receipt : ");
+                    boolean fileDeleted = deleteJsonAccountFromDisk(oldAccount);
+                    shellHelper.printSuccess("File deleted: " + fileDeleted);
+                } else {
+                    shellHelper.printError("Some error, account not deleted");
+                }
+            } else if (isInfoCorrect.equals("no")) {
+                shellHelper.print("Nope, incorrect, let's make some changes");
             } else {
-                shellHelper.printError("Some error, account not deleted");
+                shellHelper.printError("Input must either been yes or no");
             }
-        } else if (isInfoCorrect.equals("no")) {
-            shellHelper.print("Nope, incorrect, let's make some changes");
-        } else {
-            shellHelper.printError("Input must either been yes or no");
+        } catch (Exception e) {
+            shellHelper.printError(e.getMessage());
         }
     }
 

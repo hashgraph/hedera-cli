@@ -55,13 +55,13 @@ public class CryptoTransferMultiple implements Runnable {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"-a", "--accountId"}, split = " ", arity = "1..*",
+    @Option(names = {"-a", "--accountId"}, split = " ", arity = "1..*", required = true,
             description = "Recipient accountID to transfer to, shardNum and realmNum not needed"
                     + "%n@|bold,underline Usage:|@%n"
                     + "@|fg(yellow) transfer multiple -a=1001,1002,1003,-r=100,100,100|@")
     private String[] recipient;
 
-    @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", description = "Amount to transfer in tinybar")
+    @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
     private String[] recipientAmt;
 
     @Option(names = {"-n", "noPreview"}, arity = "0..1",
