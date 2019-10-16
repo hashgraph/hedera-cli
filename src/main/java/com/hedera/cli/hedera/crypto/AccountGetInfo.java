@@ -60,6 +60,7 @@ public class AccountGetInfo implements Runnable {
                 shellHelper.printError(e.getMessage());
             }
         }
+        // do nothing
     }
 
     public AccountInfo getAccountInfo(Hedera hedera, String accountIDInString) {

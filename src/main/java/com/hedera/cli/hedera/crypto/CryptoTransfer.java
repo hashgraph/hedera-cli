@@ -38,12 +38,12 @@ public class CryptoTransfer implements Runnable {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"-a", "--accountId"}, arity = "1", description = "Recipient's accountID to transfer to, shardNum and realmNum not needed"
+    @Option(names = {"-a", "--accountId"}, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED"
             + "%n@|bold,underline Usage:|@%n"
             + "@|fg(yellow) transfer single -a=1234,-r=100|@")
     private String recipient;
 
-    @Option(names = {"-r", "--recipientAmt"}, arity = "1", description = "Amount to transfer in tinybars")
+    @Option(names = {"-r", "--recipientAmt"}, arity = "1", required = true, description = "Amount to transfer in tinybars")
     private String recipientAmt;
 
     @Option(names = {"-n", "--noPreview"}, arity = "0..1",
@@ -60,7 +60,7 @@ public class CryptoTransfer implements Runnable {
         } else if (preview.equals("yes")) {
             mPreview = preview;
         } else {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Option -y removes preview");
+            throw new CommandLine.ParameterException(spec.commandLine(), "Option -n removes preview");
         }
         return mPreview;
     }

@@ -55,13 +55,13 @@ public class CryptoTransferMultiple implements Runnable {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"-a", "--accountId"}, split = " ", arity = "1..*",
+    @Option(names = {"-a", "--accountId"}, split = " ", arity = "1..*", required = true,
             description = "Recipient accountID to transfer to, shardNum and realmNum not needed"
                     + "%n@|bold,underline Usage:|@%n"
                     + "@|fg(yellow) transfer multiple -a=1001,1002,1003,-r=100,100,100|@")
     private String[] recipient;
 
-    @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", description = "Amount to transfer in tinybar")
+    @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
     private String[] recipientAmt;
 
     @Option(names = {"-n", "noPreview"}, arity = "0..1",
@@ -99,16 +99,12 @@ public class CryptoTransferMultiple implements Runnable {
             memoString = inputReader.prompt("Memo field");
             senderAccountIDInString = inputReader.prompt("Input sender accountID in the format xxxx");
             String transferAmountInStr = inputReader.prompt("Input transfer amount");
-            String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
-            senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
 
             Hedera hedera = new Hedera(context);
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
             // Operator is the current default account user
             var operatorId = hedera.getOperatorId();
-
-            // Currently set max fee as 1 hbar = 100,000,000 tinybars
             var client = hedera.createHederaClient();
 
             // Create a multi-sender crypto transfer where sender does not have to pay
@@ -159,13 +155,13 @@ public class CryptoTransferMultiple implements Runnable {
             // handle preview error gracefully here
             if (noPreview(mPreview).equals("no")) {
                 // do not show preview
-                executeCryptoTransferMultiple(client, senderAccountID, operatorId, cryptoTransferTransaction);
+                executeCryptoTransferMultiple(hedera, senderAccountID, operatorId, cryptoTransferTransaction);
             } else if (noPreview(mPreview).equals("yes")) {
                 // show preview and execute cryptotransfer
                 isInfoCorrect = promptPreview(operatorId, jsonStringSender, jsonStringRecipient);
                 if (isInfoCorrect.equals("yes")) {
                     shellHelper.print("Info is correct, let's go!");
-                    executeCryptoTransferMultiple(client, senderAccountID, operatorId, cryptoTransferTransaction);
+                    executeCryptoTransferMultiple(hedera, senderAccountID, operatorId, cryptoTransferTransaction);
                 } else if (isInfoCorrect.equals("no")) {
                     shellHelper.print("Nope, incorrect, let's make some changes");
                 } else {
@@ -188,25 +184,29 @@ public class CryptoTransferMultiple implements Runnable {
                 + "\nyes/no");
     }
 
-    private void executeCryptoTransferMultiple(Client client, AccountId senderAccountID, AccountId operatorId,
+    private void executeCryptoTransferMultiple(Hedera hedera, AccountId senderAccountID, AccountId operatorId,
                                                CryptoTransferTransaction cryptoTransferTransaction) {
         try {
+            var client = hedera.createHederaClient();
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
-
             var operatorBalanceBefore = client.getAccountBalance(operatorId);
             shellHelper.print(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
             shellHelper.print(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
-
-            // Since there is more than 1 sender in this multi-sender transaction example
-            // ie operator and sender,
-            // Sender must obviously sign to allow funds to be transferred out
-            var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
-
-            // Get records or get receipt or use mirror node :D
-            // GetRecords are more expensive to call
-            // GetReceipt is free
-            TransactionRecord record = Transaction.fromBytes(client, signedTxnBytes)
-                    .executeForRecord();
+            TransactionRecord record;
+            // if accountId of sender is the same as the operatorId, only sign once
+            if (senderAccountID.toString().equals(hedera.getOperatorId().toString())) {
+                record = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes())
+                        .executeForRecord();
+            } else {
+                // Since there is more than 1 sender in this multi-sender transaction example
+                // ie operator and sender are different,
+                // Sender must obviously sign to allow funds to be transferred out
+                String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
+                senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
+                var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
+                record = Transaction.fromBytes(client, signedTxnBytes)
+                        .executeForRecord();
+            }
 
             shellHelper.printInfo("transferring...");
             var operatorBalanceAfter = client.getAccountBalance(operatorId);
@@ -224,10 +224,6 @@ public class CryptoTransferMultiple implements Runnable {
 
     private void saveTransactionToJson(TransactionRecord record) {
         shellHelper.printSuccess("Success!");
-        shellHelper.printSuccess("Transfer tx ID : " + record.getTransactionId().getAccountId().toString());
-        shellHelper.printSuccess("Transfer tx ID valid start: " + record.getTransactionId().getValidStart().toString());
-        shellHelper.printSuccess("Transfer tx ID valid start seconds: " + record.getTransactionId().getValidStart().getEpochSecond());
-        shellHelper.printSuccess("Transfer tx ID valid start nano: " + record.getTransactionId().getValidStart().getNano());
         shellHelper.printSuccess("Transfer tx fee: " + record.getTransactionFee());
         shellHelper.printSuccess("Transfer consensus timestamp: " + record.getConsensusTimestamp());
         shellHelper.printSuccess("Transfer receipt status: " + record.getReceipt().getStatus());
@@ -236,6 +232,7 @@ public class CryptoTransferMultiple implements Runnable {
         String txTimestamp = record.getTransactionId().getValidStart().getEpochSecond() + "-"
                 + record.getTransactionId().getValidStart().getNano();
         String txID = record.getTransactionId().getAccountId().toString() + "-" + txTimestamp;
+        shellHelper.printSuccess("Transfer tx ID : " + txID);
 
         TransactionObj txObj = new TransactionObj();
         txObj.setTxID(txID);
@@ -258,8 +255,6 @@ public class CryptoTransferMultiple implements Runnable {
         AccountId accountId;
         String acc, amt;
         Map<Integer, Recipient> map = new HashMap<>();
-        // TODO: unused local variable?
-        long sum = 0;
 
         try {
             if (accountList.size() != amountList.size())
@@ -272,7 +267,6 @@ public class CryptoTransferMultiple implements Runnable {
                         if (isAccountId(acc) && isNumeric(amt)) {
                             accountId = AccountId.fromString("0.0." + acc);
                             var amount = new BigInteger(amt);
-                            sum += amount.longValue();
                             Recipient recipient1 = new Recipient(accountId, amount.longValue());
                             map.put(i, recipient1);
                         }
