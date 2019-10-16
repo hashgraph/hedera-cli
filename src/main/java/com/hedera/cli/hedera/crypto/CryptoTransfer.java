@@ -40,7 +40,7 @@ public class CryptoTransfer implements Runnable {
 
     @Option(names = {"-a", "--accountId"}, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED"
             + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) transfer single -a=1234,-r=100|@")
+            + "@|fg(yellow) transfer single -a=1234 -r=100|@")
     private String recipient;
 
     @Option(names = {"-r", "--recipientAmt"}, arity = "1", required = true, description = "Amount to transfer in tinybars")
