@@ -17,15 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import picocli.CommandLine;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
