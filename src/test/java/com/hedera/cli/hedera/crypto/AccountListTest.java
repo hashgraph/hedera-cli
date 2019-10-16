@@ -1,11 +1,12 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.hedera.cli.Application;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,8 +15,10 @@ import java.util.Map;
 
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class AccountListTest {
+
+    @Autowired
+    ApplicationContext context;
 
     @Test
     public void testStreamList() {
