@@ -11,13 +11,8 @@ import com.hedera.cli.hedera.utils.DataDirectory;
 
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 public class AccountListTest {
-
-    @Autowired
-    ApplicationContext context;
 
     @Test
     public void testStreamList() {
