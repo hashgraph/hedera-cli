@@ -2,8 +2,9 @@ package com.hedera.cli.hedera.crypto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.models.AccountInfoModel;
+import com.hedera.cli.hedera.utils.AccountInfoSerializer;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
@@ -45,20 +46,15 @@ public class AccountGetInfo implements Runnable {
         if (StringUtil.isNullOrEmpty(accountIDInString)) {
             accountIDInString = hedera.getOperatorId().toString();
         }
-        AccountInfo accountRes = getAccountInfo(hedera, accountIDInString);
-        if (accountRes != null) {
-            AccountInfoModel accountInfo = new AccountInfoModel();
-            accountInfo.setAccountId(accountRes.getAccountId());
-            accountInfo.setContractId(accountRes.getContractAccountId());
-            accountInfo.setBalance(accountRes.getBalance());
-            accountInfo.setClaim(accountRes.getClaims());
-            accountInfo.setAutoRenewPeriod(accountRes.getAutoRenewPeriod());
-            accountInfo.setExpirationTime(accountRes.getExpirationTime());
-            accountInfo.setReceivedRecordThreshold(accountRes.getGenerateReceiveRecordThreshold());
-            // accountInfo.setKey(accountRes.getKey());
+        AccountInfo accountInfo = getAccountInfo(hedera, accountIDInString);
+        if (accountInfo != null) {
 
             try {
-                ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                ObjectMapper mapper = new ObjectMapper();
+                SimpleModule module = new SimpleModule();
+                module.addSerializer(AccountInfo.class, new AccountInfoSerializer());
+                mapper.registerModule(module);
+                ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
                 shellHelper.printSuccess(ow.writeValueAsString(accountInfo));
             } catch (Exception e) {
                 shellHelper.printError(e.getMessage());
@@ -67,8 +63,8 @@ public class AccountGetInfo implements Runnable {
         // do nothing
     }
 
-    public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfo(Hedera hedera, String accountIDInString) {
-        com.hedera.hashgraph.sdk.account.AccountInfo accountRes = null;
+    public AccountInfo getAccountInfo(Hedera hedera, String accountIDInString) {
+        AccountInfo accountInfo = null;
         try {
             var operatorId = hedera.getOperatorId();
             var client = hedera.createHederaClient()
@@ -76,10 +72,10 @@ public class AccountGetInfo implements Runnable {
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)
                     .setAccountId(AccountId.fromString(accountIDInString));
-            accountRes = q.execute();
+            accountInfo = q.execute();
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
-        return accountRes;
+        return accountInfo;
     }
 }
