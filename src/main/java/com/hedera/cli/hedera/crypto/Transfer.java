@@ -26,7 +26,6 @@ public class Transfer implements Runnable {
         cryptoTransfer.setInputReader(inputReader);
         CryptoTransferMultiple cryptoTransferMultiple = factory.create(CryptoTransferMultiple.class);
         cryptoTransferMultiple.setInputReader(inputReader);
-
         switch (subCommand) {
         case "single":
             if (args.length == 0) {

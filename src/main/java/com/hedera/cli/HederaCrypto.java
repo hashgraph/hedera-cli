@@ -1,5 +1,8 @@
 package com.hedera.cli;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.crypto.Account;
@@ -13,6 +16,9 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 @ShellComponent
 public class HederaCrypto extends CliDefaults {
 
@@ -28,9 +34,6 @@ public class HederaCrypto extends CliDefaults {
     @Autowired
     Account account;
 
-    public HederaCrypto() {
-    }
-
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "manage Hedera account")
     public void account(@ShellOption(defaultValue = "") String subCommand,
@@ -42,7 +45,21 @@ public class HederaCrypto extends CliDefaults {
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "transfer hbars from one hedera account to another")
     public void transfer(@ShellOption(defaultValue = "") String subCommand,
-            @ShellOption(defaultValue = "", arity = -1) String... args) {
+            @ShellOption(value = {"-a", "--accountId"}, defaultValue="") String a,
+            @ShellOption(value = {"-r", "--recipientAmount"}, defaultValue="") String r,
+            @ShellOption(value = {"-n", "--noPreview"}, arity = 0) boolean n) {
+        
+        ArrayList<String> argsList = new ArrayList<String>();
+        if (!a.isEmpty()) argsList.add(a);
+        if (!r.isEmpty()) argsList.add(r);
+        if (n) {
+            argsList.add("-n=no");
+        } else {
+            argsList.add("-n=yes");
+        }
+        Object[] objs = argsList.toArray();
+        String[] args = Arrays.copyOf(objs, objs.length, String[].class);
+
         Transfer transfer = new Transfer();
         try {
             transfer.handle(context, inputReader, subCommand, args);
