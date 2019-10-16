@@ -35,7 +35,6 @@ public class AccountUse implements Runnable {
         if (exists) {
             // since this accountId exists, we set it into our CurrentAccountService
             // singleton
-            System.out.println(context);
             CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount",
                     CurrentAccountService.class);
             currentAccountService.setAccountNumber(accountId);
