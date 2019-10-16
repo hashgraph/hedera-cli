@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
-public class AccountDelete {
+public class AccountDeleteTest {
 
     @Test
     public void testDeletingAFile() throws IOException {
