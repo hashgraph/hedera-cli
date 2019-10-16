@@ -155,13 +155,13 @@ public class CryptoTransferMultiple implements Runnable {
             // handle preview error gracefully here
             if (noPreview(mPreview).equals("no")) {
                 // do not show preview
-                executeCryptoTransferMultiple(hedera, client, senderAccountID, operatorId, cryptoTransferTransaction);
+                executeCryptoTransferMultiple(hedera, senderAccountID, operatorId, cryptoTransferTransaction);
             } else if (noPreview(mPreview).equals("yes")) {
                 // show preview and execute cryptotransfer
                 isInfoCorrect = promptPreview(operatorId, jsonStringSender, jsonStringRecipient);
                 if (isInfoCorrect.equals("yes")) {
                     shellHelper.print("Info is correct, let's go!");
-                    executeCryptoTransferMultiple(hedera, client, senderAccountID, operatorId, cryptoTransferTransaction);
+                    executeCryptoTransferMultiple(hedera, senderAccountID, operatorId, cryptoTransferTransaction);
                 } else if (isInfoCorrect.equals("no")) {
                     shellHelper.print("Nope, incorrect, let's make some changes");
                 } else {
@@ -184,9 +184,10 @@ public class CryptoTransferMultiple implements Runnable {
                 + "\nyes/no");
     }
 
-    private void executeCryptoTransferMultiple(Hedera hedera, Client client, AccountId senderAccountID, AccountId operatorId,
+    private void executeCryptoTransferMultiple(Hedera hedera, AccountId senderAccountID, AccountId operatorId,
                                                CryptoTransferTransaction cryptoTransferTransaction) {
         try {
+            var client = hedera.createHederaClient();
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
             var operatorBalanceBefore = client.getAccountBalance(operatorId);
             shellHelper.print(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
@@ -254,7 +255,6 @@ public class CryptoTransferMultiple implements Runnable {
         AccountId accountId;
         String acc, amt;
         Map<Integer, Recipient> map = new HashMap<>();
-        long sum = 0;
 
         try {
             if (accountList.size() != amountList.size())
@@ -267,7 +267,6 @@ public class CryptoTransferMultiple implements Runnable {
                         if (isAccountId(acc) && isNumeric(amt)) {
                             accountId = AccountId.fromString("0.0." + acc);
                             var amount = new BigInteger(amt);
-                            sum += amount.longValue();
                             Recipient recipient1 = new Recipient(accountId, amount.longValue());
                             map.put(i, recipient1);
                         }
