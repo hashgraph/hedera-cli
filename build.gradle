@@ -80,10 +80,6 @@ dependencies {
     compile 'org.apache.logging.log4j:log4j-core:2.12.0'
     compile 'org.apache.logging.log4j:log4j-api:2.12.0'
 
-    compileJava {
-        options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
-    }
-
     // springboot implementation
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
@@ -97,9 +93,9 @@ dependencies {
     testCompile "org.springframework.boot:spring-boot-starter-test"
 }
 
-compileJava {
-    options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
-}
+// compileJava {
+//     options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
+// }
 
 application {
     // Define the main class for the application
