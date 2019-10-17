@@ -1,7 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.services.CurrentAccountService;
@@ -10,22 +10,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Spec;
+import picocli.CommandLine.Parameters;
 
+@Getter
 @Component
-@Command(name = "use", description = "@|fg(225) Allows to toggle between multiple Hedera Accounts|@", helpCommand = true)
+@Command(name = "use", 
+        separator = " ", 
+        description = "@|fg(225) Switch to use a specific Hedera account as operator.|@",
+        helpCommand = true) // @formatter:on
 public class AccountUse implements Runnable {
 
     @Autowired
     ApplicationContext context;
 
-    @Spec
-    CommandSpec spec;
-
-    @Option(names = { "-a", "--accountId" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
+    @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
+            + "%n@|bold,underline Usage:|@%n"
+            + "@|fg(yellow) account use 0.0.1003|@")
     private String accountId;
 
     @Override
@@ -52,7 +54,7 @@ public class AccountUse implements Runnable {
         String networkName = dataDirectory.readFile("network.txt");
         String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
         String pathToIndexTxt = pathToAccountsFolder + "index.txt";
-        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
         for (Object key : readingIndexAccount.keySet()) {
             if (accountId.equals(key.toString())) {
                 return true;
@@ -62,3 +64,4 @@ public class AccountUse implements Runnable {
     }
 
 }
+

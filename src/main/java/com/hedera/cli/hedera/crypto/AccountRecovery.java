@@ -1,7 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -125,7 +124,7 @@ public class AccountRecovery implements Runnable {
         AccountUtils accountUtils = new AccountUtils();
         String pathToIndexTxt = accountUtils.pathToIndexTxt();
         boolean accountExists = false;
-        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
         for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
             if (entry.getKey().equals(accountId)) {
                 accountExists = true;
