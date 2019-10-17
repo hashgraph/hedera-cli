@@ -121,7 +121,7 @@ public class Setup implements Runnable {
             dataDirectory.readFile(pathToDefaultTxt, fileName + ":" + accountId);
             // current account
             // write to index if account does not yet exist in index
-            dataDirectory.readWriteFileHashmap(pathToIndexTxt, mHashMap);
+            dataDirectory.readWriteToIndex(pathToIndexTxt, mHashMap);
         } catch (Exception e) {
             e.printStackTrace();
         }

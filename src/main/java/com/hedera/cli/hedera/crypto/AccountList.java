@@ -1,7 +1,5 @@
 package com.hedera.cli.hedera.crypto;
 
-import java.util.Map;
-
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
@@ -19,10 +17,6 @@ public class AccountList implements Runnable {
         DataDirectory dataDirectory = new DataDirectory();
         AccountUtils accountUtils = new AccountUtils();
         String pathToIndexTxt = accountUtils.pathToIndexTxt();
-        Map<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
-
-        for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
-            System.out.println(entry.getKey() + " (" + entry.getValue() + ")");
-        }
+        dataDirectory.readIndex(pathToIndexTxt);
     }
 }
