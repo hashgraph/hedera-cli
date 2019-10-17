@@ -4,8 +4,6 @@ import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -15,13 +13,10 @@ import java.util.Map;
 
 public class AccountListTest {
 
-    @Autowired
-    ApplicationContext context;
-
     @Test
     public void testStreamList() {
         AccountUtils accountUtils = new AccountUtils();
-        String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
+        String pathToIndexTxt = accountUtils.pathToIndexTxt();
 
         HashMap<String, String> testMap = new HashMap<>();
         testMap.put("0.0.90304", "aggressive_primerose_3092");
