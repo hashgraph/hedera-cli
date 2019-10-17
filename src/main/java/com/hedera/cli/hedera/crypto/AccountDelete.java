@@ -31,9 +31,7 @@ import java.util.*;
 @Setter
 @Component
 @Command(name = "delete",
-        description = "@|fg(225) Gets the information of a specific account." +
-                "%nRequires key for account modification" +
-                "%nreturns a stateproof if requested|@")
+        description = "@|fg(225) Deletes the given old account and transfers any balance to the given new account.|@")
 public class AccountDelete implements Runnable {
 
     @Spec
@@ -47,7 +45,7 @@ public class AccountDelete implements Runnable {
 
     @Option(names = {"-o", "--oldAcc"}, required = true, description = "Old account ID in %nshardNum.realmNum.accountNum format to be deleted."
             + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) account delete -o=0.0.1001,-n=0.0.1002|@")
+            + "@|fg(yellow) account delete -o=0.0.1001 -n=0.0.1002|@")
     private String oldAccountInString;
 
     @Option(names = {"-n", "--newAcc"}, required = true, description = "Account ID in %nshardNum.realmNum.accountNum format," +
