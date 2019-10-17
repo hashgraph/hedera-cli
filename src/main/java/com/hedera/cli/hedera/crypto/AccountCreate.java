@@ -32,6 +32,7 @@ import picocli.CommandLine.Spec;
 
 @Component
 @Command(name = "create",
+        separator = " ",
         description = "@|fg(225) Generates a new Ed25519 Keypair compatible with java and wallet,"
                 + "%ntogether with 24 recovery words (bip compatible),"
                 + "%nCreates a new Hedera account and "

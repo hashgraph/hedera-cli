@@ -32,7 +32,7 @@ import picocli.CommandLine.Spec;
 @Getter
 @Setter
 @Component
-@Command(name = "delete", description = "@|fg(225) Deletes the given old account and transfers any balance to the given new account.|@")
+@Command(name = "delete", separator = " ", description = "@|fg(225) Deletes the given old account and transfers any balance to the given new account.|@")
 public class AccountDelete implements Runnable {
 
     @Spec

@@ -54,22 +54,19 @@ public class HederaCrypto extends CliDefaults {
 
 		// @formatter:off
 		if (subCommand.equals("create")) {
-			argsList.add("-y=" + y);
-			if (!b.isEmpty()) argsList.add("-b=" + b);
-			argsList.add("-k=" + k);
-			if (!m.isEmpty()) argsList.add("-m=" + m);
-			argsList.add("-r=" + r);
+			if (y) argsList.add("-y");
+			if (!b.isEmpty()) argsList.add("-b " + b);
+			argsList.add("-k " + k);
+			if (!m.isEmpty()) argsList.add("-m " + m);
+			argsList.add("-r " + r);
 			Object[] objs = argsList.toArray();
 			args = Arrays.copyOf(objs, objs.length, String[].class);
-			for (String a: args) {
-				System.out.println(a);
-			}
 		}
 
 		if (subCommand.equals("delete")) {
-			argsList.add("-y=" + y);
-			if (!o.isEmpty()) argsList.add("-o=" + o);
-			if (!n.isEmpty()) argsList.add("-n=" + n);
+			if (y) argsList.add("-y");
+			if (!o.isEmpty()) argsList.add("-o " + o);
+			if (!n.isEmpty()) argsList.add("-n " + n);
 			Object[] objs = argsList.toArray();
 			args = Arrays.copyOf(objs, objs.length, String[].class);
 		}
