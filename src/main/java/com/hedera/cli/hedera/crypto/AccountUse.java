@@ -25,7 +25,9 @@ public class AccountUse implements Runnable {
     @Autowired
     ApplicationContext context;
 
-    @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum")
+    @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
+            + "%n@|bold,underline Usage:|@%n"
+            + "@|fg(yellow) account use 0.0.1003|@")
     private String accountId;
 
     @Override
