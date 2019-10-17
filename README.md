@@ -12,62 +12,59 @@ brew install hedera-cli
 curl -s https://raw.githubusercontent.com/hashgraph/hedera-cli/master/install.sh | bash
 ```
 
-Run
-===
+## Run Hedera shell
 ```bash
 hedera
 ```
-Help
-===
+## Help
 ```bash
 # shows all the available commands
 help
 ```
-Setup Network
-===
+## Setup operator account
+```bash
+# Cli will prompt setup on first run to save default operator key into ~/.hedera
+setup
+```
+
+## Switch to a specific network
 ```bash
 # To list available networks
 network ls
 
 # To select/change network
-network set -n=aspen OR
-network set -n=mainnet OR
+network set -n=aspen
+network set -n=mainnet
 network set -n=external
-
-# Cli will prompt setup on first run to save default operator key into ~/.hedera
-setup
 ```
-Create Account
-===
+## Create Account
 ```bash
+# valid commands
 account create -b=100 
-OR
 account create --balance=100
 ```
-File Create
-===
+## File Create
 ```bash
+# valid commands
 # where -d is file expiration date, must include time
 file create -d=dd-MM-yyyy,hh:mm:ss
-OR
 file create --date=dd-MM-yyyy,hh:mm:ss
 ```
-Crypto Transfer
-===
+
+## Crypto Transfer
 ```bash
-transfer single -a=1001,-r=44 
-OR
-transfer single --accountId=1001,--recipientAmt=44
+# valid commands
+transfer single -a=1001 -r=44 
+transfer single --accountId=1001 --recipientAmt=44
 ```
-Crypto Transfer Multiple
-===
+## Crypto Transfer Multiple
+
 ```bash
-transfer multiple -a=1001,1002,1003,-r=44,55,66 
-OR
-transfer multiple --accountId=1001,1002,1003,--recipientAmt=44,55,66
+# valid commands
+transfer multiple -a=1001,1002,1003 -r=44,55,66 
+transfer multiple --accountId=1001,1002,1003 --recipientAmt=44,55,66
 ```
-Switch Accounts
-===
+## Switch Accounts
 ```bash
 account use -a=0.0.xxxx
 ```
