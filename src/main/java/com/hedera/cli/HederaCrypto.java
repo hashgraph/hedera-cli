@@ -37,6 +37,8 @@ public class HederaCrypto extends CliDefaults {
 	@ShellMethodAvailability("isDefaultNetworkAndAccountSet")
 	@ShellMethod(value = "manage Hedera account")
 	public void account(@ShellOption(defaultValue = "") String subCommand,
+			// account use
+			@ShellOption(defaultValue = "") String accountId,
 			// Specifying -y flag will set y to be true (which will skip the preview)
 			@ShellOption(value = { "-y", "--yes"}, defaultValue = "false") boolean y,
 			// account create
@@ -53,6 +55,14 @@ public class HederaCrypto extends CliDefaults {
 		ArrayList<String> argsList = new ArrayList<String>();
 
 		// @formatter:off
+		if (subCommand.equals("use")) {
+			System.out.println("use");
+			System.out.println(accountId);
+			if (!accountId.isEmpty()) argsList.add(accountId);
+			Object[] objs = argsList.toArray();
+			args = Arrays.copyOf(objs, objs.length, String[].class);
+		}
+
 		if (subCommand.equals("create")) {
 			if (y) argsList.add("-y");
 			if (!b.isEmpty()) argsList.add("-b " + b);

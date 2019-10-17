@@ -1,7 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.services.CurrentAccountService;
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
 @Component
-@Command(name = "use", description = "@|fg(225) Allows to toggle between multiple Hedera Accounts|@", helpCommand = true)
+@Command(name = "use", separator = " ", description = "@|fg(225) Allows to toggle between multiple Hedera Accounts|@", helpCommand = true)
 public class AccountUse implements Runnable {
 
     @Autowired
@@ -25,7 +25,10 @@ public class AccountUse implements Runnable {
     @Spec
     CommandSpec spec;
 
-    @Option(names = { "-a", "--accountId" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
+    // @Option(names = { "-a", "--accountId" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
+    // private String accountId;
+
+    @Parameters(index = "0")
     private String accountId;
 
     @Override
@@ -52,8 +55,9 @@ public class AccountUse implements Runnable {
         String networkName = dataDirectory.readFile("network.txt");
         String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
         String pathToIndexTxt = pathToAccountsFolder + "index.txt";
-        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
         for (Object key : readingIndexAccount.keySet()) {
+            System.out.println(key.toString());
             if (accountId.equals(key.toString())) {
                 return true;
             }

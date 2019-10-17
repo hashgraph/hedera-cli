@@ -174,7 +174,7 @@ public class DataDirectory {
         boolean fileExists = Files.exists(filePath);
         if (!fileExists) {
             // file does not exist so create a new file and write value
-            String cleanedIndexTxt = defaultValue.toString().substring(1,defaultValue.toString().length()-1);
+            String cleanedIndexTxt = defaultValue.toString().substring(1, defaultValue.toString().length() - 1);
             writeFile(pathToFile, cleanedIndexTxt);
             return defaultValue;
         }
@@ -203,7 +203,8 @@ public class DataDirectory {
             // appends old map with new value
             updatedHashmap.put(key, value);
             // write to file
-            String cleanedIndexTxtUpdated = updatedHashmap.toString().substring(1,updatedHashmap.toString().length()-1);
+            String cleanedIndexTxtUpdated = updatedHashmap.toString().substring(1,
+                    updatedHashmap.toString().length() - 1);
             writeFile(pathToFile, cleanedIndexTxtUpdated.replace(", ", "\n"));
             reader.close();
             return updatedHashmap;
@@ -230,6 +231,31 @@ public class DataDirectory {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public Map<String, String> readIndexToHashmap(String pathToFile) {
+        // check if index.txt exists, if not, create one
+        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        File file = new File(filePath.toString());
+        HashMap<String, String> mHashmap = new HashMap<>();
+
+        try {
+            // file exist
+            Scanner reader = new Scanner(file);
+            while (reader.hasNext()) {
+                // checks the old map
+                String line = reader.nextLine();
+                String[] splitLines = line.split("\n");
+                for (int i = 0; i < splitLines.length; i++) {
+                    String[] keyValuePairs = splitLines[i].split("=");
+                    mHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+                }
+            }
+            reader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return mHashmap;
     }
 
     public HashMap<String, String> readFileHashmap(String pathToFile) {
@@ -284,7 +310,8 @@ public class DataDirectory {
 
         try {
             Stream<Path> walk = Files.walk(path);
-            List<String> result = walk.map(x -> x.toString()).filter(f -> f.endsWith(".json")).collect(Collectors.toList());
+            List<String> result = walk.map(x -> x.toString()).filter(f -> f.endsWith(".json"))
+                    .collect(Collectors.toList());
             if (result.isEmpty()) {
                 System.out.println("No Hedera accounts have created in the current network");
             }
