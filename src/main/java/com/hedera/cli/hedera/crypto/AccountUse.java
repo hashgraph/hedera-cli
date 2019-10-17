@@ -14,7 +14,6 @@ import lombok.Getter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
-// @formatter:off
 @Getter
 @Component
 @Command(name = "use", 
