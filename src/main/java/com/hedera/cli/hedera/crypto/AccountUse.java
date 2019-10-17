@@ -2,6 +2,7 @@ package com.hedera.cli.hedera.crypto;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.services.CurrentAccountService;
@@ -48,11 +49,11 @@ public class AccountUse implements Runnable {
      * @param dataDirectory
      * @return boolean accountIdExists
      */
-    private boolean accountIdExistsInIndex(DataDirectory dataDirectory, String accountId) {
+    public boolean accountIdExistsInIndex(DataDirectory dataDirectory, String accountId) {
         String networkName = dataDirectory.readFile("network.txt");
         String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
         String pathToIndexTxt = pathToAccountsFolder + "index.txt";
-        HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
         for (Object key : readingIndexAccount.keySet()) {
             if (accountId.equals(key.toString())) {
                 return true;
