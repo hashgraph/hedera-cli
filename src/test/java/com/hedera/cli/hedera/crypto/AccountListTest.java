@@ -1,15 +1,16 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.hedera.utils.AccountUtils;
-import com.hedera.cli.hedera.utils.DataDirectory;
-import org.junit.Test;
-import org.mockito.Mockito;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.DataDirectory;
+
+import org.junit.Test;
+import org.mockito.Mockito;
 
 public class AccountListTest {
 
@@ -27,8 +28,8 @@ public class AccountListTest {
         testMap.put("0.0.8888", "sorrowful_geranium_7578");
 
         DataDirectory dataDirectory = Mockito.mock(DataDirectory.class);
-        when(dataDirectory.readFileHashmap(pathToIndexTxt)).thenReturn(testMap);
-        Map<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        when(dataDirectory.readIndexToHashmap(pathToIndexTxt)).thenReturn(testMap);
+        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
         assertEquals(readingIndexAccount.entrySet(), testMap.entrySet());
     }
 }
