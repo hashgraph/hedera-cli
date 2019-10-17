@@ -71,8 +71,7 @@ public class AccountDelete implements Runnable {
                 shellHelper.print("Info is correct, let's go!");
                 boolean accountDeleted = executeAccountDelete(hedera, oldAccount, oldAccountPrivKey, newAccount);
                 if (accountDeleted) {
-                    getReceiptWithOperator(hedera, newAccount);
-                    shellHelper.print("after get receipt : ");
+                    getBalance(hedera, newAccount);
                     boolean fileDeleted = deleteJsonAccountFromDisk(oldAccount);
                     shellHelper.printSuccess("File deleted: " + fileDeleted);
                 } else {
@@ -98,57 +97,27 @@ public class AccountDelete implements Runnable {
     public boolean executeAccountDelete(Hedera hedera, AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey, AccountId newAccount) {
         boolean accountDeleted = false;
         var client = hedera.createHederaClient();
-        var operatorId = hedera.getOperatorId();
-        var operatorKey = hedera.getOperatorKey();
-        client.setOperator(operatorId, operatorKey);
-        // account that is to be deleted must sign the transaction
+        // account that is to be deleted must sign its own transaction
         try {
-            // if accountId for funds to be transferred is the same as the operatorId, only sign once
-            if (newAccount.toString().equals(hedera.getOperatorId().toString())) {
-                TransactionId txId = new AccountDeleteTransaction(client)
-                        .setDeleteAccountId(oldAccount)
-                        .setTransferAccountId(newAccount)
-                        .execute();
-                printTxId(txId);
-                accountDeleted = true;
-            } else {
-                // if accountId for funds to be transferred is different from the the operatorId,
-                // both accounts must sign
-                AccountDeleteTransaction accountDeleteTransaction = new AccountDeleteTransaction(client)
-                        .setDeleteAccountId(oldAccount)
-                        .setTransferAccountId(newAccount);
-                var signedTxnBytes = oldAccountSignsTransaction(client, oldAccountPrivKey, accountDeleteTransaction.toBytes());
-                TransactionId txId = Transaction.fromBytes(client, signedTxnBytes)
-                        .execute();
-                printTxId(txId);
-                accountDeleted = true;
-            }
+            TransactionReceipt receipt = new AccountDeleteTransaction(client)
+                    .setDeleteAccountId(oldAccount)
+                    .setTransferAccountId(newAccount)
+                    .sign(oldAccountPrivKey)
+                    .executeForReceipt();
+            shellHelper.printSuccess(receipt.getStatus().toString());
+            accountDeleted = true;
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
         return accountDeleted;
     }
 
-    private void printTxId(TransactionId txId) {
-        shellHelper.printInfo("Deleting old account... ");
-        String txTimestamp = txId.getValidStart().getEpochSecond() + "-"
-                + txId.getValidStart().getNano();
-        shellHelper.printSuccess("TransactionId: " + txId.getAccountId().toString() + "-" + txTimestamp);
-    }
-
-    private byte[] oldAccountSignsTransaction(Client client, Ed25519PrivateKey oldAccountPrivKey, byte[] transactionData) throws InvalidProtocolBufferException {
-        return Transaction.fromBytes(client, transactionData)
-                .sign(oldAccountPrivKey)
-                .toBytes();
-    }
-
-    public void getReceiptWithOperator(Hedera hedera, AccountId newAccount) {
+    public void getBalance(Hedera hedera, AccountId newAccount) {
         try {
             // Create a new client that is not associated with the old account
             Thread.sleep(5000);
             Client client = hedera.createHederaClient();
             client.setOperator(hedera.getOperatorId(), hedera.getOperatorKey());
-            shellHelper.print(hedera.getOperatorId().toString());
             var newAccountBalance = client.getAccountBalance(newAccount);
             shellHelper.printSuccess("Account " + newAccount + " new balance is " + newAccountBalance);
         } catch (Exception e) {
