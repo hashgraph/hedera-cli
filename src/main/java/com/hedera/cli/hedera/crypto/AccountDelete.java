@@ -161,7 +161,7 @@ public class AccountDelete implements Runnable {
         }
         // write to file
         updatedMap = readingIndexAccount;
-        dataDirectory.writeFile(pathToIndexTxt, updatedMap.toString());
+        dataDirectory.writeFile(pathToIndexTxt, dataDirectory.formatMapToIndex(updatedMap));
         return fileDeleted;
     }
 }
