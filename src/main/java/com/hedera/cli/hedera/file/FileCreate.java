@@ -40,13 +40,13 @@ public class FileCreate implements Runnable {
     @Option(names = {"-c", "--contentsString"}, split = " ", arity = "0..*",
             description = "File contents in string"
                     + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) file create -d=22-11-2019,21:21:21,-t=200000,-c=\"winter is coming!\"|@")
+                    + "@|fg(yellow) file create -d=22-11-2019,21:21:21 -t=200000 -c=\"winter is coming!\"|@")
     private String[] fileContentsInString;
 
     @Option(names = {"-s", "--fileSizeByte"},
             description = "Test file size"
                     + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) file create -d=22-11-2019,21:21:21,-t=200000,-s=10000|@")
+                    + "@|fg(yellow) file create -d=22-11-2019,21:21:21 -t=200000 -s=10000|@")
     private int fileSizeByte;
 
     // @ArgGroup(exclusive = false)
