@@ -217,7 +217,6 @@ public class DataDirectory {
         // check if index.txt exists, if not, create one
         Path filePath = Paths.get(userHome, directoryName, pathToFile);
         File file = new File(filePath.toString());
-        HashMap<String, String> mHashmap = new HashMap<>();
 
         try {
             // file exist
