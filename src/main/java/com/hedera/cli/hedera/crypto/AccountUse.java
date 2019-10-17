@@ -10,10 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
 // @formatter:off
+@Getter
 @Component
 @Command(name = "use", 
         separator = " ", 
