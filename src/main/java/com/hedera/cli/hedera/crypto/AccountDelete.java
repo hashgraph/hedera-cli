@@ -128,7 +128,7 @@ public class AccountDelete implements Runnable {
     public boolean deleteJsonAccountFromDisk(AccountId oldAccount) {
         DataDirectory dataDirectory = new DataDirectory();
         AccountUtils accountUtils = new AccountUtils();
-        String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
+        String pathToIndexTxt = accountUtils.pathToIndexTxt();
         boolean fileDeleted = false;
 
         String userHome = dataDirectory.getUserHome();

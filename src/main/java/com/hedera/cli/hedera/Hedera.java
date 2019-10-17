@@ -76,7 +76,7 @@ public class Hedera {
     public String retrieveIndexAccountKeyInHexString() {
         DataDirectory dataDirectory = new DataDirectory();
         AccountUtils accountUtils = new AccountUtils();
-        String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
+        String pathToIndexTxt = accountUtils.pathToIndexTxt();
 
         String accountId;
         String value;
@@ -99,7 +99,7 @@ public class Hedera {
     public String retrieveIndexAccountPublicKeyInHexString() {
         DataDirectory dataDirectory = new DataDirectory();
         AccountUtils accountUtils = new AccountUtils();
-        String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
+        String pathToIndexTxt = accountUtils.pathToIndexTxt();
 
         String publicKey = "";
         String accountId;

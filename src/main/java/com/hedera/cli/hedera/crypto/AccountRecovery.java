@@ -57,9 +57,7 @@ public class AccountRecovery implements Runnable {
     @Option(names = {"-a", "--accountId"}, description = "Account ID in %nshardNum.realmNum.accountNum format")
     private String accountId;
 
-    @Option(names = {"-m", "--method"}, arity = "1", defaultValue = "bip", description = "Recovers keypair from recovery phrase")
     private String strMethod = "bip";
-
     private int index = 0;
     private InputReader inputReader;
     private Utils utils;
@@ -125,7 +123,7 @@ public class AccountRecovery implements Runnable {
     public boolean retrieveIndex() {
         DataDirectory dataDirectory = new DataDirectory();
         AccountUtils accountUtils = new AccountUtils();
-        String pathToIndexTxt = accountUtils.pathToAccountsFolder() + "index.txt";
+        String pathToIndexTxt = accountUtils.pathToIndexTxt();
         boolean accountExists = false;
         HashMap<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
         for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
