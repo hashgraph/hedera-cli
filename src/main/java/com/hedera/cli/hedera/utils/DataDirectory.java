@@ -167,7 +167,7 @@ public class DataDirectory {
         return defaultValue;
     }
 
-    public HashMap<String, String> readWriteFileHashmap(String pathToFile, HashMap<String, String> defaultValue) {
+    public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> defaultValue) {
         // check if index.txt exists, if not, create one
         Path filePath = Paths.get(userHome, directoryName, pathToFile);
         File file = new File(filePath.toString());
@@ -211,6 +211,26 @@ public class DataDirectory {
             e.printStackTrace();
         }
         return defaultValue;
+    }
+
+    public void readIndex(String pathToFile) {
+        // check if index.txt exists, if not, create one
+        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        File file = new File(filePath.toString());
+        HashMap<String, String> mHashmap = new HashMap<>();
+
+        try {
+            // file exist
+            Scanner reader = new Scanner(file);
+            while (reader.hasNext()) {
+                // checks the old map
+                String line = reader.nextLine();
+                System.out.println(line);
+            }
+            reader.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public HashMap<String, String> readFileHashmap(String pathToFile) {
