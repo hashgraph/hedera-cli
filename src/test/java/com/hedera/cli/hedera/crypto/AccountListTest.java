@@ -1,22 +1,18 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.hedera.utils.AccountUtils;
-import com.hedera.cli.hedera.utils.DataDirectory;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class AccountListTest {
+import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.DataDirectory;
 
-    @Autowired
-    ApplicationContext context;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+public class AccountListTest {
 
     @Test
     public void testStreamList() {
