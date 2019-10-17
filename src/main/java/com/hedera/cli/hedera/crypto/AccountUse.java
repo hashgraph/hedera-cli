@@ -11,24 +11,20 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Parameters;
-import picocli.CommandLine.Spec;
 
+// @formatter:off
 @Component
-@Command(name = "use", separator = " ", description = "@|fg(225) Allows to toggle between multiple Hedera Accounts|@", helpCommand = true)
+@Command(name = "use", 
+        separator = " ", 
+        description = "@|fg(225) Switch to use a specific Hedera account as operator.|@",
+        helpCommand = true) // @formatter:on
 public class AccountUse implements Runnable {
 
     @Autowired
     ApplicationContext context;
 
-    @Spec
-    CommandSpec spec;
-
-    // @Option(names = { "-a", "--accountId" }, description = "Account ID in %nshardNum.realmNum.accountNum format")
-    // private String accountId;
-
-    @Parameters(index = "0")
+    @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum")
     private String accountId;
 
     @Override
@@ -57,7 +53,6 @@ public class AccountUse implements Runnable {
         String pathToIndexTxt = pathToAccountsFolder + "index.txt";
         Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
         for (Object key : readingIndexAccount.keySet()) {
-            System.out.println(key.toString());
             if (accountId.equals(key.toString())) {
                 return true;
             }

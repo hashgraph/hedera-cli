@@ -56,8 +56,6 @@ public class HederaCrypto extends CliDefaults {
 
 		// @formatter:off
 		if (subCommand.equals("use")) {
-			System.out.println("use");
-			System.out.println(accountId);
 			if (!accountId.isEmpty()) argsList.add(accountId);
 			Object[] objs = argsList.toArray();
 			args = Arrays.copyOf(objs, objs.length, String[].class);
