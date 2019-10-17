@@ -54,15 +54,15 @@ file create --date=dd-MM-yyyy,hh:mm:ss
 ## Crypto Transfer
 ```bash
 # valid commands
-transfer single -a=1001 -r=44 
-transfer single --accountId=1001 --recipientAmt=44
+transfer single -a 1001 -r 44 
+transfer single --accountId 1001 --recipientAmt 44
 ```
 ## Crypto Transfer Multiple
 
 ```bash
 # valid commands
-transfer multiple -a=1001,1002,1003 -r=44,55,66 
-transfer multiple --accountId=1001,1002,1003 --recipientAmt=44,55,66
+transfer multiple -a 1001,1002,1003 -r 44,55,66 
+transfer multiple --accountId 1001,1002,1003 --recipientAmt 44,55,66
 ```
 ## Switch Accounts
 ```bash

@@ -32,8 +32,7 @@ import picocli.CommandLine.Spec;
 @Getter
 @Setter
 @Component
-@Command(name = "delete",
-        description = "@|fg(225) Deletes the given old account and transfers any balance to the given new account.|@")
+@Command(name = "delete", description = "@|fg(225) Deletes the given old account and transfers any balance to the given new account.|@")
 public class AccountDelete implements Runnable {
 
     @Spec
@@ -45,18 +44,21 @@ public class AccountDelete implements Runnable {
     @Autowired
     ShellHelper shellHelper;
 
-    @Option(names = {"-o", "--oldAcc"}, required = true, description = "Old account ID in %nshardNum.realmNum.accountNum format to be deleted."
-            + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) account delete -o=0.0.1001 -n=0.0.1002|@")
+    @Option(names = { "-o",
+            "--oldAccount" }, required = true, description = "Old account ID in %nshardNum.realmNum.accountNum format to be deleted."
+                    + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account delete -o 0.0.1001 -n 0.0.1002|@")
     private String oldAccountInString;
 
-    @Option(names = {"-n", "--newAcc"}, required = true, description = "Account ID in %nshardNum.realmNum.accountNum format," +
-            "%nwhere funds from old account are transferred to")
+    @Option(names = { "-n",
+            "--newAccount" }, required = true, description = "Account ID in %nshardNum.realmNum.accountNum format,"
+                    + "%nwhere funds from old account are transferred to")
     private String newAccountInString;
+
+    @Option(names = { "-y", "--yes" }, description = "Yes, skip preview")
+    private boolean yes = false;
 
     private InputReader inputReader;
     private Ed25519PrivateKey oldAccountPrivKey;
-    private String isInfoCorrect;
 
     @Override
     public void run() {
@@ -65,11 +67,15 @@ public class AccountDelete implements Runnable {
             var oldAccount = AccountId.fromString(oldAccountInString);
             var newAccount = AccountId.fromString(newAccountInString);
 
-            String privKeyOfAccountToBeDeleted = inputReader.prompt("Enter the private key of the account to be deleted", "secret", false);
+            String privKeyOfAccountToBeDeleted = inputReader
+                    .prompt("Enter the private key of the account to be deleted", "secret", false);
             oldAccountPrivKey = Ed25519PrivateKey.fromString(privKeyOfAccountToBeDeleted);
 
-            isInfoCorrect = promptPreview(oldAccount, newAccount);
-            if (isInfoCorrect.equals("yes")) {
+            if (yes == false) {
+                yes = promptPreview(oldAccount, newAccount);
+            }
+
+            if (yes) {
                 shellHelper.print("Info is correct, let's go!");
                 boolean accountDeleted = executeAccountDelete(hedera, oldAccount, oldAccountPrivKey, newAccount);
                 if (accountDeleted) {
@@ -79,33 +85,32 @@ public class AccountDelete implements Runnable {
                 } else {
                     shellHelper.printError("Some error, account not deleted");
                 }
-            } else if (isInfoCorrect.equals("no")) {
-                shellHelper.print("Nope, incorrect, let's make some changes");
             } else {
-                shellHelper.printError("Input must either been yes or no");
+                shellHelper.print("Nope, incorrect, let's make some changes");
             }
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
     }
 
-    private String promptPreview(AccountId oldAccountId, AccountId newAccount) {
-        return inputReader.prompt("\nAccount to be deleted: " + oldAccountId
-                + "\nAccount for deleted account's funds to be transferred to: " + newAccount
-                + "\n\nIs this correct?"
+    private boolean promptPreview(AccountId oldAccountId, AccountId newAccount) {
+        String choice = inputReader.prompt("\nAccount to be deleted: " + oldAccountId
+                + "\nAccount for deleted account's funds to be transferred to: " + newAccount + "\n\nIs this correct?"
                 + "\nyes/no");
+        if (choice.toLowerCase().equals("yes") || choice.toLowerCase().equals("y")) {
+            return true;
+        }
+        return false;
     }
 
-    public boolean executeAccountDelete(Hedera hedera, AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey, AccountId newAccount) {
+    public boolean executeAccountDelete(Hedera hedera, AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey,
+            AccountId newAccount) {
         boolean accountDeleted = false;
         var client = hedera.createHederaClient();
         // account that is to be deleted must sign its own transaction
         try {
-            TransactionReceipt receipt = new AccountDeleteTransaction(client)
-                    .setDeleteAccountId(oldAccount)
-                    .setTransferAccountId(newAccount)
-                    .sign(oldAccountPrivKey)
-                    .executeForReceipt();
+            TransactionReceipt receipt = new AccountDeleteTransaction(client).setDeleteAccountId(oldAccount)
+                    .setTransferAccountId(newAccount).sign(oldAccountPrivKey).executeForReceipt();
             shellHelper.printSuccess(receipt.getStatus().toString());
             accountDeleted = true;
         } catch (Exception e) {

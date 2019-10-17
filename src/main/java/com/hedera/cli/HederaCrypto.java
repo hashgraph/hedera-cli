@@ -37,43 +37,45 @@ public class HederaCrypto extends CliDefaults {
 	@ShellMethodAvailability("isDefaultNetworkAndAccountSet")
 	@ShellMethod(value = "manage Hedera account")
 	public void account(@ShellOption(defaultValue = "") String subCommand,
+			// Specifying -y flag will set y to be true (which will skip the preview)
+			@ShellOption(value = { "-y", "--yes"}, defaultValue = "false") boolean y,
 			// account create
 			@ShellOption(value = { "-b", "--balance" }, defaultValue = "") String b,
-			@ShellOption(value = { "-k", "--keygen" }, arity = 0) boolean k,
+			@ShellOption(value = { "-k", "--keygen" }, defaultValue = "false") boolean k,
 			@ShellOption(value = { "-m", "--method" }, defaultValue = "") String m,
-			@ShellOption(value = { "-r", "--record" }, arity = 0) boolean r,
+			@ShellOption(value = { "-r", "--record" }, defaultValue = "false") boolean r,
 			// account delete
 			@ShellOption(value = { "-o", "--oldAccount" }, defaultValue = "") String o,
 			@ShellOption(value = { "-n", "--newAccount" }, defaultValue = "") String n) {
 
+		// convert our Spring Shell arguments into an argument list that PicoCli can use.
 		String[] args = new String[]{};
+		ArrayList<String> argsList = new ArrayList<String>();
 
 		// @formatter:off
 		if (subCommand.equals("create")) {
-			ArrayList<String> argsList = new ArrayList<String>();
-			if (!b.isEmpty()) argsList.add(b);
-			argsList.add("-k=true");
-			if (k) {
-				argsList.add("-k=false");
-			}
-			if (!m.isEmpty()) argsList.add(m);
-			argsList.add("-r=true");
-			if (r) {
-				argsList.add("-r=false");
-			}
+			argsList.add("-y=" + y);
+			if (!b.isEmpty()) argsList.add("-b=" + b);
+			argsList.add("-k=" + k);
+			if (!m.isEmpty()) argsList.add("-m=" + m);
+			argsList.add("-r=" + r);
 			Object[] objs = argsList.toArray();
 			args = Arrays.copyOf(objs, objs.length, String[].class);
+			for (String a: args) {
+				System.out.println(a);
+			}
 		}
 
 		if (subCommand.equals("delete")) {
-			ArrayList<String> argsList = new ArrayList<String>();
-			if (!o.isEmpty()) argsList.add(o);
-			if (!n.isEmpty()) argsList.add(n);
+			argsList.add("-y=" + y);
+			if (!o.isEmpty()) argsList.add("-o=" + o);
+			if (!n.isEmpty()) argsList.add("-n=" + n);
 			Object[] objs = argsList.toArray();
 			args = Arrays.copyOf(objs, objs.length, String[].class);
 		}
 		// @formatter:on
 
+		// Pass args onwards and invoke our PicoCli classes
 		Account account = new Account();
 		account.handle(context, inputReader, subCommand, args);
 	}
@@ -87,8 +89,8 @@ public class HederaCrypto extends CliDefaults {
 
 		// @formatter:on
 		ArrayList<String> argsList = new ArrayList<String>();
-		if (!a.isEmpty()) argsList.add(a);
-		if (!r.isEmpty()) argsList.add(r);
+		if (!a.isEmpty()) argsList.add("-a=" + a);
+		if (!r.isEmpty()) argsList.add("-r=" + r);
 		argsList.add("-n=yes");
 		if (n) {
 			argsList.add("-n=no");
