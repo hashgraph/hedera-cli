@@ -18,6 +18,10 @@ public class AccountUtils {
         return networkName + File.separator + "accounts" + File.separator;
     }
 
+    public String pathToIndexTxt() {
+        return pathToAccountsFolder() + "index.txt";
+    }
+
     /**
      * Default Account ID found in default.txt
      * @return

@@ -40,7 +40,7 @@ public class Initialise {
     if (defaultAccount.isEmpty()) {
       System.out.println("defaultAccount does not exist");
       Setup setup = new Setup();
-      setup.handle(inputReader);
+      setup.handle(inputReader, shellHelper);
     } else {
       System.out.println("defaultAccount already exists");
       CommandLine.usage(this, System.out);
