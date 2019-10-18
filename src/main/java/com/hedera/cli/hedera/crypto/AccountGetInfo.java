@@ -19,7 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 @NoArgsConstructor
 @Getter
@@ -36,7 +36,9 @@ public class AccountGetInfo implements Runnable {
     @Autowired
     ShellHelper shellHelper;
 
-    @Option(names = {"-a", "--accountId"}, arity = "0..1", description = "Account ID in %nshardNum.realmNum.accountNum format")
+    @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
+            + "%n@|bold,underline Usage:|@%n"
+            + "@|fg(yellow) account info 0.0.1003|@")
     private String accountIDInString;
 
     @Override
