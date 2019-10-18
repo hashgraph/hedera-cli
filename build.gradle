@@ -83,7 +83,7 @@ dependencies {
     // springboot implementation
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
-    
+
     // Mockito and JUnit 5
     testImplementation('org.junit.jupiter:junit-jupiter-api:5.2.0')
     testCompile('org.junit.jupiter:junit-jupiter-params:5.2.0')

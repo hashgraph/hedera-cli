@@ -53,35 +53,48 @@ public class HederaCrypto extends CliDefaults {
 		// convert our Spring Shell arguments into an argument list that PicoCli can use.
 		String[] args = new String[]{};
 		ArrayList<String> argsList = new ArrayList<String>();
+		Object[] objs = null;
 
-		// @formatter:off
-		if (subCommand.equals("use")) {
-			if (!accountId.isEmpty()) argsList.add(accountId);
-			Object[] objs = argsList.toArray();
-			args = Arrays.copyOf(objs, objs.length, String[].class);
+		switch (subCommand) {
+			case "create":
+				if (y) argsList.add("-y");
+				if (!b.isEmpty()) argsList.add("-b " + b);
+				argsList.add("-k " + k);
+				if (!m.isEmpty()) argsList.add("-m " + m);
+				argsList.add("-r " + r);
+				objs = argsList.toArray();
+				args = Arrays.copyOf(objs, objs.length, String[].class);
+				break;
+			case "update":
+				break;
+			case "info":
+				if(!accountId.isEmpty()) argsList.add(accountId);
+				objs = argsList.toArray();
+				args = Arrays.copyOf(objs, objs.length, String[].class);
+				break;
+			case "delete":
+				if (y) argsList.add("-y");
+				if (!o.isEmpty()) argsList.add("-o " + o);
+				if (!n.isEmpty()) argsList.add("-n " + n);
+				objs = argsList.toArray();
+				args = Arrays.copyOf(objs, objs.length, String[].class);
+				break;
+			case "recovery":
+				if (!accountId.isEmpty()) argsList.add(accountId);
+				objs = argsList.toArray();
+				args = Arrays.copyOf(objs, objs.length, String[].class);
+				break;
+			case "ls":
+				break;
+			case "use":
+				if (!accountId.isEmpty()) argsList.add(accountId);
+				objs = argsList.toArray();
+				args = Arrays.copyOf(objs, objs.length, String[].class);
+				break;
+			default:
+				break;
 		}
-
-		if (subCommand.equals("create")) {
-			if (y) argsList.add("-y");
-			if (!b.isEmpty()) argsList.add("-b " + b);
-			argsList.add("-k " + k);
-			if (!m.isEmpty()) argsList.add("-m " + m);
-			argsList.add("-r " + r);
-			Object[] objs = argsList.toArray();
-			args = Arrays.copyOf(objs, objs.length, String[].class);
-		}
-
-		if (subCommand.equals("delete")) {
-			if (y) argsList.add("-y");
-			if (!o.isEmpty()) argsList.add("-o " + o);
-			if (!n.isEmpty()) argsList.add("-n " + n);
-			Object[] objs = argsList.toArray();
-			args = Arrays.copyOf(objs, objs.length, String[].class);
-		}
-		// @formatter:on
-
 		// Pass args onwards and invoke our PicoCli classes
-		Account account = new Account();
 		account.handle(context, inputReader, subCommand, args);
 	}
 

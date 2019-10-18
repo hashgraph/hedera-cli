@@ -46,24 +46,19 @@ public class DataDirectory {
     }
 
     public void listNetworks(InputStream addressBookInputStream) {
-        // try {
-            // ObjectMapper mapper = new ObjectMapper();
-            // AddressBook addressBook = mapper.readValue(addressBookInputStream, AddressBook.class);
-            System.out.println("In DataDirectory class, our addressBook is: " + addressBook);
-            List<Network> networks = addressBook.getNetworks();
-            for (Network network : networks) {
-                String currentNetwork = this.readFile("network.txt", defaultNetworkName);
-                if (currentNetwork != null) {
-                    if (currentNetwork.equals(network.getName())) {
-                        System.out.println("* " + network.getName());
-                    } else {
-                        System.out.println("  " + network.getName());
-                    }
+
+        List<Network> networks = addressBook.getNetworks();
+        for (Network network : networks) {
+            String currentNetwork = this.readFile("network.txt", defaultNetworkName);
+            if (currentNetwork != null) {
+                if (currentNetwork.equals(network.getName())) {
+                    System.out.println("* " + network.getName());
+                } else {
+                    System.out.println("  " + network.getName());
                 }
             }
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        // }
+        }
+
     }
 
     public String networkGetName(InputStream addressBookInputStream) {
@@ -178,8 +173,7 @@ public class DataDirectory {
         boolean fileExists = Files.exists(filePath);
         if (!fileExists) {
             // file does not exist so create a new file and write value
-            String cleanedIndexTxt = defaultValue.toString().substring(1, defaultValue.toString().length() - 1);
-            writeFile(pathToFile, cleanedIndexTxt);
+            writeFile(pathToFile, formatMapToIndex(defaultValue));
             return defaultValue;
         }
 
@@ -207,15 +201,17 @@ public class DataDirectory {
             // appends old map with new value
             updatedHashmap.put(key, value);
             // write to file
-            String cleanedIndexTxtUpdated = updatedHashmap.toString().substring(1,
-                    updatedHashmap.toString().length() - 1);
-            writeFile(pathToFile, cleanedIndexTxtUpdated.replace(", ", "\n"));
+            writeFile(pathToFile, formatMapToIndex(updatedHashmap));
             reader.close();
             return updatedHashmap;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return defaultValue;
+    }
+
+    public String formatMapToIndex(Map<String, String> updatedHashmap) {
+        return updatedHashmap.toString().substring(1, updatedHashmap.toString().length() - 1).replace(", ", "\n");
     }
 
     public void readIndex(String pathToFile) {

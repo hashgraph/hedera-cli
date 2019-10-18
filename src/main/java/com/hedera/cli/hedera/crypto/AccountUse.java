@@ -29,8 +29,10 @@ public class AccountUse implements Runnable {
     @Autowired
     DataDirectory dataDirectory;
 
-    @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum")
-    private String accountId;
+    @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
+            + "%n@|bold,underline Usage:|@%n"
+            + "@|fg(yellow) account use 0.0.1003|@")
+    private String accountId;    
 
     @Override
     public void run() {
@@ -65,3 +67,4 @@ public class AccountUse implements Runnable {
     }
 
 }
+
