@@ -52,6 +52,12 @@ public class AccountRecovery implements Runnable {
     ApplicationContext context;
 
     @Autowired
+    Hedera hedera;
+
+    @Autowired
+    DataDirectory dataDirectory;
+
+    @Autowired
     ShellHelper shellHelper;
 
     @Option(names = {"-a", "--accountId"}, description = "Account ID in %nshardNum.realmNum.accountNum format")
@@ -62,7 +68,6 @@ public class AccountRecovery implements Runnable {
     private InputReader inputReader;
     private Utils utils;
     private AccountGetInfo accountInfo;
-    private Hedera hedera;
     private com.hedera.hashgraph.sdk.account.AccountInfo accountRes;
     private KeyPair keyPair;
 
@@ -70,7 +75,7 @@ public class AccountRecovery implements Runnable {
     public void run() {
         utils = new Utils();
         accountInfo = new AccountGetInfo();
-        hedera = new Hedera(context);
+        // hedera = new Hedera(context);
         shellHelper.print("Recovering accountID in the format of 0.0.xxxx" + accountId);
         strMethod = inputReader.prompt("Have you updated your account on Hedera wallet? If updated, enter `bip`, else enter `hgc`");
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
@@ -121,7 +126,6 @@ public class AccountRecovery implements Runnable {
     }
 
     public boolean retrieveIndex() {
-        DataDirectory dataDirectory = new DataDirectory();
         AccountUtils accountUtils = new AccountUtils();
         String pathToIndexTxt = accountUtils.pathToIndexTxt();
         boolean accountExists = false;

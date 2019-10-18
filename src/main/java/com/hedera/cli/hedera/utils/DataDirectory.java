@@ -22,10 +22,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.models.AddressBook;
 import com.hedera.cli.models.Network;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataDirectory {
+
+    @Autowired
+    AddressBook addressBook;
 
     private String userHome = System.getProperty("user.home");
     private String directoryName = ".hedera";
@@ -42,13 +46,13 @@ public class DataDirectory {
     }
 
     public void listNetworks(InputStream addressBookInputStream) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            AddressBook addressBook = mapper.readValue(addressBookInputStream, AddressBook.class);
+        // try {
+            // ObjectMapper mapper = new ObjectMapper();
+            // AddressBook addressBook = mapper.readValue(addressBookInputStream, AddressBook.class);
+            System.out.println("In DataDirectory class, our addressBook is: " + addressBook);
             List<Network> networks = addressBook.getNetworks();
-            DataDirectory dataDirectory = new DataDirectory();
             for (Network network : networks) {
-                String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
+                String currentNetwork = this.readFile("network.txt", defaultNetworkName);
                 if (currentNetwork != null) {
                     if (currentNetwork.equals(network.getName())) {
                         System.out.println("* " + network.getName());
@@ -57,9 +61,9 @@ public class DataDirectory {
                     }
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
     }
 
     public String networkGetName(InputStream addressBookInputStream) {

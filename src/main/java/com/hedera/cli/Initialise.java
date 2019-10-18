@@ -22,12 +22,16 @@ public class Initialise {
   @Autowired
   InputReader inputReader;
 
+  @Autowired
+  DataDirectory dataDirectory;
+
+  @Autowired
+  Setup setup;
+
   private String defaultNetworkName = "aspen";
 
   @ShellMethod(value = "Initialise a Hedera account as the default operator")
   public void setup() {
-    
-    DataDirectory dataDirectory = new DataDirectory();
     String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
     String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + "default.txt";
     String defaultAccount = "";
@@ -39,7 +43,6 @@ public class Initialise {
 
     if (defaultAccount.isEmpty()) {
       System.out.println("defaultAccount does not exist");
-      Setup setup = new Setup();
       setup.handle(inputReader, shellHelper);
     } else {
       System.out.println("defaultAccount already exists");

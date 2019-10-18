@@ -50,6 +50,9 @@ public class CryptoTransferMultiple implements Runnable {
     ApplicationContext context;
 
     @Autowired
+    Hedera hedera;
+
+    @Autowired
     ShellHelper shellHelper;
 
     @Spec
@@ -100,7 +103,7 @@ public class CryptoTransferMultiple implements Runnable {
             senderAccountIDInString = inputReader.prompt("Input sender accountID in the format xxxx");
             String transferAmountInStr = inputReader.prompt("Input transfer amount");
 
-            Hedera hedera = new Hedera(context);
+            // Hedera hedera = new Hedera(context);
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
             // Operator is the current default account user

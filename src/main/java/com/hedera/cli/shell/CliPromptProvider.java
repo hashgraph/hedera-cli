@@ -21,13 +21,14 @@ public class CliPromptProvider implements PromptProvider {
     @Autowired
     ApplicationContext context;
 
+    @Autowired
+    DataDirectory dataDirectory;
+
     private String defaultNetworkName = "aspen";
     private AttributedString currentAccountAttr;
 
     @Override
     public AttributedString getPrompt() {
-
-        DataDirectory dataDirectory = new DataDirectory();
         String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
         String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + "default.txt";
         String defaultAccount = "";

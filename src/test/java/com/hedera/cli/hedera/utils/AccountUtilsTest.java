@@ -1,74 +1,77 @@
 package com.hedera.cli.hedera.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.hedera.cli.services.CurrentAccountService;
-import com.hedera.hashgraph.sdk.account.AccountId;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(MockitoExtension.class)
 @ContextConfiguration(classes = {CurrentAccountService.class})
 public class AccountUtilsTest {
+    
+    @InjectMocks
+    AccountUtils accountUtils;
 
-    @Autowired
-    ApplicationContext context;
-//    @Test
-//    public void testCurrentOrDefaultAccountString() {
-//        String defaultPath = "default.txt";
-//        AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-//        when(accountUtils
-//                .currentOrDefaultAccountString(defaultPath))
-//                .thenReturn("adjective_botanic_number:0.0.zzzz".split(":"));
-//        String defaultAccountId = accountUtils.currentOrDefaultAccountString("default.txt")[1];
-//        assertEquals("0.0.zzzz", defaultAccountId);
-//    }
+    @Mock
+    DataDirectory dataDirectory;
 
-    @Test
-    public void testRetrieveAccountString() {
-        AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-        when(accountUtils
-                .defaultAccountString())
-                .thenReturn("adjective_botanic_number:0.0.xxxx".split(":"));
-        String accountId = accountUtils.defaultAccountString()[1];
-        assertEquals("0.0.xxxx", accountId);
+    @Before
+    public void init() {
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testRetrieveDefaultAccountID() {
-        AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-        when(accountUtils
-                .retrieveDefaultAccountID())
-                .thenReturn(AccountId.fromString("0.0.1234"));
-        AccountId accountId = accountUtils.retrieveDefaultAccountID();
-        assertEquals(AccountId.fromString("0.0.1234"), accountId);
+    public void defaultAccountString() {
+        String testDataInDefaultFile = "adjective_botanic_number:0.0.1001";
+        when(dataDirectory.readFile(any())).thenReturn(testDataInDefaultFile);
+        String[] defaultAccountArray = accountUtils.defaultAccountString();
+        assertEquals(testDataInDefaultFile.split(":")[0], defaultAccountArray[0]);
+        assertEquals(testDataInDefaultFile.split(":")[1], defaultAccountArray[1]);
     }
 
     @Test
-    public void testRetrieveDefaultAccountPublicKeyInHexString() {
-        AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-        when(accountUtils
-                .retrieveDefaultAccountPublicKeyInHexString())
-                .thenReturn("publicKeyInStringDerOrASN1Format");
-        String publicKey = accountUtils.retrieveDefaultAccountPublicKeyInHexString();
-        assertEquals("publicKeyInStringDerOrASN1Format", publicKey);
+    public void retrieveDefaultAccountID() {
+        
     }
 
-    @Test
-    public void testRetrieveDefaultAccountKeyInHexString() {
-        AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-        when(accountUtils.retrieveDefaultAccountKeyInHexString())
-                .thenReturn("privateKeyInStringDerOrASN1Format");
-        String privateKey = accountUtils.retrieveDefaultAccountKeyInHexString();
-        assertEquals("privateKeyInStringDerOrASN1Format", privateKey);
-    }
+    // @Test
+    // public void testRetrieveDefaultAccountID() {
+    //     AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
+    //     when(accountUtils
+    //             .retrieveDefaultAccountID())
+    //             .thenReturn(AccountId.fromString("0.0.1234"));
+    //     AccountId accountId = accountUtils.retrieveDefaultAccountID();
+    //     assertEquals(AccountId.fromString("0.0.1234"), accountId);
+    // }
+
+    // @Test
+    // public void testRetrieveDefaultAccountPublicKeyInHexString() {
+    //     AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
+    //     when(accountUtils
+    //             .retrieveDefaultAccountPublicKeyInHexString())
+    //             .thenReturn("publicKeyInStringDerOrASN1Format");
+    //     String publicKey = accountUtils.retrieveDefaultAccountPublicKeyInHexString();
+    //     assertEquals("publicKeyInStringDerOrASN1Format", publicKey);
+    // }
+
+    // @Test
+    // public void testRetrieveDefaultAccountKeyInHexString() {
+    //     AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
+    //     when(accountUtils.retrieveDefaultAccountKeyInHexString())
+    //             .thenReturn("privateKeyInStringDerOrASN1Format");
+    //     String privateKey = accountUtils.retrieveDefaultAccountKeyInHexString();
+    //     assertEquals("privateKeyInStringDerOrASN1Format", privateKey);
+    // }
 
 //    @Test
 //    public void testRetrieveIndexAccountKeyInHexString() {

@@ -45,6 +45,12 @@ public class AccountCreate implements Runnable {
     @Autowired
     ShellHelper shellHelper;
 
+    @Autowired
+    Hedera hedera;
+
+    @Autowired
+    Setup setup;
+
     @Spec
     CommandSpec spec;
 
@@ -76,7 +82,7 @@ public class AccountCreate implements Runnable {
     @Override
     public void run() {
 
-        Hedera hedera = new Hedera(context);
+        // Hedera hedera = new Hedera(context);
         setMinimum(initBal);
         if (keyGen) {
             // If keyGen via args is set to true, generate new keys
@@ -99,7 +105,6 @@ public class AccountCreate implements Runnable {
             String privateKey = operatorPrivateKey.toString();
             String publicKey = operatorPublicKey.toString();
             account = printAccount(accountID.toString(), privateKey, publicKey);
-            Setup setup = new Setup();
             setup.saveToJson(accountID.toString(), account);
         }
     }
@@ -122,7 +127,6 @@ public class AccountCreate implements Runnable {
 
     public AccountId createNewAccount(Ed25519PublicKey publicKey) {
         AccountId accountId = null;
-        Hedera hedera = new Hedera(context);
         var client = hedera.createHederaClient();
         var tx = new AccountCreateTransaction(client)
                 // The only _required_ property here is `key`

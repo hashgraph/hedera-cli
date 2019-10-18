@@ -13,22 +13,28 @@ import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 
+@Component
 public class Hedera {
 
+    @Autowired
+    DataDirectory dataDirectory;
+
+    @Autowired
     ApplicationContext context;
 
-    private AddressBook addressBook;
-    private HederaNode node;
+    @Autowired
+    AddressBook addressBook;
 
-    public Hedera(ApplicationContext context) {
-        addressBook = AddressBook.init();
-        this.node = this.getRandomNode();
-        this.context = context;
-    }
+    @Autowired
+    AccountUtils accountUtils;
+
+    private HederaNode node;
 
     private HederaNode getRandomNode() {
         return addressBook.getCurrentNetwork().getRandomNode();
@@ -43,7 +49,7 @@ public class Hedera {
     }
 
     public AccountId getNodeId() {
-        return AccountId.fromString(this.node.getAccount());
+        return AccountId.fromString(node.getAccount());
     }
 
     public AccountId getOperatorId() {
@@ -53,7 +59,6 @@ public class Hedera {
             String accountNumber = currentAccountId();
             operatorId = AccountId.fromString(accountNumber);
         } else {
-            AccountUtils accountUtils = new AccountUtils();
             operatorId = accountUtils.retrieveDefaultAccountID();
         }
         return operatorId;
@@ -74,8 +79,6 @@ public class Hedera {
     }
 
     public String retrieveIndexAccountKeyInHexString() {
-        DataDirectory dataDirectory = new DataDirectory();
-        AccountUtils accountUtils = new AccountUtils();
         String pathToIndexTxt = accountUtils.pathToIndexTxt();
 
         String accountId;
@@ -83,7 +86,7 @@ public class Hedera {
         String privateKey = "";
 
         Map<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
-        for(Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
+        for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
             accountId = entry.getKey(); // key refers to the account id
             value = entry.getValue(); // value refers to the filename json
             String currentAccountId = currentAccountId();
@@ -97,8 +100,6 @@ public class Hedera {
     }
 
     public String retrieveIndexAccountPublicKeyInHexString() {
-        DataDirectory dataDirectory = new DataDirectory();
-        AccountUtils accountUtils = new AccountUtils();
         String pathToIndexTxt = accountUtils.pathToIndexTxt();
 
         String publicKey = "";
@@ -106,7 +107,7 @@ public class Hedera {
         String value;
 
         Map<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
-        for(Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
+        for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
             accountId = entry.getKey(); // key refers to the account id
             value = entry.getValue(); // value refers to the filename json
             String currentAccountId = currentAccountId();
@@ -120,7 +121,6 @@ public class Hedera {
     }
 
     public Ed25519PrivateKey getOperatorKey() {
-        AccountUtils accountUtils = new AccountUtils();
         String privateKeyInHexString;
         boolean currentAccountExist = currentAccountExist();
         if (currentAccountExist) {
@@ -134,7 +134,8 @@ public class Hedera {
     public Client createHederaClient() {
         // To connect to a network with more nodes, add additional entries to the
         // network map
-        var nodeAddress = this.node.getAddress();
+        node = getRandomNode(); // can only be invoked once
+        var nodeAddress = node.getAddress();
         var client = new Client(Map.of(this.getNodeId(), nodeAddress));
 
         // Defaults the operator account ID and key such that all generated transactions

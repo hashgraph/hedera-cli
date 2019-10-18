@@ -1,20 +1,28 @@
 package com.hedera.cli.hedera.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.setup.Setup;
-import com.hedera.cli.models.TransactionObj;
-import com.hedera.hashgraph.sdk.account.AccountId;
-import org.hjson.JsonObject;
-
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.hedera.cli.hedera.keygen.KeyPair;
+import com.hedera.cli.hedera.setup.Setup;
+import com.hedera.cli.models.TransactionObj;
+import com.hedera.hashgraph.sdk.account.AccountId;
+
+import org.hjson.JsonObject;
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class Utils {
+
+    @Autowired
+    DataDirectory dataDirectory;
+
+    @Autowired
+    Setup setup;
 
     public Instant dateToMilliseconds(String[] dateInString) throws ParseException {
         StringBuilder appendedString = new StringBuilder();
@@ -36,7 +44,6 @@ public class Utils {
         String filename;
         try {
             jsonString = ow.writeValueAsString(obj);
-            DataDirectory dataDirectory = new DataDirectory();
             String networkName = dataDirectory.readFile("network.txt");
             String pathToTransactionFolder = networkName + File.separator + "transactions" + File.separator;
             filename = txID + ".json";
@@ -53,7 +60,6 @@ public class Utils {
         account.add("accountId", accountId.toString());
         account.add("privateKey", keyPair.getPrivateKeyHex());
         account.add("publicKey", keyPair.getPublicKeyHex());
-        Setup setup = new Setup();
         setup.saveToJson(accountId.toString(), account);
     }
 }

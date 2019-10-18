@@ -34,6 +34,9 @@ public class AccountGetInfo implements Runnable {
     ApplicationContext context;
 
     @Autowired
+    Hedera hedera;
+
+    @Autowired
     ShellHelper shellHelper;
 
     @Option(names = {"-a", "--accountId"}, arity = "0..1", description = "Account ID in %nshardNum.realmNum.accountNum format")
@@ -41,7 +44,7 @@ public class AccountGetInfo implements Runnable {
 
     @Override
     public void run() {
-        Hedera hedera = new Hedera(context);
+        // Hedera hedera = new Hedera(context);
 
         if (StringUtil.isNullOrEmpty(accountIDInString)) {
             accountIDInString = hedera.getOperatorId().toString();

@@ -28,6 +28,9 @@ public class FileCreate implements Runnable {
     @Autowired
     ApplicationContext context;
 
+    @Autowired
+    Hedera hedera;
+
     @Option(names = { "-d", "--date" }, arity = "0..2", description = "Enter file expiry date in the format of%n"
             + "dd-MM-yyyy hh:mm:ss%n" + "%n@|bold,underline Usage:|@%n"
             + "@|fg(yellow) file create -d=22-02-2019,21:30:58|@")
@@ -93,7 +96,7 @@ public class FileCreate implements Runnable {
     public void run() {
         CommandLine.usage(this, System.out);
         try {
-            Hedera hedera = new Hedera(context);
+            // Hedera hedera = new Hedera(context);
             var operatorKey = hedera.getOperatorKey();
             var client = hedera.createHederaClient().setMaxTransactionFee(maxTransactionFee);
             System.out.println(maxTransactionFee);

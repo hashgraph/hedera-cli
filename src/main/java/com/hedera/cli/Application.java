@@ -23,9 +23,12 @@ public class Application {
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(Application.class, args);
         // set defaults
-        DataDirectory dataDirectory = new DataDirectory();
+        // DataDirectory dataDirectory = new DataDirectory();
+        DataDirectory dataDirectory = context.getBean(DataDirectory.class);
         dataDirectory.readFile("network.txt", "aspen");
-        Hedera hedera = new Hedera(context);
+
+        Hedera hedera = context.getBean(Hedera.class);
+        // Hedera hedera = new Hedera(context);
         List<String> networkList = hedera.getNetworksStrings();
         for (String network: networkList) {
             String accountsDirForNetwork = network + File.separator + "accounts";

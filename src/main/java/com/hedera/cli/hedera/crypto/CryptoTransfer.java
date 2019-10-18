@@ -35,6 +35,9 @@ public class CryptoTransfer implements Runnable {
     @Autowired
     ShellHelper shellHelper;
 
+    @Autowired
+    Hedera hedera;
+
     @Spec
     CommandSpec spec;
 
@@ -72,7 +75,7 @@ public class CryptoTransfer implements Runnable {
     @Override
     public void run() {
         memoString = inputReader.prompt("Memo field");
-        Hedera hedera = new Hedera(context);
+        // Hedera hedera = new Hedera(context);
         var operatorId = hedera.getOperatorId();
         var client = hedera.createHederaClient();
         var recipientId = AccountId.fromString("0.0." + recipient);

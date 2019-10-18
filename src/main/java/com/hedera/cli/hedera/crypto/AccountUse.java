@@ -26,12 +26,14 @@ public class AccountUse implements Runnable {
     @Autowired
     ApplicationContext context;
 
+    @Autowired
+    DataDirectory dataDirectory;
+
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum")
     private String accountId;
 
     @Override
     public void run() {
-        DataDirectory dataDirectory = new DataDirectory();
         boolean exists = accountIdExistsInIndex(dataDirectory, accountId);
         if (exists) {
             // since this accountId exists, we set it into our CurrentAccountService

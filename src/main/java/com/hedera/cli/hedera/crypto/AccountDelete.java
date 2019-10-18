@@ -42,6 +42,12 @@ public class AccountDelete implements Runnable {
     ApplicationContext context;
 
     @Autowired
+    Hedera hedera;
+
+    @Autowired
+    DataDirectory dataDirectory;
+
+    @Autowired
     ShellHelper shellHelper;
 
     @Option(names = { "-o",
@@ -63,7 +69,7 @@ public class AccountDelete implements Runnable {
     @Override
     public void run() {
         try {
-            Hedera hedera = new Hedera(context);
+            // Hedera hedera = new Hedera(context);
             var oldAccount = AccountId.fromString(oldAccountInString);
             var newAccount = AccountId.fromString(newAccountInString);
 
@@ -133,7 +139,6 @@ public class AccountDelete implements Runnable {
     }
 
     public boolean deleteJsonAccountFromDisk(AccountId oldAccount) {
-        DataDirectory dataDirectory = new DataDirectory();
         AccountUtils accountUtils = new AccountUtils();
         String pathToIndexTxt = accountUtils.pathToIndexTxt();
         boolean fileDeleted = false;

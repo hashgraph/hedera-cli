@@ -2,6 +2,7 @@ package com.hedera.cli.hedera.network;
 
 import com.hedera.cli.hedera.utils.DataDirectory;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine.Command;
@@ -13,6 +14,9 @@ import picocli.CommandLine.Option;
          helpCommand = true)
 public class NetworkSet implements Runnable {
 
+  @Autowired
+  DataDirectory dataDirectory;
+
   @Option(names = {"-n", "--name"},
           description = "Name of the network" + 
           "%n@|bold,underline Usage:|@%n" +
@@ -23,7 +27,6 @@ public class NetworkSet implements Runnable {
   @Override
   public void run() {
     System.out.println("Setting network to " + name);
-    DataDirectory dataDirectory = new DataDirectory();
     dataDirectory.writeFile("network.txt", name);
   }
 

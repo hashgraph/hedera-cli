@@ -22,6 +22,7 @@ import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.hjson.JsonObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
@@ -33,6 +34,9 @@ import picocli.CommandLine.Spec;
 @Component
 @Command(name = "setup", description = "")
 public class Setup implements Runnable {
+
+    @Autowired
+    DataDirectory dataDirectory;
 
     @Spec
     CommandSpec spec;
@@ -93,7 +97,6 @@ public class Setup implements Runnable {
 
     public void saveToJson(String accountId, JsonObject account) {
         // ~/.hedera/[network_name]/accounts/[account_name].json
-        DataDirectory dataDirectory = new DataDirectory();
         String fileName = getRandomName();
         String fileNameWithExt = fileName + ".json";
         String networkName = dataDirectory.readFile("network.txt");
