@@ -1,4 +1,4 @@
-package com.hedera.cli;
+package com.hedera.cli.commands;
 
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.cli.hedera.network.Network;

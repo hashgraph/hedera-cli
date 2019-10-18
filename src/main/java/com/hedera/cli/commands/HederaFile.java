@@ -1,4 +1,4 @@
-package com.hedera.cli;
+package com.hedera.cli.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
