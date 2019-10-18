@@ -43,7 +43,7 @@ public class HederaCrypto extends CliDefaults {
 			@ShellOption(value = { "-y", "--yes"}, defaultValue = "false") boolean y,
 			// account create
 			@ShellOption(value = { "-b", "--balance" }, defaultValue = "") String b,
-			@ShellOption(value = { "-k", "--keygen" }, defaultValue = "false") boolean k,
+			@ShellOption(value = { "-k", "--keygen" }, defaultValue = "true") boolean k,
 			@ShellOption(value = { "-m", "--method" }, defaultValue = "") String m,
 			@ShellOption(value = { "-r", "--record" }, defaultValue = "false") boolean r,
 			// account delete
@@ -57,11 +57,8 @@ public class HederaCrypto extends CliDefaults {
 
 		switch (subCommand) {
 			case "create":
-				if (y) argsList.add("-y");
+				if (k) argsList.add("-k");
 				if (!b.isEmpty()) argsList.add("-b " + b);
-				argsList.add("-k " + k);
-				if (!m.isEmpty()) argsList.add("-m " + m);
-				argsList.add("-r " + r);
 				objs = argsList.toArray();
 				args = Arrays.copyOf(objs, objs.length, String[].class);
 				break;

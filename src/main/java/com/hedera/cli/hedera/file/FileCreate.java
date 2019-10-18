@@ -31,6 +31,9 @@ public class FileCreate implements Runnable {
     @Autowired
     Hedera hedera;
 
+    @Autowired
+    Utils utils;
+
     @Option(names = { "-d", "--date" }, arity = "0..2", description = "Enter file expiry date in the format of%n"
             + "dd-MM-yyyy hh:mm:ss%n" + "%n@|bold,underline Usage:|@%n"
             + "@|fg(yellow) file create -d=22-02-2019,21:30:58|@")
@@ -103,7 +106,6 @@ public class FileCreate implements Runnable {
             System.out.println(Arrays.asList(date));
 
             FileCreateTransaction tx = null;
-            Utils utils = new Utils();
             Instant instant = utils.dateToMilliseconds(date);
 
             boolean testSize = false;

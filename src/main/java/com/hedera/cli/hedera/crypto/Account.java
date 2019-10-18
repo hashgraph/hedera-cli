@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
+import java.util.Arrays;
+
 @Component
 @Command(name = "account", description = "@|fg(225) Create, update, delete or querying an account by providing the <args>|@"
         + "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. account create <args>|@", subcommands = {
@@ -31,6 +33,7 @@ public class Account implements Runnable {
             } else {
                 try {
                     AccountCreate accountCreate = factory.create(AccountCreate.class);
+                    System.out.println(Arrays.toString(args));
                     new CommandLine(accountCreate).execute(args);
                 } catch (Exception e) {
                     e.printStackTrace();

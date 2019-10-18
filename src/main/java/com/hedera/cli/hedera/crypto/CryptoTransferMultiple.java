@@ -55,6 +55,9 @@ public class CryptoTransferMultiple implements Runnable {
     @Autowired
     ShellHelper shellHelper;
 
+    @Autowired
+    Utils utils;
+
     @Spec
     CommandSpec spec;
 
@@ -244,7 +247,6 @@ public class CryptoTransferMultiple implements Runnable {
         txObj.setTxConsensusTimestamp(record.getConsensusTimestamp());
         txObj.setTxValidStart(txTimestamp);
 
-        Utils utils = new Utils();
         utils.saveTransactionsToJson(txID, txObj);
     }
 

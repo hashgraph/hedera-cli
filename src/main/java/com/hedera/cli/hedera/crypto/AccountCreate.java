@@ -51,13 +51,16 @@ public class AccountCreate implements Runnable {
     @Autowired
     Setup setup;
 
+    @Autowired
+    Utils utils;
+
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"-r", "--record"}, description = "Generates a record that lasts 25hrs")
-    private boolean generateRecord = false;
+//    @Option(names = {"-r", "--record"}, description = "Generates a record that lasts 25hrs")
+//    private boolean generateRecord = false;
 
-    @Option(names = {"-b", "--balance"}, description = "Initial balance of new account created in hbars")
+    @Option(names = {"-b", "--balance"}, required = true, description = "Initial balance of new account created in hbars")
     private int initBal = 0;
 
     private void setMinimum(int min) {
@@ -68,12 +71,9 @@ public class AccountCreate implements Runnable {
     }
 
     @Option(names = {"-k", "--keygen"}, description = "Default generates a brand new key pair associated with account creation"
-            + "%n@|bold,underline Usage:|@")
-    private boolean keyGen = true;
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000|@")
+    private boolean keyGen;
 
-    @Option(names = {"-m", "--method"}, defaultValue = "bip", description = "Default set for passphrases and keypairs that are bip compatible"
-            + "%n@|bold,underline Usage:|@"
-            + "%n@|fg(yellow) account create -b=100000000|@")
     private String strMethod = "bip";
 
     private AccountId accountID;
@@ -94,7 +94,6 @@ public class AccountCreate implements Runnable {
             accountID = createNewAccount(newPublicKey);
             account = printAccount(accountID.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
             // save to local disk
-            Utils utils = new Utils();
             utils.saveAccountsToJson(keypair, AccountId.fromString(accountID.toString()));
         } else {
             // Else keyGen always set to false and read from default.txt which contains operator keys

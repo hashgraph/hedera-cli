@@ -60,6 +60,9 @@ public class AccountRecovery implements Runnable {
     AccountUtils accountUtils;
 
     @Autowired
+    Utils utils;
+
+    @Autowired
     ShellHelper shellHelper;
 
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
@@ -70,14 +73,12 @@ public class AccountRecovery implements Runnable {
     private String strMethod = "bip";
     private int index = 0;
     private InputReader inputReader;
-    private Utils utils;
     private AccountGetInfo accountInfo;
     private com.hedera.hashgraph.sdk.account.AccountInfo accountRes;
     private KeyPair keyPair;
 
     @Override
     public void run() {
-        utils = new Utils();
         accountInfo = new AccountGetInfo();
         // hedera = new Hedera(context);
         shellHelper.print("Recovering accountID in the format of 0.0.xxxx" + accountId);
