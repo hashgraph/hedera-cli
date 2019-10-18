@@ -13,8 +13,8 @@ import org.springframework.shell.standard.ShellMethod;
 
 import picocli.CommandLine;
 
-@ShellComponent(value = "Initialise")
-public class Initialise {
+@ShellComponent(value = "Get Started")
+public class GetStarted {
 
   @Autowired
   ShellHelper shellHelper;
@@ -30,7 +30,7 @@ public class Initialise {
 
   private String defaultNetworkName = "aspen";
 
-  @ShellMethod(value = "Initialise a Hedera account as the default operator")
+  @ShellMethod(value = "initialise a Hedera account as the default operator")
   public void setup() {
     String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
     String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + "default.txt";

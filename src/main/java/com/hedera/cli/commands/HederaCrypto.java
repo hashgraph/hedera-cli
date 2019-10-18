@@ -96,7 +96,7 @@ public class HederaCrypto extends CliDefaults {
 	}
 
 	@ShellMethodAvailability("isDefaultNetworkAndAccountSet")
-	@ShellMethod(value = "transfer hbars from one hedera account to another")
+	@ShellMethod(value = "transfer hbars from one Hedera account to another")
 	public void transfer(@ShellOption(defaultValue = "") String subCommand,
 			@ShellOption(value = { "-a", "--accountId" }, defaultValue = "") String a,
 			@ShellOption(value = { "-r", "--recipientAmount" }, defaultValue = "") String r,

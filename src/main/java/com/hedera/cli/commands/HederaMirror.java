@@ -15,7 +15,7 @@ public class HederaMirror extends CliDefaults {
   ShellHelper shellHelper;
   
   @ShellMethodAvailability("isNotCompleted")
-  @ShellMethod(value = "Introspect Hedera mirror nodes")
+  @ShellMethod(value = "introspect Hedera mirror nodes")
   public void mirror() {
     System.out.println("Stub function.");
   }
