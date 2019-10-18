@@ -81,6 +81,9 @@ public class HederaCrypto extends CliDefaults {
 				args = Arrays.copyOf(objs, objs.length, String[].class);
 				break;
 			case "recovery":
+				if (!accountId.isEmpty()) argsList.add(accountId);
+				objs = argsList.toArray();
+				args = Arrays.copyOf(objs, objs.length, String[].class);
 				break;
 			case "ls":
 				break;

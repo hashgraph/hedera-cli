@@ -32,9 +32,10 @@ import org.springframework.stereotype.Component;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
 @NoArgsConstructor
@@ -53,7 +54,9 @@ public class AccountRecovery implements Runnable {
     @Autowired
     ShellHelper shellHelper;
 
-    @Option(names = {"-a", "--accountId"}, description = "Account ID in %nshardNum.realmNum.accountNum format")
+    @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
+            + "%n@|bold,underline Usage:|@%n"
+            + "@|fg(yellow) account recovery 0.0.1003|@")
     private String accountId;
 
     private String strMethod = "bip";
@@ -107,8 +110,7 @@ public class AccountRecovery implements Runnable {
 
     public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId, Ed25519PrivateKey accPrivKey) {
         try {
-            var client = hedera.createHederaClient()
-                    .setOperator(hedera.getOperatorId(), hedera.getOperatorKey());
+            var client = hedera.createHederaClient();
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)
                     .setAccountId(AccountId.fromString(accountId));
