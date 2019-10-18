@@ -174,8 +174,7 @@ public class DataDirectory {
         boolean fileExists = Files.exists(filePath);
         if (!fileExists) {
             // file does not exist so create a new file and write value
-            String cleanedIndexTxt = defaultValue.toString().substring(1, defaultValue.toString().length() - 1);
-            writeFile(pathToFile, cleanedIndexTxt);
+            writeFile(pathToFile, formatMapToIndex(defaultValue));
             return defaultValue;
         }
 
@@ -203,15 +202,19 @@ public class DataDirectory {
             // appends old map with new value
             updatedHashmap.put(key, value);
             // write to file
-            String cleanedIndexTxtUpdated = updatedHashmap.toString().substring(1,
-                    updatedHashmap.toString().length() - 1);
-            writeFile(pathToFile, cleanedIndexTxtUpdated.replace(", ", "\n"));
+            writeFile(pathToFile, formatMapToIndex(updatedHashmap));
             reader.close();
             return updatedHashmap;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return defaultValue;
+    }
+
+    public String formatMapToIndex(Map<String, String> updatedHashmap) {
+        return updatedHashmap.toString()
+                .substring(1, updatedHashmap.toString().length() - 1)
+                .replace(", ", "\n");
     }
 
     public void readIndex(String pathToFile) {

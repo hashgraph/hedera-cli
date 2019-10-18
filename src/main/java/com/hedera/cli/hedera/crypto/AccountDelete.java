@@ -143,7 +143,7 @@ public class AccountDelete implements Runnable {
         String pathToCurrentJsonAccount;
         Map<String, String> updatedMap;
 
-        Map<String, String> readingIndexAccount = dataDirectory.readFileHashmap(pathToIndexTxt);
+        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
 
         Set<Map.Entry<String, String>> setOfEntries = readingIndexAccount.entrySet();
         Iterator<Map.Entry<String, String>> iterator = setOfEntries.iterator();
@@ -164,7 +164,7 @@ public class AccountDelete implements Runnable {
         }
         // write to file
         updatedMap = readingIndexAccount;
-        dataDirectory.writeFile(pathToIndexTxt, updatedMap.toString());
+        dataDirectory.writeFile(pathToIndexTxt, dataDirectory.formatMapToIndex(updatedMap));
         return fileDeleted;
     }
 }
