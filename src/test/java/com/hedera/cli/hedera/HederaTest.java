@@ -1,17 +1,11 @@
 package com.hedera.cli.hedera;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-
-import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.AddressBook;
-import com.hedera.cli.models.Network;
 import com.hedera.cli.services.CurrentAccountService;
 
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 

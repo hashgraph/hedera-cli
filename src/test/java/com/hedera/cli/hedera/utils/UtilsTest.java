@@ -1,9 +1,8 @@
 package com.hedera.cli.hedera.utils;
 
-import org.junit.Test;
-
 import java.text.ParseException;
-import java.time.Instant;
+
+import org.junit.Test;
 
 public class UtilsTest {
 

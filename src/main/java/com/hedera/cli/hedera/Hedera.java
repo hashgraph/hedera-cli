@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
-import com.hedera.cli.models.AddressBook;
+import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.HederaNode;
 import com.hedera.cli.models.Network;
 import com.hedera.cli.services.CurrentAccountService;
@@ -29,7 +29,7 @@ public class Hedera {
     ApplicationContext context;
 
     @Autowired
-    AddressBook addressBook;
+    AddressBookManager addressBookManager;
 
     @Autowired
     AccountUtils accountUtils;
@@ -37,15 +37,15 @@ public class Hedera {
     private HederaNode node;
 
     private HederaNode getRandomNode() {
-        return addressBook.getCurrentNetwork().getRandomNode();
+        return addressBookManager.getCurrentNetwork().getRandomNode();
     }
 
     public List<Network> getNetworks() {
-        return addressBook.getNetworks();
+        return addressBookManager.getNetworks();
     }
 
     public List<String> getNetworksStrings() {
-        return addressBook.getNetworksAsStrings();
+        return addressBookManager.getNetworksAsStrings();
     }
 
     public AccountId getNodeId() {

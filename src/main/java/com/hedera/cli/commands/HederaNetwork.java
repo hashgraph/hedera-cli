@@ -21,7 +21,6 @@ public class HederaNetwork {
   public void network(
     @ShellOption(defaultValue = "") String subCommand,
     @ShellOption(defaultValue = "") String... args) {
-    Network network = new Network();
     network.handle(subCommand, args);
   }
 

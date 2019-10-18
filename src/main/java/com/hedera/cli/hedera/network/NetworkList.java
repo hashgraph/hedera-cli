@@ -16,18 +16,18 @@ public class NetworkList implements Runnable {
   @Autowired
   DataDirectory dataDirectory;
 
-  private String addressBookJson;
+  private String addressBookJsonPath;
 
   @Override
   public void run() {
-    addressBookJson = File.separator + "addressbook.json";
-    InputStream addressBookInputStream = getClass().getResourceAsStream(addressBookJson);
+    addressBookJsonPath = File.separator + "addressbook.json";
+    InputStream addressBookInputStream = getClass().getResourceAsStream(addressBookJsonPath);
     dataDirectory.listNetworks(addressBookInputStream);
   }
 
   // allow for dependency injection
   public void setAddressBookJson(String addressBookJsonRelativePath) {
-    this.addressBookJson = addressBookJsonRelativePath;
+    this.addressBookJsonPath = addressBookJsonRelativePath;
   }
 
 }

@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.models.AddressBook;
+import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.Network;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Component;
 public class DataDirectory {
 
     @Autowired
-    AddressBook addressBook;
+    AddressBookManager addressBookManager;
 
     private String userHome = System.getProperty("user.home");
     private String directoryName = ".hedera";
@@ -47,7 +48,7 @@ public class DataDirectory {
 
     public void listNetworks(InputStream addressBookInputStream) {
 
-        List<Network> networks = addressBook.getNetworks();
+        List<Network> networks = addressBookManager.getNetworks();
         for (Network network : networks) {
             String currentNetwork = this.readFile("network.txt", defaultNetworkName);
             if (currentNetwork != null) {
