@@ -9,6 +9,7 @@ import com.hedera.cli.hedera.crypto.Account;
 import com.hedera.cli.hedera.crypto.Transfer;
 import com.hedera.cli.shell.ShellHelper;
 
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.shell.standard.ShellComponent;
@@ -51,9 +52,9 @@ public class HederaCrypto extends CliDefaults {
 			@ShellOption(value = { "-n", "--newAccount" }, defaultValue = "") String n) {
 
 		// convert our Spring Shell arguments into an argument list that PicoCli can use.
-		String[] args = null;
+		String[] args = new String[]{};
 		ArrayList<String> argsList = new ArrayList<String>();
-		Object[] objs;
+		Object[] objs = null;
 
 		switch (subCommand) {
 			case "create":
