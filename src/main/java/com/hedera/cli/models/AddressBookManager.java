@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.shell.ShellHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,9 @@ public class AddressBookManager {
   DataDirectory dataDirectory;
 
   @Autowired
+  ShellHelper shellHelper;
+
+  @Autowired
   public AddressBookManager() {
     String  addressBookJsonPath = File.separator + "addressbook.json";
     ObjectMapper mapper = new ObjectMapper();
@@ -34,7 +38,7 @@ public class AddressBookManager {
       AddressBook addressBook = mapper.readValue(input, AddressBook.class);
       setNetworks(addressBook.getNetworks());
     } catch (IOException e) {
-      e.printStackTrace();
+      shellHelper.printError(e.getMessage());
     }
   }
 
@@ -55,7 +59,7 @@ public class AddressBookManager {
         }
       }
     } catch (Exception e) {
-      // do nothing
+      shellHelper.printError(e.getMessage());
     }
     return null;
   }
