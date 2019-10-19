@@ -12,11 +12,12 @@ import com.hedera.cli.hedera.utils.DataDirectory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-/**
- * AddressBook class manages the parsing of the addressbook.json file, which is
- * stored in resources directory
- */
+import lombok.Getter;
+import lombok.Setter;
+
 @Component
+@Getter
+@Setter
 public class AddressBookManager {
 
   private List<Network> networks;
@@ -31,29 +32,10 @@ public class AddressBookManager {
     InputStream input = getClass().getResourceAsStream(addressBookJsonPath);
     try {
       AddressBook addressBook = mapper.readValue(input, AddressBook.class);
-      networks = addressBook.getNetworks();
+      setNetworks(addressBook.getNetworks());
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-
-  private List<Network> read() {
-    List<Network> networks = null;
-    String addressBookJson = File.separator + "addressbook.json";
-    try {
-      // mapper.readerForUpdating(this).readValue(addressBookInputStream);
-      ObjectMapper mapper = new ObjectMapper();
-      InputStream input = AddressBook.class.getResourceAsStream(addressBookJson);
-      AddressBook addressBook = mapper.readValue(input, AddressBook.class);
-      networks = addressBook.getNetworks();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return networks;
-  }
-
-  public List<Network> getNetworks() {
-    return networks;
   }
 
   public List<String> getNetworksAsStrings() {
@@ -67,7 +49,6 @@ public class AddressBookManager {
   public Network getCurrentNetwork() {
     try {
       String currentNetworkString = dataDirectory.readFile("network.txt");
-      List<Network> networks = read();
       for (Network network : networks) {
         if (network.getName().equals(currentNetworkString)) {
           return network;
@@ -77,10 +58,6 @@ public class AddressBookManager {
       // do nothing
     }
     return null;
-  }
-
-  public void setDataDirectory(DataDirectory dataDirectory) {
-    this.dataDirectory = dataDirectory;
   }
 
 }
