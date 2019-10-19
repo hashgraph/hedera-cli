@@ -19,6 +19,8 @@ import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -30,6 +32,8 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Spec;
 
+@Getter
+@Setter
 @Component
 @Command(name = "create",
         separator = " ",
@@ -82,23 +86,35 @@ public class AccountCreate implements Runnable {
     @Override
     public void run() {
 
+        System.out.println("before all");
+        System.out.println(keyGen);
         // Hedera hedera = new Hedera(context);
         setMinimum(initBal);
         if (keyGen) {
+            System.out.println("hello");
+            System.out.println(keyGen);
             // If keyGen via args is set to true, generate new keys
             KeyGeneration keyGeneration = new KeyGeneration(strMethod);
             HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
             List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
             KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+            System.out.println("hello again");
+            System.out.println(keypair.getPublicKeyHex());
+            System.out.println(keypair.getPublicKeyEncodedHex());
             var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
             accountID = createNewAccount(newPublicKey);
             account = printAccount(accountID.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
             // save to local disk
             utils.saveAccountsToJson(keypair, AccountId.fromString(accountID.toString()));
         } else {
+            System.out.println("hello111");
+            System.out.println(keyGen);
             // Else keyGen always set to false and read from default.txt which contains operator keys
             var operatorPrivateKey = hedera.getOperatorKey();
             var operatorPublicKey = operatorPrivateKey.getPublicKey();
+            System.out.println("hello111 again");
+            System.out.println(operatorPublicKey);
+
             accountID = createNewAccount(operatorPublicKey);
             // save to local disk
             String privateKey = operatorPrivateKey.toString();
