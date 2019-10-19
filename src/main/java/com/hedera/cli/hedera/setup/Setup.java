@@ -36,6 +36,9 @@ import picocli.CommandLine.Spec;
 public class Setup implements Runnable {
 
     @Autowired
+    AccountRecovery accountRecovery;
+
+    @Autowired
     DataDirectory dataDirectory;
 
     @Spec
@@ -57,14 +60,13 @@ public class Setup implements Runnable {
         shellHelper.print(String.valueOf(phraseList));
         // recover key from phrase
         KeyPair keyPair;
-        AccountRecovery ac = new AccountRecovery();
         if (strMethod.equals("bip")) {
-            keyPair = ac.recoverEDKeypairPostBipMigration(phraseList);
+            keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
             printKeyPair(keyPair, accountId, shellHelper);
             JsonObject account = addAccountToJson(accountId, keyPair);
             saveToJson(accountId, account);
         } else if (strMethod.equals("hgc")) {
-            keyPair = ac.recoverEd25519AccountKeypair(phraseList);
+            keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
             printKeyPair(keyPair, accountId, shellHelper);
             JsonObject account = addAccountToJson(accountId, keyPair);
             saveToJson(accountId, account);
@@ -72,7 +74,6 @@ public class Setup implements Runnable {
             shellHelper.printError("Method must either been bip or hgc");
         }
     }
-
 
     public JsonObject addAccountToJson(String accountId, KeyPair keyPair) {
         JsonObject account = new JsonObject();
