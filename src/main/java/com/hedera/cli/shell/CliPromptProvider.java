@@ -1,8 +1,6 @@
 package com.hedera.cli.shell;
 
-import java.io.File;
-
-import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.services.CurrentAccountService;
 
 import org.jline.utils.AttributedString;
@@ -22,22 +20,14 @@ public class CliPromptProvider implements PromptProvider {
     ApplicationContext context;
 
     @Autowired
-    DataDirectory dataDirectory;
+    AddressBookManager addressBookManager;
 
-    private String defaultNetworkName = "testnet";
     private AttributedString currentAccountAttr;
 
     @Override
     public AttributedString getPrompt() {
-        // String currentNetwork = "test";
-        String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
-        String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + "default.txt";
-        String defaultAccount = "";
-        try {
-            defaultAccount = dataDirectory.readFile(pathToDefaultAccount);
-        } catch (Exception e) {
-            // do nothing
-        }
+        String currentNetwork = addressBookManager.getCurrentNetworkAsString();
+        String defaultAccount = addressBookManager.getDefaultAccount();
 
         // red
         AttributedString noDefaultAccountAttr = new AttributedString(
@@ -56,8 +46,6 @@ public class CliPromptProvider implements PromptProvider {
         // blue
         AttributedString promptAttr = new AttributedString(" :> ",
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.BLUE));
-
-        // one more: current operator account
 
         // builder returns different AttributedString depending on whether
         // default operator account for this network has been set or not

@@ -18,16 +18,11 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedera.cli.models.AddressBookManager;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataDirectory {
-
-    @Autowired
-    AddressBookManager addressBookManager;
 
     private String userHome = System.getProperty("user.home");
     private String directoryName = ".hedera";

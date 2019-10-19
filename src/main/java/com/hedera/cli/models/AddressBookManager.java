@@ -54,9 +54,13 @@ public class AddressBookManager {
     return list;
   }
 
+  public String getCurrentNetworkAsString() {
+    return dataDirectory.readFile("network", defaultNetworkName);
+  }
+
   public Network getCurrentNetwork() {
     try {
-      String currentNetworkString = dataDirectory.readFile("network.txt");
+      String currentNetworkString = getCurrentNetworkAsString();
       for (Network network : networks) {
         if (network.getName().equals(currentNetworkString)) {
           return network;
@@ -69,7 +73,6 @@ public class AddressBookManager {
   }
 
   public void listNetworks() {
-
     for (Network network : networks) {
       String currentNetwork = dataDirectory.readFile("network", defaultNetworkName);
       if (currentNetwork != null) {
@@ -80,6 +83,20 @@ public class AddressBookManager {
         }
       }
     }
+  }
+
+  // Returns an empty string if there's no default account
+  public String getDefaultAccount() {
+    String defaultAccount = "";
+    String currentNetwork = dataDirectory.readFile("network", defaultNetworkName);
+    String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + "default.txt";
+    try {
+      defaultAccount = dataDirectory.readFile(pathToDefaultAccount);
+    } catch (Exception e) {
+      // no default account
+      return "";
+    }
+    return defaultAccount;
   }
 
 }
