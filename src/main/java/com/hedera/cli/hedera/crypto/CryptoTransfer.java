@@ -41,9 +41,7 @@ public class CryptoTransfer implements Runnable {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"-a", "--accountId"}, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED"
-            + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) transfer single -a=1234 -r=100|@")
+    @Option(names = {"-a", "--accountId"}, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED")
     private String recipient;
 
     @Option(names = {"-r", "--recipientAmt"}, arity = "1", required = true, description = "Amount to transfer in tinybars")
@@ -54,7 +52,9 @@ public class CryptoTransfer implements Runnable {
             fallbackValue = "no",
             description = "Cryptotransfer preview" +
                     "\noption with optional parameter. Default: ${DEFAULT-VALUE},\n" +
-                    "if specified without parameter: ${FALLBACK-VALUE}")
+                    "if specified without parameter: ${FALLBACK-VALUE}"
+                    + "%n@|bold,underline Usage:|@%n"
+                    + "@|fg(yellow) transfer single -a 1234 -r 100|@")
     private String mPreview = "no";
 
     private String noPreview(String preview) {

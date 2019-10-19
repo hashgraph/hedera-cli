@@ -85,16 +85,19 @@ public class AccountRecovery implements Runnable {
         strMethod = inputReader.prompt("Have you updated your account on Hedera wallet? If updated, enter `bip`, else enter `hgc`");
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = Arrays.asList(phrase.split(" "));
-        // recover key from phrase
-
-        if (strMethod.equals("bip")) {
-            keyPair = recoverEDKeypairPostBipMigration(phraseList);
-            verifyAndSaveAccount();
-        } else if (strMethod.equals("hgc")) {
-            keyPair = recoverEd25519AccountKeypair(phraseList);
-            verifyAndSaveAccount();
+        if (phraseList.size() == 24) {
+            // recover key from phrase
+            if (strMethod.equals("bip")) {
+                keyPair = recoverEDKeypairPostBipMigration(phraseList);
+                verifyAndSaveAccount();
+            } else if (strMethod.equals("hgc")) {
+                keyPair = recoverEd25519AccountKeypair(phraseList);
+                verifyAndSaveAccount();
+            } else {
+                shellHelper.printError("Method must either been hgc or bip");
+            }
         } else {
-            shellHelper.printError("Method must either been hgc or bip");
+            shellHelper.printError("Recovery words must contain 24 words");
         }
     }
 
