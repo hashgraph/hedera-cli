@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,68 +18,23 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedera.cli.models.AddressBook;
-import com.hedera.cli.models.AddressBookManager;
-import com.hedera.cli.models.Network;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataDirectory {
 
-    @Autowired
-    AddressBookManager addressBookManager;
-
     private String userHome = System.getProperty("user.home");
     private String directoryName = ".hedera";
-    private String defaultNetworkName = "aspen";
 
     // Example usage:
-    // String currentNetwork = DataDirectory.readFile("network.txt", "aspen");
+    // String currentNetwork = DataDirectory.readFile("network.txt", "testnet");
     // String pathToSubDir = currentNetwork + File.separator + "accounts"
     public boolean mkHederaSubDir(String pathToSubDir) {
         Path subdirpath = Paths.get(pathToSubDir);
         Path path = Paths.get(userHome, directoryName, subdirpath.toString());
         File directory = new File(path.toString());
         return directory.mkdirs();
-    }
-
-    public void listNetworks(InputStream addressBookInputStream) {
-
-        List<Network> networks = addressBookManager.getNetworks();
-        for (Network network : networks) {
-            String currentNetwork = this.readFile("network.txt", defaultNetworkName);
-            if (currentNetwork != null) {
-                if (currentNetwork.equals(network.getName())) {
-                    System.out.println("* " + network.getName());
-                } else {
-                    System.out.println("  " + network.getName());
-                }
-            }
-        }
-
-    }
-
-    public String networkGetName(InputStream addressBookInputStream) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String nodeName = "";
-        try {
-            AddressBook addressBook = objectMapper.readValue(addressBookInputStream, AddressBook.class);
-            List<Network> networks = addressBook.getNetworks();
-            String currentNetwork = this.readFile("network.txt", defaultNetworkName);
-            if (currentNetwork != null) {
-                for (Network network : networks) {
-                    if (currentNetwork.equals(network.getName())) {
-                        nodeName = network.getName();
-                        return nodeName;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return nodeName;
     }
 
     // pathToFile instead of fileName
@@ -329,10 +283,6 @@ public class DataDirectory {
 
     public String getDirectoryName() {
         return directoryName;
-    }
-
-    public String getDefaultNetworkName() {
-        return defaultNetworkName;
     }
 
 }

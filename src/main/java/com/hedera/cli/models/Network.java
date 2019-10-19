@@ -3,25 +3,18 @@ package com.hedera.cli.models;
 import java.util.List;
 import java.util.Random;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class Network {
 
   private String name;
 
   private List<HederaNode> nodes;
 
-  public String ref;
-
-  public String getRef() {
-    return ref;
-  }
-
-  public List<HederaNode> getNodes() {
-    return nodes;
-  }
-   
-  public String getName() {
-    return name;
-  }
+  public String description;
 
   public HederaNode getRandomNode() {
     Random rand = new Random();
