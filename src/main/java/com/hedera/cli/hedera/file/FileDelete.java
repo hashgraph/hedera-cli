@@ -21,6 +21,9 @@ public class FileDelete implements Runnable {
     @Autowired
     ApplicationContext context;
 
+    @Autowired
+    Hedera hedera;
+
     @Option(names = {"-f", "--fileID"},
             description = "@|fg(225) Enter the file ID of the file to be deleted,in the format of"
                     + "%nshardNum.realmNum.fileNum|@")
@@ -29,7 +32,7 @@ public class FileDelete implements Runnable {
     @Override
     public void run() {
         try {
-            Hedera hedera = new Hedera(context);
+            // Hedera hedera = new Hedera(context);
             var client = hedera.createHederaClient();
             FileId fileId = FileId.fromString(fileNumInString);
             System.out.println("file: " + fileId);

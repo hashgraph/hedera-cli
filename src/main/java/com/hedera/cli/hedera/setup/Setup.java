@@ -22,6 +22,7 @@ import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.hjson.JsonObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
@@ -33,6 +34,12 @@ import picocli.CommandLine.Spec;
 @Component
 @Command(name = "setup", description = "")
 public class Setup implements Runnable {
+
+    @Autowired
+    AccountRecovery accountRecovery;
+
+    @Autowired
+    DataDirectory dataDirectory;
 
     @Spec
     CommandSpec spec;
@@ -46,21 +53,20 @@ public class Setup implements Runnable {
 
     public void handle(InputReader inputReader, ShellHelper shellHelper) {
         shellHelper.print("Start the setup process");
-        strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter bip, else enter hgc");
+        strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
         String accountId = inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = Arrays.asList(phrase.split(" "));
         shellHelper.print(String.valueOf(phraseList));
         // recover key from phrase
         KeyPair keyPair;
-        AccountRecovery ac = new AccountRecovery();
         if (strMethod.equals("bip")) {
-            keyPair = ac.recoverEDKeypairPostBipMigration(phraseList);
+            keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
             printKeyPair(keyPair, accountId, shellHelper);
             JsonObject account = addAccountToJson(accountId, keyPair);
             saveToJson(accountId, account);
         } else if (strMethod.equals("hgc")) {
-            keyPair = ac.recoverEd25519AccountKeypair(phraseList);
+            keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
             printKeyPair(keyPair, accountId, shellHelper);
             JsonObject account = addAccountToJson(accountId, keyPair);
             saveToJson(accountId, account);
@@ -68,7 +74,6 @@ public class Setup implements Runnable {
             shellHelper.printError("Method must either been bip or hgc");
         }
     }
-
 
     public JsonObject addAccountToJson(String accountId, KeyPair keyPair) {
         JsonObject account = new JsonObject();
@@ -93,7 +98,6 @@ public class Setup implements Runnable {
 
     public void saveToJson(String accountId, JsonObject account) {
         // ~/.hedera/[network_name]/accounts/[account_name].json
-        DataDirectory dataDirectory = new DataDirectory();
         String fileName = getRandomName();
         String fileNameWithExt = fileName + ".json";
         String networkName = dataDirectory.readFile("network.txt");

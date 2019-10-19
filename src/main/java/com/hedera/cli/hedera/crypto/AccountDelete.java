@@ -32,10 +32,7 @@ import picocli.CommandLine.Spec;
 @Getter
 @Setter
 @Component
-@Command(name = "delete",
-        description = "@|fg(225) Gets the information of a specific account." +
-                "%nRequires key for account modification" +
-                "%nreturns a stateproof if requested|@")
+@Command(name = "delete", separator = " ", description = "@|fg(225) Deletes the given old account and transfers any balance to the given new account.|@")
 public class AccountDelete implements Runnable {
 
     @Spec
@@ -45,81 +42,123 @@ public class AccountDelete implements Runnable {
     ApplicationContext context;
 
     @Autowired
+    Hedera hedera;
+
+    @Autowired
+    DataDirectory dataDirectory;
+
+    @Autowired
+    AccountUtils accountUtils;
+
+    @Autowired
     ShellHelper shellHelper;
 
-    @Option(names = {"-o", "--oldAcc"}, required = true, description = "Old account ID in %nshardNum.realmNum.accountNum format to be deleted."
-            + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) account delete -o=0.0.1001,-n=0.0.1002|@")
+    @Option(names = {"-o",
+            "--oldAccount"}, required = true, description = "Old account ID in %nshardNum.realmNum.accountNum format to be deleted."
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account delete -o 0.0.1001 -n 0.0.1002|@")
     private String oldAccountInString;
 
-    @Option(names = {"-n", "--newAcc"}, required = true, description = "Account ID in %nshardNum.realmNum.accountNum format," +
-            "%nwhere funds from old account are transferred to")
+    @Option(names = {"-n",
+            "--newAccount"}, required = true, description = "Account ID in %nshardNum.realmNum.accountNum format,"
+            + "%nwhere funds from old account are transferred to")
     private String newAccountInString;
+
+    @Option(names = {"-y", "--yes"}, description = "Yes, skip preview")
+    private boolean yes;
 
     private InputReader inputReader;
     private Ed25519PrivateKey oldAccountPrivKey;
-    private String isInfoCorrect;
 
     @Override
     public void run() {
         try {
-            Hedera hedera = new Hedera(context);
+            // Hedera hedera = new Hedera(context);
             var oldAccount = AccountId.fromString(oldAccountInString);
             var newAccount = AccountId.fromString(newAccountInString);
 
-            String privKeyOfAccountToBeDeleted = inputReader.prompt("Enter the private key of the account to be deleted", "secret", false);
+            String privKeyOfAccountToBeDeleted = inputReader
+                    .prompt("Enter the private key of the account to be deleted", "secret", false);
             oldAccountPrivKey = Ed25519PrivateKey.fromString(privKeyOfAccountToBeDeleted);
 
-            isInfoCorrect = promptPreview(oldAccount, newAccount);
-            if (isInfoCorrect.equals("yes")) {
-                shellHelper.print("Info is correct, let's go!");
-                boolean accountDeleted = executeAccountDelete(hedera, oldAccount, oldAccountPrivKey, newAccount);
-                if (accountDeleted) {
-                    getBalance(hedera, newAccount);
-                    boolean fileDeleted = deleteJsonAccountFromDisk(oldAccount);
-                    shellHelper.printSuccess("File deleted: " + fileDeleted);
+            if (!yes) {
+                boolean correctInfo = promptPreview(oldAccount, newAccount);
+                if (correctInfo) {
+                    shellHelper.print("Info is correct, let's go!");
+                    executeAccountDelete(hedera, oldAccount, oldAccountPrivKey, newAccount);
                 } else {
-                    shellHelper.printError("Some error, account not deleted");
+                    shellHelper.print("Nope, incorrect, let's make some changes");
                 }
-            } else if (isInfoCorrect.equals("no")) {
-                shellHelper.print("Nope, incorrect, let's make some changes");
             } else {
-                shellHelper.printError("Input must either been yes or no");
+                executeAccountDelete(hedera, oldAccount, oldAccountPrivKey, newAccount);
             }
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
     }
 
-    private String promptPreview(AccountId oldAccountId, AccountId newAccount) {
-        return inputReader.prompt("\nAccount to be deleted: " + oldAccountId
-                + "\nAccount for deleted account's funds to be transferred to: " + newAccount
-                + "\n\nIs this correct?"
+    private boolean promptPreview(AccountId oldAccountId, AccountId newAccount) {
+        String choice = inputReader.prompt("\nAccount to be deleted: " + oldAccountId
+                + "\nFunds from deleted account to be transferred to: " + newAccount + "\n\nIs this correct?"
                 + "\nyes/no");
+        if (choice.toLowerCase().equals("yes") || choice.toLowerCase().equals("y")) {
+            return true;
+        }
+        return false;
     }
 
-    public boolean executeAccountDelete(Hedera hedera, AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey, AccountId newAccount) {
-        boolean accountDeleted = false;
+    private boolean checkIfOperatorKeyIsTheSameAsAccountToBeDeleted(Hedera hedera, Ed25519PrivateKey oldAccountPrivKey) {
+        if (hedera.getOperatorKey().toString().equals(oldAccountPrivKey.toString())) {
+            // do not need to sign the transaction again
+            return true;
+        }
+        return false;
+    }
+
+    public void executeAccountDelete(Hedera hedera, AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey,
+                                     AccountId newAccount) {
         var client = hedera.createHederaClient();
-        // account that is to be deleted must sign its own transaction
         try {
-            TransactionReceipt receipt = new AccountDeleteTransaction(client)
-                    .setDeleteAccountId(oldAccount)
-                    .setTransferAccountId(newAccount)
-                    .sign(oldAccountPrivKey)
-                    .executeForReceipt();
-            shellHelper.printSuccess(receipt.getStatus().toString());
-            accountDeleted = true;
+
+            boolean privateKeyDuplicate = checkIfOperatorKeyIsTheSameAsAccountToBeDeleted(hedera, oldAccountPrivKey);
+            // account that is to be deleted must sign its own transaction
+            if (privateKeyDuplicate) {
+                // operator already sign transaction
+                TransactionReceipt receipt = new AccountDeleteTransaction(client)
+                        .setDeleteAccountId(oldAccount)
+                        .setTransferAccountId(newAccount)
+                        .executeForReceipt();
+                receiptStatus(receipt, hedera, newAccount, oldAccount);
+            } else {
+                // sign the transaction
+                TransactionReceipt receipt = new AccountDeleteTransaction(client)
+                        .setDeleteAccountId(oldAccount)
+                        .setTransferAccountId(newAccount)
+                        .sign(oldAccountPrivKey)
+                        .executeForReceipt();
+                receiptStatus(receipt, hedera, newAccount, oldAccount);
+            }
+
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
-        return accountDeleted;
+    }
+
+    private void receiptStatus(TransactionReceipt receipt, Hedera hedera, AccountId newAccount, AccountId oldAccount) {
+        if (receipt.getStatus().toString().equals("SUCCESS")) {
+            shellHelper.printSuccess(receipt.getStatus().toString());
+            getBalance(hedera, newAccount);
+            boolean fileDeleted = deleteJsonAccountFromDisk(oldAccount);
+            shellHelper.printSuccess("File deleted from disk " + fileDeleted);
+        } else {
+            shellHelper.printError("Some error, account not deleted");
+        }
     }
 
     public void getBalance(Hedera hedera, AccountId newAccount) {
         try {
-            // Create a new client that is not associated with the old account
-            Thread.sleep(5000);
+            // Set a sleep to wait for hedera to come to consensus for the funds of deleted account
+            // to be transferred to the new account
+            Thread.sleep(4000);
             Client client = hedera.createHederaClient();
             client.setOperator(hedera.getOperatorId(), hedera.getOperatorKey());
             var newAccountBalance = client.getAccountBalance(newAccount);
@@ -130,8 +169,6 @@ public class AccountDelete implements Runnable {
     }
 
     public boolean deleteJsonAccountFromDisk(AccountId oldAccount) {
-        DataDirectory dataDirectory = new DataDirectory();
-        AccountUtils accountUtils = new AccountUtils();
         String pathToIndexTxt = accountUtils.pathToIndexTxt();
         boolean fileDeleted = false;
 

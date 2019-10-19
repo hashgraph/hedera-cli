@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.Availability;
 
 public abstract class CliDefaults {
@@ -15,7 +16,8 @@ public abstract class CliDefaults {
 
   private String defaultNetworkName = "aspen";
 
-  private DataDirectory dataDirectory =  new DataDirectory();
+  @Autowired
+  DataDirectory dataDirectory;
 
   public CliDefaults() {}
 

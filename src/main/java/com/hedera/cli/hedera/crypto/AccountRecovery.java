@@ -34,7 +34,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
 @NoArgsConstructor
@@ -51,39 +51,53 @@ public class AccountRecovery implements Runnable {
     ApplicationContext context;
 
     @Autowired
+    Hedera hedera;
+
+    @Autowired
+    DataDirectory dataDirectory;
+
+    @Autowired
+    AccountUtils accountUtils;
+
+    @Autowired
+    Utils utils;
+
+    @Autowired
     ShellHelper shellHelper;
 
-    @Option(names = {"-a", "--accountId"}, description = "Account ID in %nshardNum.realmNum.accountNum format")
+    @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
+            + "%n@|bold,underline Usage:|@%n"
+            + "@|fg(yellow) account recovery 0.0.1003|@")
     private String accountId;
 
     private String strMethod = "bip";
     private int index = 0;
     private InputReader inputReader;
-    private Utils utils;
     private AccountGetInfo accountInfo;
-    private Hedera hedera;
     private com.hedera.hashgraph.sdk.account.AccountInfo accountRes;
     private KeyPair keyPair;
 
     @Override
     public void run() {
-        utils = new Utils();
         accountInfo = new AccountGetInfo();
-        hedera = new Hedera(context);
+        // hedera = new Hedera(context);
         shellHelper.print("Recovering accountID in the format of 0.0.xxxx" + accountId);
-        strMethod = inputReader.prompt("Have you updated your account on Hedera wallet? If updated, enter `bip`, else enter `hgc`");
+        strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = Arrays.asList(phrase.split(" "));
-        // recover key from phrase
-
-        if (strMethod.equals("bip")) {
-            keyPair = recoverEDKeypairPostBipMigration(phraseList);
-            verifyAndSaveAccount();
-        } else if (strMethod.equals("hgc")) {
-            keyPair = recoverEd25519AccountKeypair(phraseList);
-            verifyAndSaveAccount();
+        if (phraseList.size() == 24) {
+            // recover key from phrase
+            if (strMethod.equals("bip")) {
+                keyPair = recoverEDKeypairPostBipMigration(phraseList);
+                verifyAndSaveAccount();
+            } else if (strMethod.equals("hgc")) {
+                keyPair = recoverEd25519AccountKeypair(phraseList);
+                verifyAndSaveAccount();
+            } else {
+                shellHelper.printError("Method must either been hgc or bip");
+            }
         } else {
-            shellHelper.printError("Method must either been hgc or bip");
+            shellHelper.printError("Recovery words must contain 24 words");
         }
     }
 
@@ -107,8 +121,7 @@ public class AccountRecovery implements Runnable {
 
     public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId, Ed25519PrivateKey accPrivKey) {
         try {
-            var client = hedera.createHederaClient()
-                    .setOperator(hedera.getOperatorId(), hedera.getOperatorKey());
+            var client = hedera.createHederaClient();
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)
                     .setAccountId(AccountId.fromString(accountId));
@@ -120,8 +133,6 @@ public class AccountRecovery implements Runnable {
     }
 
     public boolean retrieveIndex() {
-        DataDirectory dataDirectory = new DataDirectory();
-        AccountUtils accountUtils = new AccountUtils();
         String pathToIndexTxt = accountUtils.pathToIndexTxt();
         boolean accountExists = false;
         Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);

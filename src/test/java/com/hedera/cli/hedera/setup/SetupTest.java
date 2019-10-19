@@ -6,9 +6,9 @@ public class SetupTest {
 
     @Test
     public void testGetRandomName() {
-        Setup setup = new Setup();
-        String name = setup.getRandomName();
-        System.out.println(name);
+        // Setup setup = new Setup();
+        // String name = setup.getRandomName();
+        // System.out.println(name);
     }
 
     @Test

@@ -19,6 +19,8 @@ import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -30,8 +32,11 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Spec;
 
+@Getter
+@Setter
 @Component
 @Command(name = "create",
+        separator = " ",
         description = "@|fg(225) Generates a new Ed25519 Keypair compatible with java and wallet,"
                 + "%ntogether with 24 recovery words (bip compatible),"
                 + "%nCreates a new Hedera account and "
@@ -44,13 +49,22 @@ public class AccountCreate implements Runnable {
     @Autowired
     ShellHelper shellHelper;
 
+    @Autowired
+    Hedera hedera;
+
+    @Autowired
+    Setup setup;
+
+    @Autowired
+    Utils utils;
+
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"-r", "--record"}, description = "Generates a record that lasts 25hrs")
-    private boolean generateRecord = false;
+//    @Option(names = {"-r", "--record"}, description = "Generates a record that lasts 25hrs")
+//    private boolean generateRecord = false;
 
-    @Option(names = {"-b", "--balance"}, description = "Initial balance of new account created in hbars")
+    @Option(names = {"-b", "--balance"}, required = true, description = "Initial balance of new account created in hbars")
     private int initBal = 0;
 
     private void setMinimum(int min) {
@@ -61,12 +75,9 @@ public class AccountCreate implements Runnable {
     }
 
     @Option(names = {"-k", "--keygen"}, description = "Default generates a brand new key pair associated with account creation"
-            + "%n@|bold,underline Usage:|@")
-    private boolean keyGen = true;
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000|@")
+    private boolean keyGen;
 
-    @Option(names = {"-m", "--method"}, defaultValue = "bip", description = "Default set for passphrases and keypairs that are bip compatible"
-            + "%n@|bold,underline Usage:|@"
-            + "%n@|fg(yellow) account create -b=100000000|@")
     private String strMethod = "bip";
 
     private AccountId accountID;
@@ -75,30 +86,40 @@ public class AccountCreate implements Runnable {
     @Override
     public void run() {
 
-        Hedera hedera = new Hedera(context);
+        System.out.println("before all");
+        System.out.println(keyGen);
+        // Hedera hedera = new Hedera(context);
         setMinimum(initBal);
         if (keyGen) {
+            System.out.println("hello");
+            System.out.println(keyGen);
             // If keyGen via args is set to true, generate new keys
             KeyGeneration keyGeneration = new KeyGeneration(strMethod);
             HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
             List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
             KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+            System.out.println("hello again");
+            System.out.println(keypair.getPublicKeyHex());
+            System.out.println(keypair.getPublicKeyEncodedHex());
             var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
             accountID = createNewAccount(newPublicKey);
             account = printAccount(accountID.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
             // save to local disk
-            Utils utils = new Utils();
             utils.saveAccountsToJson(keypair, AccountId.fromString(accountID.toString()));
         } else {
+            System.out.println("hello111");
+            System.out.println(keyGen);
             // Else keyGen always set to false and read from default.txt which contains operator keys
             var operatorPrivateKey = hedera.getOperatorKey();
             var operatorPublicKey = operatorPrivateKey.getPublicKey();
+            System.out.println("hello111 again");
+            System.out.println(operatorPublicKey);
+
             accountID = createNewAccount(operatorPublicKey);
             // save to local disk
             String privateKey = operatorPrivateKey.toString();
             String publicKey = operatorPublicKey.toString();
             account = printAccount(accountID.toString(), privateKey, publicKey);
-            Setup setup = new Setup();
             setup.saveToJson(accountID.toString(), account);
         }
     }
@@ -121,7 +142,6 @@ public class AccountCreate implements Runnable {
 
     public AccountId createNewAccount(Ed25519PublicKey publicKey) {
         AccountId accountId = null;
-        Hedera hedera = new Hedera(context);
         var client = hedera.createHederaClient();
         var tx = new AccountCreateTransaction(client)
                 // The only _required_ property here is `key`

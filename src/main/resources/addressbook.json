@@ -2,7 +2,7 @@
   "networks": [
     {
       "name": "mainnet",
-      "ref": "mainnet",
+      "description": "Hedera mainnet",
       "nodes": [
         {
           "account": "0.0.3",
@@ -48,7 +48,7 @@
     },
     {
       "name": "aspen",
-      "ref": "Engnet1",
+      "description": "Engnet1",
       "nodes": [
         {
           "account": "0.0.3",
@@ -77,8 +77,8 @@
       ]
     },
     {
-      "name": "external",
-      "ref": "External-testnet-1 (public testnet)",
+      "name": "testnet",
+      "description": "Hedera testnet",
       "nodes": [
         {
           "account": "0.0.3",

@@ -50,7 +50,13 @@ public class CryptoTransferMultiple implements Runnable {
     ApplicationContext context;
 
     @Autowired
+    Hedera hedera;
+
+    @Autowired
     ShellHelper shellHelper;
+
+    @Autowired
+    Utils utils;
 
     @Spec
     CommandSpec spec;
@@ -58,7 +64,7 @@ public class CryptoTransferMultiple implements Runnable {
     @Option(names = {"-a", "--accountId"}, split = " ", arity = "1..*", required = true,
             description = "Recipient accountID to transfer to, shardNum and realmNum not needed"
                     + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) transfer multiple -a=1001,1002,1003,-r=100,100,100|@")
+                    + "@|fg(yellow) transfer multiple -a=1001,1002,1003 -r=100,100,100|@")
     private String[] recipient;
 
     @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
@@ -100,7 +106,7 @@ public class CryptoTransferMultiple implements Runnable {
             senderAccountIDInString = inputReader.prompt("Input sender accountID in the format xxxx");
             String transferAmountInStr = inputReader.prompt("Input transfer amount");
 
-            Hedera hedera = new Hedera(context);
+            // Hedera hedera = new Hedera(context);
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
             // Operator is the current default account user
@@ -241,7 +247,6 @@ public class CryptoTransferMultiple implements Runnable {
         txObj.setTxConsensusTimestamp(record.getConsensusTimestamp());
         txObj.setTxValidStart(txTimestamp);
 
-        Utils utils = new Utils();
         utils.saveTransactionsToJson(txID, txObj);
     }
 

@@ -1,5 +1,8 @@
 package com.hedera.cli.models;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class HederaNode {
 
   private String account;

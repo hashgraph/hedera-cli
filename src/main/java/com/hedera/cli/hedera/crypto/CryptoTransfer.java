@@ -35,12 +35,13 @@ public class CryptoTransfer implements Runnable {
     @Autowired
     ShellHelper shellHelper;
 
+    @Autowired
+    Hedera hedera;
+
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"-a", "--accountId"}, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED"
-            + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) transfer single -a=1234,-r=100|@")
+    @Option(names = {"-a", "--accountId"}, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED")
     private String recipient;
 
     @Option(names = {"-r", "--recipientAmt"}, arity = "1", required = true, description = "Amount to transfer in tinybars")
@@ -51,7 +52,9 @@ public class CryptoTransfer implements Runnable {
             fallbackValue = "no",
             description = "Cryptotransfer preview" +
                     "\noption with optional parameter. Default: ${DEFAULT-VALUE},\n" +
-                    "if specified without parameter: ${FALLBACK-VALUE}")
+                    "if specified without parameter: ${FALLBACK-VALUE}"
+                    + "%n@|bold,underline Usage:|@%n"
+                    + "@|fg(yellow) transfer single -a 1234 -r 100|@")
     private String mPreview = "no";
 
     private String noPreview(String preview) {
@@ -72,7 +75,7 @@ public class CryptoTransfer implements Runnable {
     @Override
     public void run() {
         memoString = inputReader.prompt("Memo field");
-        Hedera hedera = new Hedera(context);
+        // Hedera hedera = new Hedera(context);
         var operatorId = hedera.getOperatorId();
         var client = hedera.createHederaClient();
         var recipientId = AccountId.fromString("0.0." + recipient);

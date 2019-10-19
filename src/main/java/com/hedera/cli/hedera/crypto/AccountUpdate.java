@@ -21,6 +21,9 @@ public class AccountUpdate implements Runnable {
     @Autowired
     ApplicationContext context;
 
+    @Autowired
+    Hedera hedera;
+
     @Option(names = {"-a", "--account"}, description = "AccountId of public key to be updated")
     private String accountId;
 //
@@ -30,7 +33,7 @@ public class AccountUpdate implements Runnable {
     @Override
     public void run() {
         try {
-            Hedera hedera = new Hedera(context);
+            // Hedera hedera = new Hedera(context);
             var client = hedera.createHederaClient();
 
             boolean update = false;
