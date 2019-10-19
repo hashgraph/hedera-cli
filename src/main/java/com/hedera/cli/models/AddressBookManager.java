@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
@@ -29,9 +31,11 @@ public class AddressBookManager {
   @Autowired
   ShellHelper shellHelper;
 
-  @Autowired
-  public AddressBookManager() {
-    String  addressBookJsonPath = File.separator + "addressbook.json";
+  private String defaultNetworkName = "testnet";
+
+  @PostConstruct
+  public void init() {
+    String addressBookJsonPath = File.separator + "addressbook.json";
     ObjectMapper mapper = new ObjectMapper();
     InputStream input = getClass().getResourceAsStream(addressBookJsonPath);
     try {
@@ -44,8 +48,8 @@ public class AddressBookManager {
 
   public List<String> getNetworksAsStrings() {
     List<String> list = new ArrayList<String>();
-    for (Network network: networks) {
-        list.add(network.getName());
+    for (Network network : networks) {
+      list.add(network.getName());
     }
     return list;
   }
@@ -62,6 +66,20 @@ public class AddressBookManager {
       shellHelper.printError(e.getMessage());
     }
     return null;
+  }
+
+  public void listNetworks() {
+
+    for (Network network : networks) {
+      String currentNetwork = dataDirectory.readFile("network", defaultNetworkName);
+      if (currentNetwork != null) {
+        if (currentNetwork.equals(network.getName())) {
+          System.out.println("* " + network.getName());
+        } else {
+          System.out.println("  " + network.getName());
+        }
+      }
+    }
   }
 
 }
