@@ -82,7 +82,7 @@ public class AccountRecovery implements Runnable {
         accountInfo = new AccountGetInfo();
         // hedera = new Hedera(context);
         shellHelper.print("Recovering accountID in the format of 0.0.xxxx" + accountId);
-        strMethod = inputReader.prompt("Have you updated your account on Hedera wallet? If updated, enter `bip`, else enter `hgc`");
+        strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = Arrays.asList(phrase.split(" "));
         if (phraseList.size() == 24) {

@@ -33,24 +33,29 @@ setup
 network ls
 
 # To select/change network
-network set -n=aspen
-network set -n=mainnet
-network set -n=external
+network use mainnet
+network use testnet
+```
+## Switch Accounts
+```bash
+account use 0.0.xxxx
+```
+## Recover Accounts
+```bash
+account recovery 0.0.xxxx
 ```
 ## Create Account
 ```bash
 # valid commands
-account create -b=100 
-account create --balance=100
+account create -b 100000000 
+account create --balance 100000000
 ```
-## File Create
+## Delete Account
 ```bash
 # valid commands
-# where -d is file expiration date, must include time
-file create -d=dd-MM-yyyy,hh:mm:ss
-file create --date=dd-MM-yyyy,hh:mm:ss
+account delete -o 0.0.1001 -n 0.0.1002
+account delete --oldAccount 0.0.1001 --newAccount 0.0.1002
 ```
-
 ## Crypto Transfer
 ```bash
 # valid commands
@@ -64,7 +69,4 @@ transfer single --accountId 1001 --recipientAmt 44
 transfer multiple -a 1001,1002,1003 -r 44,55,66 
 transfer multiple --accountId 1001,1002,1003 --recipientAmt 44,55,66
 ```
-## Switch Accounts
-```bash
-account use -a=0.0.xxxx
-```
+

@@ -53,7 +53,7 @@ public class Setup implements Runnable {
 
     public void handle(InputReader inputReader, ShellHelper shellHelper) {
         shellHelper.print("Start the setup process");
-        strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter bip, else enter hgc");
+        strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
         String accountId = inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = Arrays.asList(phrase.split(" "));
