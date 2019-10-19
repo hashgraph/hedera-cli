@@ -26,7 +26,6 @@ public class DataDirectory {
 
     private String userHome = System.getProperty("user.home");
     private String directoryName = ".hedera";
-    
 
     // Example usage:
     // String currentNetwork = DataDirectory.readFile("network.txt", "testnet");
