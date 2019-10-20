@@ -42,13 +42,23 @@ account use 0.0.xxxx
 ```
 ## Recover Accounts
 ```bash
+# Recovering a Hedera account using 24 recovery words, where words are separated by spaces. This is default.
 account recovery 0.0.xxxx
+# Recovering a Hedera account only using keypairs. (Perhaps you've misplaced your words)
+TODO
+account recovery 0.0.xxxx -k
+
 ```
 ## Create Account
 ```bash
-# valid commands
-account create -b 100000000 
-account create --balance 100000000
+# Creates a new Hedera account using NEW recovery words and keypair. This is default.
+account create -b 100000000
+
+# Creates a new Hedera account using OPERATOR's keypair 
+account create -b 100000000 -k
+
+# Creates a new Hedera account using ANY public key 
+TODO
 ```
 ## Delete Account
 ```bash
