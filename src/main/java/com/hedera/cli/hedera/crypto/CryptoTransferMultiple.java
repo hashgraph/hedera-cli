@@ -63,10 +63,10 @@ public class CryptoTransferMultiple implements Runnable {
             description = "Recipient accountID to transfer to, shardNum and realmNum not needed"
                     + "%n@|bold,underline Usage:|@%n"
                     + "@|fg(yellow) transfer multiple -a=1001,1002,1003 -r=100,100,100|@")
-    private String[] recipient;
+    private String springRecipient;
 
     @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
-    private String[] recipientAmt;
+    private String springRecipientAmt;
 
     @Option(names = {"-n", "noPreview"}, arity = "0..1",
             defaultValue = "yes",
@@ -86,7 +86,8 @@ public class CryptoTransferMultiple implements Runnable {
         }
         return mPreview;
     }
-
+    private String[] recipient;
+    private String[] recipientAmt;
     private String senderAccountIDInString;
     private String memoString = "";
 
@@ -98,13 +99,13 @@ public class CryptoTransferMultiple implements Runnable {
     @Override
     public void run() {
         try {
-
+            recipient = springRecipient.split(",");
+            recipientAmt = springRecipientAmt.split(",");
             // Cli prompt for input from user
             memoString = inputReader.prompt("Memo field");
             senderAccountIDInString = inputReader.prompt("Input sender accountID in the format xxxx");
             String transferAmountInStr = inputReader.prompt("Input transfer amount");
 
-            // Hedera hedera = new Hedera(context);
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
             // Operator is the current default account user
