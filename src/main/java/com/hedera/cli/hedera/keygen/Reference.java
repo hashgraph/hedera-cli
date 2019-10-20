@@ -25,10 +25,6 @@ public class Reference {
   private static final String digits = "0123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   /**
-   * use this for all logging, as controlled by the optional data/log4j2.xml file
-   */
-
-  /**
    * Pass to the constructor 16, 32, or 48 bytes (128, 256, or 384 bits), which is
    * the hash of the thing being referenced (a key, a swirld name, a file, etc). A
    * copy of data is made, so it is OK to change the array after instantiating the

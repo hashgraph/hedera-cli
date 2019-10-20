@@ -4,8 +4,8 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
 import com.hedera.hashgraph.sdk.file.FileId;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
-import com.hedera.hashgraph.sdk.proto.ResponseCodeEnum;
 
+import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
