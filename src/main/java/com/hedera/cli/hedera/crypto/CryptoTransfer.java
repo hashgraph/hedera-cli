@@ -113,9 +113,9 @@ public class CryptoTransfer implements Runnable {
     }
 
     private String noPreview(String preview) {
-        if (preview.equals("no")) {
+        if ("no".equals(preview)) {
             mPreview = preview;
-        } else if (preview.equals("yes")) {
+        } else if ("yes".equals(preview)) {
             mPreview = preview;
         } else {
             throw new CommandLine.ParameterException(spec.commandLine(), "Option -n removes preview");

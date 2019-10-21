@@ -108,17 +108,17 @@ public class DataDirectory {
             return defaultValue;
         }
 
+        String resultValue = defaultValue;
         try {
             // file exist, check if empty
             FileReader fr = new FileReader(file.getAbsoluteFile());
             BufferedReader br = new BufferedReader(fr);
-            defaultValue = br.readLine();
+            resultValue= br.readLine();
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(-1);
         }
-        return defaultValue;
+        return resultValue;
     }
 
     public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> defaultValue) {
