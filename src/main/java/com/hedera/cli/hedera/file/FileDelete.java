@@ -7,7 +7,6 @@ import com.hedera.hashgraph.sdk.file.FileInfoQuery;
 import com.hedera.hashgraph.sdk.proto.ResponseCodeEnum;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine.Command;
@@ -19,10 +18,7 @@ import picocli.CommandLine.Option;
 public class FileDelete implements Runnable {
 
     @Autowired
-    ApplicationContext context;
-
-    @Autowired
-    Hedera hedera;
+    private Hedera hedera;
 
     @Option(names = {"-f", "--fileID"},
             description = "@|fg(225) Enter the file ID of the file to be deleted,in the format of"

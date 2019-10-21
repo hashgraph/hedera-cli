@@ -2,8 +2,8 @@
 
 HOMEBREW_TAP_REPO=homebrew-tap
 
-git clone git@github.com:${GH_USER}/${HOMEBREW_TAP_REPO}.git
-cd ${HOMEBREW_TAP_REPO}
+git clone git@github.com:"${GH_USER}"/"${HOMEBREW_TAP_REPO}".git
+cd "${HOMEBREW_TAP_REPO}"
 
 ./scripts/sha256update.rb "${GH_REPO}"
 

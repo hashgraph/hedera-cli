@@ -28,7 +28,7 @@ import java.util.List;
  */
 class WordList {
   /** the list of 4096 words */
-  static List<String> words = Arrays.asList("aback", "abbey", "abbot", "abide", "ablaze", "able", "aboard", "abode",
+  public static List<String> words = Arrays.asList("aback", "abbey", "abbot", "abide", "ablaze", "able", "aboard", "abode",
       "abort", "abound", "about", "above", "abroad", "abrupt", "absent", "absorb", "absurd", "abuse", "accent",
       "accept", "access", "accord", "accuse", "ace", "ache", "aching", "acid", "acidic", "acorn", "acre", "across",
       "act", "action", "active", "actor", "actual", "acute", "Adam", "adapt", "add", "added", "addict", "adept",

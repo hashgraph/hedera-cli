@@ -45,25 +45,25 @@ import picocli.CommandLine.Spec;
 public class AccountRecovery implements Runnable {
 
     @Spec
-    CommandSpec spec;
+    private CommandSpec spec;
 
     @Autowired
-    ApplicationContext context;
+    private ApplicationContext context;
 
     @Autowired
-    Hedera hedera;
+    private Hedera hedera;
 
     @Autowired
-    DataDirectory dataDirectory;
+    private DataDirectory dataDirectory;
 
     @Autowired
-    AccountUtils accountUtils;
+    private AccountUtils accountUtils;
 
     @Autowired
-    Utils utils;
+    private Utils utils;
 
     @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n"
@@ -87,10 +87,10 @@ public class AccountRecovery implements Runnable {
         List<String> phraseList = Arrays.asList(phrase.split(" "));
         if (phraseList.size() == 24) {
             // recover key from phrase
-            if (strMethod.equals("bip")) {
+            if ("bip".equals(strMethod)) {
                 keyPair = recoverEDKeypairPostBipMigration(phraseList);
                 verifyAndSaveAccount();
-            } else if (strMethod.equals("hgc")) {
+            } else if ("hgc".equals(strMethod)) {
                 keyPair = recoverEd25519AccountKeypair(phraseList);
                 verifyAndSaveAccount();
             } else {

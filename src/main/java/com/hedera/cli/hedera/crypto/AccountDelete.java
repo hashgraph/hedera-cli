@@ -36,22 +36,22 @@ import picocli.CommandLine.Spec;
 public class AccountDelete implements Runnable {
 
     @Spec
-    CommandSpec spec;
+    private CommandSpec spec;
 
     @Autowired
-    ApplicationContext context;
+    private ApplicationContext context;
 
     @Autowired
-    Hedera hedera;
+    private Hedera hedera;
 
     @Autowired
-    DataDirectory dataDirectory;
+    private DataDirectory dataDirectory;
 
     @Autowired
-    AccountUtils accountUtils;
+    private AccountUtils accountUtils;
 
     @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Option(names = {"-o",
             "--oldAccount"}, required = true, description = "Old account ID in %nshardNum.realmNum.accountNum format to be deleted."

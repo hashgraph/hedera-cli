@@ -11,7 +11,7 @@ import java.util.Random;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.botany.AdjectivesWordList;
+import com.hedera.cli.hedera.botany.AdjectivesWordListHelper;
 import com.hedera.cli.hedera.botany.BotanyWordList;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.KeyPair;
@@ -27,8 +27,6 @@ import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Spec;
 
 
 @Component
@@ -36,13 +34,10 @@ import picocli.CommandLine.Spec;
 public class Setup implements Runnable {
 
     @Autowired
-    AccountRecovery accountRecovery;
+    private AccountRecovery accountRecovery;
 
     @Autowired
-    DataDirectory dataDirectory;
-
-    @Spec
-    CommandSpec spec;
+    private DataDirectory dataDirectory;
 
     private String strMethod = "bip";
 
@@ -60,12 +55,12 @@ public class Setup implements Runnable {
         shellHelper.print(String.valueOf(phraseList));
         // recover key from phrase
         KeyPair keyPair;
-        if (strMethod.equals("bip")) {
+        if ("bip".equals(strMethod)) {
             keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
             printKeyPair(keyPair, accountId, shellHelper);
             JsonObject account = addAccountToJson(accountId, keyPair);
             saveToJson(accountId, account);
-        } else if (strMethod.equals("hgc")) {
+        } else if ("hgc".equals(strMethod)) {
             keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
             printKeyPair(keyPair, accountId, shellHelper);
             JsonObject account = addAccountToJson(accountId, keyPair);
@@ -130,7 +125,7 @@ public class Setup implements Runnable {
     public String getRandomName() {
         Random rand = new Random();
         List<String> botanyNames = BotanyWordList.words;
-        List<String> adjectives = AdjectivesWordList.words;
+        List<String> adjectives = AdjectivesWordListHelper.words;
         String randomBotanyName = botanyNames.get(rand.nextInt(botanyNames.size()));
         String randomAdjectives = adjectives.get(rand.nextInt(adjectives.size()));
         int randomNumber = rand.nextInt(10000);

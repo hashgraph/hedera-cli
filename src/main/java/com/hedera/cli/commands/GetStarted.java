@@ -15,16 +15,16 @@ import picocli.CommandLine;
 public class GetStarted {
 
   @Autowired
-  ShellHelper shellHelper;
+  private ShellHelper shellHelper;
 
   @Autowired
-  InputReader inputReader;
+  private InputReader inputReader;
 
   @Autowired
-  AddressBookManager addressBookManager;
+  private AddressBookManager addressBookManager;
 
   @Autowired
-  Setup setup;
+  private Setup setup;
 
   @ShellMethod(value = "initialise a Hedera account as the default operator")
   public void setup() {

@@ -12,7 +12,7 @@ import picocli.CommandLine.Command;
 public class NetworkList implements Runnable {
 
   @Autowired
-  AddressBookManager addressBookManager;
+  private AddressBookManager addressBookManager;
 
   @Override
   public void run() {

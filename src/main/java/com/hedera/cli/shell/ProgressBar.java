@@ -9,7 +9,7 @@ public class ProgressBar {
     private String leftDelimiter = "<";
     private String rightDelimiter = ">";
 
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     private boolean started = false;
 

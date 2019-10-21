@@ -1,19 +1,18 @@
 package com.hedera.cli.hedera.keygen;
 
-import javax.crypto.Mac;
-import javax.crypto.ShortBufferException;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
+import javax.crypto.Mac;
+import javax.crypto.ShortBufferException;
+import javax.crypto.spec.SecretKeySpec;
+
 public class Slip10 {
 
-
-    private Slip10() {
-    }
-
     private static final String hmacSHA512algorithm = "HmacSHA512";
+
+    private Slip10() {}
 
     /**
      * Derives only the private key for ED25519 in the manor defined in

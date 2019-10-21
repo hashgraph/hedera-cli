@@ -25,11 +25,7 @@ public class MnemonicException extends Exception {
   /**
    * Thrown when a list of Mnemonic words fails the checksum check.
    */
-  public static class MnemonicChecksumException extends MnemonicException {
-    public MnemonicChecksumException() {
-      super();
-    }
-  }
+  public static class MnemonicChecksumException extends MnemonicException {}
 
   /**
    * Thrown when a word is encountered which is not in the Mnemonic's word list.
