@@ -27,7 +27,7 @@ public class KeyGeneration implements Runnable {
   private HGCSeed hgcSeed;
 
   @CommandLine.Spec
-  CommandLine.Model.CommandSpec spec;
+  private CommandLine.Model.CommandSpec spec;
 
   @CommandLine.Option(names = {"-m", "--method"}, description = "Input -m=hgc if passphrases have not been migrated on wallet "
           + "%nor account creations are before 13 September 2019. Input -m=bip if passphrases have been migrated on the wallet,"

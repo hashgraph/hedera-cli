@@ -47,7 +47,7 @@ public class CryptoTransferMultiple implements Runnable {
     private Hedera hedera;
 
     @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Autowired
     private Utils utils;
@@ -234,7 +234,8 @@ public class CryptoTransferMultiple implements Runnable {
 
     public Map<Integer, Recipient> verifiedRecipientMap(List<String> accountList, List<String> amountList) {
         AccountId accountId;
-        String acc, amt;
+        String acc;
+        String amt;
         Map<Integer, Recipient> map = new HashMap<>();
 
         try {
