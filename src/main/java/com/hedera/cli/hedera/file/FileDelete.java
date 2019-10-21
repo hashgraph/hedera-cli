@@ -6,8 +6,8 @@ import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
 import com.hedera.hashgraph.sdk.file.FileId;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
-
 import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class FileDelete implements Runnable {
     private Hedera hedera;
 
     @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Option(names = {"-f", "--fileID"},
             description = "@|fg(225) Enter the file ID of the file to be deleted,in the format of"
@@ -35,9 +35,9 @@ public class FileDelete implements Runnable {
         try {
             var client = hedera.createHederaClient();
             FileId fileId = FileId.fromString(fileNumInString);
-            shellHelper.print("file: " + fileId);
-
+            shellHelper.printInfo("file: " + fileId);
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
+
 
             // now to delete the file
             var txDeleteReceipt = new FileDeleteTransaction(client)
@@ -47,15 +47,14 @@ public class FileDelete implements Runnable {
 
             if(txDeleteReceipt.getStatus() != ResponseCodeEnum.SUCCESS) {
                 shellHelper.printError("Error while deleting file");
-                System.exit(1);
             }
 
-            shellHelper.print(txDeleteReceipt.getStatus().toString());
+            shellHelper.printInfo("File deleted successfully");
             var fileInfo = new FileInfoQuery(client)
                     .setFileId(fileId)
                     .execute();
-
-            shellHelper.print("File info " + fileInfo);
+          
+            shellHelper.printInfo("File info " + fileInfo);
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }

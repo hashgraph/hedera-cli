@@ -3,10 +3,13 @@
  */
 package com.hedera.cli;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 public class ApplicationTest {
-    @Test 
+    @Test
     public void testApplication() {
+        assertTrue(true);
     }
 }

@@ -18,11 +18,16 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedera.cli.shell.ShellHelper;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataDirectory {
+
+    @Autowired
+    private ShellHelper shellHelper;
 
     private String userHome = System.getProperty("user.home");
     private String directoryName = ".hedera";
@@ -54,8 +59,7 @@ public class DataDirectory {
             bw.write(value);
             bw.close();
         } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(-1);
+            shellHelper.printError(e.getMessage());
         }
     }
 
@@ -82,9 +86,7 @@ public class DataDirectory {
             try {
                 br.close();
             } catch (IOException e) {
-                // System.err.println("An IOException was caught!");
-                // e.printStackTrace();
-                return value;
+                shellHelper.printError(e.getMessage());
             }
         }
 

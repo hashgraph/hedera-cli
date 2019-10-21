@@ -6,7 +6,8 @@ import picocli.CommandLine.Command;
 
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 public class FileTest {
 

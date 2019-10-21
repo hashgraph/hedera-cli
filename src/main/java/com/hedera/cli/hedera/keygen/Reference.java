@@ -343,7 +343,7 @@ public class Reference {
   }
 
   public List<String> toWordsList() {
-    List<String> words = WordList.words;
+    List<String> words = WordListHelper.words;
     // need len words
     int len = (int) Math.ceil(data.length * 8 / log2(words.size()));
     ArrayList<String> answer = new ArrayList<String>();
@@ -392,7 +392,7 @@ public class Reference {
   }
 
   public static List<String> lowercasedWords() {
-    List<String> words = WordList.words;
+    List<String> words = WordListHelper.words;
     ArrayList<String> lowercasedWords = new ArrayList<>();
     for (int i = 0; i < words.size(); i++) {
       lowercasedWords.add(words.get(i).toLowerCase());

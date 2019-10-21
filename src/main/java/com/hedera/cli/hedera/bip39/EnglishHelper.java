@@ -4,7 +4,7 @@ package com.hedera.cli.hedera.bip39;
  * Source: https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt
  */
 
-public class English {
+public class EnglishHelper {
   public final static String[] words = new String[] { "abandon", "ability", "able", "about", "above", "absent",
       "absorb", "abstract", "absurd", "abuse", "access", "accident", "account", "accuse", "achieve", "acid", "acoustic",
       "acquire", "across", "act", "action", "actor", "actress", "actual", "adapt", "add", "addict", "address", "adjust",

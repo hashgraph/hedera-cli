@@ -135,7 +135,7 @@ public class KeyGeneration implements Runnable {
     String words = StringUtils.join(wordList, " ");
     EDBip32KeyChain kc = new EDBip32KeyChain(hgcSeed);
     byte[] bipSeed = kc.bipSeed(words);
-    seed = Slip10.deriveEd25519PrivateKey(bipSeed, 44, 3030, 0, 0, index);
+    seed = Slip10Utils.deriveEd25519PrivateKey(bipSeed, 44, 3030, 0, 0, index);
     return new EDKeyPair(seed);
   }
 

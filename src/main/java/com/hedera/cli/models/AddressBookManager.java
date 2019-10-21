@@ -51,10 +51,8 @@ public class AddressBookManager {
       // check to see if there is an additional addressbook.json in ~/.hedera directory
       // if it exists, we will deep merge our /resources/addressbook.json with ~/.hedera/addressbook.json
       Path additionalAddressBook = Paths.get(System.getProperty("user.home"), ".hedera", "addressbook.json");
-      System.out.println(additionalAddressBook.toString());
       File additionalAddressBookFile = new File(additionalAddressBook.toString());
       if (additionalAddressBookFile.exists()) {
-        System.out.println("The file exists");
         InputStream additionalInput = new FileInputStream(additionalAddressBookFile);
         addressBook = mapper.readerForUpdating(addressBook).readValue(additionalInput);
       }

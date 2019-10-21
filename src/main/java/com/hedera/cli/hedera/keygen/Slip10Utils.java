@@ -8,11 +8,11 @@ import javax.crypto.Mac;
 import javax.crypto.ShortBufferException;
 import javax.crypto.spec.SecretKeySpec;
 
-public class Slip10 {
+public class Slip10Utils {
 
     private static final String hmacSHA512algorithm = "HmacSHA512";
 
-    private Slip10() {}
+    private Slip10Utils() {}
 
     /**
      * Derives only the private key for ED25519 in the manor defined in

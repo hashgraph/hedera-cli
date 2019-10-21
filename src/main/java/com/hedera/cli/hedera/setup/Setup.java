@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.botany.AdjectivesWordListHelper;
-import com.hedera.cli.hedera.botany.BotanyWordList;
+import com.hedera.cli.hedera.botany.BotanyWordListHelper;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
@@ -39,14 +39,13 @@ public class Setup implements Runnable {
     @Autowired
     private DataDirectory dataDirectory;
 
-    private String strMethod = "bip";
-
     @Override
     public void run() {
         CommandLine.usage(this, System.out);
     }
 
     public void handle(InputReader inputReader, ShellHelper shellHelper) {
+        String strMethod = "bip";
         shellHelper.print("Start the setup process");
         strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
         String accountId = inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
@@ -124,7 +123,7 @@ public class Setup implements Runnable {
 
     public String getRandomName() {
         Random rand = new Random();
-        List<String> botanyNames = BotanyWordList.words;
+        List<String> botanyNames = BotanyWordListHelper.words;
         List<String> adjectives = AdjectivesWordListHelper.words;
         String randomBotanyName = botanyNames.get(rand.nextInt(botanyNames.size()));
         String randomAdjectives = adjectives.get(rand.nextInt(adjectives.size()));

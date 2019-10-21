@@ -1,5 +1,7 @@
 package com.hedera.cli.models;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 public class HederaNodeTest {
@@ -9,6 +11,8 @@ public class HederaNodeTest {
 
   @Test
   public void testNode() {
+
+    assertTrue(true);
     // List<Network> networks = addressBook.getNetworks();
     // Network network = networks.get(0);
     // HederaNode node = network.getNodeByAccountId("0.0.3");

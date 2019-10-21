@@ -25,7 +25,7 @@ public class Mnemonic {
   private static final int SEED_KEY_SIZE = 512;
 
   public Mnemonic() {
-    this.wordList = Arrays.asList(English.words);
+    this.wordList = Arrays.asList(EnglishHelper.words);
   }
 
   /**

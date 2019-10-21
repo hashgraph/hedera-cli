@@ -18,6 +18,7 @@ public class CliDefaultsTest {
     // captures our stdout
     @Rule
     public OutputCaptureRule capture = new OutputCaptureRule();
+
     @Test
     public void testIsDefaultNetworkAndAccountSet() {
 

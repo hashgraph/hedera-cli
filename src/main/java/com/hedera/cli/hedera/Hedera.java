@@ -65,12 +65,7 @@ public class Hedera {
     }
 
     public boolean currentAccountExist() {
-        String accountNumber = currentAccountId();
-        if (!StringUtil.isNullOrEmpty(accountNumber)) {
-            // current account exists
-            return true;
-        }
-        return false;
+        return !StringUtil.isNullOrEmpty(currentAccountId());
     }
 
     public String currentAccountId() {
