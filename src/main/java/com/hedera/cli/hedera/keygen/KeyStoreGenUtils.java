@@ -86,10 +86,10 @@ public class KeyStoreGenUtils {
 			final KeyStore keyStore = KeyStore.getInstance(DEFAULT_KEY_STORE_TYPE);
 			keyStore.setEntry(PRIVATE_KEY_ALIAS, privateKeyEntry, passwordProtection);
 			keyStore.store(fos, passphrase);
-			return keyPair;
-		} catch (final Exception exception) {
-			throw new RuntimeException(exception);
+		} catch (final Exception e) {
+			e.printStackTrace();
 		}
+		return keyPair;
 	}
 
 	public static KeyPair loadKey(final char[] passphrase) {
