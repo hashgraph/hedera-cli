@@ -13,6 +13,6 @@ import lombok.Setter;
 @Setter
 public class AddressBook {
 
-  List<Network> networks;
+  private List<Network> networks;
 
 }

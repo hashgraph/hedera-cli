@@ -26,15 +26,15 @@ public class AddressBookManager {
   private List<Network> networks;
 
   @Autowired
-  DataDirectory dataDirectory;
+  private DataDirectory dataDirectory;
 
   @Autowired
-  ShellHelper shellHelper;
+  private ShellHelper shellHelper;
 
-  static final String ADDRESSBOOK_DEFAULT = "addressbook.json";
-  static final String NETWORK_DEFAULT = "testnet";
-  static final String NETWORK_FILE = "network.txt";
-  static final String ACCOUNT_DEFAULT_FILE = "default.txt";
+  static private final String ADDRESSBOOK_DEFAULT = "addressbook.json";
+  static private final String NETWORK_DEFAULT = "testnet";
+  static private final String NETWORK_FILE = "network.txt";
+  static private final String ACCOUNT_DEFAULT_FILE = "default.txt";
 
   @PostConstruct
   public void init() {

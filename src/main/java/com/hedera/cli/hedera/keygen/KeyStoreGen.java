@@ -76,7 +76,7 @@ public class KeyStoreGen {
 	}
 
 	public static KeyPair createKeyStore(final char[] passphrase, String filename, final KeyPair keyPair) {
-		if (filename.equals("")) {
+		if ("".equals(filename)) {
 			filename = DEFAULT_KEY_STORE_FILE_NAME;
 		}
 		try (FileOutputStream fos = new FileOutputStream(filename)){
@@ -97,7 +97,7 @@ public class KeyStoreGen {
 	}
 
 	public static KeyPair loadKey(final char[] passphrase, String filename) {
-		if (filename.equals("")) {
+		if ("".equals(filename)) {
 			filename = DEFAULT_KEY_STORE_FILE_NAME;
 		}
 		try (FileInputStream fis = new FileInputStream(filename)) {

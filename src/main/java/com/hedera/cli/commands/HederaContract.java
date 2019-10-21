@@ -12,12 +12,12 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 public class HederaContract extends CliDefaults {
 
   @Autowired
-  ShellHelper shellHelper;
+  private ShellHelper shellHelper;
 
   @ShellMethodAvailability("isNotCompleted")
   @ShellMethod(value = "manage Solidity contracts on Hedera")
   public void contract() {
-      System.out.println("Stub function.");
+      shellHelper.printInfo("Stub function.");
   }
 
 }

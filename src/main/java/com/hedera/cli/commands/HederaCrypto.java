@@ -23,16 +23,16 @@ import lombok.NoArgsConstructor;
 public class HederaCrypto extends CliDefaults {
 
 	@Autowired
-	ApplicationContext context;
+	private ApplicationContext context;
 
 	@Autowired
-	ShellHelper shellHelper;
+	private ShellHelper shellHelper;
 
 	@Autowired
-	InputReader inputReader;
+	private InputReader inputReader;
 
 	@Autowired
-	Account account;
+	private Account account;
 
 	@ShellMethodAvailability("isDefaultNetworkAndAccountSet")
 	@ShellMethod(value = "manage Hedera account")
@@ -119,7 +119,7 @@ public class HederaCrypto extends CliDefaults {
 			transfer.handle(context, inputReader, subCommand, args);
 		} catch (Exception e) {
 			e.printStackTrace();
-			// print out a useful message for end user here
+			shellHelper.printError(e.getMessage());
 		}
 	}
 

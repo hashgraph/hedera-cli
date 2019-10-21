@@ -20,10 +20,10 @@ import org.springframework.test.context.ContextConfiguration;
 public class AccountUtilsTest {
     
     @InjectMocks
-    AccountUtils accountUtils;
+    private AccountUtils accountUtils;
 
     @Mock
-    DataDirectory dataDirectory;
+    private DataDirectory dataDirectory;
 
     @Before
     public void init() {
@@ -41,7 +41,7 @@ public class AccountUtilsTest {
 
     @Test
     public void retrieveDefaultAccountID() {
-        
+        // to be completed
     }
 
     // @Test

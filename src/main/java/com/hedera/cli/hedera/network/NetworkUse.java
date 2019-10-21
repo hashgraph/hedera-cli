@@ -18,10 +18,10 @@ import picocli.CommandLine.Parameters;
 public class NetworkUse implements Runnable {
 
   @Autowired
-  DataDirectory dataDirectory;
+  private DataDirectory dataDirectory;
 
   @Autowired
-  ShellHelper shellHelper;
+  private ShellHelper shellHelper;
 
   @Parameters(index = "0", description = "Name of the network"
           + "%n@|bold,underline Usage:|@%n"

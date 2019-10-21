@@ -1,8 +1,6 @@
 package com.hedera.cli.defaults;
 
 import java.io.File;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.hedera.cli.hedera.utils.DataDirectory;
 
@@ -10,16 +8,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.Availability;
 
+
 public abstract class CliDefaults {
 
-  static Logger logger = LogManager.getFormatterLogger();
-
-  private String defaultNetworkName = "aspen";
+  private String defaultNetworkName = "testnet";
 
   @Autowired
-  DataDirectory dataDirectory;
-
-  public CliDefaults() {}
+  private DataDirectory dataDirectory;
 
   public Availability isDefaultNetworkAndAccountSet() {
     // sequentially

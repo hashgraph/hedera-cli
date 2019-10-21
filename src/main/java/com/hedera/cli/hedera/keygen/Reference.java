@@ -23,6 +23,10 @@ public class Reference {
   // data is the actual reference, either 16 or 32 bytes
   private byte[] data;
   private static final String digits = "0123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  /**
+   * The natural log of 2, used in the log2() function
+   */
+  private final static double LOG_2 = Math.log(2);
 
   /**
    * use this for all logging, as controlled by the optional data/log4j2.xml file
@@ -59,11 +63,6 @@ public class Reference {
       this.data[i] = (byte) (data[i] ^ crc); // the checksum also is XORed with all previous bytes
     }
   }
-
-  /**
-   * The natural log of 2, used in the log2() function
-   */
-  private final static double LOG_2 = Math.log(2);
 
   /**
    * return the log base 2 of x
@@ -379,7 +378,7 @@ public class Reference {
    * @return a hex string of exactly two characters per converted byte
    */
 
-  static String toHex(byte[] bytes, int firstIndex, int lastIndex) {
+  public static String toHex(byte[] bytes, int firstIndex, int lastIndex) {
     String ans = "";
     int last = lastIndex >= 0 ? lastIndex : bytes.length + lastIndex;
     if (!(0 <= firstIndex && firstIndex <= last && last < bytes.length)) {

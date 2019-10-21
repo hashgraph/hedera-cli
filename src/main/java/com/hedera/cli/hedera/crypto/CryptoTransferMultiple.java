@@ -25,7 +25,6 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import lombok.NoArgsConstructor;
@@ -39,55 +38,37 @@ import picocli.CommandLine.Spec;
 @NoArgsConstructor
 @Setter
 @Component
-@Command(name = "multiple",
-        description = "@|fg(225) Transfer hbars to multiple accounts with multiple senders"
-                + "%nWhereby default account is the operator, ie the paying account for transaction fees,"
-                + "%nwhile sender is the account transferring the hbars to the recipient(s)|@",
-        helpCommand = true)
+@Command(name = "multiple", description = "@|fg(225) Transfer hbars to multiple accounts with multiple senders"
+        + "%nWhereby default account is the operator, ie the paying account for transaction fees,"
+        + "%nwhile sender is the account transferring the hbars to the recipient(s)|@", helpCommand = true)
 public class CryptoTransferMultiple implements Runnable {
 
     @Autowired
-    ApplicationContext context;
+    private Hedera hedera;
 
     @Autowired
-    Hedera hedera;
+    private ShellHelper shellHelper;
 
     @Autowired
-    ShellHelper shellHelper;
-
-    @Autowired
-    Utils utils;
+    private Utils utils;
 
     @Spec
-    CommandSpec spec;
+    private CommandSpec spec;
 
-    @Option(names = {"-a", "--accountId"}, split = " ", arity = "1..*", required = true,
-            description = "Recipient accountID to transfer to, shardNum and realmNum not needed"
+    @Option(names = { "-a",
+            "--accountId" }, split = " ", arity = "1..*", required = true, description = "Recipient accountID to transfer to, shardNum and realmNum not needed"
                     + "%n@|bold,underline Usage:|@%n"
                     + "@|fg(yellow) transfer multiple -a=1001,1002,1003 -r=100,100,100|@")
     private String[] recipient;
 
-    @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
+    @Option(names = { "-r",
+            "--recipientAmt" }, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
     private String[] recipientAmt;
 
-    @Option(names = {"-n", "noPreview"}, arity = "0..1",
-            defaultValue = "yes",
-            fallbackValue = "no",
-            description = "Cryptotransfer preview option with optional parameter\n" +
-                    "Default: ${DEFAULT-VALUE},\n" +
-                    "if specified without parameters: ${FALLBACK-VALUE}")
+    @Option(names = { "-n",
+            "noPreview" }, arity = "0..1", defaultValue = "yes", fallbackValue = "no", description = "Cryptotransfer preview option with optional parameter\n"
+                    + "Default: ${DEFAULT-VALUE},\n" + "if specified without parameters: ${FALLBACK-VALUE}")
     private String mPreview = "no";
-
-    private String noPreview(String preview) {
-        if (preview.equals("no")) {
-            mPreview = preview;
-        } else if (preview.equals("yes")) {
-            mPreview = preview;
-        } else {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Option -y removes preview");
-        }
-        return mPreview;
-    }
 
     private String senderAccountIDInString;
     private String memoString = "";
@@ -165,10 +146,10 @@ public class CryptoTransferMultiple implements Runnable {
             } else if (noPreview(mPreview).equals("yes")) {
                 // show preview and execute cryptotransfer
                 isInfoCorrect = promptPreview(operatorId, jsonStringSender, jsonStringRecipient);
-                if (isInfoCorrect.equals("yes")) {
+                if ("yesy".equals(isInfoCorrect)) {
                     shellHelper.print("Info is correct, let's go!");
                     executeCryptoTransferMultiple(hedera, senderAccountID, operatorId, cryptoTransferTransaction);
-                } else if (isInfoCorrect.equals("no")) {
+                } else if ("no".equals(isInfoCorrect)) {
                     shellHelper.print("Nope, incorrect, let's make some changes");
                 } else {
                     shellHelper.printError("Input must either been yes or no");
@@ -183,15 +164,12 @@ public class CryptoTransferMultiple implements Runnable {
     }
 
     private String promptPreview(AccountId operatorId, String jsonStringSender, String jsonStringRecipient) {
-        return inputReader.prompt("\nOperator\n" + operatorId
-                + "\nSender\n" + jsonStringSender
-                + "\nRecipient\n" + jsonStringRecipient
-                + "\n\nIs this correct?"
-                + "\nyes/no");
+        return inputReader.prompt("\nOperator\n" + operatorId + "\nSender\n" + jsonStringSender + "\nRecipient\n"
+                + jsonStringRecipient + "\n\nIs this correct?" + "\nyes/no");
     }
 
     private void executeCryptoTransferMultiple(Hedera hedera, AccountId senderAccountID, AccountId operatorId,
-                                               CryptoTransferTransaction cryptoTransferTransaction) {
+            CryptoTransferTransaction cryptoTransferTransaction) {
         try {
             var client = hedera.createHederaClient();
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
@@ -201,8 +179,7 @@ public class CryptoTransferMultiple implements Runnable {
             TransactionRecord record;
             // if accountId of sender is the same as the operatorId, only sign once
             if (senderAccountID.toString().equals(hedera.getOperatorId().toString())) {
-                record = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes())
-                        .executeForRecord();
+                record = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes()).executeForRecord();
             } else {
                 // Since there is more than 1 sender in this multi-sender transaction example
                 // ie operator and sender are different,
@@ -210,8 +187,7 @@ public class CryptoTransferMultiple implements Runnable {
                 String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
                 senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
                 var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
-                record = Transaction.fromBytes(client, signedTxnBytes)
-                        .executeForRecord();
+                record = Transaction.fromBytes(client, signedTxnBytes).executeForRecord();
             }
 
             shellHelper.printInfo("transferring...");
@@ -221,7 +197,8 @@ public class CryptoTransferMultiple implements Runnable {
             // Get balance is always free, does not require any keys
             shellHelper.print(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
             shellHelper.print(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
-            // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
+            // save all transaction record into
+            // ~/.hedera/[network_name]/transaction/[file_name].json
             saveTransactionToJson(record);
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
@@ -250,15 +227,15 @@ public class CryptoTransferMultiple implements Runnable {
         utils.saveTransactionsToJson(txID, txObj);
     }
 
-    private byte[] senderSignsTransaction(Client client, Ed25519PrivateKey senderPrivKey, byte[] transactionData) throws InvalidProtocolBufferException {
-        return Transaction.fromBytes(client, transactionData)
-                .sign(senderPrivKey)
-                .toBytes();
+    private byte[] senderSignsTransaction(Client client, Ed25519PrivateKey senderPrivKey, byte[] transactionData)
+            throws InvalidProtocolBufferException {
+        return Transaction.fromBytes(client, transactionData).sign(senderPrivKey).toBytes();
     }
 
     public Map<Integer, Recipient> verifiedRecipientMap(List<String> accountList, List<String> amountList) {
         AccountId accountId;
-        String acc, amt;
+        String acc;
+        String amt;
         Map<Integer, Recipient> map = new HashMap<>();
 
         try {
@@ -323,5 +300,16 @@ public class CryptoTransferMultiple implements Runnable {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private String noPreview(String preview) {
+        if ("no".equals(preview)) {
+            mPreview = preview;
+        } else if ("yes".equals(preview)) {
+            mPreview = preview;
+        } else {
+            throw new CommandLine.ParameterException(spec.commandLine(), "Option -y removes preview");
+        }
+        return mPreview;
     }
 }

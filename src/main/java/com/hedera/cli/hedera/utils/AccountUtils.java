@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class AccountUtils {
 
     @Autowired
-    DataDirectory dataDirectory;
+    private DataDirectory dataDirectory;
 
     private static final String DEFAULT = "default.txt";
     private static final String PRIVATEKEY = "privateKey";
