@@ -8,6 +8,7 @@ import com.hedera.cli.hedera.utils.DataDirectory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,6 @@ public class CliDefaultsTest {
     public OutputCapture capture = new OutputCapture();
 
     public static Logger logger = LogManager.getFormatterLogger();
-
     @Test
     public void testIsDefaultNetworkAndAccountSet() {
 

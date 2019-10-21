@@ -1,7 +1,6 @@
 package com.hedera.cli.defaults;
 
 import java.io.File;
-
 import com.hedera.cli.hedera.utils.DataDirectory;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.Availability;
 
 
+
 public abstract class CliDefaults {
 
   private String defaultNetworkName = "testnet";
 
-  @Autowired
   private DataDirectory dataDirectory;
 
   public Availability isDefaultNetworkAndAccountSet() {
