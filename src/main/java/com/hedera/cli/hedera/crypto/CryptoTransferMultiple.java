@@ -16,11 +16,7 @@ import com.hedera.cli.models.Recipient;
 import com.hedera.cli.models.Sender;
 import com.hedera.cli.models.TransactionObj;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.Transaction;
-import com.hedera.hashgraph.sdk.TransactionId;
-import com.hedera.hashgraph.sdk.TransactionRecord;
-import com.hedera.hashgraph.sdk.TransactionRecordQuery;
+import com.hedera.hashgraph.sdk.*;
 
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
@@ -71,17 +67,6 @@ public class CryptoTransferMultiple implements Runnable {
             "noPreview" }, arity = "0..1", defaultValue = "yes", fallbackValue = "no", description = "Cryptotransfer preview option with optional parameter\n"
                     + "Default: ${DEFAULT-VALUE},\n" + "if specified without parameters: ${FALLBACK-VALUE}")
     private String mPreview = "no";
-
-    private String noPreview(String preview) {
-        if (preview.equals("no")) {
-            mPreview = preview;
-        } else if (preview.equals("yes")) {
-            mPreview = preview;
-        } else {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Option -y removes preview");
-        }
-        return mPreview;
-    }
   
     private String[] recipient;
     private String[] recipientAmt;
