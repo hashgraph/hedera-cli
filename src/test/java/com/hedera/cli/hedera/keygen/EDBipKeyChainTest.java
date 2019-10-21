@@ -20,7 +20,7 @@ public class EDBipKeyChainTest {
 
         byte[] edSeed = new byte[0];
         try {
-            edSeed = Slip10.deriveEd25519PrivateKey(bipSeed, 44, 3030, 0, 0, 0);
+            edSeed = Slip10Utils.deriveEd25519PrivateKey(bipSeed, 44, 3030, 0, 0, 0);
         } catch (NoSuchAlgorithmException | ShortBufferException | InvalidKeyException e) {
             e.printStackTrace();
         }

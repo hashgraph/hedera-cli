@@ -38,7 +38,7 @@ public class EDBip32KeyChain implements KeyChain {
         int[] array = {44, 3030, 0, 0, i};
         byte[] ckd = new byte[0];
         try {
-            ckd = Slip10.deriveEd25519PrivateKey(bipSeed, array);
+            ckd = Slip10Utils.deriveEd25519PrivateKey(bipSeed, array);
         } catch (NoSuchAlgorithmException | ShortBufferException | InvalidKeyException e) {
             e.printStackTrace();
         }

@@ -26,7 +26,7 @@ import java.util.List;
  * displayed with the given capitalization, but case insensitive matching should
  * be used when they are entered by the user.
  */
-class WordList {
+public class WordListHelper {
   /** the list of 4096 words */
   public static List<String> words = Arrays.asList("aback", "abbey", "abbot", "abide", "ablaze", "able", "aboard", "abode",
       "abort", "abound", "about", "above", "abroad", "abrupt", "absent", "absorb", "absurd", "abuse", "accent",
