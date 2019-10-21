@@ -39,14 +39,13 @@ public class Setup implements Runnable {
     @Autowired
     private DataDirectory dataDirectory;
 
-    private String strMethod = "bip";
-
     @Override
     public void run() {
         CommandLine.usage(this, System.out);
     }
 
     public void handle(InputReader inputReader, ShellHelper shellHelper) {
+        String strMethod = "bip";
         shellHelper.print("Start the setup process");
         strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
         String accountId = inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
