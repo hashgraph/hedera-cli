@@ -100,10 +100,7 @@ public class AccountDelete implements Runnable {
         String choice = inputReader.prompt("\nAccount to be deleted: " + oldAccountId
                 + "\nFunds from deleted account to be transferred to: " + newAccount + "\n\nIs this correct?"
                 + "\nyes/no");
-        if (choice.equalsIgnoreCase("yes") || choice.equalsIgnoreCase("y")) {
-            return true;
-        }
-        return false;
+        return choice.equalsIgnoreCase("yes") || choice.equalsIgnoreCase("y");
     }
 
     private boolean checkIfOperatorKeyIsTheSameAsAccountToBeDeleted(Hedera hedera, Ed25519PrivateKey oldAccountPrivKey) {
