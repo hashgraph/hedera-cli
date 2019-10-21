@@ -2,6 +2,7 @@ package com.hedera.cli.hedera.file;
 
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
 import com.hedera.hashgraph.sdk.file.FileId;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
@@ -32,13 +33,15 @@ public class FileDelete implements Runnable {
     @Override
     public void run() {
         try {
-            // Hedera hedera = new Hedera(context);
             var client = hedera.createHederaClient();
             FileId fileId = FileId.fromString(fileNumInString);
             shellHelper.printInfo("file: " + fileId);
+            TransactionId transactionId = new TransactionId(hedera.getOperatorId());
+
 
             // now to delete the file
             var txDeleteReceipt = new FileDeleteTransaction(client)
+                    .setTransactionId(transactionId)
                     .setFileId(fileId)
                     .executeForReceipt();
 
@@ -50,7 +53,7 @@ public class FileDelete implements Runnable {
             var fileInfo = new FileInfoQuery(client)
                     .setFileId(fileId)
                     .execute();
-
+          
             shellHelper.printInfo("File info " + fileInfo);
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());

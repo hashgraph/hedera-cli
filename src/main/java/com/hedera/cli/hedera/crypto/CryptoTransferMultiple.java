@@ -61,17 +61,18 @@ public class CryptoTransferMultiple implements Runnable {
             "--accountId" }, split = " ", arity = "1..*", required = true, description = "Recipient accountID to transfer to, shardNum and realmNum not needed"
                     + "%n@|bold,underline Usage:|@%n"
                     + "@|fg(yellow) transfer multiple -a=1001,1002,1003 -r=100,100,100|@")
-    private String[] recipient;
+    private String springRecipient;
 
-    @Option(names = { "-r",
-            "--recipientAmt" }, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
-    private String[] recipientAmt;
+    @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
+    private String springRecipientAmt;
 
     @Option(names = { "-n",
             "noPreview" }, arity = "0..1", defaultValue = "yes", fallbackValue = "no", description = "Cryptotransfer preview option with optional parameter\n"
                     + "Default: ${DEFAULT-VALUE},\n" + "if specified without parameters: ${FALLBACK-VALUE}")
     private String mPreview = "no";
-
+  
+    private String[] recipient;
+    private String[] recipientAmt;
     private String senderAccountIDInString;
     private String memoString = "";
 
@@ -83,13 +84,13 @@ public class CryptoTransferMultiple implements Runnable {
     @Override
     public void run() {
         try {
-
+            recipient = springRecipient.split(",");
+            recipientAmt = springRecipientAmt.split(",");
             // Cli prompt for input from user
             memoString = inputReader.prompt("Memo field");
             senderAccountIDInString = inputReader.prompt("Input sender accountID in the format xxxx");
             String transferAmountInStr = inputReader.prompt("Input transfer amount");
 
-            // Hedera hedera = new Hedera(context);
             var recipientList = Arrays.asList(recipient);
             var amountList = Arrays.asList(recipientAmt);
             // Operator is the current default account user
@@ -144,13 +145,13 @@ public class CryptoTransferMultiple implements Runnable {
             // handle preview error gracefully here
             if (noPreview(mPreview).equals("no")) {
                 // do not show preview
-                executeCryptoTransferMultiple(hedera, senderAccountID, operatorId, cryptoTransferTransaction);
+                executeCryptoTransferMultiple(hedera, client, senderAccountID, operatorId, cryptoTransferTransaction);
             } else if (noPreview(mPreview).equals("yes")) {
                 // show preview and execute cryptotransfer
                 isInfoCorrect = promptPreview(operatorId, jsonStringSender, jsonStringRecipient);
-                if ("yesy".equals(isInfoCorrect)) {
+                if ("yes".equals(isInfoCorrect)) {
                     shellHelper.print("Info is correct, let's go!");
-                    executeCryptoTransferMultiple(hedera, senderAccountID, operatorId, cryptoTransferTransaction);
+                    executeCryptoTransferMultiple(hedera, client, senderAccountID, operatorId, cryptoTransferTransaction);
                 } else if ("no".equals(isInfoCorrect)) {
                     shellHelper.print("Nope, incorrect, let's make some changes");
                 } else {
@@ -170,20 +171,31 @@ public class CryptoTransferMultiple implements Runnable {
                 + jsonStringRecipient + "\n\nIs this correct?" + "\nyes/no");
     }
 
-    private void executeCryptoTransferMultiple(Hedera hedera, AccountId senderAccountID, AccountId operatorId,
-            CryptoTransferTransaction cryptoTransferTransaction) {
+    private void executeCryptoTransferMultiple(Hedera hedera, Client client, AccountId senderAccountID, AccountId operatorId,
+                                               CryptoTransferTransaction cryptoTransferTransaction) {
+
         try {
-            var client = hedera.createHederaClient();
+
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
             var operatorBalanceBefore = client.getAccountBalance(operatorId);
             shellHelper.print(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
             shellHelper.print(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
-            TransactionRecord record;
+            TransactionReceipt transactionReceipt;
+            TransactionRecord record = null;
+
+            TransactionId transactionId = new TransactionId(operatorId);
+            cryptoTransferTransaction.setTransactionId(transactionId);
+
             // if accountId of sender is the same as the operatorId, only sign once
             if (senderAccountID.toString().equals(hedera.getOperatorId().toString())) {
-                TransactionId txId = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes()).execute();
-                TransactionRecordQuery q = new TransactionRecordQuery(client).setTransactionId(txId);
-                record = q.execute();
+                transactionReceipt = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes()).executeForReceipt();
+                if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
+                    record = new TransactionRecordQuery(client).setTransactionId(transactionId)
+                            .execute();
+                    printBalance(client, operatorId, senderAccountID);
+                    // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
+                    saveTransactionToJson(record);
+                }
             } else {
                 // Since there is more than 1 sender in this multi-sender transaction example
                 // ie operator and sender are different,
@@ -191,22 +203,15 @@ public class CryptoTransferMultiple implements Runnable {
                 String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
                 senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
                 var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
-
-                TransactionId txId = Transaction.fromBytes(client, signedTxnBytes).execute();
-                TransactionRecordQuery q = new TransactionRecordQuery(client).setTransactionId(txId);
-                record = q.execute();
+                transactionReceipt = Transaction.fromBytes(client, signedTxnBytes).executeForReceipt();
+                if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
+                    record = new TransactionRecordQuery(client).setTransactionId(transactionId)
+                            .execute();
+                    printBalance(client, operatorId, senderAccountID);
+                    // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
+                    saveTransactionToJson(record);
+                }
             }
-
-            shellHelper.printInfo("transferring...");
-            var operatorBalanceAfter = client.getAccountBalance(operatorId);
-            var senderBalanceAfter = client.getAccountBalance(senderAccountID);
-
-            // Get balance is always free, does not require any keys
-            shellHelper.print(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
-            shellHelper.print(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
-            // save all transaction record into
-            // ~/.hedera/[network_name]/transaction/[file_name].json
-            saveTransactionToJson(record);
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
@@ -219,24 +224,44 @@ public class CryptoTransferMultiple implements Runnable {
         shellHelper.printSuccess("Transfer receipt status: " + record.getReceipt().getStatus());
         shellHelper.printSuccess("Transfer memo: " + record.getMemo());
 
-        String txTimestamp = record.getTransactionId().getValidStart().getEpochSecond() + "-"
-                + record.getTransactionId().getValidStart().getNano();
-        String txID = record.getTransactionId().getAccountId().toString() + "-" + txTimestamp;
-        shellHelper.printSuccess("Transfer tx ID : " + txID);
+        String txID = printTransactionId(record.getTransactionId());
 
         TransactionObj txObj = new TransactionObj();
         txObj.setTxID(txID);
         txObj.setTxMemo(record.getMemo());
         txObj.setTxFee(BigInteger.valueOf(record.getTransactionFee()));
         txObj.setTxConsensusTimestamp(record.getConsensusTimestamp());
-        txObj.setTxValidStart(txTimestamp);
+        txObj.setTxValidStart(record.getTransactionId().getValidStart().getEpochSecond() + "-"
+                + record.getTransactionId().getValidStart().getNano());
 
         utils.saveTransactionsToJson(txID, txObj);
     }
 
-    private byte[] senderSignsTransaction(Client client, Ed25519PrivateKey senderPrivKey, byte[] transactionData)
-            throws InvalidProtocolBufferException {
-        return Transaction.fromBytes(client, transactionData).sign(senderPrivKey).toBytes();
+    private void printBalance(Client client, AccountId operatorId, AccountId senderAccountID) {
+        try {
+            shellHelper.printInfo("transferring...");
+            var operatorBalanceAfter = client.getAccountBalance(operatorId);
+            var senderBalanceAfter = client.getAccountBalance(senderAccountID);
+            // Get balance is always free, does not require any keys
+            shellHelper.print(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
+            shellHelper.print(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
+        } catch(Exception e) {
+            shellHelper.printError(e.getMessage());
+        }
+    }
+
+    private String printTransactionId(TransactionId transactionId) {
+        String txTimestamp = transactionId.getValidStart().getEpochSecond() + "-"
+                + transactionId.getValidStart().getNano();
+        String txID = transactionId.getAccountId().toString() + "-" + txTimestamp;
+        shellHelper.printSuccess("TransactionID : " + txID);
+        return txID;
+    }
+
+    private byte[] senderSignsTransaction(Client client, Ed25519PrivateKey senderPrivKey, byte[] transactionData) throws InvalidProtocolBufferException {
+        return Transaction.fromBytes(client, transactionData)
+                .sign(senderPrivKey)
+                .toBytes();
     }
 
     public Map<Integer, Recipient> verifiedRecipientMap(List<String> accountList, List<String> amountList) {
