@@ -27,8 +27,6 @@ import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Spec;
 
 
 @Component
@@ -40,9 +38,6 @@ public class Setup implements Runnable {
 
     @Autowired
     private DataDirectory dataDirectory;
-
-    @Spec
-    private CommandSpec spec;
 
     private String strMethod = "bip";
 
