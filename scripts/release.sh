@@ -23,7 +23,7 @@ cp build/libs/"${GH_REPO}-${VERSION}.jar" hedera && chmod +x hedera
 # pack only our hedera binary
 tar -zcvf "${PACKAGE}" hedera
 
-SHA256="$(sha256sum \"${PACKAGE}\" | cut -d' ' -f1)"
+SHA256=$(sha256sum "${PACKAGE}" | cut -d' ' -f1)
 
 git config --global user.email "calvin@hedera.com"
 git config --global user.name "Calvin Cheng"

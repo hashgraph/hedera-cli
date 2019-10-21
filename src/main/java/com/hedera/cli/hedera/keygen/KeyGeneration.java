@@ -39,9 +39,9 @@ public class KeyGeneration implements Runnable {
   }
   
   public String setMethod(String method) {
-    if (method.equals("bip")) {
+    if ("bip".equals(method)) {
       strMethod = method;
-    } else if (method.equals("hgc")) {
+    } else if ("hgc".equals(method)) {
       strMethod = method;
     } else {
       throw new CommandLine.ParameterException(spec.commandLine(), "Method must either been hgc or bip");
