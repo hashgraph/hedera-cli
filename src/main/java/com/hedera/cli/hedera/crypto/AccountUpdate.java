@@ -47,7 +47,7 @@ public class AccountUpdate implements Runnable {
             shellHelper.printInfo(" :: update public key of account " + accountId);
             shellHelper.printInfo("set key = " + newKey.getPublicKey());
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
-            new AccountUpdateTransaction(client).setAccountForUpdate(accountId)
+            new AccountUpdateTransaction(client).setAccountForUpdate(AccountId.fromString(accountId))
                     .setTransactionId(transactionId)
                     .setKey(newKey.getPublicKey())
                     // Sign with the previous key and the new key
