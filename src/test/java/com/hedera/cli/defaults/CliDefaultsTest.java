@@ -1,6 +1,10 @@
 package com.hedera.cli.defaults;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+
 import com.hedera.cli.hedera.utils.DataDirectory;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Rule;
@@ -10,9 +14,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.shell.Availability;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CliDefaultsTest {
@@ -27,7 +28,7 @@ public class CliDefaultsTest {
     public void testIsDefaultNetworkAndAccountSet() {
 
         DataDirectory dataDirectory = Mockito.mock(DataDirectory.class);
-        when(dataDirectory.readFile("network.txt", "aspen")).thenReturn("aspen");
+        when(dataDirectory.readFile("network.txt", "testnet")).thenReturn("testnet");
 
         CliDefaults defaults = new CliDefaults() {
             @Override
