@@ -16,6 +16,6 @@ import lombok.Setter;
 public class AddressBook {
 
   @JsonMerge
-  List<Network> networks;
+  private List<Network> networks;
 
 }
