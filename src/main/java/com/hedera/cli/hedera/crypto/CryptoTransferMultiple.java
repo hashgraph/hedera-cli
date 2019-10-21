@@ -191,7 +191,7 @@ public class CryptoTransferMultiple implements Runnable {
                 String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
                 senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
                 var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
-                
+
                 TransactionId txId = Transaction.fromBytes(client, signedTxnBytes).execute();
                 TransactionRecordQuery q = new TransactionRecordQuery(client).setTransactionId(txId);
                 record = q.execute();
@@ -252,13 +252,11 @@ public class CryptoTransferMultiple implements Runnable {
                 for (int i = 0; i < accountList.size(); ++i) {
                     acc = accountList.get(i);
                     amt = amountList.get(i);
-                    if (StringUtils.isNumeric(acc)) {
-                        if (isAccountId(acc) && isNumeric(amt)) {
-                            accountId = AccountId.fromString("0.0." + acc);
-                            var amount = new BigInteger(amt);
-                            Recipient recipient1 = new Recipient(accountId, amount.longValue());
-                            map.put(i, recipient1);
-                        }
+                    if (StringUtils.isNumeric(acc) && isAccountId(acc) && isNumeric(amt)) {
+                        accountId = AccountId.fromString("0.0." + acc);
+                        var amount = new BigInteger(amt);
+                        Recipient recipient1 = new Recipient(accountId, amount.longValue());
+                        map.put(i, recipient1);
                     }
                 }
             }
