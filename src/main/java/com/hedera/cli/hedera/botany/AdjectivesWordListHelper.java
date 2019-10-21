@@ -3,7 +3,7 @@ package com.hedera.cli.hedera.botany;
 import java.util.Arrays;
 import java.util.List;
 
-public class AdjectivesWordList {
+public class AdjectivesWordListHelper {
     static public List<String> words = Arrays.asList(
             "abandoned", "able", "absolute","academic","acceptable","acclaimed","accomplished","accurate","aching","acidic","acrobatic","active","actual","adept","admirable","admired","adolescent","adorable","adored","advanced","adventurous","affectionate","afraid","aged","aggravating","aggressive","agile","agitated","agonizing","agreeable","ajar","alarmed","alarming","alert","alienated","alive","all","altruistic","amazing","ambitious","ample","amused","amusing","anchored","ancient","angelic","angry","anguished","animated","annual","another","antique","anxious","any","apprehensive","appropriate","apt","arctic","arid","aromatic","artistic","ashamed","assured","astonishing","athletic","attached","attentive","attractive","austere","authentic","authorized","automatic","avaricious","average","aware","awesome","awful","awkward",
             "babyish","back","bad","baggy","bare","barren","basic","beautiful","belated","beloved","beneficial","best","better","bewitched","big","biodegrada","ble","bitter","black","bland","blank","blaring","bleak","blind","blissful","blond","blue","blushing","bogus","boiling","bold","bony","boring","bossy","both","bouncy","bountiful","bowed","brave","breakable","brief","bright","brilliant","brisk","broken","bronze","brown","bruised","bubbly","bulky","bumpy","buoyant","burdensome","burly","bustling","busy","buttery","buzzing",

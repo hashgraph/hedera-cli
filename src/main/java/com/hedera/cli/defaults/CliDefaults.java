@@ -7,14 +7,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.Availability;
 
+
+
 public abstract class CliDefaults {
 
-  private String defaultNetworkName = "aspen";
+  private String defaultNetworkName = "testnet";
 
-  @Autowired
-  DataDirectory dataDirectory;
-
-  public CliDefaults() {}
+  private DataDirectory dataDirectory;
 
   public Availability isDefaultNetworkAndAccountSet() {
     // sequentially

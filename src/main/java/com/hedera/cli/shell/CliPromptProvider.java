@@ -17,10 +17,10 @@ import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 public class CliPromptProvider implements PromptProvider {
 
     @Autowired
-    ApplicationContext context;
+    private ApplicationContext context;
 
     @Autowired
-    AddressBookManager addressBookManager;
+    private AddressBookManager addressBookManager;
 
     private AttributedString currentAccountAttr;
 

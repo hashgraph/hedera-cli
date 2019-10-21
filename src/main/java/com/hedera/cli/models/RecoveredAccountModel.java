@@ -6,10 +6,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RecoveredAccountModel {
-    String accountId;
-    String privateKey;
-    String publicKey;
-    String privateKeyEncoded;
-    String publicKeyEncoded;
-    String privateKeyBrowserCompatible;
+    private String accountId;
+    private String privateKey;
+    private String publicKey;
+    private String privateKeyEncoded;
+    private String publicKeyEncoded;
+    private String privateKeyBrowserCompatible;
 }

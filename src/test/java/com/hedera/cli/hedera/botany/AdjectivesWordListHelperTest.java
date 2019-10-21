@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-public class AdjectivesWordListTest {
+public class AdjectivesWordListHelperTest {
 
     @Test
     public void splitmystring() {

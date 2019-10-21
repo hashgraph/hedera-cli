@@ -31,13 +31,13 @@ import picocli.CommandLine.Parameters;
 public class AccountGetInfo implements Runnable {
 
     @Autowired
-    ApplicationContext context;
+    private ApplicationContext context;
 
     @Autowired
-    Hedera hedera;
+    private Hedera hedera;
 
     @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n"

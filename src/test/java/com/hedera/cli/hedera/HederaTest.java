@@ -15,14 +15,15 @@ import org.springframework.test.context.ContextConfiguration;
 public class HederaTest {
 
     @Mock
-    AddressBook addressBook;
+    private AddressBook addressBook;
 
     @Mock
-    CurrentAccountService currentAccountService;
+    private CurrentAccountService currentAccountService;
 
 
     @Test
     public void testGetRandomNode() {
+        System.out.println(addressBook);
         // DataDirectory dataDirectory = Mockito.mock(DataDirectory.class);
         // when(dataDirectory.readFile("network.txt")).thenReturn("mainnet");
 
@@ -34,6 +35,7 @@ public class HederaTest {
 
     @Test
     public void testGetOperatorId() {
+        System.out.println(currentAccountService);
         // AccountId operatorAccount;
         // AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
         // when(accountUtils

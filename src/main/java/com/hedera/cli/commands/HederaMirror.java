@@ -12,12 +12,12 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 public class HederaMirror extends CliDefaults {
 
   @Autowired
-  ShellHelper shellHelper;
+  private ShellHelper shellHelper;
   
   @ShellMethodAvailability("isNotCompleted")
   @ShellMethod(value = "introspect Hedera mirror nodes")
   public void mirror() {
-    System.out.println("Stub function.");
+    shellHelper.printInfo("Stub function.");
   }
 
 }
