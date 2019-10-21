@@ -1,8 +1,11 @@
 package com.hedera.cli.models;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,10 +47,23 @@ public class AddressBookManager {
     InputStream input = getClass().getResourceAsStream(addressBookJsonPath);
     try {
       AddressBook addressBook = mapper.readValue(input, AddressBook.class);
+
+      // check to see if there is an additional addressbook.json in ~/.hedera directory
+      // if it exists, we will deep merge our /resources/addressbook.json with ~/.hedera/addressbook.json
+      Path additionalAddressBook = Paths.get(System.getProperty("user.home"), ".hedera", "addressbook.json");
+      System.out.println(additionalAddressBook.toString());
+      File additionalAddressBookFile = new File(additionalAddressBook.toString());
+      if (additionalAddressBookFile.exists()) {
+        System.out.println("The file exists");
+        InputStream additionalInput = new FileInputStream(additionalAddressBookFile);
+        addressBook = mapper.readerForUpdating(addressBook).readValue(additionalInput);
+      }
+
       setNetworks(addressBook.getNetworks());
     } catch (IOException e) {
       shellHelper.printError(e.getMessage());
     }
+
     // ensure that all sub-directories are created
     for (String network : getNetworksAsStrings()) {
       String accountsDirForNetwork = network + File.separator + "accounts";
