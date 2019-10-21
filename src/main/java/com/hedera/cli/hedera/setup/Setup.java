@@ -11,7 +11,7 @@ import java.util.Random;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.botany.AdjectivesWordList;
+import com.hedera.cli.hedera.botany.AdjectivesWordListHelper;
 import com.hedera.cli.hedera.botany.BotanyWordList;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.KeyPair;
@@ -130,7 +130,7 @@ public class Setup implements Runnable {
     public String getRandomName() {
         Random rand = new Random();
         List<String> botanyNames = BotanyWordList.words;
-        List<String> adjectives = AdjectivesWordList.words;
+        List<String> adjectives = AdjectivesWordListHelper.words;
         String randomBotanyName = botanyNames.get(rand.nextInt(botanyNames.size()));
         String randomAdjectives = adjectives.get(rand.nextInt(adjectives.size()));
         int randomNumber = rand.nextInt(10000);
