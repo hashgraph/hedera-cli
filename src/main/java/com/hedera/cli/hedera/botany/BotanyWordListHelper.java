@@ -3,7 +3,7 @@ package com.hedera.cli.hedera.botany;
 import java.util.Arrays;
 import java.util.List;
 
-public class BotanyWordList {
+public class BotanyWordListHelper {
   static public List<String> words = Arrays.asList("adornis", "ainsley", "alder", "almond", "alyssum", "angelica", "ameretat", "arrowwood",
           "artichoke","ash", "aspen", "aster", "azalea", "balsam", "basil", "baobab", "bamboo", "baneberry", "basswood", "bay", "beech", "bentley",
           "birch", "birk", "blackberry", "bluebell","bramble", "briar", "bryn", "bryony", "buttercup","calendula", "calla", "camellia", "caldendula","carnation","cedar", "cerise", "cherry",

@@ -59,7 +59,7 @@ import net.i2p.crypto.eddsa.EdDSASecurityProvider;
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
-public class KeyStoreGen {
+public class KeyStoreGenUtils {
 
 	private static final String DEFAULT_KEY_STORE_FILE_NAME = "KeyStore.pfx";
 
