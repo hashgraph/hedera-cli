@@ -1,6 +1,8 @@
 package com.hedera.cli.hedera.file;
 
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
 import com.hedera.hashgraph.sdk.file.FileId;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
@@ -24,6 +26,9 @@ public class FileDelete implements Runnable {
     @Autowired
     Hedera hedera;
 
+    @Autowired
+    ShellHelper shellHelper;
+
     @Option(names = {"-f", "--fileID"},
             description = "@|fg(225) Enter the file ID of the file to be deleted,in the format of"
                     + "%nshardNum.realmNum.fileNum|@")
@@ -32,29 +37,31 @@ public class FileDelete implements Runnable {
     @Override
     public void run() {
         try {
-            // Hedera hedera = new Hedera(context);
             var client = hedera.createHederaClient();
             FileId fileId = FileId.fromString(fileNumInString);
-            System.out.println("file: " + fileId);
+            shellHelper.print("file: " + fileId);
+
+            TransactionId transactionId = new TransactionId(hedera.getOperatorId());
 
             // now to delete the file
             var txDeleteReceipt = new FileDeleteTransaction(client)
+                    .setTransactionId(transactionId)
                     .setFileId(fileId)
                     .executeForReceipt();
 
             if(txDeleteReceipt.getStatus() != ResponseCodeEnum.SUCCESS) {
-                System.out.println("Error while deleting file");
+                shellHelper.printError("Error while deleting file");
                 System.exit(1);
             }
 
-            System.out.println("File deleted successfully");
+            shellHelper.print(txDeleteReceipt.getStatus().toString());
             var fileInfo = new FileInfoQuery(client)
                     .setFileId(fileId)
                     .execute();
 
-            System.out.println("File info " + fileInfo);
+            shellHelper.print("File info " + fileInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            shellHelper.printError(e.getMessage());
         }
     }
 }

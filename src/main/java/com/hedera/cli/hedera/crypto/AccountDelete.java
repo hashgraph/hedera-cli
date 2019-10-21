@@ -13,6 +13,7 @@ import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountDeleteTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -117,6 +118,7 @@ public class AccountDelete implements Runnable {
     public void executeAccountDelete(Hedera hedera, AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey,
                                      AccountId newAccount) {
         var client = hedera.createHederaClient();
+        TransactionId transactionId = new TransactionId(hedera.getOperatorId());
         try {
 
             boolean privateKeyDuplicate = checkIfOperatorKeyIsTheSameAsAccountToBeDeleted(hedera, oldAccountPrivKey);
@@ -124,6 +126,7 @@ public class AccountDelete implements Runnable {
             if (privateKeyDuplicate) {
                 // operator already sign transaction
                 TransactionReceipt receipt = new AccountDeleteTransaction(client)
+                        .setTransactionId(transactionId)
                         .setDeleteAccountId(oldAccount)
                         .setTransferAccountId(newAccount)
                         .executeForReceipt();
@@ -131,6 +134,7 @@ public class AccountDelete implements Runnable {
             } else {
                 // sign the transaction
                 TransactionReceipt receipt = new AccountDeleteTransaction(client)
+                        .setTransactionId(transactionId)
                         .setDeleteAccountId(oldAccount)
                         .setTransferAccountId(newAccount)
                         .sign(oldAccountPrivKey)

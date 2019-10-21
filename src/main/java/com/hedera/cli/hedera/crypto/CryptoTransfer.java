@@ -6,6 +6,7 @@ import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 
@@ -111,6 +112,7 @@ public class CryptoTransfer implements Runnable {
             var receiptBalanceBefore = client.getAccountBalance(recipientId);
             shellHelper.print("" + operatorId + " balance = " + senderBalanceBefore);
             shellHelper.print("" + recipientId + " balance = " + receiptBalanceBefore);
+            TransactionId transactionId = new TransactionId(operatorId);
             new CryptoTransferTransaction(client)
                     // .addSender and .addRecipient can be called as many times as you want as long
                     // as the total sum from
@@ -118,6 +120,7 @@ public class CryptoTransfer implements Runnable {
                     .addSender(operatorId, amount.longValue())
                     .addRecipient(recipientId, amount.longValue())
                     .setMemo(memoString)
+                    .setTransactionId(transactionId)
                     // As we are sending from the operator we do not need to explicitly sign the
                     // transaction
                     .executeForReceipt();
