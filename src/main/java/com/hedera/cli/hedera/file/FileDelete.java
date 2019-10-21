@@ -46,12 +46,12 @@ public class FileDelete implements Runnable {
                 shellHelper.printError("Error while deleting file");
             }
 
-            System.out.println("File deleted successfully");
+            shellHelper.printInfo("File deleted successfully");
             var fileInfo = new FileInfoQuery(client)
                     .setFileId(fileId)
                     .execute();
 
-            System.out.println("File info " + fileInfo);
+            shellHelper.printInfo("File info " + fileInfo);
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
