@@ -1,7 +1,7 @@
 Project Setup
 ===
 
-```
+```bash
 git clone https://github.com/hashgraph/hedera-cli
 ```
 
