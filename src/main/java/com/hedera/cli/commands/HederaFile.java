@@ -38,7 +38,7 @@ public class HederaFile extends CliDefaults {
         String[] args = new String[]{};
 
         // @formatter:off
-        if (subCommand.equals("create")) {
+        if ("create".equals(subCommand)) {
 			ArrayList<String> argsList = new ArrayList<String>();
 			if (!c.isEmpty()) argsList.add(c);
             if (!d.isEmpty()) argsList.add(d);
@@ -48,7 +48,7 @@ public class HederaFile extends CliDefaults {
 			args = Arrays.copyOf(objs, objs.length, String[].class);
         }
 
-        if (subCommand.equals("delete")) {
+        if ("delete".equals(subCommand)) {
             ArrayList<String> argsList = new ArrayList<String>();
             if (!f.isEmpty()) argsList.add(f);
             Object[] objs = argsList.toArray();
