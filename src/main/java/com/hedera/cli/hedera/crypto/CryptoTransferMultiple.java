@@ -160,13 +160,13 @@ public class CryptoTransferMultiple implements Runnable {
             // handle preview error gracefully here
             if (noPreview(mPreview).equals("no")) {
                 // do not show preview
-                executeCryptoTransferMultiple(hedera, senderAccountID, operatorId, cryptoTransferTransaction);
+                executeCryptoTransferMultiple(hedera, client, senderAccountID, operatorId, cryptoTransferTransaction);
             } else if (noPreview(mPreview).equals("yes")) {
                 // show preview and execute cryptotransfer
                 isInfoCorrect = promptPreview(operatorId, jsonStringSender, jsonStringRecipient);
                 if (isInfoCorrect.equals("yes")) {
                     shellHelper.print("Info is correct, let's go!");
-                    executeCryptoTransferMultiple(hedera, senderAccountID, operatorId, cryptoTransferTransaction);
+                    executeCryptoTransferMultiple(hedera, client, senderAccountID, operatorId, cryptoTransferTransaction);
                 } else if (isInfoCorrect.equals("no")) {
                     shellHelper.print("Nope, incorrect, let's make some changes");
                 } else {
@@ -189,24 +189,22 @@ public class CryptoTransferMultiple implements Runnable {
                 + "\nyes/no");
     }
 
-    private void executeCryptoTransferMultiple(Hedera hedera, AccountId senderAccountID, AccountId operatorId,
+    private void executeCryptoTransferMultiple(Hedera hedera, Client client, AccountId senderAccountID, AccountId operatorId,
                                                CryptoTransferTransaction cryptoTransferTransaction) {
         try {
-            var client = hedera.createHederaClient();
+
             var senderBalanceBefore = client.getAccountBalance(senderAccountID);
             var operatorBalanceBefore = client.getAccountBalance(operatorId);
             shellHelper.print(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
             shellHelper.print(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
             TransactionReceipt transactionReceipt;
             TransactionRecord record = null;
-            TransactionId transactionId;
+
+            TransactionId transactionId = new TransactionId(operatorId);
+            cryptoTransferTransaction.setTransactionId(transactionId);
+
             // if accountId of sender is the same as the operatorId, only sign once
             if (senderAccountID.toString().equals(hedera.getOperatorId().toString())) {
-                transactionId = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes()).getId();
-
-                // print txid to verify
-                printTransactionId(transactionId);
-
                 transactionReceipt = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes()).executeForReceipt();
                 if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
                     record = new TransactionRecordQuery(client).setTransactionId(transactionId)
@@ -222,9 +220,6 @@ public class CryptoTransferMultiple implements Runnable {
                 String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
                 senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
                 var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
-                transactionId = Transaction.fromBytes(client, signedTxnBytes).getId();
-                printTransactionId(transactionId);
-
                 transactionReceipt = Transaction.fromBytes(client, signedTxnBytes).executeForReceipt();
                 if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
                     record = new TransactionRecordQuery(client).setTransactionId(transactionId)
