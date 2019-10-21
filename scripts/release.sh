@@ -4,7 +4,7 @@ file="./gradle.properties"
 while IFS= read -r line
 do
     # display $line or do somthing with $line
-    export VERSION="$(echo \"$line\" | cut -d'=' -f2)"
+    export VERSION=$(echo "$line" | cut -d'=' -f2)
     printf '%s\n' "v${VERSION} will be released"
 done <"$file"
 

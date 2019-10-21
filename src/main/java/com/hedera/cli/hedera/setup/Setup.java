@@ -55,12 +55,12 @@ public class Setup implements Runnable {
         shellHelper.print(String.valueOf(phraseList));
         // recover key from phrase
         KeyPair keyPair;
-        if (strMethod.equals("bip")) {
+        if ("bip".equals(strMethod)) {
             keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
             printKeyPair(keyPair, accountId, shellHelper);
             JsonObject account = addAccountToJson(accountId, keyPair);
             saveToJson(accountId, account);
-        } else if (strMethod.equals("hgc")) {
+        } else if ("hgc".equals(strMethod)) {
             keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
             printKeyPair(keyPair, accountId, shellHelper);
             JsonObject account = addAccountToJson(accountId, keyPair);
