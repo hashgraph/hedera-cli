@@ -15,10 +15,10 @@ import org.springframework.test.context.ContextConfiguration;
 public class HederaTest {
 
     @Mock
-    AddressBook addressBook;
+    private AddressBook addressBook;
 
     @Mock
-    CurrentAccountService currentAccountService;
+    private CurrentAccountService currentAccountService;
 
 
     @Test

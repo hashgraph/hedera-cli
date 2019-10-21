@@ -23,9 +23,7 @@ import picocli.CommandLine.Spec;
 @NoArgsConstructor
 @Setter
 @Component
-@Command(name = "single",
-        description = "@|fg(225) Transfer hbars to a single account|@%n",
-        helpCommand = true)
+@Command(name = "single", description = "@|fg(225) Transfer hbars to a single account|@%n", helpCommand = true)
 public class CryptoTransfer implements Runnable {
 
     @Autowired
@@ -37,32 +35,20 @@ public class CryptoTransfer implements Runnable {
     @Spec
     private CommandSpec spec;
 
-    @Option(names = {"-a", "--accountId"}, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED")
+    @Option(names = { "-a",
+            "--accountId" }, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED")
     private String recipient;
 
-    @Option(names = {"-r", "--recipientAmt"}, arity = "1", required = true, description = "Amount to transfer in tinybars")
+    @Option(names = { "-r",
+            "--recipientAmt" }, arity = "1", required = true, description = "Amount to transfer in tinybars")
     private String recipientAmt;
 
-    @Option(names = {"-n", "--noPreview"}, arity = "0..1",
-            defaultValue = "yes",
-            fallbackValue = "no",
-            description = "Cryptotransfer preview" +
-                    "\noption with optional parameter. Default: ${DEFAULT-VALUE},\n" +
-                    "if specified without parameter: ${FALLBACK-VALUE}"
-                    + "%n@|bold,underline Usage:|@%n"
+    @Option(names = { "-n",
+            "--noPreview" }, arity = "0..1", defaultValue = "yes", fallbackValue = "no", description = "Cryptotransfer preview"
+                    + "\noption with optional parameter. Default: ${DEFAULT-VALUE},\n"
+                    + "if specified without parameter: ${FALLBACK-VALUE}" + "%n@|bold,underline Usage:|@%n"
                     + "@|fg(yellow) transfer single -a 1234 -r 100|@")
     private String mPreview = "no";
-
-    private String noPreview(String preview) {
-        if (preview.equals("no")) {
-            mPreview = preview;
-        } else if (preview.equals("yes")) {
-            mPreview = preview;
-        } else {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Option -n removes preview");
-        }
-        return mPreview;
-    }
 
     private String memoString;
     private InputReader inputReader;
@@ -77,14 +63,14 @@ public class CryptoTransfer implements Runnable {
         var recipientId = AccountId.fromString("0.0." + recipient);
         var amount = new BigInteger(recipientAmt);
 
-        if (noPreview(mPreview).equals("no")) {
+        if ("no".equals(noPreview(mPreview))) {
             executeCryptoTransfer(client, operatorId, recipientId, amount);
-        } else if (noPreview(mPreview).equals("yes")) {
+        } else if ("yes".equals(noPreview(mPreview))) {
             isInfoCorrect = promptPreview(operatorId, recipientId, amount);
-            if (isInfoCorrect.equals("yes")) {
+            if ("yes".equals(isInfoCorrect)) {
                 shellHelper.print("Info is correct, let's go!");
                 executeCryptoTransfer(client, operatorId, recipientId, amount);
-            } else if (isInfoCorrect.equals("no")) {
+            } else if ("no".equals(isInfoCorrect)) {
                 shellHelper.print("Nope, incorrect, let's make some changes");
             } else {
                 shellHelper.printError("Input must either been yes or no");
@@ -95,10 +81,8 @@ public class CryptoTransfer implements Runnable {
     }
 
     private String promptPreview(AccountId operatorId, AccountId recipientId, BigInteger amount) {
-        return inputReader.prompt("\nOperator: " + operatorId
-                + "\nRecipient: " + recipientId + "\nAmount: " + amount
-                + "\n\nIs this correct?"
-                + "\nyes/no");
+        return inputReader.prompt("\nOperator: " + operatorId + "\nRecipient: " + recipientId + "\nAmount: " + amount
+                + "\n\nIs this correct?" + "\nyes/no");
     }
 
     public void executeCryptoTransfer(Client client, AccountId operatorId, AccountId recipientId, BigInteger amount) {
@@ -111,8 +95,7 @@ public class CryptoTransfer implements Runnable {
                     // .addSender and .addRecipient can be called as many times as you want as long
                     // as the total sum from
                     // both sides is equivalent
-                    .addSender(operatorId, amount.longValue())
-                    .addRecipient(recipientId, amount.longValue())
+                    .addSender(operatorId, amount.longValue()).addRecipient(recipientId, amount.longValue())
                     .setMemo(memoString)
                     // As we are sending from the operator we do not need to explicitly sign the
                     // transaction
@@ -121,13 +104,23 @@ public class CryptoTransfer implements Runnable {
             shellHelper.printInfo("transferring " + amount.longValue() + " tinybar...");
             var senderBalanceAfter = client.getAccountBalance(operatorId);
             var receiptBalanceAfter = client.getAccountBalance(recipientId);
-            shellHelper.printSuccess("" + operatorId + " balance = " + senderBalanceAfter +
-                    "\n" + recipientId + " balance = " + receiptBalanceAfter);
+            shellHelper.printSuccess("" + operatorId + " balance = " + senderBalanceAfter + "\n" + recipientId
+                    + " balance = " + receiptBalanceAfter);
             shellHelper.printSuccess("Success!");
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
     }
 
-}
+    private String noPreview(String preview) {
+        if (preview.equals("no")) {
+            mPreview = preview;
+        } else if (preview.equals("yes")) {
+            mPreview = preview;
+        } else {
+            throw new CommandLine.ParameterException(spec.commandLine(), "Option -n removes preview");
+        }
+        return mPreview;
+    }
 
+}

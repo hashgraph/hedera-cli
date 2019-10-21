@@ -379,7 +379,7 @@ public class Reference {
    * @return a hex string of exactly two characters per converted byte
    */
 
-  static String toHex(byte[] bytes, int firstIndex, int lastIndex) {
+  public static String toHex(byte[] bytes, int firstIndex, int lastIndex) {
     String ans = "";
     int last = lastIndex >= 0 ? lastIndex : bytes.length + lastIndex;
     if (!(0 <= firstIndex && firstIndex <= last && last < bytes.length)) {

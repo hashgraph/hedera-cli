@@ -16,8 +16,6 @@ public abstract class CliDefaults {
   @Autowired
   private DataDirectory dataDirectory;
 
-  public CliDefaults() {}
-
   public Availability isDefaultNetworkAndAccountSet() {
     // sequentially
     // invoke isDefaultNetworkSet

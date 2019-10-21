@@ -35,12 +35,9 @@ import picocli.CommandLine.Spec;
 @Getter
 @Setter
 @Component
-@Command(name = "create",
-        separator = " ",
-        description = "@|fg(225) Generates a new Ed25519 Keypair compatible with java and wallet,"
-                + "%ntogether with 24 recovery words (bip compatible),"
-                + "%nCreates a new Hedera account and "
-                + "%nReturns an accountID in the form of shardNum.realmNum.accountNum.|@", helpCommand = true)
+@Command(name = "create", separator = " ", description = "@|fg(225) Generates a new Ed25519 Keypair compatible with java and wallet,"
+        + "%ntogether with 24 recovery words (bip compatible)," + "%nCreates a new Hedera account and "
+        + "%nReturns an accountID in the form of shardNum.realmNum.accountNum.|@", helpCommand = true)
 public class AccountCreate implements Runnable {
 
     @Autowired
@@ -61,26 +58,23 @@ public class AccountCreate implements Runnable {
     @Spec
     private CommandSpec spec;
 
-//    @Option(names = {"-r", "--record"}, description = "Generates a record that lasts 25hrs")
-//    private boolean generateRecord = false;
+    // @Option(names = {"-r", "--record"}, description = "Generates a record that
+    // lasts 25hrs")
+    // private boolean generateRecord = false;
 
-    @Option(names = {"-b", "--balance"}, required = true, description = "Initial balance of new account created in hbars")
+    @Option(names = { "-b",
+            "--balance" }, required = true, description = "Initial balance of new account created in hbars")
     private int initBal = 0;
 
-    private void setMinimum(int min) {
-        if (min < 0) {
-            throw new ParameterException(spec.commandLine(), "Minimum must be a positive integer");
-        }
-        initBal = min;
-    }
-
-    @Option(names = {"-k", "--keygen"}, description = "Default generates a brand new key pair associated with account creation"
-            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000|@")
+    @Option(names = { "-k",
+            "--keygen" }, description = "Default generates a brand new key pair associated with account creation"
+                    + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000|@")
     private boolean keyGen;
 
     private String strMethod = "bip";
 
     private AccountId accountID;
+    
     private JsonObject account;
 
     @Override
@@ -109,7 +103,8 @@ public class AccountCreate implements Runnable {
         } else {
             System.out.println("hello111");
             System.out.println(keyGen);
-            // Else keyGen always set to false and read from default.txt which contains operator keys
+            // Else keyGen always set to false and read from default.txt which contains
+            // operator keys
             var operatorPrivateKey = hedera.getOperatorKey();
             var operatorPublicKey = operatorPrivateKey.getPublicKey();
             System.out.println("hello111 again");
@@ -145,8 +140,7 @@ public class AccountCreate implements Runnable {
         var client = hedera.createHederaClient();
         var tx = new AccountCreateTransaction(client)
                 // The only _required_ property here is `key`
-                .setKey(publicKey).setInitialBalance(initBal)
-                .setAutoRenewPeriod(Duration.ofSeconds(7890000));
+                .setKey(publicKey).setInitialBalance(initBal).setAutoRenewPeriod(Duration.ofSeconds(7890000));
         // This will wait for the receipt to become available
         TransactionReceipt receipt;
         try {
@@ -160,5 +154,12 @@ public class AccountCreate implements Runnable {
             shellHelper.printError(e.getMessage());
         }
         return accountId;
+    }
+
+    private void setMinimum(int min) {
+        if (min < 0) {
+            throw new ParameterException(spec.commandLine(), "Minimum must be a positive integer");
+        }
+        initBal = min;
     }
 }

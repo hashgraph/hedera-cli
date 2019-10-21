@@ -87,10 +87,10 @@ public class AccountRecovery implements Runnable {
         List<String> phraseList = Arrays.asList(phrase.split(" "));
         if (phraseList.size() == 24) {
             // recover key from phrase
-            if (strMethod.equals("bip")) {
+            if ("bip".equals(strMethod)) {
                 keyPair = recoverEDKeypairPostBipMigration(phraseList);
                 verifyAndSaveAccount();
-            } else if (strMethod.equals("hgc")) {
+            } else if ("hgc".equals(strMethod)) {
                 keyPair = recoverEd25519AccountKeypair(phraseList);
                 verifyAndSaveAccount();
             } else {
