@@ -10,7 +10,6 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import lombok.NoArgsConstructor;
@@ -30,16 +29,13 @@ import picocli.CommandLine.Spec;
 public class CryptoTransfer implements Runnable {
 
     @Autowired
-    ApplicationContext context;
+    private ShellHelper shellHelper;
 
     @Autowired
-    ShellHelper shellHelper;
-
-    @Autowired
-    Hedera hedera;
+    private Hedera hedera;
 
     @Spec
-    CommandSpec spec;
+    private CommandSpec spec;
 
     @Option(names = {"-a", "--accountId"}, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED")
     private String recipient;

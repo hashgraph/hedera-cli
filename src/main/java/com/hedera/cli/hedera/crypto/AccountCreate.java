@@ -19,13 +19,13 @@ import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+import lombok.Setter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -44,22 +44,22 @@ import picocli.CommandLine.Spec;
 public class AccountCreate implements Runnable {
 
     @Autowired
-    ApplicationContext context;
+    private ApplicationContext context;
 
     @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Autowired
-    Hedera hedera;
+    private Hedera hedera;
 
     @Autowired
-    Setup setup;
+    private Setup setup;
 
     @Autowired
-    Utils utils;
+    private Utils utils;
 
     @Spec
-    CommandSpec spec;
+    private CommandSpec spec;
 
 //    @Option(names = {"-r", "--record"}, description = "Generates a record that lasts 25hrs")
 //    private boolean generateRecord = false;

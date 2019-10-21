@@ -25,7 +25,6 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import lombok.NoArgsConstructor;
@@ -47,19 +46,16 @@ import picocli.CommandLine.Spec;
 public class CryptoTransferMultiple implements Runnable {
 
     @Autowired
-    ApplicationContext context;
-
-    @Autowired
-    Hedera hedera;
+    private Hedera hedera;
 
     @Autowired
     ShellHelper shellHelper;
 
     @Autowired
-    Utils utils;
+    private Utils utils;
 
     @Spec
-    CommandSpec spec;
+    private CommandSpec spec;
 
     @Option(names = {"-a", "--accountId"}, split = " ", arity = "1..*", required = true,
             description = "Recipient accountID to transfer to, shardNum and realmNum not needed"

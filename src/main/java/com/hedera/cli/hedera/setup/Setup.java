@@ -36,13 +36,13 @@ import picocli.CommandLine.Spec;
 public class Setup implements Runnable {
 
     @Autowired
-    AccountRecovery accountRecovery;
+    private AccountRecovery accountRecovery;
 
     @Autowired
-    DataDirectory dataDirectory;
+    private DataDirectory dataDirectory;
 
     @Spec
-    CommandSpec spec;
+    private CommandSpec spec;
 
     private String strMethod = "bip";
 

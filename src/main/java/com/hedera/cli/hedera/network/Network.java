@@ -16,10 +16,7 @@ import picocli.CommandLine.Command;
 public class Network implements Runnable {
 
     @Autowired
-    ApplicationContext context;
-
-    @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Override
     public void run() {

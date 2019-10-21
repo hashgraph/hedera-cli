@@ -26,10 +26,10 @@ public class AddressBookManager {
   private List<Network> networks;
 
   @Autowired
-  DataDirectory dataDirectory;
+  private DataDirectory dataDirectory;
 
   @Autowired
-  ShellHelper shellHelper;
+  private ShellHelper shellHelper;
 
   static final String ADDRESSBOOK_DEFAULT = "addressbook.json";
   static final String NETWORK_DEFAULT = "testnet";
