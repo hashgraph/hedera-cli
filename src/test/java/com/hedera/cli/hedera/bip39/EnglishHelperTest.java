@@ -1,11 +1,11 @@
 package com.hedera.cli.hedera.bip39;
 
-import static com.hedera.cli.hedera.bip39.English.words;
+import static com.hedera.cli.hedera.bip39.EnglishHelper.words;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class EnglishTest {
+public class EnglishHelperTest {
 
   @Test
   public void testEnglishWords() {
