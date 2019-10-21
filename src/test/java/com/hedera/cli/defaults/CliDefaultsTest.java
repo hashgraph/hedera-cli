@@ -22,7 +22,7 @@ public class CliDefaultsTest {
     @Rule
     public OutputCapture capture = new OutputCapture();
 
-    static Logger logger = LogManager.getFormatterLogger();
+    public static Logger logger = LogManager.getFormatterLogger();
 
     @Test
     public void testIsDefaultNetworkAndAccountSet() {
