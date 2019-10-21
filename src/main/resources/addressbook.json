@@ -47,36 +47,6 @@
       ]
     },
     {
-      "name": "aspen",
-      "description": "Engnet1",
-      "nodes": [
-        {
-          "account": "0.0.3",
-          "address": "35.196.146.2:50211"
-        },
-        {
-          "account": "0.0.4",
-          "address": "35.245.91.14:50211"
-        },
-        {
-          "account": "0.0.5",
-          "address": "34.67.95.76:50211"
-        },
-        {
-          "account": "0.0.6",
-          "address": "35.203.145.150:50211"
-        },
-        {
-          "account": "0.0.7",
-          "address": "34.94.112.161:50211"
-        },
-        {
-          "account": "0.0.8",
-          "address": "34.95.37.183:50211"
-        }
-      ]
-    },
-    {
       "name": "testnet",
       "description": "Hedera testnet",
       "nodes": [
