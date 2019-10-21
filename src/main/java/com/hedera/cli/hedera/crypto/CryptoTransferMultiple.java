@@ -18,7 +18,9 @@ import com.hedera.cli.models.TransactionObj;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.Transaction;
+import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionRecord;
+import com.hedera.hashgraph.sdk.TransactionRecordQuery;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -179,7 +181,9 @@ public class CryptoTransferMultiple implements Runnable {
             TransactionRecord record;
             // if accountId of sender is the same as the operatorId, only sign once
             if (senderAccountID.toString().equals(hedera.getOperatorId().toString())) {
-                record = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes()).executeForRecord();
+                TransactionId txId = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes()).execute();
+                TransactionRecordQuery q = new TransactionRecordQuery(client).setTransactionId(txId);
+                record = q.execute();
             } else {
                 // Since there is more than 1 sender in this multi-sender transaction example
                 // ie operator and sender are different,
@@ -187,7 +191,10 @@ public class CryptoTransferMultiple implements Runnable {
                 String senderPrivKeyInString = inputReader.prompt("Input sender private key", "secret", false);
                 senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
                 var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
-                record = Transaction.fromBytes(client, signedTxnBytes).executeForRecord();
+                
+                TransactionId txId = Transaction.fromBytes(client, signedTxnBytes).execute();
+                TransactionRecordQuery q = new TransactionRecordQuery(client).setTransactionId(txId);
+                record = q.execute();
             }
 
             shellHelper.printInfo("transferring...");
