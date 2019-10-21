@@ -14,13 +14,13 @@ import picocli.CommandLine.Command;
 public class AccountList implements Runnable {
 
     @Autowired
-    DataDirectory dataDirectory;
+    private DataDirectory dataDirectory;
 
     @Autowired
-    AccountUtils accountUtils;
+    private AccountUtils accountUtils;
 
     @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Override
     public void run() {

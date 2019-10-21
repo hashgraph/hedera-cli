@@ -1,12 +1,11 @@
 package com.hedera.cli.models;
 
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class NetworkTest {
 
-  @Autowired
-  AddressBook addressBook;
+  // @Autowired
+  // private AddressBook addressBook;
 
   @Test
   public void getNetworks() {

@@ -23,16 +23,16 @@ import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 public class Hedera {
 
     @Autowired
-    DataDirectory dataDirectory;
+    private DataDirectory dataDirectory;
 
     @Autowired
-    ApplicationContext context;
+    private ApplicationContext context;
 
     @Autowired
-    AddressBookManager addressBookManager;
+    private AddressBookManager addressBookManager;
 
     @Autowired
-    AccountUtils accountUtils;
+    private AccountUtils accountUtils;
 
     private HederaNode node;
 

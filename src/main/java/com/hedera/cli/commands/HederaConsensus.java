@@ -12,12 +12,12 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 public class HederaConsensus extends CliDefaults {
 
   @Autowired
-  ShellHelper shellHelper;
+  private ShellHelper shellHelper;
   
   @ShellMethodAvailability("isNotCompleted")
   @ShellMethod(value = "manage Hedera consensus service")
   public void consensus() {
-    System.out.println("Stub function.");
+    shellHelper.printInfo("Stub function.");
   }
 
 }

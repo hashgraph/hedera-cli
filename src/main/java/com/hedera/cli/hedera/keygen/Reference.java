@@ -23,8 +23,13 @@ public class Reference {
   // data is the actual reference, either 16 or 32 bytes
   private byte[] data;
   private static final String digits = "0123456789" + "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  /**
+   * The natural log of 2, used in the log2() function
+   */
+  private final static double LOG_2 = Math.log(2);
 
   /**
+
    * Pass to the constructor 16, 32, or 48 bytes (128, 256, or 384 bits), which is
    * the hash of the thing being referenced (a key, a swirld name, a file, etc). A
    * copy of data is made, so it is OK to change the array after instantiating the
@@ -55,11 +60,6 @@ public class Reference {
       this.data[i] = (byte) (data[i] ^ crc); // the checksum also is XORed with all previous bytes
     }
   }
-
-  /**
-   * The natural log of 2, used in the log2() function
-   */
-  private final static double LOG_2 = Math.log(2);
 
   /**
    * return the log base 2 of x
@@ -375,7 +375,7 @@ public class Reference {
    * @return a hex string of exactly two characters per converted byte
    */
 
-  static String toHex(byte[] bytes, int firstIndex, int lastIndex) {
+  public static String toHex(byte[] bytes, int firstIndex, int lastIndex) {
     String ans = "";
     int last = lastIndex >= 0 ? lastIndex : bytes.length + lastIndex;
     if (!(0 <= firstIndex && firstIndex <= last && last < bytes.length)) {

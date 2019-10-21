@@ -15,7 +15,6 @@ import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
@@ -28,13 +27,10 @@ import picocli.CommandLine.Option;
 public class FileCreate implements Runnable {
 
     @Autowired
-    ApplicationContext context;
+    private Hedera hedera;
 
     @Autowired
-    Hedera hedera;
-
-    @Autowired
-    Utils utils;
+    private Utils utils;
 
     @Autowired
     ShellHelper shellHelper;

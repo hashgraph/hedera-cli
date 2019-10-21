@@ -6,22 +6,22 @@ public class MnemonicTest {
 
   @Test
   public void testToEntropy() {
-
+    // to be completed
   }
 
   @Test
   public void testToMnemonic() {
-
+    // to be completed
   }
 
   @Test
   public void testCheck() {
-
+    // to be completed
   }
 
   @Test
   public void testBytesToBits() {
-
+    // to be completed
   }
 
 }

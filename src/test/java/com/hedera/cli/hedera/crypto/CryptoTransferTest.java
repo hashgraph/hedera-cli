@@ -1,16 +1,19 @@
 package com.hedera.cli.hedera.crypto;
 
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+
 import org.junit.Test;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ParseResult;
 
-import java.util.Arrays;
-import static org.junit.Assert.*;
-
-public class CryptoTransferTests {
+public class CryptoTransferTest {
 
     @Test
     public void testCryptoTransferSingleArgs() {

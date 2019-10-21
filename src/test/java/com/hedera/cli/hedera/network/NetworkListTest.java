@@ -4,14 +4,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.rule.OutputCapture;
+import org.springframework.boot.test.system.OutputCaptureRule;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NetworkListTest {
 
   // captures our stdout
   @Rule
-  public OutputCapture capture = new OutputCapture();
+  public OutputCaptureRule capture = new OutputCaptureRule();
 
   @Test
   public void testListNetwork() {

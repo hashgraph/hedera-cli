@@ -21,10 +21,10 @@ import org.springframework.stereotype.Component;
 public class Utils {
 
     @Autowired
-    DataDirectory dataDirectory;
+    private DataDirectory dataDirectory;
 
     @Autowired
-    Setup setup;
+    private Setup setup;
 
     public Instant dateToMilliseconds(String[] dateInString) throws ParseException {
         StringBuilder appendedString = new StringBuilder();

@@ -1,8 +1,11 @@
 package com.hedera.cli.models;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,15 +29,15 @@ public class AddressBookManager {
   private List<Network> networks;
 
   @Autowired
-  DataDirectory dataDirectory;
+  private DataDirectory dataDirectory;
 
   @Autowired
-  ShellHelper shellHelper;
+  private ShellHelper shellHelper;
 
-  static final String ADDRESSBOOK_DEFAULT = "addressbook.json";
-  static final String NETWORK_DEFAULT = "testnet";
-  static final String NETWORK_FILE = "network.txt";
-  static final String ACCOUNT_DEFAULT_FILE = "default.txt";
+  static private final String ADDRESSBOOK_DEFAULT = "addressbook.json";
+  static private final String NETWORK_DEFAULT = "testnet";
+  static private final String NETWORK_FILE = "network.txt";
+  static private final String ACCOUNT_DEFAULT_FILE = "default.txt";
 
   @PostConstruct
   public void init() {
@@ -44,10 +47,23 @@ public class AddressBookManager {
     InputStream input = getClass().getResourceAsStream(addressBookJsonPath);
     try {
       AddressBook addressBook = mapper.readValue(input, AddressBook.class);
+
+      // check to see if there is an additional addressbook.json in ~/.hedera directory
+      // if it exists, we will deep merge our /resources/addressbook.json with ~/.hedera/addressbook.json
+      Path additionalAddressBook = Paths.get(System.getProperty("user.home"), ".hedera", "addressbook.json");
+      System.out.println(additionalAddressBook.toString());
+      File additionalAddressBookFile = new File(additionalAddressBook.toString());
+      if (additionalAddressBookFile.exists()) {
+        System.out.println("The file exists");
+        InputStream additionalInput = new FileInputStream(additionalAddressBookFile);
+        addressBook = mapper.readerForUpdating(addressBook).readValue(additionalInput);
+      }
+
       setNetworks(addressBook.getNetworks());
     } catch (IOException e) {
       shellHelper.printError(e.getMessage());
     }
+
     // ensure that all sub-directories are created
     for (String network : getNetworksAsStrings()) {
       String accountsDirForNetwork = network + File.separator + "accounts";

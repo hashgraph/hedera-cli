@@ -6,7 +6,6 @@ import java.util.Arrays;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.file.File;
-import com.hedera.cli.shell.ShellHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -19,16 +18,10 @@ import org.springframework.shell.standard.ShellOption;
 public class HederaFile extends CliDefaults {
 
     @Autowired
-    ShellHelper shellHelper;
+    private ApplicationContext context;
 
     @Autowired
-    ApplicationContext context;
-
-    @Autowired
-    InputReader inputReader;
-
-    public HederaFile() {
-    }
+    private InputReader inputReader;
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "manage hedera file")
@@ -45,7 +38,7 @@ public class HederaFile extends CliDefaults {
         String[] args = new String[]{};
 
         // @formatter:off
-        if (subCommand.equals("create")) {
+        if ("create".equals(subCommand)) {
 			ArrayList<String> argsList = new ArrayList<String>();
 			if (!c.isEmpty()) argsList.add(c);
             if (!d.isEmpty()) argsList.add(d);
@@ -55,7 +48,7 @@ public class HederaFile extends CliDefaults {
 			args = Arrays.copyOf(objs, objs.length, String[].class);
         }
 
-        if (subCommand.equals("delete")) {
+        if ("delete".equals(subCommand)) {
             ArrayList<String> argsList = new ArrayList<String>();
             if (!f.isEmpty()) argsList.add(f);
             Object[] objs = argsList.toArray();
