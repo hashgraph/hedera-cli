@@ -29,6 +29,7 @@ public class Reference {
   private final static double LOG_2 = Math.log(2);
 
   /**
+
    * Pass to the constructor 16, 32, or 48 bytes (128, 256, or 384 bits), which is
    * the hash of the thing being referenced (a key, a swirld name, a file, etc). A
    * copy of data is made, so it is OK to change the array after instantiating the

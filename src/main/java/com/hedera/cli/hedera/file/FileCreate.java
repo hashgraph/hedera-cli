@@ -9,6 +9,8 @@ import java.util.Collections;
 
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.utils.Utils;
+import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 
@@ -29,6 +31,9 @@ public class FileCreate implements Runnable {
 
     @Autowired
     private Utils utils;
+
+    @Autowired
+    ShellHelper shellHelper;
 
     @Option(names = { "-d", "--date" }, arity = "0..2", description = "Enter file expiry date in the format of%n"
             + "dd-MM-yyyy hh:mm:ss%n" + "%n@|bold,underline Usage:|@%n"
@@ -95,20 +100,21 @@ public class FileCreate implements Runnable {
     public void run() {
         CommandLine.usage(this, System.out);
         try {
-            // Hedera hedera = new Hedera(context);
             var operatorKey = hedera.getOperatorKey();
             var client = hedera.createHederaClient().setMaxTransactionFee(maxTransactionFee);
-            System.out.println(maxTransactionFee);
-            System.out.println(Arrays.asList(date));
+            shellHelper.print(String.valueOf(maxTransactionFee));
+            shellHelper.print(String.valueOf(Arrays.asList(date)));
 
             FileCreateTransaction tx = null;
             Instant instant = utils.dateToMilliseconds(date);
+            TransactionId transactionId = new TransactionId(hedera.getOperatorId());
 
             boolean testSize = false;
             if (testSize) {
                 // This is to test the file size, by parsing in -b=100, it creates file contents on 100bytes
                 var fileContentsTestSize = stringOfNBytes(fileSizeByte).getBytes();
                 tx = new FileCreateTransaction(client)
+                        .setTransactionId(transactionId)
                         .setExpirationTime(instant)
                         // Use the same key as the operator to "own" this file
                         .addKey(operatorKey.getPublicKey())
@@ -119,6 +125,7 @@ public class FileCreate implements Runnable {
                 // you can easily use the bytes of a file instead.
                 var fileContents = stringArrayToString(fileContentsInString).getBytes();
                 tx = new FileCreateTransaction(client)
+                        .setTransactionId(transactionId)
                         .setExpirationTime(instant)
                         // Use the same key as the operator to "own" this file
                         .addKey(operatorKey.getPublicKey())
@@ -128,9 +135,9 @@ public class FileCreate implements Runnable {
             // This will wait for the receipt to become available
             TransactionReceipt receipt = tx.executeForReceipt();
             var newFileId = receipt.getFileId();
-            System.out.println("file: " + newFileId);
+            shellHelper.print("file: " + newFileId);
         } catch (Exception e) {
-            e.printStackTrace();
+            shellHelper.printError(e.getMessage());
         }
     }
 
@@ -149,16 +156,15 @@ public class FileCreate implements Runnable {
             fileInputStream.read(bytesArray);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            shellHelper.printError(e.getMessage());
         } finally {
             if (fileInputStream != null) {
                 try {
                     fileInputStream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    shellHelper.printError(e.getMessage());
                 }
             }
-
         }
         return bytesArray;
     }
