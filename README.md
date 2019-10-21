@@ -1,5 +1,6 @@
 [![CircleCI](https://circleci.com/gh/hashgraph/hedera-cli/tree/master.svg?style=shield)](https://circleci.com/gh/hashgraph/hedera-cli/tree/master) [![Coverage Status](https://coveralls.io/repos/github/hashgraph/hedera-cli/badge.svg?branch=test-coverage-jacoco)](https://coveralls.io/github/hashgraph/hedera-cli?branch=test-coverage-jacoco) [![GitHub](https://img.shields.io/github/license/hashgraph/hedera-mirror-node)](LICENSE)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/66c53b09f508477884f807f35ea755cc)](https://www.codacy.com/manual/HederaHashgraph/hedera-cli?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=hashgraph/hedera-cli&amp;utm_campaign=Badge_Grade)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/hashgraph/hedera-cli)
 
 # Getting Started
 
