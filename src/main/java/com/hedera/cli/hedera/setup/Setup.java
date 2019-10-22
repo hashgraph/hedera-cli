@@ -45,28 +45,36 @@ public class Setup implements Runnable {
     }
 
     public void handle(InputReader inputReader, ShellHelper shellHelper) {
-        String strMethod = "bip";
         shellHelper.print("Start the setup process");
-        strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
+        String strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
         String accountId = inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = Arrays.asList(phrase.split(" "));
         shellHelper.print(String.valueOf(phraseList));
         // recover key from phrase
         KeyPair keyPair;
-        if ("bip".equals(strMethod)) {
-            keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
-            printKeyPair(keyPair, accountId, shellHelper);
-            JsonObject account = addAccountToJson(accountId, keyPair);
-            saveToJson(accountId, account);
-        } else if ("hgc".equals(strMethod)) {
-            keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
-            printKeyPair(keyPair, accountId, shellHelper);
-            JsonObject account = addAccountToJson(accountId, keyPair);
-            saveToJson(accountId, account);
+        if (phraseListSize(phraseList)) {
+            if ("bip".equals(strMethod)) {
+                keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
+                printKeyPair(keyPair, accountId, shellHelper);
+                JsonObject account = addAccountToJson(accountId, keyPair);
+                saveToJson(accountId, account);
+            } else if ("hgc".equals(strMethod)) {
+                keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
+                printKeyPair(keyPair, accountId, shellHelper);
+                JsonObject account = addAccountToJson(accountId, keyPair);
+                saveToJson(accountId, account);
+            } else {
+                shellHelper.printError("Method must either been bip or hgc");
+            }
         } else {
-            shellHelper.printError("Method must either been bip or hgc");
+            shellHelper.printError("Recovery words must contain 24 words");
         }
+    }
+
+
+    public boolean phraseListSize(List<String> phraseList) {
+        return phraseList.size() == 24;
     }
 
     public JsonObject addAccountToJson(String accountId, KeyPair keyPair) {
@@ -123,8 +131,8 @@ public class Setup implements Runnable {
 
     public String getRandomName() {
         Random rand = new Random();
-        List<String> botanyNames = BotanyWordListHelper.words;
-        List<String> adjectives = AdjectivesWordListHelper.words;
+        List<String> botanyNames = BotanyWordListHelper.botany;
+        List<String> adjectives = AdjectivesWordListHelper.adjectives;
         String randomBotanyName = botanyNames.get(rand.nextInt(botanyNames.size()));
         String randomAdjectives = adjectives.get(rand.nextInt(adjectives.size()));
         int randomNumber = rand.nextInt(10000);

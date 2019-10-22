@@ -1,12 +1,11 @@
 package com.hedera.cli.hedera.crypto;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -18,17 +17,18 @@ public class CryptoTransferTest {
     @Test
     public void testCryptoTransferSingleArgs() {
 
-        @Command class CryptoTransfer {
+        @Command
+        class CryptoTransfer {
 
-            @Option(names = {"-a", "--accountId"}, arity = "0..1")
+            @Option(names = { "-a", "--accountId" }, arity = "0..1")
             private String recipient;
 
-            @Option(names = {"-r", "--recipientAmt"}, arity = "0..1")
+            @Option(names = { "-r", "--recipientAmt" }, arity = "0..1")
             private String recipientAmt;
 
         }
 
-        CryptoTransfer ct = CommandLine.populateCommand(new CryptoTransfer(), "-a=1234","-r=100");
+        CryptoTransfer ct = CommandLine.populateCommand(new CryptoTransfer(), "-a=1234", "-r=100");
         assertEquals("1234", ct.recipient);
         assertEquals("100", ct.recipientAmt);
 

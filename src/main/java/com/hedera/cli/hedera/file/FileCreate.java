@@ -33,7 +33,7 @@ public class FileCreate implements Runnable {
     private Utils utils;
 
     @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Option(names = { "-d", "--date" }, arity = "0..2", description = "Enter file expiry date in the format of%n"
             + "dd-MM-yyyy hh:mm:ss%n" + "%n@|bold,underline Usage:|@%n"

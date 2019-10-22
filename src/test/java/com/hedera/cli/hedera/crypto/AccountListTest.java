@@ -1,6 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -9,8 +9,8 @@ import java.util.Map;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -26,7 +26,7 @@ public class AccountListTest {
     @Mock
     private DataDirectory dataDirectory;
 
-    @Before
+    @BeforeEach
     public void init() {
         MockitoAnnotations.initMocks(this);
     }

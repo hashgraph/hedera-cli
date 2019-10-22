@@ -1,11 +1,11 @@
 package com.hedera.cli.hedera.crypto;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
 
 public class AccountDeleteTest {
 

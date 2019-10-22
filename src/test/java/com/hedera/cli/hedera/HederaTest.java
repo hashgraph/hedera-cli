@@ -1,11 +1,11 @@
 package com.hedera.cli.hedera;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.hedera.cli.models.AddressBook;
 import com.hedera.cli.services.CurrentAccountService;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
