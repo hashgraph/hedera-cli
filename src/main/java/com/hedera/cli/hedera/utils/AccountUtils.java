@@ -27,15 +27,16 @@ public class AccountUtils {
         return pathToAccountsFolder() + "index.txt";
     }
 
+    public String pathToDefaultTxt() {
+        return pathToAccountsFolder() + DEFAULT;
+    }
+
     /**
      * Default Account ID found in default.txt
      * @return
      */
     public String[] defaultAccountString() {
-        String pathToAccountsFolder = pathToAccountsFolder();
-        String pathToDefaultTxt = pathToAccountsFolder + DEFAULT;
-        // read the key value, the associated file in the list
-        String fileString = dataDirectory.readFile(pathToDefaultTxt);
+        String fileString = dataDirectory.readFile(pathToDefaultTxt());
         return fileString.split(":");
     }
 

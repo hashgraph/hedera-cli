@@ -1,17 +1,17 @@
 package com.hedera.cli.hedera.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doAnswer;
+
+import java.util.HashMap;
 
 import com.hedera.cli.services.CurrentAccountService;
+import com.hedera.hashgraph.sdk.account.AccountId;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -25,63 +25,66 @@ public class AccountUtilsTest {
     @Mock
     private DataDirectory dataDirectory;
 
-    @BeforeEach
-    public void init() {
-        MockitoAnnotations.initMocks(this);
+    @Test
+    public void checkPaths() {
+        doAnswer(invocation -> "testnet").when(dataDirectory).readFile("network.txt");
+
+        assertEquals("testnet/accounts/", accountUtils.pathToAccountsFolder());
+        assertEquals("testnet/accounts/index.txt", accountUtils.pathToIndexTxt());
+        assertEquals("testnet/accounts/default.txt", accountUtils.pathToDefaultTxt());
     }
 
     @Test
     public void defaultAccountString() {
-        String testDataInDefaultFile = "adjective_botanic_number:0.0.1001";
-        when(dataDirectory.readFile(any())).thenReturn(testDataInDefaultFile);
+        doAnswer(invocation -> "testnet").when(dataDirectory).readFile("network.txt");
+        doAnswer(invocation -> "adjective_botanic_number:0.0.1234").when(dataDirectory)
+                .readFile("testnet/accounts/default.txt");
+
         String[] defaultAccountArray = accountUtils.defaultAccountString();
-        assertEquals(testDataInDefaultFile.split(":")[0], defaultAccountArray[0]);
-        assertEquals(testDataInDefaultFile.split(":")[1], defaultAccountArray[1]);
+        assertEquals("adjective_botanic_number:0.0.1234".split(":")[0], defaultAccountArray[0]);
+        assertEquals("adjective_botanic_number:0.0.1234".split(":")[1], defaultAccountArray[1]);
     }
 
     @Test
     public void retrieveDefaultAccountID() {
-        // to be completed
+        doAnswer(invocation -> "testnet").when(dataDirectory).readFile("network.txt");
+        doAnswer(invocation -> "adjective_botanic_number:0.0.1234").when(dataDirectory)
+                .readFile("testnet/accounts/default.txt");
+
+        AccountId accountId = accountUtils.retrieveDefaultAccountID();
+        assertEquals("0.0.1234", accountId.toString());
     }
 
-    // @Test
-    // public void testRetrieveDefaultAccountID() {
-    // AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-    // when(accountUtils
-    // .retrieveDefaultAccountID())
-    // .thenReturn(AccountId.fromString("0.0.1234"));
-    // AccountId accountId = accountUtils.retrieveDefaultAccountID();
-    // assertEquals(AccountId.fromString("0.0.1234"), accountId);
-    // }
+    @SuppressWarnings("serial")
+    @Test
+    public void retrieveDefaultAccountPublicKeyInHexString() {
+        doAnswer(invocation -> "testnet").when(dataDirectory).readFile("network.txt");
+        doAnswer(invocation -> "adjective_botanic_number:0.0.1234").when(dataDirectory)
+                .readFile("testnet/accounts/default.txt");
+        doAnswer(invocation -> new HashMap<String, String>() {
+            {
+                put("publicKey", "somepublickeyhex");
+            }
+        }).when(dataDirectory).jsonToHashmap("testnet/accounts/adjective_botanic_number.json");
 
-    // @Test
-    // public void testRetrieveDefaultAccountPublicKeyInHexString() {
-    // AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-    // when(accountUtils
-    // .retrieveDefaultAccountPublicKeyInHexString())
-    // .thenReturn("publicKeyInStringDerOrASN1Format");
-    // String publicKey = accountUtils.retrieveDefaultAccountPublicKeyInHexString();
-    // assertEquals("publicKeyInStringDerOrASN1Format", publicKey);
-    // }
+        String publicKey = accountUtils.retrieveDefaultAccountPublicKeyInHexString();
+        assertEquals("somepublickeyhex", publicKey);
+    }
 
-    // @Test
-    // public void testRetrieveDefaultAccountKeyInHexString() {
-    // AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-    // when(accountUtils.retrieveDefaultAccountKeyInHexString())
-    // .thenReturn("privateKeyInStringDerOrASN1Format");
-    // String privateKey = accountUtils.retrieveDefaultAccountKeyInHexString();
-    // assertEquals("privateKeyInStringDerOrASN1Format", privateKey);
-    // }
+    @SuppressWarnings("serial")
+    @Test
+    public void testRetrieveDefaultAccountKeyInHexString() {
+        doAnswer(invocation -> "testnet").when(dataDirectory).readFile("network.txt");
+        doAnswer(invocation -> "adjective_botanic_number:0.0.1234").when(dataDirectory)
+                .readFile("testnet/accounts/default.txt");
+        doAnswer(invocation -> new HashMap<String, String>() {
+            {
+                put("privateKey", "somesecretprivatekey");
+            }
+        }).when(dataDirectory).jsonToHashmap("testnet/accounts/adjective_botanic_number.json");
 
-    // @Test
-    // public void testRetrieveIndexAccountKeyInHexString() {
-    //
-    // HashMap<String, String> mHashmap = new HashMap<>();
-    // mHashmap.put("0.0.9998", "filename_001");
-    // mHashmap.put("0.0.7777", "filename_007");
-    //
-    // Hedera hedera = new Hedera(context);
-    // hedera.retrieveIndexAccountKeyInHexString();
-    //
-    // }
+        String privateKey = accountUtils.retrieveDefaultAccountKeyInHexString();
+        assertEquals("somesecretprivatekey", privateKey);
+    }
+
 }
