@@ -1,18 +1,33 @@
 package com.hedera.cli.hedera.network;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import com.hedera.cli.models.AddressBookManager;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class NetworkListTest {
+
+  @InjectMocks
+  private NetworkList networkList;
+
+  @Mock
+  private AddressBookManager addressBookManager;
 
   // captures our stdout
   // public OutputCaptureRule capture = new OutputCaptureRule();
 
   @Test
   public void testListNetwork() {
-    System.out.println("We can't instantiate NetworkList anymore?");
+    assertNotNull(networkList);
+    // how do we capture the output?
+    addressBookManager.listNetworks();
+    
     // String addressBookJson = File.separator + "addressbook.json";
     // NetworkList networkList = new NetworkList();
     // networkList.setAddressBookJson(addressBookJson);
