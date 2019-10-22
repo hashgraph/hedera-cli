@@ -1,5 +1,7 @@
 package com.hedera.cli;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,17 +18,18 @@ import org.springframework.test.context.ActiveProfiles;
 public class ApplicationTest {
 
     @Autowired
-    private Shell shell;
+    private ApplicationContext context;
 
     @Autowired
-    private ApplicationContext context;
+    private Shell shell;
 
     @Test
     public void contextLoads() {
-        System.out.println("#############");
-        System.out.println(context);
-        System.out.println(shell);
-        System.out.println("#############");
-        // assertNotNull(context);
+        assertNotNull(context);
+    }
+
+    @Test
+    public void shellLoads() {
+        assertNotNull(shell);
     }
 }
