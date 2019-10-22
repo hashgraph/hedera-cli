@@ -1,17 +1,14 @@
 package com.hedera.cli.hedera.network;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.system.OutputCaptureRule;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class NetworkListTest {
 
   // captures our stdout
-  @Rule
-  public OutputCaptureRule capture = new OutputCaptureRule();
+  // public OutputCaptureRule capture = new OutputCaptureRule();
 
   @Test
   public void testListNetwork() {

@@ -1,13 +1,13 @@
 package com.hedera.cli.hedera.utils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.hedera.cli.services.CurrentAccountService;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,16 +16,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
 @ExtendWith(MockitoExtension.class)
-@ContextConfiguration(classes = {CurrentAccountService.class})
+@ContextConfiguration(classes = { CurrentAccountService.class })
 public class AccountUtilsTest {
-    
+
     @InjectMocks
     private AccountUtils accountUtils;
 
     @Mock
     private DataDirectory dataDirectory;
 
-    @Before
+    @BeforeEach
     public void init() {
         MockitoAnnotations.initMocks(this);
     }
@@ -46,42 +46,42 @@ public class AccountUtilsTest {
 
     // @Test
     // public void testRetrieveDefaultAccountID() {
-    //     AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-    //     when(accountUtils
-    //             .retrieveDefaultAccountID())
-    //             .thenReturn(AccountId.fromString("0.0.1234"));
-    //     AccountId accountId = accountUtils.retrieveDefaultAccountID();
-    //     assertEquals(AccountId.fromString("0.0.1234"), accountId);
+    // AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
+    // when(accountUtils
+    // .retrieveDefaultAccountID())
+    // .thenReturn(AccountId.fromString("0.0.1234"));
+    // AccountId accountId = accountUtils.retrieveDefaultAccountID();
+    // assertEquals(AccountId.fromString("0.0.1234"), accountId);
     // }
 
     // @Test
     // public void testRetrieveDefaultAccountPublicKeyInHexString() {
-    //     AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-    //     when(accountUtils
-    //             .retrieveDefaultAccountPublicKeyInHexString())
-    //             .thenReturn("publicKeyInStringDerOrASN1Format");
-    //     String publicKey = accountUtils.retrieveDefaultAccountPublicKeyInHexString();
-    //     assertEquals("publicKeyInStringDerOrASN1Format", publicKey);
+    // AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
+    // when(accountUtils
+    // .retrieveDefaultAccountPublicKeyInHexString())
+    // .thenReturn("publicKeyInStringDerOrASN1Format");
+    // String publicKey = accountUtils.retrieveDefaultAccountPublicKeyInHexString();
+    // assertEquals("publicKeyInStringDerOrASN1Format", publicKey);
     // }
 
     // @Test
     // public void testRetrieveDefaultAccountKeyInHexString() {
-    //     AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
-    //     when(accountUtils.retrieveDefaultAccountKeyInHexString())
-    //             .thenReturn("privateKeyInStringDerOrASN1Format");
-    //     String privateKey = accountUtils.retrieveDefaultAccountKeyInHexString();
-    //     assertEquals("privateKeyInStringDerOrASN1Format", privateKey);
+    // AccountUtils accountUtils = Mockito.mock(AccountUtils.class);
+    // when(accountUtils.retrieveDefaultAccountKeyInHexString())
+    // .thenReturn("privateKeyInStringDerOrASN1Format");
+    // String privateKey = accountUtils.retrieveDefaultAccountKeyInHexString();
+    // assertEquals("privateKeyInStringDerOrASN1Format", privateKey);
     // }
 
-//    @Test
-//    public void testRetrieveIndexAccountKeyInHexString() {
-//
-//        HashMap<String, String> mHashmap = new HashMap<>();
-//        mHashmap.put("0.0.9998", "filename_001");
-//        mHashmap.put("0.0.7777", "filename_007");
-//
-//        Hedera hedera = new Hedera(context);
-//        hedera.retrieveIndexAccountKeyInHexString();
-//
-//    }
+    // @Test
+    // public void testRetrieveIndexAccountKeyInHexString() {
+    //
+    // HashMap<String, String> mHashmap = new HashMap<>();
+    // mHashmap.put("0.0.9998", "filename_001");
+    // mHashmap.put("0.0.7777", "filename_007");
+    //
+    // Hedera hedera = new Hedera(context);
+    // hedera.retrieveIndexAccountKeyInHexString();
+    //
+    // }
 }

@@ -1,13 +1,14 @@
 package com.hedera.cli.hedera.crypto;
 
-import org.junit.Test;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
 
 public class TransferTest {
 
@@ -27,7 +28,7 @@ public class TransferTest {
 
         Map<String, CommandLine> commandMap = commandLine.getSubcommands();
         assertEquals(2, commandMap.size());
-        assertTrue("single", commandMap.containsKey("single"));
-        assertTrue("multiple", commandMap.containsKey("multiple"));
+        assertTrue(commandMap.containsKey("single"));
+        assertTrue(commandMap.containsKey("multiple"));
     }
 }

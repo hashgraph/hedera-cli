@@ -1,12 +1,12 @@
 package com.hedera.cli.hedera.botany;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AdjectivesWordListHelperTest {
 
@@ -14,7 +14,7 @@ public class AdjectivesWordListHelperTest {
     public void splitmystring() {
         String string = "zanyzealouszestyzigzag";
         String[] parts = string.split("(?=z)"); // split after the letter
-//        String[] parts = string.split("(?<=c)"); // split before the letter
+        // String[] parts = string.split("(?<=c)"); // split before the letter
 
         // insert quotes
         List<String> wordList = new ArrayList<String>(Arrays.asList(parts));
