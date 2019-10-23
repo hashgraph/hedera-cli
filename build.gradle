@@ -83,6 +83,12 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
 	    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
+
+    // capture log during tests for assertions
+    testImplementation("io.github.netmikey.logunit:logunit-core:1.1.0")
+    // log4j2 only
+    testRuntimeOnly("io.github.netmikey.logunit:logunit-jul:1.1.0")
+
 }
 
 application {

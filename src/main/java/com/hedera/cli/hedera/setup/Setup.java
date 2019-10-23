@@ -1,7 +1,6 @@
 
 package com.hedera.cli.hedera.setup;
 
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,10 +21,15 @@ import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.java.Log;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
-
+@Log
+@Getter
+@Setter
 @Component
 @Command(name = "setup", description = "")
 public class Setup implements Runnable {
@@ -46,8 +50,10 @@ public class Setup implements Runnable {
 
     public void handle(InputReader inputReader, ShellHelper shellHelper) {
         shellHelper.print("Start the setup process");
-        String strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        String accountId = inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
+        String strMethod = inputReader
+                .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
+        String accountId = inputReader
+                .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = Arrays.asList(phrase.split(" "));
         shellHelper.print(String.valueOf(phraseList));
@@ -72,7 +78,6 @@ public class Setup implements Runnable {
         }
     }
 
-
     public boolean phraseListSize(List<String> phraseList) {
         return phraseList.size() == 24;
     }
@@ -82,16 +87,13 @@ public class Setup implements Runnable {
         account.add("accountId", accountId);
         account.add("privateKey", keyPair.getPrivateKeyHex());
         account.add("publicKey", keyPair.getPublicKeyHex());
-//    account.add("privateKey_ASN1", keyPair.getPrivateKeyEncodedHex());
-//    account.add("publicKey_ASN1", keyPair.getPublicKeyEncodedHex());
+        // account.add("privateKey_ASN1", keyPair.getPrivateKeyEncodedHex());
+        // account.add("publicKey_ASN1", keyPair.getPublicKeyEncodedHex());
         return account;
     }
 
-
     public JsonObject addAccountToJsonWithPrivateKey(String accountId, Ed25519PrivateKey privateKey) {
         JsonObject account = new JsonObject();
-        System.out.println("private key " + privateKey);
-        System.out.println("public key " + privateKey.getPublicKey().toString());
         account.add("accountId", accountId);
         account.add("privateKey", privateKey.toString());
         account.add("publicKey", privateKey.getPublicKey().toString());
@@ -124,7 +126,7 @@ public class Setup implements Runnable {
             // write to index if account does not yet exist in index
             dataDirectory.readWriteToIndex(pathToIndexTxt, mHashMap);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("did not save json");
         }
     }
 
