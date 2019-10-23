@@ -39,6 +39,9 @@ public class Setup implements Runnable {
     @Autowired
     private DataDirectory dataDirectory;
 
+    @Autowired
+    private RandomNameGenerator randomNameGenerator;
+
     @Override
     public void run() {
         CommandLine.usage(this, System.out);
@@ -100,10 +103,9 @@ public class Setup implements Runnable {
 
     public void saveToJson(String accountId, JsonObject account) {
         // ~/.hedera/[network_name]/accounts/[account_name].json
-        String fileName = getRandomName();
+        String fileName = randomNameGenerator.getRandomName();
         String fileNameWithExt = fileName + ".json";
         String networkName = dataDirectory.readFile("network.txt");
-
         String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
         String pathToAccountFile = pathToAccountsFolder + fileNameWithExt;
 
@@ -127,16 +129,6 @@ public class Setup implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public String getRandomName() {
-        Random rand = new Random();
-        List<String> botanyNames = BotanyWordListHelper.words;
-        List<String> adjectives = AdjectivesWordListHelper.words;
-        String randomBotanyName = botanyNames.get(rand.nextInt(botanyNames.size()));
-        String randomAdjectives = adjectives.get(rand.nextInt(adjectives.size()));
-        int randomNumber = rand.nextInt(10000);
-        return randomAdjectives + "_" + randomBotanyName + "_" + randomNumber;
     }
 
     public void printKeyPair(KeyPair keyPair, String accountId, ShellHelper shellHelper) {
