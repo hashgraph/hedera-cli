@@ -6,13 +6,10 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.botany.AdjectivesWordListHelper;
-import com.hedera.cli.hedera.botany.BotanyWordListHelper;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;

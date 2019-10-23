@@ -88,7 +88,6 @@ transfer multiple -a 1001,1002,1003 -r 44,55,66
 transfer multiple --accountId 1001,1002,1003 --recipientAmt 44,55,66
 ```
 
-
 TODO
 ```bash
 

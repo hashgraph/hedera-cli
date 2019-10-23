@@ -34,7 +34,7 @@ public class SetupTest {
     private DataDirectory dataDirectory;
 
     @Mock
-    RandomNameGenerator randomNameGenerator;
+    private RandomNameGenerator randomNameGenerator;
 
     @BeforeEach
     public void init() {
