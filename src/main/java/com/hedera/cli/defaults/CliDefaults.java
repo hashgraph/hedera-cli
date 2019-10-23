@@ -14,23 +14,18 @@ public abstract class CliDefaults {
   private DataDirectory dataDirectory;
 
   public Availability isDefaultNetworkAndAccountSet() {
-    // sequentially
-    // invoke isDefaultNetworkSet
+    // do we have a default network?
     String defaultNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
     if (StringUtils.isEmpty(defaultNetwork)) {
       return Availability.unavailable("you have not set your default network");
     }
 
-    String currentNetwork = dataDirectory.readFile("network.txt", defaultNetworkName);
-    String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + "default.txt";
-    String defaultAccount = "";
-    try {
-      dataDirectory.readFile(pathToDefaultAccount);
-    } catch (Exception e) {
-      if (defaultAccount.isEmpty()) {
-        return Availability.unavailable("you have not set your default account for the current network");
-      }  
-    }
+    // do we have a default account?
+    String pathToDefaultAccount = defaultNetwork + File.separator + "accounts" + File.separator + "default.txt";
+    String defaultAccount = dataDirectory.readFile(pathToDefaultAccount);    
+    if (defaultAccount.isEmpty()) {
+      return Availability.unavailable("you have not set your default account for the current network");
+    }  
      // invoke isDefaultAccountSet
     return Availability.available();
   }
