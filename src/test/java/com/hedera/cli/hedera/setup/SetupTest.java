@@ -1,15 +1,15 @@
 package com.hedera.cli.hedera.setup;
 
-import static com.hedera.cli.hedera.botany.AdjectivesWordListHelper.adjectives;
-import static com.hedera.cli.hedera.botany.BotanyWordListHelper.botany;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.hedera.cli.hedera.keygen.*;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 import org.hjson.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class SetupTest {
@@ -32,43 +33,16 @@ public class SetupTest {
     @Mock
     private DataDirectory dataDirectory;
 
+    @Mock
+    private RandomNameGenerator randomNameGenerator;
+
     @BeforeEach
     public void init() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testGetRandomName() {
-        setup = new Setup();
-        Setup spy = spy(setup);
-
-        //optionally, you can stub out some methods:
-        when(spy.getRandomName()).thenReturn("thorny_bluebell_8443");
-        //using the spy calls *real* methods
-        String helloSpy = spy.getRandomName();
-        assertEquals("thorny_bluebell_8443", helloSpy);
-        //optionally, you can verify
-        verify(spy).getRandomName();
-
-        // Or
-        String randomNameActual = setup.getRandomName();
-        List<String> botanyWordList = botany;
-        List<String> adjectivesWordList = adjectives;
-        int high = 10000;
-
-        String adjectives = randomNameActual.split("_")[0];
-        String botany = randomNameActual.split("_")[1];
-        int number = Integer.valueOf(randomNameActual.split("_")[2]);
-        assertTrue(botanyWordList.contains(botany));
-        assertTrue(adjectivesWordList.contains(adjectives));
-        assertTrue(high >= number);
-    }
-
-
-    @Test
-    public void testSaveToJson() {
-
-        String pathToAccountFile = "";
+    public void testSaveToJson() throws JsonProcessingException {
         List<String> mnemonic = Arrays.asList("hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
         hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
         String accountId = "0.0.1234";
@@ -81,13 +55,26 @@ public class SetupTest {
         accountValue.add("privateKey", keyPair.getPrivateKeyHex());
         accountValue.add("publicKey", keyPair.getPublicKeyHex());
 
-        // TODO
-//        dataDirectory = Mockito.mock(DataDirectory.class);
-//        when(dataDirectory.readFile("network.txt")).thenReturn("testnet");
-//        setup = new Setup();
-//        Setup spy = spy(setup);
-//        setup.saveToJson(pathToAccountFile, accountValue);
-//        verify(spy).saveToJson(pathToAccountFile, accountValue);
+        String randFileName = "mushy_daisy_4820";
+        HashMap<String, String> mHashMap = new HashMap<>();
+        mHashMap.put(accountId, randFileName);
+        String pathToFile = "testnet/accounts/"+ randFileName +".json";
+        String pathToIndex = "testnet/accounts/index.txt";
+        String pathToDefault = "testnet/accounts/default.txt";
+        ObjectMapper mapper = new ObjectMapper();
+        Object jsonObject = mapper.readValue(accountValue.toString(), HederaAccount.class);
+        String accountValueString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+
+        when(dataDirectory.readFile("network.txt")).thenReturn("testnet");
+        when(dataDirectory.readFile(pathToDefault, randFileName +":"+ accountId)).thenReturn(randFileName +":"+ accountId);
+        doNothing().when(dataDirectory).writeFile(pathToFile, accountValueString);
+        when(dataDirectory.readWriteToIndex(pathToIndex, mHashMap)).thenReturn(mHashMap);
+        when(randomNameGenerator.getRandomName()).thenReturn(randFileName);
+
+        assertEquals("testnet", dataDirectory.readFile("network.txt"));
+        assertEquals(randFileName +":"+ accountId, dataDirectory.readFile(pathToDefault, randFileName +":"+ accountId));
+        assertEquals(mHashMap, dataDirectory.readWriteToIndex(pathToIndex, mHashMap));
+        assertEquals(randFileName, randomNameGenerator.getRandomName());
     }
 
 

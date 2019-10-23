@@ -6,13 +6,10 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.botany.AdjectivesWordListHelper;
-import com.hedera.cli.hedera.botany.BotanyWordListHelper;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.DataDirectory;
@@ -38,6 +35,9 @@ public class Setup implements Runnable {
 
     @Autowired
     private DataDirectory dataDirectory;
+
+    @Autowired
+    private RandomNameGenerator randomNameGenerator;
 
     @Override
     public void run() {
@@ -100,10 +100,9 @@ public class Setup implements Runnable {
 
     public void saveToJson(String accountId, JsonObject account) {
         // ~/.hedera/[network_name]/accounts/[account_name].json
-        String fileName = getRandomName();
+        String fileName = randomNameGenerator.getRandomName();
         String fileNameWithExt = fileName + ".json";
         String networkName = dataDirectory.readFile("network.txt");
-
         String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
         String pathToAccountFile = pathToAccountsFolder + fileNameWithExt;
 
@@ -127,16 +126,6 @@ public class Setup implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public String getRandomName() {
-        Random rand = new Random();
-        List<String> botanyNames = BotanyWordListHelper.botany;
-        List<String> adjectives = AdjectivesWordListHelper.adjectives;
-        String randomBotanyName = botanyNames.get(rand.nextInt(botanyNames.size()));
-        String randomAdjectives = adjectives.get(rand.nextInt(adjectives.size()));
-        int randomNumber = rand.nextInt(10000);
-        return randomAdjectives + "_" + randomBotanyName + "_" + randomNumber;
     }
 
     public void printKeyPair(KeyPair keyPair, String accountId, ShellHelper shellHelper) {

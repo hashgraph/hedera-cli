@@ -59,10 +59,6 @@ public class KeyGenerationTest {
         HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
         List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
         // Generate mnemonics using HGCSeed
-        // List<String> mnemonic = Arrays.asList("arrest", "insect", "jump", "unfair",
-        // "reject", "tell", "denial", "tilt", "visual", "fortune", "car", "tail",
-        // "offer", "radio", "stomach", "relief", "push", "purpose", "track", "wild",
-        // "tennis", "client", "zone", "float");
         EDBip32KeyChain kc2 = new EDBip32KeyChain();
         KeyPair kp2 = kc2.keyPairFromWordList(0, mnemonic);
 
