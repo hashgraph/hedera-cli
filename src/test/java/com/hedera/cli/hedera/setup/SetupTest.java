@@ -1,23 +1,29 @@
 package com.hedera.cli.hedera.setup;
 
-import static com.hedera.cli.hedera.botany.AdjectivesWordListHelper.adjectives;
-import static com.hedera.cli.hedera.botany.BotanyWordListHelper.botany;
+import com.hedera.cli.hedera.botany.AdjectivesWordListHelper;
+import com.hedera.cli.hedera.botany.BotanyWordListHelper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.keygen.*;
 import com.hedera.cli.hedera.utils.DataDirectory;
-import com.hedera.cli.models.HederaAccount;
 import org.hjson.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.FileSystem;
+import java.nio.file.Path;
+import java.nio.file.spi.FileSystemProvider;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,8 +58,8 @@ public class SetupTest {
 
         // Or
         String randomNameActual = setup.getRandomName();
-        List<String> botanyWordList = botany;
-        List<String> adjectivesWordList = adjectives;
+        List<String> botanyWordList = BotanyWordListHelper.words;
+        List<String> adjectivesWordList = AdjectivesWordListHelper.words;
         int high = 10000;
 
         String adjectives = randomNameActual.split("_")[0];
@@ -66,7 +72,7 @@ public class SetupTest {
 
 
     @Test
-    public void testSaveToJson() {
+    public void testSaveToJson() throws IOException {
 
         String pathToAccountFile = "";
         List<String> mnemonic = Arrays.asList("hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
@@ -81,13 +87,34 @@ public class SetupTest {
         accountValue.add("privateKey", keyPair.getPrivateKeyHex());
         accountValue.add("publicKey", keyPair.getPublicKeyHex());
 
-        // TODO
-//        dataDirectory = Mockito.mock(DataDirectory.class);
+//        doAnswer(invocation -> "adjective_botanic_number:0.0.1234").when(dataDirectory)
+//                .readFile("testnet/accounts/default.txt");
+//        doAnswer(invocation -> new HashMap<String, String>() {
+//            {
+//                put("privateKey", "somesecretprivatekey");
+//            }
+//        }).when(dataDirectory).jsonToHashmap("testnet/accounts/adjective_botanic_number.json");
+//
+//        Path mockPath = mock(Path.class);
+//        FileSystem mockFileSystem = mock(FileSystem.class);
+//        FileSystemProvider mockFileSystemProvider = mock(FileSystemProvider.class);
+//        OutputStream mockOutputStream = mock(OutputStream.class);
+//        when(mockPath.getFileSystem()).thenReturn(mockFileSystem);
+//        when(mockFileSystem.provider()).thenReturn(mockFileSystemProvider);
+//        when(mockFileSystemProvider.newOutputStream(any(Path.class), anyVararg())).thenReturn(mockOutputStream);
+//        when(mockFileSystem.getPath(anyString(), anyVararg())).thenReturn(mockPath);
+//
+//// using Spring helper, but could use Java reflection
+//        ReflectionTestUtils.setField(serviceToTest, "fileSystem", mockFileSystem);
+
+//        DataDirectory dataDirectory = Mockito.mock(DataDirectory.class);
+        doAnswer(invocation -> "testnet").when(dataDirectory).readFile("network.txt");
 //        when(dataDirectory.readFile("network.txt")).thenReturn("testnet");
-//        setup = new Setup();
-//        Setup spy = spy(setup);
-//        setup.saveToJson(pathToAccountFile, accountValue);
-//        verify(spy).saveToJson(pathToAccountFile, accountValue);
+        System.out.println(dataDirectory);
+        setup = new Setup();
+        Setup spy = spy(setup);
+        setup.saveToJson(pathToAccountFile, accountValue);
+        verify(spy).saveToJson(pathToAccountFile, accountValue);
     }
 
 

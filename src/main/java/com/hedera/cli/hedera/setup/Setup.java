@@ -131,8 +131,8 @@ public class Setup implements Runnable {
 
     public String getRandomName() {
         Random rand = new Random();
-        List<String> botanyNames = BotanyWordListHelper.botany;
-        List<String> adjectives = AdjectivesWordListHelper.adjectives;
+        List<String> botanyNames = BotanyWordListHelper.words;
+        List<String> adjectives = AdjectivesWordListHelper.words;
         String randomBotanyName = botanyNames.get(rand.nextInt(botanyNames.size()));
         String randomAdjectives = adjectives.get(rand.nextInt(adjectives.size()));
         int randomNumber = rand.nextInt(10000);
