@@ -169,8 +169,6 @@ public class AccountDelete implements Runnable {
         String pathToIndexTxt = accountUtils.pathToIndexTxt();
         boolean fileDeleted = false;
 
-        String userHome = dataDirectory.getUserHome();
-        String directoryName = dataDirectory.getDirectoryName();
         String pathToCurrentJsonAccount;
         Map<String, String> updatedMap;
 
@@ -187,7 +185,7 @@ public class AccountDelete implements Runnable {
             if (accountId.equals(oldAccount.toString())) {
                 // delete the associated json file in disk
                 pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
-                Path filePathToJson = Paths.get(userHome, directoryName, pathToCurrentJsonAccount);
+                Path filePathToJson = Paths.get(dataDirectory.getDataDir().toString(), pathToCurrentJsonAccount);
                 File file = new File(filePathToJson.toString());
                 fileDeleted = file.delete();
                 iterator.remove();

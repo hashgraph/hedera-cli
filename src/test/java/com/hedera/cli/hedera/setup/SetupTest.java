@@ -27,8 +27,8 @@ public class SetupTest {
     @InjectMocks
     private Setup setup;
 
-    @Mock
-    private HGCSeed hgcSeed;
+    // @Mock
+    // private HGCSeed hgcSeed;
 
     @Mock
     private DataDirectory dataDirectory;
@@ -44,7 +44,6 @@ public class SetupTest {
     @Test
     public void testSaveToJson() throws JsonProcessingException {
         List<String> mnemonic = Arrays.asList("hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
-        hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
         String accountId = "0.0.1234";
 
         EDBip32KeyChain keyChain = new EDBip32KeyChain();
@@ -97,7 +96,7 @@ public class SetupTest {
     @Test
     public void accountToJsonInRightFormat() {
         List<String> mnemonic = Arrays.asList("hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
-        hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
+        HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
         String accountId = "0.0.1234";
 
         EDBip32KeyChain keyChain = new EDBip32KeyChain();
