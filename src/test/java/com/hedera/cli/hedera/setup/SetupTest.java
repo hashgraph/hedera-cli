@@ -81,7 +81,7 @@ public class SetupTest {
     private AccountInfoQuery q;
 
     @BeforeEach
-    private void init() {
+    void init() {
         mnemonic = Arrays.asList(
                 "hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
         seed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
@@ -221,7 +221,7 @@ public class SetupTest {
     }
 
     @Test
-    private void handleSetupWithBipRecoveryWords() throws HederaException {
+    void handleSetupWithBipRecoveryWords() throws HederaException {
         prepareTestData();
 //        String randFileName = "mushy_fir_1234";
         String accountId = "0.0.5432";
@@ -268,7 +268,7 @@ public class SetupTest {
     }
 
     @Test
-    private void handleSetupWithHgcRecoveryWords() throws HederaException {
+    void handleSetupWithHgcRecoveryWords() throws HederaException {
         prepareTestData();
 
 //        String randFileName = "happy_marigold_9999";
