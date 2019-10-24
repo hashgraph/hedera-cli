@@ -23,19 +23,18 @@ public class NetworkTest {
 
   private final PrintStream stdout = System.out;
   private final ByteArrayOutputStream output = new ByteArrayOutputStream();
-  private List<String> outputResultArray;
 
   @InjectMocks
   private Network network;
 
   @BeforeEach
-  public void setup() throws UnsupportedEncodingException {
+  public void setUp() throws UnsupportedEncodingException {
     // ensures that System.out is captured by output
     System.setOut(new PrintStream(output, true, "UTF-8"));
   }
 
   @AfterEach
-  public void teardown() {
+  public void tearDown() {
     System.setOut(stdout);
   }
 
@@ -47,7 +46,7 @@ public class NetworkTest {
 
     // after network.run() is executed, we retrieve the captured output
     String outputResult = new String(output.toByteArray());
-    outputResultArray = Arrays.asList(outputResult.split("\n"));
+    List<String> outputResultArray = Arrays.asList(outputResult.split("\n"));
     outputResultArray.stream().map(s -> s.trim()).collect(Collectors.toList());
     // our captured output should tally with this expected usage results
     assertThat(outputResultArray, containsInAnyOrder(
