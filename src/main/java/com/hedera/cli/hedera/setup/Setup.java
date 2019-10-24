@@ -17,6 +17,7 @@ import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -80,7 +81,7 @@ public class Setup implements Runnable {
                 JsonObject account = addAccountToJson(accountId, keyPair);
                 saveToJson(accountId, account);
             } else {
-                shellHelper.printError("AccountId and Recovery words do not match");
+                shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
         } else {
             KeyPair keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
@@ -90,7 +91,7 @@ public class Setup implements Runnable {
                 JsonObject account = addAccountToJson(accountId, keyPair);
                 saveToJson(accountId, account);
             } else {
-                shellHelper.printError("AccountId and Recovery words do not match");
+                shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
         }
     }
@@ -127,28 +128,30 @@ public class Setup implements Runnable {
         com.hedera.hashgraph.sdk.account.AccountInfo accountResponse;
         boolean accountVerified = false;
         try {
-            accountResponse = getAccountInfoWithPrivKey(hedera, accountId, Ed25519PrivateKey.fromString(keyPair.getPrivateKeyHex()), shellHelper);
+            accountResponse = getAccountInfoWithPrivKey(accountId, Ed25519PrivateKey.fromString(keyPair.getPrivateKeyHex()), shellHelper);
             if (accountResponse.getAccountId().equals(AccountId.fromString(accountId))) {
                 // Check if account already exists in index.txt
                 shellHelper.printSuccess("Account recovered and saved in ~/.hedera");
                 accountVerified = true;
             }
         } catch (Exception e) {
-            shellHelper.printError("AccountId and Recovery words do not match");
             accountVerified = false;
         }
         return accountVerified;
     }
 
-    public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId, Ed25519PrivateKey accPrivKey, ShellHelper shellHelper) {
+    public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfoWithPrivKey(String accountId, Ed25519PrivateKey accPrivKey, ShellHelper shellHelper) {
         com.hedera.hashgraph.sdk.account.AccountInfo accountResponse = null;
         try {
-            var client = hedera.createHederaClient()
+            // check account exists on hedera by hardcoding initial
+            // because the application might not have been fully spun up yet.
+            Client client = new Client(AccountId.fromString("0.0.3"), "35.188.20.11:50211")
                     .setOperator(AccountId.fromString(accountId), accPrivKey);
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)
                     .setAccountId(AccountId.fromString(accountId));
             accountResponse = q.execute();
+            client.close();
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }

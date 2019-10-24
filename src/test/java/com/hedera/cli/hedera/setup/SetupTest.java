@@ -232,11 +232,14 @@ public class SetupTest {
         when(accountUtils.isAccountId(accountId)).thenReturn(true);
         when(randomNameGenerator.getRandomName()).thenReturn(randFileName);
         when(accountRecovery.recoverEDKeypairPostBipMigration(Arrays.asList(phrase.split(" ")))).thenReturn(keyPair);
-        when(hedera.createHederaClient()).thenReturn(client);
 
+        when(hedera.createHederaClient()).thenReturn(client);
         q = new AccountInfoQuery(client)
                 .setAccountId(AccountId.fromString(accountId));
-        when(q.execute()).thenReturn(accountResponse);
+        when(q.execute()).thenCallRealMethod().thenReturn(accountResponse);
+
+//        mockFoo = makeFoo(client, AccountId.fromString(accountId));
+//        when(mockFoo.execute()).thenReturn(accountResponse);
 
         setup.handle(inputReader, shellHelper);
 
@@ -266,12 +269,13 @@ public class SetupTest {
         when(accountRecovery.recoverEd25519AccountKeypair(Arrays.asList(phrase.split(" ")))).thenReturn(keyPair);
 
         when(hedera.createHederaClient()).thenReturn(client);
-        setup.handle(inputReader, shellHelper);
-
         q = new AccountInfoQuery(client)
                 .setAccountId(AccountId.fromString(accountId));
+        when(q.execute()).thenCallRealMethod().thenReturn(accountResponse);
+        setup.handle(inputReader, shellHelper);
 
-        when(q.execute()).thenReturn(accountResponse);
+//        mockFoo = makeFoo(client, AccountId.fromString(accountId));
+//        when(mockFoo.execute()).thenReturn(accountResponse);
 
         // read the whatever.json file back from our temporary test directory
         String pathToFile = "testnet/accounts/" + randFileName + ".json";
@@ -282,4 +286,8 @@ public class SetupTest {
 
         cleanUpTestData();
     }
+
+//    AccountInfoQuery makeFoo( Client client, AccountId accountId){
+//        return new AccountInfoQuery(client).setAccountId(accountId);
+//    }
 }
