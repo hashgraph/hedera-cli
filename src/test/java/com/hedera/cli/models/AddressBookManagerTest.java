@@ -1,5 +1,6 @@
 package com.hedera.cli.models;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,7 +35,7 @@ public class AddressBookManagerTest {
   private AddressBookManager addressBookManager;
 
   @BeforeEach
-  public void setup() throws UnsupportedEncodingException {
+  public void setUp() throws UnsupportedEncodingException {
     // ensures that System.out is captured by output
     System.setOut(new PrintStream(output, true, "UTF-8"));
 
@@ -51,10 +52,15 @@ public class AddressBookManagerTest {
     dataDirectory.mkHederaSubDir("testnet/accounts/");
     dataDirectory.writeFile("testnet/accounts/default.txt", randFileName + ":" + accountId);
     addressBookManager.setDataDirectory(dataDirectory);
+
+    // since we are manually instantiating AddressBookManager with new,
+    // we have to manually invoke init() in order to parse our default
+    // addressbook.jsom
+    addressBookManager.init();
   }
 
   @AfterEach
-  public void teardown() {
+  public void tearDown() {
     System.setOut(stdout);
   }
 
@@ -62,10 +68,6 @@ public class AddressBookManagerTest {
   public void listNetworks() {
     assertNotNull(addressBookManager);
 
-    // since we are manually instantiating AddressBookManager with new,
-    // we have to manually invoke init() in order to parse our default
-    // addressbook.jsom
-    addressBookManager.init();
     addressBookManager.listNetworks();
 
     // after addressBookManager.listNetworks() is executed, we retrieve the captured
@@ -78,6 +80,11 @@ public class AddressBookManagerTest {
       "  mainnet",
       "* testnet"
     ));
+  }
+
+  @Test
+  public void getDefaultAccount() {
+    assertEquals("mushy_daisy_4820:0.0.1234", addressBookManager.getDefaultAccount());
   }
 
 }
