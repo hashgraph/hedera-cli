@@ -21,7 +21,7 @@ public class AddressBookTest {
   private AddressBook addressBook;
 
   @BeforeEach
-  public void setup() {
+  public void setUp() {
     // use our default addressbook as test data
     String addressBookJsonPath = File.separator + ADDRESSBOOK_DEFAULT;
     ObjectMapper mapper = new ObjectMapper();
