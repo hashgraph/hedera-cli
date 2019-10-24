@@ -1,10 +1,10 @@
 package com.hedera.cli.hedera.utils;
 
 import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -17,6 +17,11 @@ import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @Component
 public class Utils {
 
@@ -26,18 +31,20 @@ public class Utils {
     @Autowired
     private Setup setup;
 
-    public Instant dateToMilliseconds(String[] dateInString) throws ParseException {
-        StringBuilder appendedString = new StringBuilder();
+    public ZonedDateTime dateToMilliseconds(String[] dateInString) {
         System.out.println("The date from cli is: ");
-        for (String date : dateInString) {
-            appendedString.append(date).append(" ");
+        StringBuilder sb = new StringBuilder();
+        for (String s: dateInString) {
+            sb.append(s).append(" ");
         }
-        SimpleDateFormat sdfWithTime = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        Date dateWithTime;
-        dateWithTime = sdfWithTime.parse(appendedString.toString());
-        Instant instant = dateWithTime.toInstant();
-        System.out.println("Date of File Expiry is: " + instant);
-        return instant;
+        TimeZone tz = Calendar.getInstance().getTimeZone();
+        sb.append(tz.getID());
+        String dateString = sb.toString();
+        System.out.println(dateString);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss z");
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateString, formatter);
+        System.out.println("Date of File Expiry is: " + zonedDateTime.toString());
+        return zonedDateTime; 
     }
 
     public void saveTransactionsToJson(String txID, TransactionObj obj) {
