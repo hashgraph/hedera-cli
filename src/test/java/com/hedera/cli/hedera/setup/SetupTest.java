@@ -35,7 +35,7 @@ import io.github.netmikey.logunit.api.LogCapturer;
 public class SetupTest {
 
     @RegisterExtension
-    LogCapturer logs = LogCapturer.create().captureForType(Setup.class);
+    private LogCapturer logs = LogCapturer.create().captureForType(Setup.class);
 
     @InjectMocks
     private Setup setup;
