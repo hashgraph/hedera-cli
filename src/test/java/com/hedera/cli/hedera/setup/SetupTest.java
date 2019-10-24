@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
@@ -27,7 +26,9 @@ import com.hedera.cli.hedera.utils.DataDirectory;
 
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.*;
+import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.HederaException;
+import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
@@ -70,18 +71,12 @@ public class SetupTest {
     @Mock
     private RandomNameGenerator randomNameGenerator;
 
-    @Mock
-    private Hedera hedera;
-
     // not a mock
     private DataDirectory dataDirectory;
-    private RecoveredAccountModel recoveredAccountModel;
     private HGCSeed seed;
     private String accountId;
     private List<String> mnemonic;
-    private EDBip32KeyChain keyChain;
     private KeyPair keyPair;
-    private int index;
     private String phrase;
     private AccountInfoQuery q;
 
@@ -91,13 +86,13 @@ public class SetupTest {
                 "hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
         seed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
         accountId = "0.0.1234";
-        keyChain = new EDBip32KeyChain();
-        index = 0;
+        EDBip32KeyChain keyChain = new EDBip32KeyChain();
+        int index = 0;
         keyPair = keyChain.keyPairFromWordList(index, mnemonic);
         phrase = "once busy dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
     }
 
-    void prepareTestData() {
+    private void prepareTestData() {
         String randFileName = "mushy_daisy_4820";
         // we manually invoke new DataDirectory as a real object
         dataDirectory = new DataDirectory();
@@ -109,7 +104,7 @@ public class SetupTest {
         dataDirectory.writeFile("testnet/accounts/default.txt", randFileName + ":" + accountId);
     }
 
-    void cleanUpTestData() {
+    private void cleanUpTestData() {
         File tempDirFolder = new File(tempDir.toString());
         boolean deleted = FileSystemUtils.deleteRecursively(tempDirFolder);
         assertTrue(deleted);
@@ -197,6 +192,7 @@ public class SetupTest {
 
     @Test
     void printKeyPairInRecoveredAccountModelFormat() {
+        RecoveredAccountModel recoveredAccountModel;
         recoveredAccountModel = new RecoveredAccountModel();
         recoveredAccountModel.setAccountId(accountId);
         recoveredAccountModel.setPrivateKey(keyPair.getPrivateKeyHex());
@@ -227,7 +223,7 @@ public class SetupTest {
     @Test
     void handleSetupWithBipRecoveryWords() throws HederaException {
         prepareTestData();
-        String randFileName = "mushy_fir_1234";
+//        String randFileName = "mushy_fir_1234";
         String accountId = "0.0.5432";
         Client client = new Client(AccountId.fromString("0.0.3"), "35.188.20.11:50211");
         when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn("bip");
@@ -275,7 +271,7 @@ public class SetupTest {
     public void handleSetupWithHgcRecoveryWords() throws HederaException {
         prepareTestData();
 
-        String randFileName = "happy_marigold_9999";
+//        String randFileName = "happy_marigold_9999";
         String accountId = "0.0.9876";
         Client client = new Client(AccountId.fromString("0.0.3"), "35.188.20.11:50211");
         when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn("hgc");
