@@ -6,9 +6,11 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +34,8 @@ public class AddressBookManagerTest {
   @TempDir
   public Path tempDir;
 
+  private DataDirectory dataDirectory;
+
   private AddressBookManager addressBookManager;
 
   @BeforeEach
@@ -45,7 +49,7 @@ public class AddressBookManagerTest {
     String accountId = "0.0.1234";
     String randFileName = "mushy_daisy_4820";
     // we manually invoke new DataDirectory as a real object
-    DataDirectory dataDirectory = new DataDirectory();
+    dataDirectory = new DataDirectory();
     // then, we use the tempDir as its actual data directory
     dataDirectory.setDataDir(tempDir);
     dataDirectory.writeFile("network.txt", "testnet");
@@ -85,6 +89,12 @@ public class AddressBookManagerTest {
   @Test
   public void getDefaultAccount() {
     assertEquals("mushy_daisy_4820:0.0.1234", addressBookManager.getDefaultAccount());
+
+    // delete the default.txt file and we will no longer have a default account
+    String currentNetwork = dataDirectory.readFile("network.txt", "testnet");
+    String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + "default.txt";
+    Paths.get(tempDir.toString(), pathToDefaultAccount).toFile().delete();
+    assertEquals("", addressBookManager.getDefaultAccount());
   }
 
 }
