@@ -230,7 +230,7 @@ public class CryptoTransferMultiple implements Runnable {
         TransactionObj txObj = new TransactionObj();
         txObj.setTxID(txID);
         txObj.setTxMemo(record.getMemo());
-        txObj.setTxFee(BigInteger.valueOf(record.getTransactionFee()));
+        txObj.setTxFee(record.getTransactionFee());
         txObj.setTxConsensusTimestamp(record.getConsensusTimestamp());
         txObj.setTxValidStart(record.getTransactionId().getValidStart().getEpochSecond() + "-"
                 + record.getTransactionId().getValidStart().getNano());
