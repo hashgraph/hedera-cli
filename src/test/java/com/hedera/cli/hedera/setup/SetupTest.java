@@ -52,7 +52,7 @@ public class SetupTest {
     @Mock
     private KeyGeneration keyGeneration;
 
-    public void setup() {
+    public void prepareTestData() {
         // test data
         String accountId = "0.0.1234";
         String randFileName = "mushy_daisy_4820";
@@ -70,7 +70,7 @@ public class SetupTest {
         dataDirectory.writeFile("testnet/accounts/default.txt", randFileName + ":" + accountId);
     }
 
-    public void teardown() {
+    public void cleanup() {
         File tempDirFolder = new File(tempDir.toString());
         boolean deleted = FileSystemUtils.deleteRecursively(tempDirFolder);
         System.out.println("Deleted: " + deleted);
@@ -78,7 +78,7 @@ public class SetupTest {
 
     @Test
     public void testSaveToJson() throws JsonProcessingException {
-        setup();
+        prepareTestData();
 
         List<String> mnemonic = Arrays.asList(
                 "hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
@@ -110,7 +110,7 @@ public class SetupTest {
         setup.saveToJson("0.0.1235", null);
         logs.assertContains("did not save json");
 
-        teardown();
+        cleanup();
     }
 
     @Test
