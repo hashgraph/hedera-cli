@@ -2,12 +2,16 @@ package com.hedera.cli.hedera.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.ParseException;
-import java.util.Calendar;
-import java.util.TimeZone;
 import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.TimeZone;
+
+import com.hedera.cli.models.TransactionObj;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +36,12 @@ public class UtilsTest {
         dataDirectory.setDataDir(tempDir);
         utils = new Utils();
         utils.setDataDirectory(dataDirectory);
+
+        String accountId = "0.0.1234";
+        String randFileName = "mushy_daisy_4820";
+        dataDirectory.writeFile("network.txt", "testnet");
+        dataDirectory.mkHederaSubDir("testnet/accounts/");
+        dataDirectory.writeFile("testnet/accounts/default.txt", randFileName + ":" + accountId);
     }
 
     @AfterEach
@@ -58,5 +68,23 @@ public class UtilsTest {
 
         // assert
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void saveTransactionsToJson() {
+        TransactionObj txObj = new TransactionObj();
+        String txID = "sometransactionid";
+        txObj.setTxID(txID);
+        txObj.setTxFee(100000000L);
+        utils.saveTransactionsToJson(txID, txObj);
+
+        String networkName = dataDirectory.readFile("network.txt");
+        String pathToTransactionFolder = networkName + File.separator + "transactions" + File.separator;
+        String filename = txID + ".json";
+        String pathToTransactionFile = pathToTransactionFolder + filename;
+        HashMap<String, String> transactionHashMap = dataDirectory.jsonToHashmap(pathToTransactionFile);
+
+        assertEquals("sometransactionid", transactionHashMap.get("txID"));
+        assertEquals("100000000", transactionHashMap.get("txFee"));
     }
 }
