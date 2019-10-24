@@ -16,7 +16,12 @@ import com.hedera.cli.models.Recipient;
 import com.hedera.cli.models.Sender;
 import com.hedera.cli.models.TransactionObj;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.*;
+import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.Transaction;
+import com.hedera.hashgraph.sdk.TransactionId;
+import com.hedera.hashgraph.sdk.TransactionReceipt;
+import com.hedera.hashgraph.sdk.TransactionRecord;
+import com.hedera.hashgraph.sdk.TransactionRecordQuery;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -96,7 +101,7 @@ public class CryptoTransferMultiple implements Runnable {
             // Create a multi-sender crypto transfer where sender does not have to pay
             // transaction fees = network fee + node fee
             var senderAccountID = AccountId.fromString("0.0." + senderAccountIDInString);
-            BigInteger transferAmount = new BigInteger(transferAmountInStr);
+            Long transferAmount = Long.parseLong(transferAmountInStr);
 
             // Sender and recipient's total must always be zero
             long senderTotal = sumOfTransfer(recipientAmt) - transferAmount.longValue();
@@ -119,8 +124,8 @@ public class CryptoTransferMultiple implements Runnable {
                 if (map.size() != amountList.size()) {
                     shellHelper.printError("Please check your recipient list");
                 }
-                var account = value.accountId;
-                var amount = value.amount;
+                var account = value.getAccountId();
+                var amount = value.getAmount();
                 cryptoTransferTransaction.addTransfer(account, amount);
             });
 
@@ -225,7 +230,7 @@ public class CryptoTransferMultiple implements Runnable {
         TransactionObj txObj = new TransactionObj();
         txObj.setTxID(txID);
         txObj.setTxMemo(record.getMemo());
-        txObj.setTxFee(BigInteger.valueOf(record.getTransactionFee()));
+        txObj.setTxFee(record.getTransactionFee());
         txObj.setTxConsensusTimestamp(record.getConsensusTimestamp());
         txObj.setTxValidStart(record.getTransactionId().getValidStart().getEpochSecond() + "-"
                 + record.getTransactionId().getValidStart().getNano());

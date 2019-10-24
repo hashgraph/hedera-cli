@@ -25,13 +25,13 @@ public class DataDirectoryTest {
 
 
   @BeforeEach
-  public void setup() {
+  public void setUp() {
     // System.out.println(tempDir.toAbsolutePath().toString());
     dataDirectory.setDataDir(tempDir);
   }
 
   @AfterEach
-  public void teardown() {
+  public void tearDown() {
     File tempDirFolder = new File(tempDir.toString());
     tempDirFolder.delete();
     System.out.println(tempDirFolder.exists());

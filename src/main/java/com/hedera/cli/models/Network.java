@@ -33,8 +33,4 @@ public class Network {
     return selectedNode;
   }
 
-  public HederaNode getSingleNode() {
-    List<HederaNode> nodes = this.getNodes();
-    return nodes.get(0);
-  }
 }
