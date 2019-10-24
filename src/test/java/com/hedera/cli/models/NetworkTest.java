@@ -27,7 +27,7 @@ public class NetworkTest {
   private List<Map<String, String>> testnetNodes = new ArrayList<Map<String, String>>();
 
   @BeforeEach
-  public void setup() {
+  public void setUp() {
     // use our default addressbook as test data
     String addressBookJsonPath = File.separator + ADDRESSBOOK_DEFAULT;
     ObjectMapper mapper = new ObjectMapper();
