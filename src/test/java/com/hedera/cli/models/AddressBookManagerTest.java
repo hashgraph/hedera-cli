@@ -29,7 +29,6 @@ public class AddressBookManagerTest {
 
   private final PrintStream stdout = System.out;
   private final ByteArrayOutputStream output = new ByteArrayOutputStream();
-  private List<String> outputResultArray;
 
   @TempDir
   public Path tempDir;
@@ -77,7 +76,7 @@ public class AddressBookManagerTest {
     // after addressBookManager.listNetworks() is executed, we retrieve the captured
     // output
     String outputResult = new String(output.toByteArray());
-    outputResultArray = Arrays.asList(outputResult.split("\n"));
+    List<String> outputResultArray = Arrays.asList(outputResult.split("\n"));
     outputResultArray.stream().map(s -> s.trim()).collect(Collectors.toList());
 
     assertThat(outputResultArray, containsInAnyOrder(
