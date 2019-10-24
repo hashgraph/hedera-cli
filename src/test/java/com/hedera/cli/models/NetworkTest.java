@@ -83,4 +83,10 @@ public class NetworkTest {
     assertEquals("35.188.20.11:50211", node.getAddress());
   }
 
+  @Test
+  public void getDescription() {
+    String description = network.getDescription();
+    assertEquals("Hedera testnet", description);
+  }
+
 }

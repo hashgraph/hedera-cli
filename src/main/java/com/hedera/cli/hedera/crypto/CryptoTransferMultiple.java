@@ -124,8 +124,8 @@ public class CryptoTransferMultiple implements Runnable {
                 if (map.size() != amountList.size()) {
                     shellHelper.printError("Please check your recipient list");
                 }
-                var account = value.accountId;
-                var amount = value.amount;
+                var account = value.getAccountId();
+                var amount = value.getAmount();
                 cryptoTransferTransaction.addTransfer(account, amount);
             });
 
