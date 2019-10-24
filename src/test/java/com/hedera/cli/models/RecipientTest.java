@@ -19,6 +19,14 @@ public class RecipientTest {
 
     assertEquals(accountId, recipient.getAccountId());
     assertEquals(amount, recipient.getAmount());
+
+    AccountId newAccountId = AccountId.fromString("0.0.1235");
+    Long newAmount = 2000L;
+    recipient.setAccountId(newAccountId);
+    recipient.setAmount(newAmount);
+
+    assertEquals(newAccountId, recipient.getAccountId());
+    assertEquals(newAmount, recipient.getAmount());    
   }
 
 }
