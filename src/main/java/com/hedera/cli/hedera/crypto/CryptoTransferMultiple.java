@@ -101,7 +101,7 @@ public class CryptoTransferMultiple implements Runnable {
             // Create a multi-sender crypto transfer where sender does not have to pay
             // transaction fees = network fee + node fee
             var senderAccountID = AccountId.fromString("0.0." + senderAccountIDInString);
-            BigInteger transferAmount = new BigInteger(transferAmountInStr);
+            Long transferAmount = Long.parseLong(transferAmountInStr);
 
             // Sender and recipient's total must always be zero
             long senderTotal = sumOfTransfer(recipientAmt) - transferAmount.longValue();

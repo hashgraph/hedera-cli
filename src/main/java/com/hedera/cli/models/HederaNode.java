@@ -2,6 +2,11 @@ package com.hedera.cli.models;
 
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @Component
 public class HederaNode {
 
@@ -9,11 +14,4 @@ public class HederaNode {
   
   private String address;
 
-  public String getAccount() {
-    return account;
-  }
-
-  public String getAddress() {
-    return address;
-  }
 }
