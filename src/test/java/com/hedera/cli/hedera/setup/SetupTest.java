@@ -1,8 +1,7 @@
 package com.hedera.cli.hedera.setup;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -11,45 +10,41 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.hedera.cli.config.InputReader;
+import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.HGCSeed;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
+import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.HederaException;
+import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.hjson.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.FileSystemUtils;
 
-import io.github.netmikey.logunit.api.LogCapturer;
-import picocli.CommandLine;
-
 @ExtendWith(MockitoExtension.class)
 public class SetupTest {
-
-    @RegisterExtension
-    LogCapturer logs = LogCapturer.create().captureForType(Setup.class);
 
     @InjectMocks
     private Setup setup;
 
     @TempDir
     public Path tempDir;
-
-    @Mock
-    private RandomNameGenerator randomNameGenerator;
 
     @Mock
     private KeyGeneration keyGeneration;
@@ -64,7 +59,14 @@ public class SetupTest {
     private AccountRecovery accountRecovery;
 
     @Mock
-    private CommandLine.Model.CommandSpec spec;
+    private AccountUtils accountUtils;
+
+    @Mock
+    private RandomNameGenerator randomNameGenerator;
+
+    @Mock
+    private Hedera hedera;
+
     // not a mock
     private DataDirectory dataDirectory;
     private RecoveredAccountModel recoveredAccountModel;
@@ -75,6 +77,8 @@ public class SetupTest {
     private KeyPair keyPair;
     private int index;
     private String phrase;
+    private AccountInfoQuery q;
+    private com.hedera.hashgraph.sdk.account.AccountInfo accountResponse;
 
     @BeforeEach
     void init() {
@@ -88,31 +92,28 @@ public class SetupTest {
         phrase = "once busy dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
     }
 
-    void setup() {
+    public void prepareTestData() {
         String randFileName = "mushy_daisy_4820";
-
         // we manually invoke new DataDirectory as a real object
         dataDirectory = new DataDirectory();
         // then, we use the tempDir as its actual data directory
         dataDirectory.setDataDir(tempDir);
-
         when(randomNameGenerator.getRandomName()).thenReturn(randFileName);
         setup.setDataDirectory(dataDirectory);
-
         dataDirectory.writeFile("network.txt", "testnet");
         dataDirectory.mkHederaSubDir("testnet/accounts/");
         dataDirectory.writeFile("testnet/accounts/default.txt", randFileName + ":" + accountId);
     }
 
-    void teardown() {
+    public void cleanUpTestData() {
         File tempDirFolder = new File(tempDir.toString());
         boolean deleted = FileSystemUtils.deleteRecursively(tempDirFolder);
         assertTrue(deleted);
     }
 
     @Test
-    void testSaveToJson() {
-        setup();
+    public void testSaveToJson() {
+        prepareTestData();
 
         JsonObject accountValue = new JsonObject();
         accountValue.add("accountId", accountId);
@@ -134,28 +135,46 @@ public class SetupTest {
         assertEquals(accountValue.get("publicKey").asString(), jsonMap.get("publicKey"));
 
         setup.saveToJson("0.0.1235", null);
-        logs.assertContains("did not save json");
-
-        teardown();
+        cleanUpTestData();
     }
 
     @Test
-    void runt() {
-
-        CommandLine commandLine = new CommandLine();
-        setup.run();
-    }
-
-    @Test
-    void verifyPhaseListSize() {
+    public void verifyPhaseListSizeTrue() {
         List<String> phraseList = Arrays.asList(phrase.split(" "));
         assertEquals(phraseList, setup.verifyPhraseList(phraseList, shellHelper));
     }
 
     @Test
-    void verifyAccountId() {
+    public void verifyPhaseListSizeFalse() {
+        String not24WordPhrase = "dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
+        List<String> phraseList = Arrays.asList(not24WordPhrase.split(" "));
+        assertNull(setup.verifyPhraseList(phraseList, shellHelper));
+    }
+
+    @Test
+    void verifyAccountIdTrue() {
         String accountId = "0.0.1234";
+        when(accountUtils.isAccountId(accountId)).thenReturn(true);
         assertEquals(accountId, setup.verifyAccountId(accountId, shellHelper));
+    }
+
+    @Test
+    public void verifyAccountIdFalse() {
+        String accountId = "0.0";
+        when(accountUtils.isAccountId(accountId)).thenReturn(false);
+        assertNull(setup.verifyAccountId(accountId, shellHelper));
+    }
+
+    @Test
+    void verifyMethodTrue() {
+        String method = "bip";
+        assertEquals(method, setup.verifyMethod(method, shellHelper));
+    }
+
+    @Test
+    void verifyMethodFalse() {
+        String method = "hellooo";
+        assertNull(setup.verifyMethod(method, shellHelper));
     }
 
     @Test
@@ -187,9 +206,6 @@ public class SetupTest {
         assertEquals(keyPair.getPrivateKeyEncodedHex(), recoveredAccountModel.getPrivateKeyEncoded());
         assertEquals(keyPair.getPublicKeyEncodedHex(), recoveredAccountModel.getPublicKeyEncoded());
         assertEquals(keyPair.getSeedAndPublicKeyHex(), recoveredAccountModel.getPrivateKeyBrowserCompatible());
-
-//        setup.printKeyPair(null, null, null);
-//        logs.assertContains("hmm");
     }
 
     @Test
@@ -204,43 +220,66 @@ public class SetupTest {
     }
 
     @Test
-    void handleSetupWithBipRecoveryWords() {
-        setup();
+    public void handleSetupWithBipRecoveryWords() throws HederaException {
+        prepareTestData();
+        String randFileName = "mushy_fir_1234";
+        String accountId = "0.0.5432";
+        Client client = new Client(AccountId.fromString("0.0.3"), "35.188.20.11:50211");
         when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn("bip");
         when(inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator")).thenReturn(accountId);
-        String phrase = "once busy dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
+        String phrase = "hello fine demise ladder glow hard magnet fan donkey carry chuckle assault leopard fee kingdom cheap odor okay crazy raven goose focus shrimp carbon";
         when(inputReader.prompt("24 words phrase", "secret", false)).thenReturn(phrase);
+        when(accountUtils.isAccountId(accountId)).thenReturn(true);
+        when(randomNameGenerator.getRandomName()).thenReturn(randFileName);
         when(accountRecovery.recoverEDKeypairPostBipMigration(Arrays.asList(phrase.split(" ")))).thenReturn(keyPair);
+        when(hedera.createHederaClient()).thenReturn(client);
+
+        q = new AccountInfoQuery(client)
+                .setAccountId(AccountId.fromString(accountId));
+        when(q.execute()).thenReturn(accountResponse);
+
         setup.handle(inputReader, shellHelper);
-        teardown();
+
+        // read the mushy_fir_1234.json file back from our temporary test directory
+        String pathToFile = "testnet/accounts/" + randFileName + ".json";
+        HashMap<String, String> jsonMap = dataDirectory.jsonToHashmap(pathToFile);
+        assertEquals("0.0.5432", jsonMap.get("accountId"));
+        assertEquals(keyPair.getPrivateKeyHex(), jsonMap.get("privateKey"));
+        assertEquals(keyPair.getPublicKeyHex(), jsonMap.get("publicKey"));
+
+        cleanUpTestData();
     }
 
     @Test
-    void handleSetupWithHgcRecoveryWords() {
-        setup();
+    public void handleSetupWithHgcRecoveryWords() throws HederaException {
+        prepareTestData();
+
+        String randFileName = "happy_marigold_9999";
+        String accountId = "0.0.9876";
+        Client client = new Client(AccountId.fromString("0.0.3"), "35.188.20.11:50211");
         when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn("hgc");
         when(inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator")).thenReturn(accountId);
-        String phrase = "once busy dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
+        String phrase = "hello fine demise ladder glow hard magnet fan donkey carry chuckle assault leopard fee kingdom cheap odor okay crazy raven goose focus shrimp carbon";
         when(inputReader.prompt("24 words phrase", "secret", false)).thenReturn(phrase);
+        when(accountUtils.isAccountId(accountId)).thenReturn(true);
+        when(randomNameGenerator.getRandomName()).thenReturn(randFileName);
         when(accountRecovery.recoverEd25519AccountKeypair(Arrays.asList(phrase.split(" ")))).thenReturn(keyPair);
-        setup.handle(inputReader, shellHelper);
-        teardown();
-    }
 
-//    @Test
-//    void handleSetupError() {
-//        setup();
-//
-////         assertThrows(NullPointerException.class, () -> {
-////         inputReader.prompt(null);
-////         });
-////
-//        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn("");
-////        when(inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator")).thenReturn(accountId);
-////        String phrase = "once busy dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
-////        when(inputReader.prompt("24 words phrase", "secret", false)).thenReturn(phrase);
-////        when(accountRecovery.recoverEd25519AccountKeypair(Arrays.asList(phrase.split(" ")))).thenReturn(keyPair);
-////        setup.handle(inputReader, shellHelper);
-//        teardown();
-//    }
+        when(hedera.createHederaClient()).thenReturn(client);
+        setup.handle(inputReader, shellHelper);
+
+        q = new AccountInfoQuery(client)
+                .setAccountId(AccountId.fromString(accountId));
+
+        when(q.execute()).thenReturn(accountResponse);
+
+        // read the whatever.json file back from our temporary test directory
+        String pathToFile = "testnet/accounts/" + randFileName + ".json";
+        HashMap<String, String> jsonMap = dataDirectory.jsonToHashmap(pathToFile);
+        assertEquals("0.0.9876", jsonMap.get("accountId"));
+        assertEquals(keyPair.getPrivateKeyHex(), jsonMap.get("privateKey"));
+        assertEquals(keyPair.getPublicKeyHex(), jsonMap.get("publicKey"));
+
+        cleanUpTestData();
+    }
 }

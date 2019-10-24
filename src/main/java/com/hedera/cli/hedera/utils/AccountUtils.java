@@ -56,4 +56,22 @@ public class AccountUtils {
         HashMap<String, String> defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
         return defaultJsonAccount.get(PUBLICKEY).toString();
     }
+
+    public boolean isAccountId(final String str) {
+        // checks null or empty
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        // checks if accountId only contains 0
+        if (str.matches("^[0]+$")) {
+            return false;
+        }
+        try {
+            // parse string to make sure it can be of type AccountId
+            AccountId.fromString("0.0." + str);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
