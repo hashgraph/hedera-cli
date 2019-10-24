@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.TimeZone;
 
@@ -57,7 +58,9 @@ public class UtilsTest {
         // prepare test data
         TimeZone tz = Calendar.getInstance().getTimeZone();
         StringBuilder sb = new StringBuilder();
-        sb.append("2019-02-22T21:30:58+08:00[");
+        sb.append("2019-02-22T21:30:58");
+        sb.append(getCurrentTimeZoneOffset());
+        sb.append("[");
         sb.append(tz.getID());
         sb.append("]");
         String expected = sb.toString();
@@ -86,5 +89,15 @@ public class UtilsTest {
 
         assertEquals("sometransactionid", transactionHashMap.get("txID"));
         assertEquals("100000000", transactionHashMap.get("txFee"));
+    }
+
+    private String getCurrentTimeZoneOffset() {
+        // get timezone offset
+        TimeZone tz = TimeZone.getDefault();
+        Calendar cal = GregorianCalendar.getInstance(tz);
+        int offsetInMillis = tz.getOffset(cal.getTimeInMillis());
+        String offset = String.format("%02d:%02d", Math.abs(offsetInMillis / 3600000),
+                Math.abs((offsetInMillis / 60000) % 60));
+        return (offsetInMillis >= 0 ? "+" : "-") + offset;
     }
 }
