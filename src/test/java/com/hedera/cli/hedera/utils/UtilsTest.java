@@ -6,20 +6,22 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.ParseException;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.TimeZone;
 
 import com.hedera.cli.models.TransactionObj;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.FileSystemUtils;
 
+@ExtendWith(MockitoExtension.class)
 public class UtilsTest {
 
     @TempDir
@@ -55,19 +57,13 @@ public class UtilsTest {
         // raw test data
         String[] dateInString = { "22-02-2019", "21:30:58" };
 
-        // prepare test data
-        TimeZone tz = Calendar.getInstance().getTimeZone();
-        StringBuilder sb = new StringBuilder();
-        sb.append("2019-02-22T21:30:58");
-        sb.append(getCurrentTimeZoneOffset());
-        sb.append("[");
-        sb.append(tz.getID());
-        sb.append("]");
-        String expected = sb.toString();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        Date date = formatter.parse("22-02-2019 21:30:58");
+        String expected = date.toInstant().toString();
 
         // execute the function that we want to test
-        ZonedDateTime zonedDateTime = utils.dateToMilliseconds(dateInString);
-        String actual = zonedDateTime.toString();
+        Instant instant = utils.dateToMilliseconds(dateInString);
+        String actual = instant.toString();
 
         // assert
         assertEquals(expected, actual);
@@ -89,15 +85,5 @@ public class UtilsTest {
 
         assertEquals("sometransactionid", transactionHashMap.get("txID"));
         assertEquals("100000000", transactionHashMap.get("txFee"));
-    }
-
-    private String getCurrentTimeZoneOffset() {
-        // get timezone offset
-        TimeZone tz = TimeZone.getDefault();
-        Calendar cal = GregorianCalendar.getInstance(tz);
-        int offsetInMillis = tz.getOffset(cal.getTimeInMillis());
-        String offset = String.format("%02d:%02d", Math.abs(offsetInMillis / 3600000),
-                Math.abs((offsetInMillis / 60000) % 60));
-        return (offsetInMillis >= 0 ? "+" : "-") + offset;
     }
 }

@@ -1,10 +1,10 @@
 package com.hedera.cli.hedera.utils;
 
 import java.io.File;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.TimeZone;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -31,20 +31,18 @@ public class Utils {
     @Autowired
     private Setup setup;
 
-    public ZonedDateTime dateToMilliseconds(String[] dateInString) {
+    public Instant dateToMilliseconds(String[] dateInString) throws ParseException {
         System.out.println("The date from cli is: ");
         StringBuilder sb = new StringBuilder();
         for (String s: dateInString) {
             sb.append(s).append(" ");
         }
-        TimeZone tz = Calendar.getInstance().getTimeZone();
-        sb.append(tz.getID());
-        String dateString = sb.toString();
+        String dateString = sb.toString().stripTrailing();
         System.out.println(dateString);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss z");
-        ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateString, formatter);
-        System.out.println("Date of File Expiry is: " + zonedDateTime.toString());
-        return zonedDateTime; 
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        Date date = formatter.parse(dateString);
+        System.out.println("Date of File Expiry is: " + date.toInstant().toString());
+        return date.toInstant(); 
     }
 
     public void saveTransactionsToJson(String txID, TransactionObj obj) {

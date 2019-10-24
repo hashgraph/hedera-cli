@@ -3,7 +3,7 @@ package com.hedera.cli.hedera.file;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -108,7 +108,7 @@ public class FileCreate implements Runnable {
             FileCreateTransaction tx = null;
             // ZonedDateTime zonedDateTime = utils.dateToMilliseconds(date);
             // Instant instant = zonedDateTime.toInstant();
-            ZonedDateTime zonedDateTime = utils.dateToMilliseconds(date);
+            Instant instant = utils.dateToMilliseconds(date);
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
 
             boolean testSize = false;
@@ -117,7 +117,7 @@ public class FileCreate implements Runnable {
                 var fileContentsTestSize = stringOfNBytes(fileSizeByte).getBytes();
                 tx = new FileCreateTransaction(client)
                         .setTransactionId(transactionId)
-                        .setExpirationTime(zonedDateTime.toInstant())
+                        .setExpirationTime(instant)
                         // Use the same key as the operator to "own" this file
                         .addKey(operatorKey.getPublicKey())
                         .setContents(fileContentsTestSize)
@@ -128,7 +128,7 @@ public class FileCreate implements Runnable {
                 var fileContents = stringArrayToString(fileContentsInString).getBytes();
                 tx = new FileCreateTransaction(client)
                         .setTransactionId(transactionId)
-                        .setExpirationTime(zonedDateTime.toInstant())
+                        .setExpirationTime(instant)
                         // Use the same key as the operator to "own" this file
                         .addKey(operatorKey.getPublicKey())
                         .setContents(fileContents)
