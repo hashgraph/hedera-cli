@@ -15,8 +15,10 @@ import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
 import picocli.CommandLine;
+import picocli.CommandLine.Spec;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Command;
 
 @Log
@@ -43,6 +48,9 @@ public class Setup implements Runnable {
     @Autowired
     private RandomNameGenerator randomNameGenerator;
 
+    @Spec
+    private CommandSpec spec;
+
     @Override
     public void run() {
         CommandLine.usage(this, System.out);
@@ -50,36 +58,44 @@ public class Setup implements Runnable {
 
     public void handle(InputReader inputReader, ShellHelper shellHelper) {
         shellHelper.print("Start the setup process");
+        String accountIdInString = inputReader
+                .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
+        String accountId = verifyAccountId(accountIdInString, shellHelper);
+        String phrase = inputReader.prompt("24 words phrase", "secret", false);
+        List<String> phraseList = verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
         String strMethod = inputReader
                 .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        String accountId = inputReader
-                .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
-        String phrase = inputReader.prompt("24 words phrase", "secret", false);
-        List<String> phraseList = Arrays.asList(phrase.split(" "));
-        shellHelper.print(String.valueOf(phraseList));
-        // recover key from phrase
-        KeyPair keyPair;
-        if (phraseListSize(phraseList)) {
-            if ("bip".equals(strMethod)) {
-                keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
-                printKeyPair(keyPair, accountId, shellHelper);
-                JsonObject account = addAccountToJson(accountId, keyPair);
-                saveToJson(accountId, account);
-            } else if ("hgc".equals(strMethod)) {
-                keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
-                printKeyPair(keyPair, accountId, shellHelper);
-                JsonObject account = addAccountToJson(accountId, keyPair);
-                saveToJson(accountId, account);
-            } else {
-                shellHelper.printError("Method must either been bip or hgc");
-            }
-        } else {
-            shellHelper.printError("Recovery words must contain 24 words");
-        }
+        verifyMethodAndExecute(strMethod, phraseList, accountId, shellHelper);
     }
 
-    public boolean phraseListSize(List<String> phraseList) {
-        return phraseList.size() == 24;
+    public List<String> verifyPhraseList(List<String> phraseList, ShellHelper shellHelper) {
+        if (phraseList.size() != 24) {
+            shellHelper.printError("Recovery words must contain 24 words");
+        }
+        return phraseList;
+    }
+
+    public String verifyAccountId(String accountIdInString, ShellHelper shellHelper) {
+        if (StringUtil.isNullOrEmpty(accountIdInString)) {
+            shellHelper.printError("AccountId must not be empty");
+        }
+        return accountIdInString;
+    }
+
+    public void verifyMethodAndExecute(String method, List<String> phraseList, String accountId, ShellHelper shellHelper) {
+        if ("bip".equals(method)) {
+            KeyPair keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
+            printKeyPair(keyPair, accountId, shellHelper);
+            JsonObject account = addAccountToJson(accountId, keyPair);
+            saveToJson(accountId, account);
+        } else if ("hgc".equals(method)) {
+            KeyPair keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
+            printKeyPair(keyPair, accountId, shellHelper);
+            JsonObject account = addAccountToJson(accountId, keyPair);
+            saveToJson(accountId, account);
+        } else {
+            shellHelper.printError("Method must either been bip or hgc");
+        }
     }
 
     public JsonObject addAccountToJson(String accountId, KeyPair keyPair) {

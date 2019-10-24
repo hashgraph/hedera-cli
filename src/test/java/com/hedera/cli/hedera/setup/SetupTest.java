@@ -1,8 +1,7 @@
 package com.hedera.cli.hedera.setup;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -35,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.FileSystemUtils;
 
 import io.github.netmikey.logunit.api.LogCapturer;
+import picocli.CommandLine;
 
 @ExtendWith(MockitoExtension.class)
 public class SetupTest {
@@ -63,6 +63,8 @@ public class SetupTest {
     @Mock
     private AccountRecovery accountRecovery;
 
+    @Mock
+    private CommandLine.Model.CommandSpec spec;
     // not a mock
     private DataDirectory dataDirectory;
     private RecoveredAccountModel recoveredAccountModel;
@@ -138,16 +140,22 @@ public class SetupTest {
     }
 
     @Test
-    void phraseListSizeTrue() {
-        List<String> phraseList = Arrays.asList(phrase.split(" "));
-        assertTrue(setup.phraseListSize(phraseList));
+    void runt() {
+
+        CommandLine commandLine = new CommandLine();
+        setup.run();
     }
 
     @Test
-    void phraseListSizeFalse() {
-        String wordList = "dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
-        List<String> phraseList = Arrays.asList(wordList.split(" "));
-        assertFalse(setup.phraseListSize(phraseList));
+    void verifyPhaseListSize() {
+        List<String> phraseList = Arrays.asList(phrase.split(" "));
+        assertEquals(phraseList, setup.verifyPhraseList(phraseList, shellHelper));
+    }
+
+    @Test
+    void verifyAccountId() {
+        String accountId = "0.0.1234";
+        assertEquals(accountId, setup.verifyAccountId(accountId, shellHelper));
     }
 
     @Test
@@ -218,4 +226,21 @@ public class SetupTest {
         setup.handle(inputReader, shellHelper);
         teardown();
     }
+
+//    @Test
+//    void handleSetupError() {
+//        setup();
+//
+////         assertThrows(NullPointerException.class, () -> {
+////         inputReader.prompt(null);
+////         });
+////
+//        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn("");
+////        when(inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator")).thenReturn(accountId);
+////        String phrase = "once busy dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
+////        when(inputReader.prompt("24 words phrase", "secret", false)).thenReturn(phrase);
+////        when(accountRecovery.recoverEd25519AccountKeypair(Arrays.asList(phrase.split(" ")))).thenReturn(keyPair);
+////        setup.handle(inputReader, shellHelper);
+//        teardown();
+//    }
 }
