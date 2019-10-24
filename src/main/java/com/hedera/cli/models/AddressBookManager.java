@@ -50,7 +50,7 @@ public class AddressBookManager {
 
       // check to see if there is an additional addressbook.json in ~/.hedera directory
       // if it exists, we will deep merge our /resources/addressbook.json with ~/.hedera/addressbook.json
-      Path additionalAddressBook = Paths.get(System.getProperty("user.home"), ".hedera", "addressbook.json");
+      Path additionalAddressBook = Paths.get(dataDirectory.getDataDir().toString(), "addressbook.json");
       File additionalAddressBookFile = new File(additionalAddressBook.toString());
       if (additionalAddressBookFile.exists()) {
         InputStream additionalInput = new FileInputStream(additionalAddressBookFile);
@@ -108,6 +108,7 @@ public class AddressBookManager {
     }
   }
 
+  // This function should be moved some where else
   // Returns an empty string if there's no default account
   public String getDefaultAccount() {
     String defaultAccount = "";

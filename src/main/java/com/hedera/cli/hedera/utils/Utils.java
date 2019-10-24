@@ -17,6 +17,11 @@ import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @Component
 public class Utils {
 
@@ -27,17 +32,17 @@ public class Utils {
     private Setup setup;
 
     public Instant dateToMilliseconds(String[] dateInString) throws ParseException {
-        StringBuilder appendedString = new StringBuilder();
         System.out.println("The date from cli is: ");
-        for (String date : dateInString) {
-            appendedString.append(date).append(" ");
+        StringBuilder sb = new StringBuilder();
+        for (String s: dateInString) {
+            sb.append(s).append(" ");
         }
-        SimpleDateFormat sdfWithTime = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-        Date dateWithTime;
-        dateWithTime = sdfWithTime.parse(appendedString.toString());
-        Instant instant = dateWithTime.toInstant();
-        System.out.println("Date of File Expiry is: " + instant);
-        return instant;
+        String dateString = sb.toString().stripTrailing();
+        System.out.println(dateString);
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        Date date = formatter.parse(dateString);
+        System.out.println("Date of File Expiry is: " + date.toInstant().toString());
+        return date.toInstant(); 
     }
 
     public void saveTransactionsToJson(String txID, TransactionObj obj) {

@@ -16,6 +16,8 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.shell.ShellHelper;
@@ -23,35 +25,46 @@ import com.hedera.cli.shell.ShellHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @Component
 public class DataDirectory {
 
     @Autowired
     private ShellHelper shellHelper;
 
-    private String userHome = System.getProperty("user.home");
-    private String directoryName = ".hedera";
+    private Path dataDir;
+
+    @PostConstruct
+    public void init() {
+        // our default directories that is used
+        String userHome = System.getProperty("user.home");
+        String directoryName = ".hedera";
+        this.dataDir = Paths.get(userHome, directoryName);
+    }
 
     // Example usage:
     // String currentNetwork = DataDirectory.readFile("network.txt", "testnet");
     // String pathToSubDir = currentNetwork + File.separator + "accounts"
     public boolean mkHederaSubDir(String pathToSubDir) {
         Path subdirpath = Paths.get(pathToSubDir);
-        Path path = Paths.get(userHome, directoryName, subdirpath.toString());
+        Path path = Paths.get(dataDir.toString(), subdirpath.toString());
         File directory = new File(path.toString());
         return directory.mkdirs();
     }
 
     // pathToFile instead of fileName
     public void writeFile(String pathToFile, String value) {
-        Path path = Paths.get(userHome, directoryName);
-        boolean directoryExists = Files.exists(path);
+        boolean directoryExists = Files.exists(dataDir);
         if (!directoryExists) {
-            File directory = new File(path.toString());
+            File directory = new File(dataDir.toString());
             directory.mkdir();
         }
         // write the data
-        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
         try {
             FileWriter fw = new FileWriter(file.getAbsoluteFile());
@@ -65,13 +78,12 @@ public class DataDirectory {
 
     public String readFile(String pathToFile) {
         String value = null;
-        Path path = Paths.get(userHome, directoryName);
-        boolean directoryExists = Files.exists(path);
+        boolean directoryExists = Files.exists(dataDir);
         if (!directoryExists) {
-            File directory = new File(path.toString());
+            File directory = new File(dataDir.toString());
             directory.mkdir();
         }
-        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        Path filePath = Paths.get(dataDir.toString(), pathToFile);
 
         BufferedReader br = null;
         try {
@@ -94,15 +106,14 @@ public class DataDirectory {
     }
 
     public String readFile(String pathToFile, String defaultValue) {
-        Path path = Paths.get(userHome, directoryName);
-        boolean directoryExists = Files.exists(path);
+        boolean directoryExists = Files.exists(dataDir);
         if (!directoryExists) {
-            File directory = new File(path.toString());
+            File directory = new File(dataDir.toString());
             directory.mkdir();
         }
 
         // read the data from file
-        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
         boolean fileExists = Files.exists(filePath);
         if (!fileExists) {
@@ -115,7 +126,7 @@ public class DataDirectory {
             // file exist, check if empty
             FileReader fr = new FileReader(file.getAbsoluteFile());
             BufferedReader br = new BufferedReader(fr);
-            resultValue= br.readLine();
+            resultValue = br.readLine();
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -125,7 +136,7 @@ public class DataDirectory {
 
     public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> defaultValue) {
         // check if index.txt exists, if not, create one
-        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
         boolean fileExists = Files.exists(filePath);
         if (!fileExists) {
@@ -173,7 +184,7 @@ public class DataDirectory {
 
     public void readIndex(String pathToFile) {
         // check if index.txt exists, if not, create one
-        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
 
         try {
@@ -192,7 +203,7 @@ public class DataDirectory {
 
     public Map<String, String> readIndexToHashmap(String pathToFile) {
         // check if index.txt exists, if not, create one
-        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
         HashMap<String, String> mHashmap = new HashMap<>();
 
@@ -217,7 +228,7 @@ public class DataDirectory {
 
     public HashMap<String, String> readFileHashmap(String pathToFile) {
         // check if index.txt exists, if not, create one
-        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
         HashMap<String, String> mHashmap = new HashMap<>();
 
@@ -242,7 +253,7 @@ public class DataDirectory {
     }
 
     public HashMap<String, String> jsonToHashmap(String pathToFile) {
-        Path filePath = Paths.get(userHome, directoryName, pathToFile);
+        Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
         HashMap<String, String> newHashmap = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
@@ -260,10 +271,8 @@ public class DataDirectory {
     }
 
     public void listFiles(String pathToSubDir) {
-        String userHome = System.getProperty("user.home");
-        String directoryName = ".hedera";
         Path subdirpath = Paths.get(pathToSubDir);
-        Path path = Paths.get(userHome, directoryName, subdirpath.toString());
+        Path path = Paths.get(dataDir.toString(), subdirpath.toString());
 
         try {
             Stream<Path> walk = Files.walk(path);
@@ -277,14 +286,6 @@ public class DataDirectory {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public String getUserHome() {
-        return userHome;
-    }
-
-    public String getDirectoryName() {
-        return directoryName;
     }
 
 }

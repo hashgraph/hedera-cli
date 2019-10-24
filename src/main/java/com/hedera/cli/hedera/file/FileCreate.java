@@ -106,6 +106,8 @@ public class FileCreate implements Runnable {
             shellHelper.print(String.valueOf(Arrays.asList(date)));
 
             FileCreateTransaction tx = null;
+            // ZonedDateTime zonedDateTime = utils.dateToMilliseconds(date);
+            // Instant instant = zonedDateTime.toInstant();
             Instant instant = utils.dateToMilliseconds(date);
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
 
