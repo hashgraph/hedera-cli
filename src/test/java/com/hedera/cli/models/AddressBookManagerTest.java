@@ -39,8 +39,6 @@ public class AddressBookManagerTest {
   private final PrintStream stdout = System.out;
   private final ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-  List<String> outputResultArray;
-
   @TempDir
   public Path tempDir;
 
@@ -122,13 +120,6 @@ public class AddressBookManagerTest {
     assertEquals("", addressBookManager.getDefaultAccount());
   }
 
-  private List<String> captureSystemOut() {
-    String outputResult = new String(output.toByteArray());
-    List<String> outputResultArray = Arrays.asList(outputResult.split("\n"));
-    outputResultArray.stream().map(s -> s.trim()).collect(Collectors.toList());
-    return outputResultArray;
-  }
-
   @Test
   public void gettersAndSetters() {
     System.setOut(stdout);
@@ -161,6 +152,13 @@ public class AddressBookManagerTest {
 
     shellHelper = addressBookManager.getShellHelper();
     assertNotNull(shellHelper);
+  }
+
+  private List<String> captureSystemOut() {
+    String outputResult = new String(output.toByteArray());
+    List<String> outputResultArray = Arrays.asList(outputResult.split("\n"));
+    outputResultArray.stream().map(s -> s.trim()).collect(Collectors.toList());
+    return outputResultArray;
   }
 
 }
