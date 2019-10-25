@@ -1,8 +1,8 @@
 package com.hedera.cli.hedera.network;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class NetworkTest {
+
 
   private final PrintStream stdout = System.out;
   private final ByteArrayOutputStream output = new ByteArrayOutputStream();
