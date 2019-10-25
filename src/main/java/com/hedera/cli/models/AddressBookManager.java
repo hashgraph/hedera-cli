@@ -2,7 +2,6 @@ package com.hedera.cli.models;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,7 +33,7 @@ public class AddressBookManager {
   @Autowired
   private ShellHelper shellHelper;
 
-  static private final String ADDRESSBOOK_DEFAULT = "addressbook.json";
+  static private String ADDRESSBOOK_DEFAULT = "addressbook.json";
   static private final String NETWORK_DEFAULT = "testnet";
   static private final String NETWORK_FILE = "network.txt";
   static private final String ACCOUNT_DEFAULT_FILE = "default.txt";
@@ -48,8 +47,10 @@ public class AddressBookManager {
     try {
       AddressBook addressBook = mapper.readValue(input, AddressBook.class);
 
-      // check to see if there is an additional addressbook.json in ~/.hedera directory
-      // if it exists, we will deep merge our /resources/addressbook.json with ~/.hedera/addressbook.json
+      // check to see if there is an additional addressbook.json in ~/.hedera
+      // directory
+      // if it exists, we will deep merge our /resources/addressbook.json with
+      // ~/.hedera/addressbook.json
       Path additionalAddressBook = Paths.get(dataDirectory.getDataDir().toString(), "addressbook.json");
       File additionalAddressBookFile = new File(additionalAddressBook.toString());
       if (additionalAddressBookFile.exists()) {
@@ -58,12 +59,13 @@ public class AddressBookManager {
       }
 
       setNetworks(addressBook.getNetworks());
-    } catch (IOException e) {
+    } catch (Exception e) {
       shellHelper.printError(e.getMessage());
     }
 
     // ensure that all sub-directories are created
-    for (String network : getNetworksAsStrings()) {
+    List<String> networkList = getNetworksAsStrings();
+    for (String network : networkList) {
       String accountsDirForNetwork = network + File.separator + "accounts";
       dataDirectory.mkHederaSubDir(accountsDirForNetwork);
     }
@@ -71,8 +73,10 @@ public class AddressBookManager {
 
   public List<String> getNetworksAsStrings() {
     List<String> list = new ArrayList<String>();
-    for (Network network : networks) {
-      list.add(network.getName());
+    if (networks != null) {
+      for (Network network : networks) {
+        list.add(network.getName());
+      }
     }
     return list;
   }
