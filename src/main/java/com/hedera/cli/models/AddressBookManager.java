@@ -86,15 +86,13 @@ public class AddressBookManager {
   }
 
   public Network getCurrentNetwork() {
-    try {
-      String currentNetworkString = getCurrentNetworkAsString();
+    String currentNetworkString = getCurrentNetworkAsString();
+    if (networks != null) {
       for (Network network : networks) {
         if (network.getName().equals(currentNetworkString)) {
           return network;
         }
       }
-    } catch (Exception e) {
-      shellHelper.printError(e.getMessage());
     }
     return null;
   }
@@ -102,13 +100,12 @@ public class AddressBookManager {
   public void listNetworks() {
     for (Network network : networks) {
       String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
-      if (currentNetwork != null) {
-        if (currentNetwork.equals(network.getName())) {
-          System.out.println("* " + network.getName());
-        } else {
-          System.out.println("  " + network.getName());
-        }
+      if (currentNetwork.equals(network.getName())) {
+        System.out.println("* " + network.getName());
+      } else {
+        System.out.println("  " + network.getName());
       }
+
     }
   }
 

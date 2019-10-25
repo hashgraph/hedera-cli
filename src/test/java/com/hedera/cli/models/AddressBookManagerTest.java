@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doNothing;
 
 import java.io.ByteArrayOutputStream;
@@ -14,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,38 +91,23 @@ public class AddressBookManagerTest {
     // Retrieve the captured output
     List<String> outputResultArray = captureSystemOut();
 
-    assertThat(outputResultArray, containsInAnyOrder(
-      "  mainnet",
-      "* testnet"
-    ));
+    assertThat(outputResultArray, containsInAnyOrder("  mainnet", "* testnet"));
   }
 
   @Test
   public void listNetworksFail() {
+    ReflectionTestUtils.setField(addressBookManager, "ADDRESSBOOK_DEFAULT", "nosuchaddressbook.json");
     
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
     doNothing().when(shellHelper).printError(valueCapture.capture());
-    // PipedInputStream in = new PipedInputStream();
-    try {
-      // output2 = new PipedOutputStream(in);
-      // System.setOut(new PrintStream(output2, true, "UTF-8"));
-      ReflectionTestUtils.setField(addressBookManager, "ADDRESSBOOK_DEFAULT", "nosuchaddressbook.json");
-      System.setOut(stdout);
-      addressBookManager.init();
 
+    addressBookManager.init();
+    
+    String actual = valueCapture.getValue();
+    String expected = "argument \"src\" is null";
 
-      String actual = valueCapture.getValue();
-      System.out.println(valueCapture.getValue());
-      String expected = "argument \"src\" is null";
-      assertEquals(expected, actual);
-      // Retrieve the captured output
-      // List<String> outputResultArray = captureSystemOut();
-      // String outputResult = output2.toString();
-      // outputResultArray = Arrays.asList(outputResult.split("\n"));
-      // outputResultArray.stream().map(s -> s.trim()).collect(Collectors.toList());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    assertEquals(expected, actual);
+
     ReflectionTestUtils.setField(addressBookManager, "ADDRESSBOOK_DEFAULT", "addressbook.json");
   }
 
@@ -140,6 +127,40 @@ public class AddressBookManagerTest {
     List<String> outputResultArray = Arrays.asList(outputResult.split("\n"));
     outputResultArray.stream().map(s -> s.trim()).collect(Collectors.toList());
     return outputResultArray;
+  }
+
+  @Test
+  public void gettersAndSetters() {
+    System.setOut(stdout);
+    addressBookManager.init();
+
+    List<Network> networks = addressBookManager.getNetworks();
+    assertEquals(2, networks.size());
+
+    Network currentNetwork = addressBookManager.getCurrentNetwork();
+    assertEquals("testnet", currentNetwork.getName());
+
+    // deliberately remove testnet from network list
+    for (Iterator<Network> iter = networks.listIterator(); iter.hasNext();) {
+      Network n = iter.next();
+      if ("testnet".equals(n.getName())) {
+        iter.remove();
+      }
+    }
+    addressBookManager.setNetworks(networks);
+    currentNetwork = addressBookManager.getCurrentNetwork();
+    assertNull(currentNetwork);
+
+    // deliberately setNetworks to null
+    addressBookManager.setNetworks(null);
+    currentNetwork = addressBookManager.getCurrentNetwork();
+    assertNull(currentNetwork);
+
+    dataDirectory = addressBookManager.getDataDirectory();
+    assertNotNull(dataDirectory);
+
+    shellHelper = addressBookManager.getShellHelper();
+    assertNotNull(shellHelper);
   }
 
 }
