@@ -20,7 +20,6 @@ import com.hedera.cli.hedera.utils.DataDirectory;
 
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.hjson.JsonObject;
@@ -57,8 +56,6 @@ public class SetupTest {
     private String accountId;
     private List<String> mnemonic;
     private KeyPair keyPair;
-    private String phrase;
-    private AccountInfoQuery q;
 
     @BeforeEach
     public void init() {
@@ -69,7 +66,6 @@ public class SetupTest {
         EDBip32KeyChain keyChain = new EDBip32KeyChain();
         int index = 0;
         keyPair = keyChain.keyPairFromWordList(index, mnemonic);
-        phrase = "once busy dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
     }
 
     public void prepareTestData() {

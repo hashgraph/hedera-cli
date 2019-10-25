@@ -70,13 +70,9 @@ public class AccountUtils {
         if (strSplit.length != 3) {
             return false;
         }
-        if (strSplit[0].matches("^[0-9*]+$")
+        return strSplit[0].matches("^[0-9*]+$")
                 && strSplit[1].matches("^[0-9*]+$")
-                && (strSplit[2].matches("^[1-9][0-9*]+$"))) {
-            return true;
-        } else {
-            return false;
-        }
+                && (strSplit[2].matches("^[1-9][0-9*]+$"));
     }
 
 
