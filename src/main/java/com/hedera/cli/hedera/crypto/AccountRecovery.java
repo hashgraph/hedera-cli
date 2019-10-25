@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.bip39.Mnemonic;
@@ -16,15 +14,16 @@ import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.keygen.KeyPair;
+import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.hedera.utils.Utils;
-import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
+import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -65,6 +64,9 @@ public class AccountRecovery implements Runnable {
     @Autowired
     private ShellHelper shellHelper;
 
+    @Autowired
+    private Setup setup;
+
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n"
             + "@|fg(yellow) account recovery 0.0.1003|@")
@@ -80,43 +82,61 @@ public class AccountRecovery implements Runnable {
     @Override
     public void run() {
         accountInfo = new AccountGetInfo();
-        // hedera = new Hedera(context);
-        shellHelper.print("Recovering accountID in the format of 0.0.xxxx" + accountId);
-        strMethod = inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
+        shellHelper.print("Start the recovery process");
+        String accountIdInString = inputReader
+                .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
+        String accountId = accountUtils.verifyAccountId(accountIdInString, shellHelper);
+        if (accountId == null) return;
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
-        List<String> phraseList = Arrays.asList(phrase.split(" "));
-        if (phraseList.size() == 24) {
-            // recover key from phrase
-            if ("bip".equals(strMethod)) {
-                keyPair = recoverEDKeypairPostBipMigration(phraseList);
-                verifyAndSaveAccount();
-            } else if ("hgc".equals(strMethod)) {
-                keyPair = recoverEd25519AccountKeypair(phraseList);
-                verifyAndSaveAccount();
+        List<String> phraseList = accountUtils.verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
+        if (phraseList == null) return;
+        String method = inputReader
+                .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
+        String strMethod = accountUtils.verifyMethod(method, shellHelper);
+        if (strMethod == null) return;
+
+        if ("bip".equals(method)) {
+            KeyPair keyPair = recoverEDKeypairPostBipMigration(phraseList);
+            boolean accountRecovered = verifyAndSaveAccount(accountId, keyPair, shellHelper);
+            if (accountRecovered) {
+                setup.printKeyPair(keyPair, accountId, shellHelper);
+                JsonObject account = setup.addAccountToJson(accountId, keyPair);
+                setup.saveToJson(accountId, account, shellHelper);
             } else {
-                shellHelper.printError("Method must either been hgc or bip");
+                shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
         } else {
-            shellHelper.printError("Recovery words must contain 24 words");
+            KeyPair keyPair = recoverEd25519AccountKeypair(phraseList, accountId, shellHelper);
+            boolean accountRecovered = verifyAndSaveAccount(accountId, keyPair, shellHelper);
+            if (accountRecovered) {
+                setup.printKeyPair(keyPair, accountId, shellHelper);
+                JsonObject account = setup.addAccountToJson(accountId, keyPair);
+                setup.saveToJson(accountId, account, shellHelper);
+            } else {
+                shellHelper.printError("Error in verifying that accountId and recovery words match");
+            }
         }
+
     }
 
-    public void verifyAndSaveAccount() {
+    public boolean verifyAndSaveAccount(String accountId, KeyPair keyPair, ShellHelper shellHelper) {
+        com.hedera.hashgraph.sdk.account.AccountInfo accountResponse;
+        boolean accountRecovered;
         try {
-            accountRes = getAccountInfoWithPrivKey(hedera, accountId, Ed25519PrivateKey.fromString(keyPair.getPrivateKeyHex()));
-            if (accountRes.getAccountId().equals(AccountId.fromString(accountId))) {
+            accountResponse = getAccountInfoWithPrivKey(hedera, accountId, Ed25519PrivateKey.fromString(keyPair.getPrivateKeyHex()));
+            if (accountResponse.getAccountId().equals(AccountId.fromString(accountId))
+                    && !retrieveIndex()) {
                 // Check if account already exists in index.txt
-                if (!retrieveIndex()) {
-                    printKeyPair(keyPair);
-                    utils.saveAccountsToJson(keyPair, AccountId.fromString(accountId));
-                    shellHelper.printSuccess("Account recovered and saved in ~/.hedera");
-                } else {
-                    shellHelper.printWarning("This account already exists!");
-                }
+                shellHelper.printSuccess("Account recovered and verified with Hedera");
+                accountRecovered = true;
+            } else {
+                shellHelper.printWarning("This account already exists!");
+                accountRecovered = false;
             }
         } catch (Exception e) {
-            shellHelper.printError("AccountId and Recovery words do not match");
+            accountRecovered = false;
         }
+        return accountRecovered;
     }
 
     public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId, Ed25519PrivateKey accPrivKey) {
@@ -144,14 +164,14 @@ public class AccountRecovery implements Runnable {
         return accountExists;
     }
 
-    public KeyPair recoverEd25519AccountKeypair(List<String> phraseList) {
+    public KeyPair recoverEd25519AccountKeypair(List<String> phraseList, String accountId, ShellHelper shellHelper) {
         KeyPair keyPair = null;
         Mnemonic mnemonic = new Mnemonic();
         try {
             byte[] entropy = mnemonic.toEntropy(phraseList);
             byte[] seed = CryptoUtils.deriveKey(entropy, index, 32);
             keyPair = new EDKeyPair(seed);
-            printKeyPair(keyPair);
+            setup.printKeyPair(keyPair, accountId, shellHelper);
         } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
             shellHelper.printError(e.getMessage());
         }
@@ -161,21 +181,5 @@ public class AccountRecovery implements Runnable {
     public KeyPair recoverEDKeypairPostBipMigration(List<String> phraseList) {
         EDBip32KeyChain edBip32KeyChain = new EDBip32KeyChain();
         return edBip32KeyChain.keyPairFromWordList(0, phraseList);
-    }
-
-    public void printKeyPair(KeyPair keyPair) {
-        RecoveredAccountModel recoveredAccountModel = new RecoveredAccountModel();
-        recoveredAccountModel.setAccountId(accountId);
-        recoveredAccountModel.setPrivateKey(keyPair.getPrivateKeyHex());
-        recoveredAccountModel.setPublicKey(keyPair.getPublicKeyHex());
-        recoveredAccountModel.setPrivateKeyEncoded(keyPair.getPrivateKeyEncodedHex());
-        recoveredAccountModel.setPublicKeyEncoded(keyPair.getPublicKeyEncodedHex());
-        recoveredAccountModel.setPrivateKeyBrowserCompatible(keyPair.getSeedAndPublicKeyHex());
-        try {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            shellHelper.print(ow.writeValueAsString(recoveredAccountModel));
-        } catch (Exception e) {
-            shellHelper.printError(e.getMessage());
-        }
     }
 }

@@ -18,6 +18,7 @@ import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
 import org.hjson.JsonObject;
@@ -63,19 +64,19 @@ public class AccountCreate implements Runnable {
     // lasts 25hrs")
     // private boolean generateRecord = false;
 
-    @Option(names = { "-b",
-            "--balance" }, required = true, description = "Initial balance of new account created in hbars")
+    @Option(names = {"-b",
+            "--balance"}, required = true, description = "Initial balance of new account created in hbars")
     private int initBal = 0;
 
-    @Option(names = { "-k",
-            "--keygen" }, description = "Default generates a brand new key pair associated with account creation"
-                    + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000|@")
+    @Option(names = {"-k",
+            "--keygen"}, description = "Default generates a brand new key pair associated with account creation"
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000|@")
     private boolean keyGen;
 
     private String strMethod = "bip";
 
     private AccountId accountID;
-    
+
     private JsonObject account;
 
     @Override
@@ -91,8 +92,8 @@ public class AccountCreate implements Runnable {
             var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
             accountID = createNewAccount(newPublicKey, hedera.getOperatorId());
             account = printAccount(accountID.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
-            // save to local disk
-            utils.saveAccountsToJson(keypair, AccountId.fromString(accountID.toString()));
+            JsonObject jsonAccount = setup.addAccountToJson(accountID.toString(), keypair);
+            setup.saveToJson(accountID.toString(), jsonAccount, shellHelper);
         } else {
             // Else keyGen always set to false and read from default.txt which contains
             // operator keys
@@ -103,7 +104,8 @@ public class AccountCreate implements Runnable {
             String privateKey = operatorPrivateKey.toString();
             String publicKey = operatorPublicKey.toString();
             account = printAccount(accountID.toString(), privateKey, publicKey);
-            setup.saveToJson(accountID.toString(), account);
+            JsonObject jsonAccount = setup.addAccountToJsonWithPrivateKey(accountID.toString(), Ed25519PrivateKey.fromString(privateKey));
+            setup.saveToJson(accountID.toString(), jsonAccount, shellHelper);
         }
     }
 

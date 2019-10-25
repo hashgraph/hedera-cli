@@ -63,14 +63,14 @@ public class Setup implements Runnable {
         shellHelper.print("Start the setup process");
         String accountIdInString = inputReader
                 .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
-        String accountId = verifyAccountId(accountIdInString, shellHelper);
+        String accountId = accountUtils.verifyAccountId(accountIdInString, shellHelper);
         if (accountId == null) return;
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
-        List<String> phraseList = verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
+        List<String> phraseList = accountUtils.verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
         if (phraseList == null) return;
         String method = inputReader
                 .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        String strMethod = verifyMethod(method, shellHelper);
+        String strMethod = accountUtils.verifyMethod(method, shellHelper);
         if (strMethod == null) return;
 
         if ("bip".equals(method)) {
@@ -79,48 +79,20 @@ public class Setup implements Runnable {
             if (accountVerified) {
                 printKeyPair(keyPair, accountId, shellHelper);
                 JsonObject account = addAccountToJson(accountId, keyPair);
-                saveToJson(accountId, account);
+                saveToJson(accountId, account, shellHelper);
             } else {
                 shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
         } else {
-            KeyPair keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
+            KeyPair keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList, accountId, shellHelper);
             boolean accountVerified = verifyAndSaveAccount(accountId, keyPair, shellHelper);
             if (accountVerified) {
                 printKeyPair(keyPair, accountId, shellHelper);
                 JsonObject account = addAccountToJson(accountId, keyPair);
-                saveToJson(accountId, account);
+                saveToJson(accountId, account, shellHelper);
             } else {
                 shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
-        }
-    }
-
-    public List<String> verifyPhraseList(List<String> phraseList, ShellHelper shellHelper) {
-        if (phraseList.size() != 24) {
-            shellHelper.printError("Recovery words must contain 24 words");
-            return null;
-        }
-        return phraseList;
-    }
-
-    public String verifyAccountId(String accountIdInString, ShellHelper shellHelper) {
-        boolean isAccountId = accountUtils.isAccountId(accountIdInString);
-        if (!isAccountId) {
-            shellHelper.printError("AccountId must be in the format of 0.0.xxxx");
-            return null;
-        }
-        return accountIdInString;
-    }
-
-    public String verifyMethod(String method, ShellHelper shellHelper) {
-        if ("bip".equals(method)) {
-            return method;
-        } else if ("hgc".equals(method)) {
-            return method;
-        } else {
-            shellHelper.printError("Enter hgc ONLY IF you have created your account via Hedera wallet and HAVE NOT updated, otherwise enter bip");
-            return null;
         }
     }
 
@@ -158,16 +130,6 @@ public class Setup implements Runnable {
         return accountResponse;
     }
 
-    public JsonObject addAccountToJson(String accountId, KeyPair keyPair) {
-        JsonObject account = new JsonObject();
-        account.add("accountId", accountId);
-        account.add("privateKey", keyPair.getPrivateKeyHex());
-        account.add("publicKey", keyPair.getPublicKeyHex());
-        // account.add("privateKey_ASN1", keyPair.getPrivateKeyEncodedHex());
-        // account.add("publicKey_ASN1", keyPair.getPublicKeyEncodedHex());
-        return account;
-    }
-
     public JsonObject addAccountToJsonWithPrivateKey(String accountId, Ed25519PrivateKey privateKey) {
         JsonObject account = new JsonObject();
         account.add("accountId", accountId);
@@ -176,7 +138,15 @@ public class Setup implements Runnable {
         return account;
     }
 
-    public void saveToJson(String accountId, JsonObject account) {
+    public JsonObject addAccountToJson(String accountId, KeyPair keyPair) {
+        JsonObject account = new JsonObject();
+        account.add("accountId", accountId);
+        account.add("privateKey", keyPair.getPrivateKeyHex());
+        account.add("publicKey", keyPair.getPublicKeyHex());
+        return account;
+    }
+
+    public void saveToJson(String accountId, JsonObject account, ShellHelper shellHelper) {
         // ~/.hedera/[network_name]/accounts/[account_name].json
         String fileName = randomNameGenerator.getRandomName();
         String fileNameWithExt = fileName + ".json";
@@ -202,7 +172,7 @@ public class Setup implements Runnable {
             // write to index if account does not yet exist in index
             dataDirectory.readWriteToIndex(pathToIndexTxt, mHashMap);
         } catch (Exception e) {
-            System.err.println("did not save json");
+            shellHelper.printError("did not save json");
         }
     }
 
