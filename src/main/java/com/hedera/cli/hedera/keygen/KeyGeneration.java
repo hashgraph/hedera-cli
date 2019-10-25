@@ -70,7 +70,6 @@ public class KeyGeneration implements Runnable {
   public KeyPair generateKeysAndWords(HGCSeed hgcSeed, List<String> wordList) {
     KeyPair keyPair;
     if (strMethod.contains("bip")) {
-//      keyPair = keyPairAfterBipMigration(hgcSeed);
       keyPair = keyPairAfterBipMigration(wordList);
     } else {
       System.out.println(strMethod);
