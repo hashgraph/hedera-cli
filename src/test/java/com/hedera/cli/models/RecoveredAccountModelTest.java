@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class RecoveredAccountModelTest {
 
   @Test
-  private void recoveredAccountModel() {
+  public void recoveredAccountModel() {
 
     RecoveredAccountModel r = new RecoveredAccountModel();
 
