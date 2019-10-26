@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.cli.models.Recipient;
 import com.hedera.cli.models.Sender;
@@ -26,6 +27,8 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,6 +43,7 @@ import picocli.CommandLine.Spec;
 
 @NoArgsConstructor
 @Setter
+@Getter
 @Component
 @Command(name = "multiple", description = "@|fg(225) Transfer hbars to multiple accounts with multiple senders"
         + "%nWhereby default account is the operator, ie the paying account for transaction fees,"
@@ -55,13 +59,16 @@ public class CryptoTransferMultiple implements Runnable {
     @Autowired
     private Utils utils;
 
+    @Autowired
+    AccountUtils accountUtils;
+
     @Spec
     private CommandSpec spec;
 
     @Option(names = { "-a",
-            "--accountId" }, split = " ", arity = "1..*", required = true, description = "Recipient accountID to transfer to, shardNum and realmNum not needed"
+            "--accountId" }, split = " ", arity = "1..*", required = true, description = "Recipient accountID in the format shardNum.realmNum.accountNum"
                     + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) transfer multiple -a=1001,1002,1003 -r=100,100,100|@")
+                    + "@|fg(yellow) transfer multiple -a=0.0.1001,0.0.1002,0.0.1003 -r=100,100,100|@")
     private String springRecipient;
 
     @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
@@ -89,7 +96,7 @@ public class CryptoTransferMultiple implements Runnable {
             recipientAmt = springRecipientAmt.split(",");
             // Cli prompt for input from user
             memoString = inputReader.prompt("Memo field");
-            senderAccountIDInString = inputReader.prompt("Input sender accountID in the format xxxx");
+            senderAccountIDInString = inputReader.prompt("Input sender accountID in the format 0.0.xxxx");
             String transferAmountInStr = inputReader.prompt("Input transfer amount");
 
             var recipientList = Arrays.asList(recipient);
@@ -100,11 +107,11 @@ public class CryptoTransferMultiple implements Runnable {
 
             // Create a multi-sender crypto transfer where sender does not have to pay
             // transaction fees = network fee + node fee
-            var senderAccountID = AccountId.fromString("0.0." + senderAccountIDInString);
+            var senderAccountID = AccountId.fromString(senderAccountIDInString);
             Long transferAmount = Long.parseLong(transferAmountInStr);
 
             // Sender and recipient's total must always be zero
-            long senderTotal = sumOfTransfer(recipientAmt) - transferAmount.longValue();
+            long senderTotal = sumOfTransfer(recipientAmt) - transferAmount;
             if (senderTotal != 0) {
                 shellHelper.printError("Transaction total amount must add up to a zero sum!");
             }
@@ -117,7 +124,7 @@ public class CryptoTransferMultiple implements Runnable {
 
             // .addTransfer can be called as many times as you want as long as
             // the total sum of all transfers adds up to zero
-            cryptoTransferTransaction.addTransfer(senderAccountID, -transferAmount.longValue());
+            cryptoTransferTransaction.addTransfer(senderAccountID, -transferAmount);
 
             // Dynamic population of recipient List
             map.forEach((key, value) -> {
@@ -129,7 +136,7 @@ public class CryptoTransferMultiple implements Runnable {
                 cryptoTransferTransaction.addTransfer(account, amount);
             });
 
-            if (StringUtils.isEmpty(memoString)) {
+            if (StringUtil.isNullOrEmpty(memoString)) {
                 memoString = "";
             }
             // Sets the memo that is required in some transactions
@@ -278,8 +285,8 @@ public class CryptoTransferMultiple implements Runnable {
                 for (int i = 0; i < accountList.size(); ++i) {
                     acc = accountList.get(i);
                     amt = amountList.get(i);
-                    if (StringUtils.isNumeric(acc) && isAccountId(acc) && isNumeric(amt)) {
-                        accountId = AccountId.fromString("0.0." + acc);
+                    if (accountUtils.isAccountId(acc) && isNumeric(amt)) {
+                        accountId = AccountId.fromString(acc);
                         var amount = new BigInteger(amt);
                         Recipient recipient1 = new Recipient(accountId, amount.longValue());
                         map.put(i, recipient1);
@@ -304,7 +311,7 @@ public class CryptoTransferMultiple implements Runnable {
 
     public boolean isNumeric(final String str) {
         // checks null or empty
-        if (str == null || str.isEmpty()) {
+        if (StringUtil.isNullOrEmpty(str)) {
             return false;
         }
         for (char c : str.toCharArray()) {
@@ -315,23 +322,6 @@ public class CryptoTransferMultiple implements Runnable {
         return true;
     }
 
-    public boolean isAccountId(final String str) {
-        // checks null or empty
-        if (str == null || str.isEmpty()) {
-            return false;
-        }
-        // checks if accountId only contains 0
-        if (str.matches("^[0]+$")) {
-            return false;
-        }
-        try {
-            // parse string to make sure it can be of type AccountId
-            AccountId.fromString("0.0." + str);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
     private String noPreview(String preview) {
         if ("no".equals(preview)) {
