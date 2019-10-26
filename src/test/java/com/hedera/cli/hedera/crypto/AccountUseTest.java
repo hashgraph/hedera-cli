@@ -2,26 +2,16 @@ package com.hedera.cli.hedera.crypto;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.hedera.cli.hedera.utils.DataDirectory;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationContext;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountUseTest {
 
   @InjectMocks
   private AccountUse accountUse;
-
-  @Mock
-  private ApplicationContext context;
-
-  @Mock
-  private DataDirectory dataDirectory;
 
   @Test
   public void testAccountUseWithNoArgs() {
