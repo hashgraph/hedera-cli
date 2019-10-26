@@ -11,7 +11,6 @@ import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
@@ -29,9 +28,6 @@ import picocli.CommandLine.Parameters;
         description = "@|fg(225) Gets the information of the paying/operator account"
                 + " returns a stateproof if requested|@")
 public class AccountGetInfo implements Runnable {
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private Hedera hedera;
