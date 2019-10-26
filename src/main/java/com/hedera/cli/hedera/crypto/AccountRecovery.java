@@ -83,10 +83,8 @@ public class AccountRecovery implements Runnable {
     public void run() {
         accountInfo = new AccountGetInfo();
         shellHelper.print("Start the recovery process");
-        String accountIdInString = inputReader
-                .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
-        String accountId = accountUtils.verifyAccountId(accountIdInString, shellHelper);
-        if (accountId == null) return;
+        String verifiedAccountId = accountUtils.verifyAccountId(accountId, shellHelper);
+        if (verifiedAccountId == null) return;
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = accountUtils.verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
         if (phraseList == null) return;
