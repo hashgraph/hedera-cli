@@ -14,7 +14,9 @@ import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.HederaAccount;
+import com.hedera.cli.models.Network;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
@@ -50,6 +52,9 @@ public class Setup implements Runnable {
 
     @Autowired
     private RandomNameGenerator randomNameGenerator;
+
+    @Autowired
+    AddressBookManager addressBookManager;
 
     @Autowired
     private Hedera hedera;
@@ -117,7 +122,12 @@ public class Setup implements Runnable {
         try {
             // check account exists on hedera by hardcoding initial
             // because the application might not have been fully spun up yet.
-            Client client = new Client(AccountId.fromString("0.0.3"), "35.188.20.11:50211")
+            List<Network> networks = addressBookManager.getNetworks();
+            addressBookManager.setNetworks(networks);
+            Network currentNetwork = addressBookManager.getCurrentNetwork();
+            AccountId nodeAccountId = AccountId.fromString(currentNetwork.getRandomNode().getAccount());
+            String nodeAddress = currentNetwork.getRandomNode().getAddress();
+            Client client = new Client(nodeAccountId, nodeAddress)
                     .setOperator(AccountId.fromString(accountId), accPrivKey);
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)
