@@ -79,15 +79,15 @@ account balance 0.0.xxxx
 ## Crypto Transfer
 ```bash
 # valid commands
-transfer single -a 1001 -r 44 
-transfer single --accountId 1001 --recipientAmt 44
+transfer single -a 0.0.1001 -r 44 
+transfer single --accountId 0.0.1001 --recipientAmt 44
 ```
 
 ## Crypto Transfer Multiple
 ```bash
 # valid commands
-transfer multiple -a 1001,1002,1003 -r 44,55,66 
-transfer multiple --accountId 1001,1002,1003 --recipientAmt 44,55,66
+transfer multiple -a 0.0.1001,0.0.1002,0.0.1003 -r 44,55,66 
+transfer multiple --accountId 0.0.1001,0.0.1002,0.0.1003 --recipientAmt 44,55,66
 ```
 
 TODO

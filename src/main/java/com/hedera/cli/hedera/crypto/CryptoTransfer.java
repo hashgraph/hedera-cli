@@ -10,6 +10,7 @@ import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +38,7 @@ public class CryptoTransfer implements Runnable {
     private CommandSpec spec;
 
     @Option(names = { "-a",
-            "--accountId" }, arity = "1", required = true, description = "Recipient's accountID to transfer to, shardNum and realmNum NOT NEEDED")
+            "--accountId" }, arity = "1", required = true, description = "Recipient's accountID in the format shardNum.realmNum.accountNum")
     private String recipient;
 
     @Option(names = { "-r",
@@ -48,7 +49,7 @@ public class CryptoTransfer implements Runnable {
             "--noPreview" }, arity = "0..1", defaultValue = "yes", fallbackValue = "no", description = "Cryptotransfer preview"
                     + "\noption with optional parameter. Default: ${DEFAULT-VALUE},\n"
                     + "if specified without parameter: ${FALLBACK-VALUE}" + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) transfer single -a 1234 -r 100|@")
+                    + "@|fg(yellow) transfer single -a 0.0.1234 -r 100|@")
     private String mPreview = "no";
 
     private String memoString;
@@ -58,10 +59,12 @@ public class CryptoTransfer implements Runnable {
     @Override
     public void run() {
         memoString = inputReader.prompt("Memo field");
-        // Hedera hedera = new Hedera(context);
+        if (StringUtil.isNullOrEmpty(memoString)) {
+            memoString = "";
+        }
         var operatorId = hedera.getOperatorId();
         var client = hedera.createHederaClient();
-        var recipientId = AccountId.fromString("0.0." + recipient);
+        var recipientId = AccountId.fromString(recipient);
         var amount = new BigInteger(recipientAmt);
 
         if ("no".equals(noPreview(mPreview))) {
