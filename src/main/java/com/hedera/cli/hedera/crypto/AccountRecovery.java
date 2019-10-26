@@ -25,7 +25,6 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -45,9 +44,6 @@ public class AccountRecovery implements Runnable {
 
     @Spec
     private CommandSpec spec;
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private Hedera hedera;
@@ -101,7 +97,7 @@ public class AccountRecovery implements Runnable {
                 JsonObject account = setup.addAccountToJson(accountId, keyPair);
                 setup.saveToJson(accountId, account, shellHelper);
             } else {
-                shellHelper.printError("Error in verifying that accountId and recovery words match");
+                shellHelper.printError("Error in recovering account");
             }
         } else {
             KeyPair keyPair = recoverEd25519AccountKeypair(phraseList, accountId, shellHelper);
@@ -111,7 +107,7 @@ public class AccountRecovery implements Runnable {
                 JsonObject account = setup.addAccountToJson(accountId, keyPair);
                 setup.saveToJson(accountId, account, shellHelper);
             } else {
-                shellHelper.printError("Error in verifying that accountId and recovery words match");
+                shellHelper.printError("Error in recovering account");
             }
         }
 
@@ -128,10 +124,11 @@ public class AccountRecovery implements Runnable {
                 shellHelper.printSuccess("Account recovered and verified with Hedera");
                 accountRecovered = true;
             } else {
-                shellHelper.printWarning("This account already exists!");
+                shellHelper.printError("This account already exists!");
                 accountRecovered = false;
             }
         } catch (Exception e) {
+            shellHelper.printError("Error in verifying accountID and recovery words");
             accountRecovered = false;
         }
         return accountRecovered;

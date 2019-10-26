@@ -4,6 +4,7 @@ import java.math.BigInteger;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.TransactionId;
@@ -33,6 +34,9 @@ public class CryptoTransfer implements Runnable {
 
     @Autowired
     private Hedera hedera;
+
+    @Autowired
+    private AccountUtils accountUtils;
 
     @Spec
     private CommandSpec spec;

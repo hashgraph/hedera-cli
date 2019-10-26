@@ -23,7 +23,6 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -41,9 +40,6 @@ import picocli.CommandLine.Spec;
         + "%ntogether with 24 recovery words (bip compatible)," + "%nCreates a new Hedera account and "
         + "%nReturns an accountID in the form of shardNum.realmNum.accountNum.|@", helpCommand = true)
 public class AccountCreate implements Runnable {
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private ShellHelper shellHelper;

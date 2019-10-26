@@ -20,7 +20,6 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -38,9 +37,6 @@ public class AccountDelete implements Runnable {
 
     @Spec
     private CommandSpec spec;
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private Hedera hedera;
