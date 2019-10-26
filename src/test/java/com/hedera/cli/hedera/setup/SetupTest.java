@@ -1,7 +1,7 @@
 package com.hedera.cli.hedera.setup;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -11,13 +11,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.HGCSeed;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
+import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
+import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -46,6 +50,18 @@ public class SetupTest {
 
     @Mock
     private ShellHelper shellHelper;
+
+    @Mock
+    private AccountUtils accountUtils;
+
+    @Mock
+    private AccountRecovery accountRecovery;
+
+    @Mock
+    private Hedera hedera;
+
+    @Mock
+    private AddressBookManager addressBookManager;
 
     @Mock
     private RandomNameGenerator randomNameGenerator;
@@ -155,6 +171,21 @@ public class SetupTest {
 
         JsonObject objectActual = setup.addAccountToJsonWithPrivateKey(accountId, Ed25519PrivateKey.fromString(keyPair.getPrivateKeyHex()));
         assertEquals(objectExpected, objectActual);
+    }
+
+    @Test
+    public void autoWiredDependenciesNotNull() {
+        accountUtils = setup.getAccountUtils();
+        assertNotNull(accountUtils);
+
+        hedera = setup.getHedera();
+        assertNotNull(hedera);
+
+        addressBookManager = setup.getAddressBookManager();
+        assertNotNull(addressBookManager);
+
+        accountRecovery = setup.getAccountRecovery();
+        assertNotNull(accountRecovery);
     }
 
 //    @Test

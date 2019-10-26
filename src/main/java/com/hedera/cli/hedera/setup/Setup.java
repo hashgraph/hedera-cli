@@ -54,7 +54,7 @@ public class Setup implements Runnable {
     private RandomNameGenerator randomNameGenerator;
 
     @Autowired
-    AddressBookManager addressBookManager;
+    private AddressBookManager addressBookManager;
 
     @Autowired
     private Hedera hedera;

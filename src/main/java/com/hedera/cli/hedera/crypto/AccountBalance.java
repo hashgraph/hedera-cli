@@ -1,6 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -28,15 +29,20 @@ public class AccountBalance implements Runnable {
     private Hedera hedera;
 
     @Autowired
+    private AccountUtils accountUtils;
+
+    @Autowired
     private ShellHelper shellHelper;
 
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n"
             + "@|fg(yellow) account balance 0.0.1003|@")
-    private String accountIDInString;
+    private String accountIdInString;
 
     @Override
     public void run() {
+        String accountId = accountUtils.verifyAccountId(accountIdInString, shellHelper);
+        if (accountId == null) return;
         getBalance();
     }
 
@@ -44,7 +50,7 @@ public class AccountBalance implements Runnable {
         long balance = 0;
         try {
             Client client = hedera.createHederaClient();
-            balance = client.getAccountBalance(AccountId.fromString(accountIDInString));
+            balance = client.getAccountBalance(AccountId.fromString(accountIdInString));
             shellHelper.printSuccess("Balance: " + balance);
             client.close();
         } catch (Exception e) {
