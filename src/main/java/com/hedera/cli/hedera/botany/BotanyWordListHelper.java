@@ -13,5 +13,5 @@ public class BotanyWordListHelper {
             "heather", "hemlock", "hickory", "holly", "hyacinth", "iberis", "ilana", "ilex", "indigo", "iris", "ipheion", "ipomoea", "ixia", "ixora", "ivy", "jasmine",
             "jessamine", "juniper", "kale", "lavender", "lemon", "lime", "lily", "linden", "maple", "magnolia", "mint", "moss", "mulberry", "neem", "oak",
             "olive", "palm", "pine", "pitcher", "poppy", "primerose", "plum", "radish", "redwood", "reed", "raspberry", "rose", "scarlet", "sequoia", "serviceberry",
-            "shamrocks", "spindle", "spinach", "spruce", "sumac", "sycamore", "teak", "thistle", "thyme", "tulip", "violet", "walnut", "weed", "willow", "walnut", "yew");
+            "shamrocks", "spindle", "spinach", "spruce", "sumac", "sycamore", "teak", "thistle", "thyme", "tulip", "violet", "walnut", "weed", "willow", "yew");
 }
