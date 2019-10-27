@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 
@@ -103,5 +104,13 @@ public class AccountUtils {
             shellHelper.printError("Enter hgc ONLY IF you have created your account via Hedera wallet and HAVE NOT updated, otherwise enter bip");
             return null;
         }
+    }
+
+    public String promptMemoString(InputReader inputReader) {
+        String memoString = inputReader.prompt("Memo field");
+        if (StringUtil.isNullOrEmpty(memoString)) {
+            memoString = "";
+        }
+        return  memoString;
     }
 }
