@@ -104,32 +104,57 @@ public class HederaCrypto extends CliDefaults {
     @ShellMethod(value = "transfer hbars from one Hedera account to another")
     public void transfer(@ShellOption(defaultValue = "") String subCommand,
                          @ShellOption(value = {"-a", "--accountId"}, defaultValue = "") String[] aa,
-                         @ShellOption(value = {"-r", "--recipientAmount"}, defaultValue = "") String[] rr,
-                         @ShellOption(value = {"-n", "--noPreview"}, arity = 0) boolean n) {
+                         @ShellOption(value = {"-n", "--noPreview"}, arity = 0) boolean n,
+                         @ShellOption(value = {"-hb", "--tinybars"}, defaultValue = "") String[] hb,
+                         @ShellOption(value = {"-tb", "--hbars"}, defaultValue = "") String[] tb) {
 
         // @formatter:on
         ArrayList<String> argsList = new ArrayList<>();
 
-        if (isEmptyStringArray(aa) || isEmptyStringArray(rr)) {
+        if (!isEmptyStringArray(aa) && !isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
+            shellHelper.printError("Amount must be in hbar or tinybar");
+        }
+        if (isEmptyStringArray(aa) && (isEmptyStringArray(hb) && isEmptyStringArray(tb))) {
             shellHelper.printError("Recipient and amount cannot be empty");
-        } else {
+        }
+        if (!isEmptyStringArray(aa) && !isEmptyStringArray(hb) && isEmptyStringArray(tb)) {
+            // hbar args
             argsList.add("-a=" + Arrays.toString(aa)
                     .replace("[", "")
                     .replace("]", "")
                     .replace(" ", ""));
-            argsList.add("-r=" + Arrays.toString(rr)
+            argsList.add("-hb=" + Arrays.toString(hb)
                     .replace("[", "")
                     .replace("]", "")
                     .replace(" ", ""));
-            argsList.add("-n=yes");
             if (n) {
                 argsList.add("-n=no");
+            } else {
+                argsList.add("-n=yes");
+            }
+        }
+        if (!isEmptyStringArray(aa) && isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
+            // tinybar args
+            argsList.add("-a=" + Arrays.toString(aa)
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", ""));
+            argsList.add("-tb=" + Arrays.toString(tb)
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", ""));
+            if (n) {
+                argsList.add("-n=no");
+            } else {
+                argsList.add("-n=yes");
             }
         }
 
         Object[] objs = argsList.toArray();
         String[] args = Arrays.copyOf(objs, objs.length, String[].class);
         // @formatter:off
+        System.out.println("bb");
+        System.out.println(Arrays.toString(args));
 
         Transfer transfer = new Transfer();
         try {
