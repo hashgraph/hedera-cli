@@ -1,5 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.HederaException;
@@ -11,14 +12,13 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 @Component
-@Command(name="update",
-        description = "@|fg(225) Updates the account public key|@",
-        subcommands = {})
-public class AccountUpdate implements Runnable {
+@Command(name = "update", description = "@|fg(225) Updates the account public key|@", subcommands = {})
+public class AccountUpdate implements Runnable, Operation {
 
     @Autowired
     private ShellHelper shellHelper;
@@ -26,11 +26,12 @@ public class AccountUpdate implements Runnable {
     @Autowired
     private Hedera hedera;
 
-    @Option(names = {"-a", "--account"}, description = "AccountId of public key to be updated")
+    @Option(names = { "-a", "--account" }, description = "AccountId of public key to be updated")
     private String accountId;
-//
-//    @Option(names = {"-origk", "--origKey"}, description = "Original public key to be updated")
-//    private String originalKey;
+    //
+    // @Option(names = {"-origk", "--origKey"}, description = "Original public key
+    // to be updated")
+    // private String originalKey;
 
     @Override
     public void run() {
@@ -48,12 +49,9 @@ public class AccountUpdate implements Runnable {
             shellHelper.printInfo("set key = " + newKey.getPublicKey());
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
             new AccountUpdateTransaction(client).setAccountForUpdate(AccountId.fromString(accountId))
-                    .setTransactionId(transactionId)
-                    .setKey(newKey.getPublicKey())
+                    .setTransactionId(transactionId).setKey(newKey.getPublicKey())
                     // Sign with the previous key and the new key
-                    .sign(originalKey)
-                    .sign(newKey)
-                    .executeForReceipt();
+                    .sign(originalKey).sign(newKey).executeForReceipt();
             // Now we fetch the account information to check if the key was changed
             shellHelper.printInfo(" :: getAccount and check our current key");
 
@@ -62,6 +60,19 @@ public class AccountUpdate implements Runnable {
             shellHelper.printInfo("key = " + info.getKey());
         } catch (HederaException e) {
             shellHelper.printError(e.getMessage());
+        }
+    }
+
+    @Override
+    public void executeSubCommand(InputReader inputReader, String... args) {
+        if (args.length == 0) {
+            CommandLine.usage(this, System.out);
+        } else {
+            try {
+                new CommandLine(this).execute(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Parameters;
@@ -40,7 +41,7 @@ import picocli.CommandLine.Spec;
 @Setter
 @Component
 @Command(name = "recovery", description = "@|fg(225) Recovers a Hedera account via the 24 recovery words.|@", helpCommand = true)
-public class AccountRecovery implements Runnable {
+public class AccountRecovery implements Runnable, Operation {
 
     @Spec
     private CommandSpec spec;
@@ -176,5 +177,20 @@ public class AccountRecovery implements Runnable {
     public KeyPair recoverEDKeypairPostBipMigration(List<String> phraseList) {
         EDBip32KeyChain edBip32KeyChain = new EDBip32KeyChain();
         return edBip32KeyChain.keyPairFromWordList(0, phraseList);
+    }
+
+    @Override
+    public void executeSubCommand(InputReader inputReader, String... args) {
+        if (args.length == 0) {
+            CommandLine.usage(this, System.out);
+        } else {
+            try {
+                this.setInputReader(inputReader);
+                new CommandLine(this).execute(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }

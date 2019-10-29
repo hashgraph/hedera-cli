@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.HGCSeed;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.Setter;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -40,7 +42,7 @@ import picocli.CommandLine.Spec;
 @Command(name = "create", separator = " ", description = "@|fg(225) Generates a new Ed25519 Keypair compatible with java and wallet,"
         + "%ntogether with 24 recovery words (bip compatible)," + "%nCreates a new Hedera account and "
         + "%nReturns an accountID in the form of shardNum.realmNum.accountNum.|@", helpCommand = true)
-public class AccountCreate implements Runnable {
+public class AccountCreate implements Runnable, Operation {
 
     @Autowired
     private ApplicationContext context;
@@ -64,13 +66,13 @@ public class AccountCreate implements Runnable {
     // lasts 25hrs")
     // private boolean generateRecord = false;
 
-    @Option(names = {"-b",
-            "--balance"}, required = true, description = "Initial balance of new account created in hbars")
+    @Option(names = { "-b",
+            "--balance" }, required = true, description = "Initial balance of new account created in hbars")
     private int initBal = 0;
 
-    @Option(names = {"-k",
-            "--keygen"}, description = "Default generates a brand new key pair associated with account creation"
-            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000|@")
+    @Option(names = { "-k",
+            "--keygen" }, description = "Default generates a brand new key pair associated with account creation"
+                    + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000|@")
     private boolean keyGen;
 
     private String strMethod = "bip";
@@ -129,8 +131,7 @@ public class AccountCreate implements Runnable {
         TransactionId transactionId = new TransactionId(operatorId);
         var tx = new AccountCreateTransaction(client)
                 // The only _required_ property here is `key`
-                .setTransactionId(transactionId)
-                .setKey(publicKey).setInitialBalance(initBal)
+                .setTransactionId(transactionId).setKey(publicKey).setInitialBalance(initBal)
                 .setAutoRenewPeriod(Duration.ofSeconds(7890000));
 
         // This will wait for the receipt to become available
@@ -153,5 +154,18 @@ public class AccountCreate implements Runnable {
             throw new ParameterException(spec.commandLine(), "Minimum must be a positive integer");
         }
         initBal = min;
+    }
+
+    @Override
+    public void executeSubCommand(InputReader inputReader, String... args) {
+        if (args.length == 0) {
+            CommandLine.usage(this, System.out);
+        } else {
+            try {
+                new CommandLine(this).execute(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
