@@ -1,7 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,15 +26,15 @@ public class AccountBalanceTest {
     private ShellHelper shellHelper;
 
     @Mock
-    private AccountUtils accountUtils;
+    private AccountManager accountManager;
 
     @Mock
     private Hedera hedera;
 
     @Test
     public void autoWiredDependenciesNotNull() {
-        accountUtils = accountBalance.getAccountUtils();
-        assertNotNull(accountUtils);
+        accountManager = accountBalance.getAccountManager();
+        assertNotNull(accountManager);
 
         shellHelper = accountBalance.getShellHelper();
         assertNotNull(shellHelper);
@@ -51,8 +51,8 @@ public class AccountBalanceTest {
     public void runAccountBalanceVerifies() {
         String accountId = "0.0.1121";
         accountBalance.setAccountIdInString(accountId);
-        when(accountUtils.verifyAccountId(accountId, shellHelper)).thenReturn(accountId);
+        when(accountManager.verifyAccountId(accountId, shellHelper)).thenReturn(accountId);
         accountBalance.run();
-        verify(accountUtils, times(1)).verifyAccountId(accountId, shellHelper);
+        verify(accountManager, times(1)).verifyAccountId(accountId, shellHelper);
     }
 }

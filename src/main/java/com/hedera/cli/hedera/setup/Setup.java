@@ -10,7 +10,6 @@ import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.RecoveredAccountModel;
@@ -38,9 +37,6 @@ public class Setup implements Runnable {
     private AccountRecovery accountRecovery;
 
     @Autowired
-    private AccountUtils accountUtils;
-
-    @Autowired
     private DataDirectory dataDirectory;
 
     @Autowired
@@ -61,14 +57,14 @@ public class Setup implements Runnable {
         shellHelper.print("Start the setup process");
         String accountIdInString = inputReader
                 .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
-        String accountId = accountUtils.verifyAccountId(accountIdInString, shellHelper);
+        String accountId = hedera.accountManager.verifyAccountId(accountIdInString, shellHelper);
         if (accountId == null) return;
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
-        List<String> phraseList = accountUtils.verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
+        List<String> phraseList = hedera.accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
         if (phraseList == null) return;
         String method = inputReader
                 .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        String strMethod = accountUtils.verifyMethod(method, shellHelper);
+        String strMethod = hedera.accountManager.verifyMethod(method, shellHelper);
         if (strMethod == null) return;
 
         if ("bip".equals(method)) {
@@ -76,7 +72,7 @@ public class Setup implements Runnable {
             boolean accountVerified = verifyAndSaveAccount(accountId, keypair, shellHelper);
             if (accountVerified) {
                 printKeyPair(keypair, accountId, shellHelper);
-                hedera.accountUtils.setDefaultAccountId(AccountId.fromString(accountId), keypair);
+                hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keypair);
             } else {
                 shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
@@ -85,7 +81,7 @@ public class Setup implements Runnable {
             boolean accountVerified = verifyAndSaveAccount(accountId, keypair, shellHelper);
             if (accountVerified) {
                 printKeyPair(keypair, accountId, shellHelper);
-                hedera.accountUtils.setDefaultAccountId(AccountId.fromString(accountId), keypair);
+                hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keypair);
             } else {
                 shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
@@ -113,7 +109,7 @@ public class Setup implements Runnable {
         try {
             // check account exists on hedera by hardcoding initial
             // because the application might not have been fully spun up yet.
-            hedera.accountUtils.setDefaultAccountId(AccountId.fromString(accountId), accPrivKey);
+            hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), accPrivKey);
             Client client = hedera.createHederaClient();
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)

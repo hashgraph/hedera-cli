@@ -1,6 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
 import com.hedera.cli.shell.ShellHelper;
@@ -17,7 +17,7 @@ public class AccountList implements Runnable {
     private DataDirectory dataDirectory;
 
     @Autowired
-    private AccountUtils accountUtils;
+    private AccountManager accountManager;
 
     @Autowired
     private ShellHelper shellHelper;
@@ -25,7 +25,7 @@ public class AccountList implements Runnable {
     @Override
     public void run() {
         shellHelper.print("List of accounts in the current network");
-        String pathToIndexTxt = accountUtils.pathToIndexTxt();
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
         dataDirectory.readIndex(pathToIndexTxt);
     }
 }

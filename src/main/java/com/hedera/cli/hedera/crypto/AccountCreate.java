@@ -92,7 +92,7 @@ public class AccountCreate implements Runnable {
             var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
             accountId = createNewAccount(newPublicKey, hedera.getOperatorId());
             account = printAccount(accountId.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
-            hedera.accountUtils.setDefaultAccountId(accountId, keypair);
+            hedera.accountManager.setDefaultAccountId(accountId, keypair);
         } else {
             // Else keyGen always set to false and read from default.txt which contains
             // operator keys
@@ -103,7 +103,7 @@ public class AccountCreate implements Runnable {
             String privateKey = operatorPrivateKey.toString();
             String publicKey = operatorPublicKey.toString();
             account = printAccount(accountId.toString(), privateKey, publicKey);
-            hedera.accountUtils.setDefaultAccountId(accountId, Ed25519PrivateKey.fromString(privateKey));
+            hedera.accountManager.setDefaultAccountId(accountId, Ed25519PrivateKey.fromString(privateKey));
         }
     }
 

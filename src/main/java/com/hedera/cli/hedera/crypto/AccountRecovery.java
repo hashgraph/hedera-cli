@@ -15,7 +15,7 @@ import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.Setup;
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.cli.shell.ShellHelper;
@@ -55,7 +55,7 @@ public class AccountRecovery implements Runnable {
     private DataDirectory dataDirectory;
 
     @Autowired
-    private AccountUtils accountUtils;
+    private AccountManager accountManager;
 
     @Autowired
     private Utils utils;
@@ -82,14 +82,14 @@ public class AccountRecovery implements Runnable {
     public void run() {
         accountInfo = new AccountGetInfo();
         shellHelper.print("Start the recovery process");
-        String verifiedAccountId = accountUtils.verifyAccountId(accountId, shellHelper);
+        String verifiedAccountId = accountManager.verifyAccountId(accountId, shellHelper);
         if (verifiedAccountId == null) return;
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
-        List<String> phraseList = accountUtils.verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
+        List<String> phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
         if (phraseList == null) return;
         String method = inputReader
                 .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        String strMethod = accountUtils.verifyMethod(method, shellHelper);
+        String strMethod = accountManager.verifyMethod(method, shellHelper);
         if (strMethod == null) return;
 
         if ("bip".equals(method)) {
@@ -97,7 +97,7 @@ public class AccountRecovery implements Runnable {
             boolean accountRecovered = verifyAndSaveAccount(accountId, keypair, shellHelper);
             if (accountRecovered) {
                 setup.printKeyPair(keypair, accountId, shellHelper);
-                hedera.accountUtils.setDefaultAccountId(AccountId.fromString(accountId), keypair);
+                hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keypair);
             } else {
                 shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
@@ -106,7 +106,7 @@ public class AccountRecovery implements Runnable {
             boolean accountRecovered = verifyAndSaveAccount(accountId, keypair, shellHelper);
             if (accountRecovered) {
                 setup.printKeyPair(keypair, accountId, shellHelper);
-                hedera.accountUtils.setDefaultAccountId(AccountId.fromString(accountId), keypair);
+                hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keypair);
             } else {
                 shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
@@ -148,7 +148,7 @@ public class AccountRecovery implements Runnable {
     }
 
     public boolean retrieveIndex() {
-        String pathToIndexTxt = accountUtils.pathToIndexTxt();
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
         boolean accountExists = false;
         Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
         for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {

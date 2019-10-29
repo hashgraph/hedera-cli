@@ -3,7 +3,7 @@ package com.hedera.cli.hedera;
 import java.util.List;
 import java.util.Map;
 
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.HederaNode;
@@ -36,7 +36,7 @@ public class Hedera {
     private AddressBookManager addressBookManager;
 
     @Autowired
-    public AccountUtils accountUtils;
+    public AccountManager accountManager;
 
     private HederaNode node;
 
@@ -63,7 +63,7 @@ public class Hedera {
             String accountNumber = currentAccountId();
             operatorId = AccountId.fromString(accountNumber);
         } else {
-            operatorId = accountUtils.getDefaultAccountId();
+            operatorId = accountManager.getDefaultAccountId();
         }
         return operatorId;
     }
@@ -78,7 +78,7 @@ public class Hedera {
     }
 
     public String retrieveIndexAccountKeyInHexString() {
-        String pathToIndexTxt = accountUtils.pathToIndexTxt();
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
 
         String accountId;
         String value;
@@ -90,7 +90,7 @@ public class Hedera {
             value = entry.getValue(); // value refers to the filename json
             String currentAccountId = currentAccountId();
             if (accountId.equals(currentAccountId)) {
-                String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
+                String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
                 Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
                 privateKey = currentJsonAccount.get("privateKey").toString();
             }
@@ -99,7 +99,7 @@ public class Hedera {
     }
 
     public String retrieveIndexAccountPublicKeyInHexString() {
-        String pathToIndexTxt = accountUtils.pathToIndexTxt();
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
 
         String publicKey = "";
         String accountId;
@@ -111,7 +111,7 @@ public class Hedera {
             value = entry.getValue(); // value refers to the filename json
             String currentAccountId = currentAccountId();
             if (accountId.equals(currentAccountId)) {
-                String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
+                String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
                 Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
                 publicKey = currentJsonAccount.get("publicKey").toString();
             }
@@ -125,7 +125,7 @@ public class Hedera {
         if (currentAccountExist) {
             privateKeyInHexString = retrieveIndexAccountKeyInHexString();
         } else {
-            privateKeyInHexString = accountUtils.getDefaultAccountKeyInHexString();
+            privateKeyInHexString = accountManager.getDefaultAccountKeyInHexString();
         }
         return Ed25519PrivateKey.fromString(privateKeyInHexString);
     }

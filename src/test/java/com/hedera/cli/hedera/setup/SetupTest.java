@@ -14,7 +14,7 @@ import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.RecoveredAccountModel;
@@ -45,7 +45,7 @@ public class SetupTest {
     private ShellHelper shellHelper;
 
     @Mock
-    private AccountUtils accountUtils;
+    private AccountManager accountManager;
 
     @Mock
     private AccountRecovery accountRecovery;
@@ -114,9 +114,6 @@ public class SetupTest {
 
     @Test
     public void autoWiredDependenciesNotNull() {
-        accountUtils = setup.getAccountUtils();
-        assertNotNull(accountUtils);
-
         hedera = setup.getHedera();
         assertNotNull(hedera);
 
@@ -136,7 +133,7 @@ public class SetupTest {
 //        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn("bip");
 //        when(inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator")).thenReturn(accountId);
 //        when(inputReader.prompt("24 words phrase", "secret", false)).thenReturn(phrase);
-//        when(accountUtils.isAccountId(accountId)).thenReturn(true);
+//        when(accountManager.isAccountId(accountId)).thenReturn(true);
 //        when(accountRecovery.recoverEDKeypairPostBipMigration(Arrays.asList(phrase.split(" ")))).thenReturn(keyPair);
 //
 //        q = new AccountInfoQuery(client)
@@ -168,7 +165,7 @@ public class SetupTest {
 //        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn("hgc");
 //        when(inputReader.prompt("account ID in the format of 0.0.xxxx that will be used as default operator")).thenReturn(accountId);
 //        when(inputReader.prompt("24 words phrase", "secret", false)).thenReturn(phrase);
-//        when(accountUtils.isAccountId(accountId)).thenReturn(true);
+//        when(accountManager.isAccountId(accountId)).thenReturn(true);
 //        when(accountRecovery.recoverEd25519AccountKeypair(Arrays.asList(phrase.split(" ")), accountId, shellHelper)).thenReturn(keyPair);
 //
 //        q = new AccountInfoQuery(client)
