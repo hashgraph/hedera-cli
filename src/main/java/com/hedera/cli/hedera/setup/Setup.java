@@ -10,8 +10,6 @@ import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.utils.DataDirectory;
-import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
@@ -35,15 +33,6 @@ public class Setup implements Runnable {
 
     @Autowired
     private AccountRecovery accountRecovery;
-
-    @Autowired
-    private DataDirectory dataDirectory;
-
-    @Autowired
-    private RandomNameGenerator randomNameGenerator;
-
-    @Autowired
-    private AddressBookManager addressBookManager;
 
     @Autowired
     private Hedera hedera;
@@ -121,52 +110,6 @@ public class Setup implements Runnable {
         }
         return accountResponse;
     }
-
-    // public JsonObject addAccountToJsonWithPrivateKey(String accountId, Ed25519PrivateKey privateKey) {
-    //     JsonObject account = new JsonObject();
-    //     account.add("accountId", accountId);
-    //     account.add("privateKey", privateKey.toString());
-    //     account.add("publicKey", privateKey.getPublicKey().toString());
-    //     return account;
-    // }
-
-    // public JsonObject addAccountToJson(String accountId, KeyPair keypair) {
-    //     JsonObject account = new JsonObject();
-    //     account.add("accountId", accountId);
-    //     account.add("privateKey", keypair.getPrivateKeyHex());
-    //     account.add("publicKey", keypair.getPublicKeyHex());
-    //     return account;
-    // }
-
-    // public void saveToJson(String accountId, JsonObject account, ShellHelper shellHelper) {
-    //     // ~/.hedera/[network_name]/accounts/[account_name].json
-    //     String fileName = randomNameGenerator.getRandomName();
-    //     String fileNameWithExt = fileName + ".json";
-    //     String networkName = dataDirectory.readFile("network.txt");
-    //     String pathToAccountsFolder = networkName + File.separator + "accounts" + File.separator;
-    //     String pathToAccountFile = pathToAccountsFolder + fileNameWithExt;
-
-    //     String pathToDefaultTxt = pathToAccountsFolder + "default.txt";
-    //     String pathToIndexTxt = pathToAccountsFolder + "index.txt";
-
-    //     HashMap<String, String> mHashMap = new HashMap<>();
-    //     mHashMap.put(accountId, fileName);
-    //     ObjectMapper mapper = new ObjectMapper();
-
-    //     try {
-    //         // create the account json and write it to disk
-    //         Object jsonObject = mapper.readValue(account.toString(), HederaAccount.class);
-    //         String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
-    //         dataDirectory.writeFile(pathToAccountFile, accountValue);
-    //         // default account
-    //         dataDirectory.readFile(pathToDefaultTxt, fileName + ":" + accountId);
-    //         // current account
-    //         // write to index if account does not yet exist in index
-    //         dataDirectory.readWriteToIndex(pathToIndexTxt, mHashMap);
-    //     } catch (Exception e) {
-    //         shellHelper.printError("did not save json");
-    //     }
-    // }
 
     public void printKeyPair(KeyPair keypair, String accountId, ShellHelper shellHelper) {
         RecoveredAccountModel recoveredAccountModel = new RecoveredAccountModel();

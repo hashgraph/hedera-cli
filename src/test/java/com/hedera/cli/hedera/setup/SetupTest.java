@@ -2,9 +2,7 @@ package com.hedera.cli.hedera.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -15,8 +13,6 @@ import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.AccountManager;
-import com.hedera.cli.hedera.utils.DataDirectory;
-import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 
@@ -27,7 +23,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.FileSystemUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class SetupTest {
@@ -53,14 +48,7 @@ public class SetupTest {
     @Mock
     private Hedera hedera;
 
-    @Mock
-    private AddressBookManager addressBookManager;
-
-    @Mock
-    private RandomNameGenerator randomNameGenerator;
-
     // not a mock
-    private DataDirectory dataDirectory;
     private String accountId;
     private List<String> mnemonic;
     private KeyPair keyPair;
@@ -73,24 +61,6 @@ public class SetupTest {
         EDBip32KeyChain keyChain = new EDBip32KeyChain();
         int index = 0;
         keyPair = keyChain.keyPairFromWordList(index, mnemonic);
-    }
-
-    public void prepareTestData() {
-        String randFileName = "mushy_daisy_4820";
-        // we manually invoke new DataDirectory as a real object
-        dataDirectory = new DataDirectory();
-        // then, we use the tempDir as its actual data directory
-        dataDirectory.setDataDir(tempDir);
-        setup.setDataDirectory(dataDirectory);
-        dataDirectory.writeFile("network.txt", "testnet");
-        dataDirectory.mkHederaSubDir("testnet/accounts/");
-        dataDirectory.writeFile("testnet/accounts/default.txt", randFileName + ":" + accountId);
-    }
-
-    public void cleanUpTestData() {
-        File tempDirFolder = new File(tempDir.toString());
-        boolean deleted = FileSystemUtils.deleteRecursively(tempDirFolder);
-        assertTrue(deleted);
     }
 
     @Test
@@ -116,9 +86,6 @@ public class SetupTest {
     public void autoWiredDependenciesNotNull() {
         hedera = setup.getHedera();
         assertNotNull(hedera);
-
-        addressBookManager = setup.getAddressBookManager();
-        assertNotNull(addressBookManager);
 
         accountRecovery = setup.getAccountRecovery();
         assertNotNull(accountRecovery);
