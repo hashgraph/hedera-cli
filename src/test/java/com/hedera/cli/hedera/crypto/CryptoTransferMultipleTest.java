@@ -98,10 +98,10 @@ public class CryptoTransferMultipleTest {
 //    }
 
     @Test
-    public void testRecipientList() {
+    public void recipientListInTiny() {
         List<String> accountList = Arrays.asList("0.0.1001", "0.0.1002", "0.0.1003");
         List<String> amountList = Arrays.asList("100", "9888486986", "10000001100000");
-        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList);
+        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList, true);
 
         // This test needs an assertion to be completed. Please fix this.
         assertTrue(true);

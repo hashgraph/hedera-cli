@@ -1,7 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.List;
 
@@ -9,6 +8,7 @@ import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.Composite;
+import com.hedera.cli.hedera.utils.CryptoTransferUtils;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.TransactionId;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import picocli.CommandLine;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
@@ -45,6 +45,9 @@ public class CryptoTransfer implements Runnable {
     private AccountUtils accountUtils;
 
     @Autowired
+    private CryptoTransferUtils cryptoTransferUtils;
+
+    @Autowired
     private Composite composite;
 
     @Spec
@@ -62,6 +65,7 @@ public class CryptoTransfer implements Runnable {
     @Override
     public void run() {
         try {
+            // size 2
             for (int i = 0; i < composites.size(); i++) {
                 // get the exclusive arg by user ie tinybars or hbars
                 composite = composites.get(i);
@@ -76,12 +80,20 @@ public class CryptoTransfer implements Runnable {
             var recipientId = AccountId.fromString(recipient);
 
             if (!StringUtil.isNullOrEmpty(tinyBars) && StringUtil.isNullOrEmpty(hBars)) {
-                memoString = inputReader.prompt("Memo field");
-                amountInTiny = verifyTransferInTinyBars(tinyBars);
+                memoString = accountUtils.promptMemoString(inputReader);
+                amountInTiny = cryptoTransferUtils.verifyTransferInTinyBars(tinyBars);
+                if (amountInTiny == 0L) {
+                    shellHelper.printError("Tinybars must be whole numbers");
+                    return;
+                }
                 reviewAndExecute(client, operatorId, recipientId, amountInTiny);
             } else if (StringUtil.isNullOrEmpty(tinyBars) && !StringUtil.isNullOrEmpty(hBars)) {
-                memoString = inputReader.prompt("Memo field");
-                amountInTiny = verifyTransferInHbars(hBars);
+                memoString = accountUtils.promptMemoString(inputReader);
+                amountInTiny = cryptoTransferUtils.verifyTransferInHbars(hBars);
+                if (amountInTiny == 0L) {
+                    shellHelper.printError("Hbar must be > 0");
+                    return;
+                }
                 reviewAndExecute(client, operatorId, recipientId, amountInTiny);
             } else if (StringUtil.isNullOrEmpty(tinyBars) && StringUtil.isNullOrEmpty(hBars)) {
                 shellHelper.printError("You have to provide a transaction amount in hbars or tinybars");
@@ -91,23 +103,6 @@ public class CryptoTransfer implements Runnable {
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
-    }
-
-    public long verifyTransferInHbars(String hBars) {
-        long amountInHbars = Long.parseLong(hBars);
-        long tinyConversion = 100000000L;
-        return amountInHbars * tinyConversion;
-    }
-
-
-    public long verifyTransferInTinyBars(String tinyBars) {
-        if (Long.parseLong(tinyBars) >= 1L) {
-            return Long.parseLong(tinyBars);
-        }
-        System.out.println(tinyBars);
-        System.out.println(Long.parseLong(tinyBars));
-        System.out.println(Long.parseLong(null));
-        return Long.parseLong(tinyBars);
     }
 
     public void reviewAndExecute(Client client, AccountId operatorId, AccountId recipientId, long amountInTiny) {

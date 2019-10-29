@@ -16,7 +16,10 @@ public class Composite {
     public Dependent dependent;
 
     public static class Exclusive {
-        @Option(names = {"-tb", "--recipientAmtTinyBars"}, required = true, description = "Amount to transfer in tinybars")
+        @Option(names = {"-tb", "--recipientAmtTinyBars"}, required = true, description = "Amount to transfer in tinybars"
+                + "%n@|bold,underline Usage:|@%n"
+                + "@|fg(yellow) transfer single -a 0.0.1234 -tb 100|@"
+                + "@|fg(yellow) transfer single -a 0.0.1234 -hb 0.1|@")
         public String recipientAmtTinyBars;
 
         @Option(names = {"-hb", "--recipientAmtHBars"}, required = true, description = "Amount to transfer in hbars")
@@ -29,11 +32,10 @@ public class Composite {
                 "--accountId" }, arity = "1", required = true, description = "Recipient's accountID in the format shardNum.realmNum.accountNum")
         public String recipient;
 
-        @Option(names = { "-n",
-                "--noPreview" }, arity = "0..1", defaultValue = "yes", fallbackValue = "no", description = "Cryptotransfer preview"
-                + "\noption with optional parameter. Default: ${DEFAULT-VALUE},\n"
-                + "if specified without parameter: ${FALLBACK-VALUE}" + "%n@|bold,underline Usage:|@%n"
-                + "@|fg(yellow) transfer single -a 0.0.1234 -r 100|@")
+        @Option(names = {"-y", "--yes"}, arity = "0..1", defaultValue = "yes", fallbackValue = "no",
+                description = "Yes, skip preview"
+                        + "\noption with optional parameter. Default: ${DEFAULT-VALUE},\n"
+                        + "if specified without parameter: ${FALLBACK-VALUE}")
         public String mPreview = "no";
     }
 }

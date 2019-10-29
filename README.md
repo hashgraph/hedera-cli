@@ -78,16 +78,24 @@ account balance 0.0.xxxx
 ```
 ## Crypto Transfer
 ```bash
-# valid commands
-transfer single -a 0.0.1001 -r 44 
-transfer single --accountId 0.0.1001 --recipientAmt 44
+# Transfer in tinybars
+transfer single -a 0.0.1001 -tb 4400 
+transfer single --accountId 0.0.1001 --recipientAmtTinyBars 4400
+
+# Transfer in hbars
+transfer single -a 0.0.1001 -hb 0.00044 
+transfer single --accountId 0.0.1001 --recipientAmtHBars 0.00044
 ```
 
 ## Crypto Transfer Multiple
 ```bash
-# valid commands
-transfer multiple -a 0.0.1001,0.0.1002,0.0.1003 -r 44,55,66 
-transfer multiple --accountId 0.0.1001,0.0.1002,0.0.1003 --recipientAmt 44,55,66
+# Transfer in tinybars
+transfer multiple -a 0.0.1001,0.0.1002,0.0.1003 -tb 440000,550000,660000 
+transfer multiple --accountId 0.0.1001,0.0.1002,0.0.1003 --recipientAmtTinyBars 44000,55000,66000
+
+# Transfer in hbars
+transfer multiple -a 0.0.1001,0.0.1002,0.0.1003 -hb 0.44,1.55,22.66
+transfer multiple --accountId 0.0.1001,0.0.1002,0.0.1003 --recipientAmtHBars 0.44,1.55,22.66
 ```
 
 TODO

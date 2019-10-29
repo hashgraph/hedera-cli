@@ -1,6 +1,5 @@
 package com.hedera.cli.hedera.crypto;
 
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +10,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountUtils;
-import com.hedera.cli.hedera.utils.Utils;
+import com.hedera.cli.hedera.utils.*;
 import com.hedera.cli.models.Recipient;
 import com.hedera.cli.models.Sender;
 import com.hedera.cli.models.TransactionObj;
@@ -29,7 +27,6 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +35,7 @@ import lombok.Setter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
+import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Spec;
 
 @NoArgsConstructor
@@ -60,27 +57,27 @@ public class CryptoTransferMultiple implements Runnable {
     private Utils utils;
 
     @Autowired
-    AccountUtils accountUtils;
+    private AccountUtils accountUtils;
+
+    @Autowired
+    private CryptoTransferUtils cryptoTransferUtils;
+
+    @Autowired
+    private Composite2 composite;
 
     @Spec
     private CommandSpec spec;
 
-    @Option(names = { "-a",
-            "--accountId" }, split = " ", arity = "1..*", required = true, description = "Recipient accountID in the format shardNum.realmNum.accountNum"
-                    + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) transfer multiple -a=0.0.1001,0.0.1002,0.0.1003 -r=100,100,100|@")
+    @ArgGroup(exclusive = false, multiplicity = "1")
+    List<Composite2> composites;
+
     private String springRecipient;
-
-    @Option(names = {"-r", "--recipientAmt"}, split = " ", arity = "1..*", required = true, description = "Amount to transfer in tinybar")
-    private String springRecipientAmt;
-
-    @Option(names = { "-n",
-            "noPreview" }, arity = "0..1", defaultValue = "yes", fallbackValue = "no", description = "Cryptotransfer preview option with optional parameter\n"
-                    + "Default: ${DEFAULT-VALUE},\n" + "if specified without parameters: ${FALLBACK-VALUE}")
+    private String springTinybarAmt;
+    private String springHbarAmt;
     private String mPreview = "no";
-  
+
     private String[] recipient;
-    private String[] recipientAmt;
+    private String[] recipientAmtStrArray;
     private String senderAccountIDInString;
     private String memoString = "";
 
@@ -88,37 +85,75 @@ public class CryptoTransferMultiple implements Runnable {
     private Ed25519PrivateKey senderPrivKey;
 
     private String isInfoCorrect;
+    private long transferAmount;
+    private boolean isTiny;
 
     @Override
     public void run() {
         try {
-            recipient = springRecipient.split(",");
-            recipientAmt = springRecipientAmt.split(",");
-            // Cli prompt for input from user
-            memoString = inputReader.prompt("Memo field");
-            senderAccountIDInString = inputReader.prompt("Input sender accountID in the format 0.0.xxxx");
-            String transferAmountInStr = inputReader.prompt("Input transfer amount");
+            // size 2
+            for (int i = 0; i < composites.size(); i++) {
+                // get the exclusive arg by user ie tinybars or hbars
+                composite = composites.get(i);
+            }
+            springHbarAmt = composite.exclusive.recipientAmtHBars;
+            springTinybarAmt = composite.exclusive.recipientAmtTinyBars;
+            springRecipient = composite.dependent.springRecipient;
+            mPreview = composite.dependent.mPreview;
 
-            var recipientList = Arrays.asList(recipient);
-            var amountList = Arrays.asList(recipientAmt);
+            if (!StringUtil.isNullOrEmpty(springTinybarAmt) && StringUtil.isNullOrEmpty(springHbarAmt)) {
+                // tinybar arg
+                recipient = springRecipient.split(",");
+                recipientAmtStrArray = springTinybarAmt.split(",");
+                memoString = accountUtils.promptMemoString(inputReader);
+                senderAccountIDInString = promptSenderId(inputReader);
+                String transferAmountInStr = promptTransferAmount(inputReader);
+                transferAmount = cryptoTransferUtils.verifyTransferInTinyBars(transferAmountInStr);
+                // Sender and recipient's total must always be zero
+                isTiny = true;
+                long senderTotal = sumOfTransfer(recipientAmtStrArray, isTiny) - transferAmount;
+                if (senderTotal != 0) {
+                    shellHelper.printError("Transaction total amount must add up to a zero sum!");
+                    return;
+                }
+            } else if (StringUtil.isNullOrEmpty(springTinybarAmt) && !StringUtil.isNullOrEmpty(springHbarAmt)) {
+                // hbar arg
+                recipient = springRecipient.split(",");
+                recipientAmtStrArray = springHbarAmt.split(",");
+                memoString = accountUtils.promptMemoString(inputReader);
+                senderAccountIDInString = promptSenderId(inputReader);
+                String transferAmountInStr = promptTransferAmount(inputReader);
+                transferAmount = cryptoTransferUtils.verifyTransferInHbars(transferAmountInStr);
+                // Sender and recipient's total must always be zero
+                isTiny = false;
+                long senderTotal = sumOfTransfer(recipientAmtStrArray, isTiny) - transferAmount;
+                if (senderTotal != 0) {
+                    shellHelper.printError("Transaction total amount must add up to a zero sum!");
+                    return;
+                }
+            } else if (StringUtil.isNullOrEmpty(springTinybarAmt) && StringUtil.isNullOrEmpty(springHbarAmt)) {
+                shellHelper.printError("You have to provide a transaction amount in hbars or tinybars");
+            } else {
+                shellHelper.printError("Error in commandline");
+            }
+
+            List<String> recipientList = Arrays.asList(recipient);
+            List<String> amountList = Arrays.asList(recipientAmtStrArray);
             // Operator is the current default account user
-            var operatorId = hedera.getOperatorId();
-            var client = hedera.createHederaClient();
+            AccountId operatorId = hedera.getOperatorId();
+            Client client = hedera.createHederaClient();
 
             // Create a multi-sender crypto transfer where sender does not have to pay
             // transaction fees = network fee + node fee
-            var senderAccountID = AccountId.fromString(senderAccountIDInString);
-            Long transferAmount = Long.parseLong(transferAmountInStr);
-
-            // Sender and recipient's total must always be zero
-            long senderTotal = sumOfTransfer(recipientAmt) - transferAmount;
-            if (senderTotal != 0) {
-                shellHelper.printError("Transaction total amount must add up to a zero sum!");
-            }
+            AccountId senderAccountID = AccountId.fromString(senderAccountIDInString);
 
             // Simple check, can be more comprehensive
-            var map = verifiedRecipientMap(recipientList, amountList);
-
+            System.out.println("HELLOO");
+            System.out.println(isTiny());
+            Map<Integer, Recipient> map = verifiedRecipientMap(recipientList, amountList, isTiny());
+            if (map == null) {
+                return;
+            }
             // Create a crypto transfer transaction
             CryptoTransferTransaction cryptoTransferTransaction = new CryptoTransferTransaction(client);
 
@@ -131,14 +166,11 @@ public class CryptoTransferMultiple implements Runnable {
                 if (map.size() != amountList.size()) {
                     shellHelper.printError("Please check your recipient list");
                 }
-                var account = value.getAccountId();
-                var amount = value.getAmount();
+                AccountId account = value.getAccountId();
+                long amount = value.getAmount();
                 cryptoTransferTransaction.addTransfer(account, amount);
             });
 
-            if (StringUtil.isNullOrEmpty(memoString)) {
-                memoString = "";
-            }
             // Sets the memo that is required in some transactions
             cryptoTransferTransaction.setMemo(memoString);
 
@@ -174,6 +206,15 @@ public class CryptoTransferMultiple implements Runnable {
         }
     }
 
+    public String promptSenderId(InputReader inputReader) {
+        return inputReader.prompt("Input sender accountID in the format 0.0.xxxx");
+    }
+
+    public String promptTransferAmount(InputReader inputReader) {
+        return inputReader.prompt("Input transfer amount");
+    }
+
+
     private String promptPreview(AccountId operatorId, String jsonStringSender, String jsonStringRecipient) {
         return inputReader.prompt("\nOperator\n" + operatorId + "\nSender\n" + jsonStringSender + "\nRecipient\n"
                 + jsonStringRecipient + "\n\nIs this correct?" + "\nyes/no");
@@ -184,12 +225,12 @@ public class CryptoTransferMultiple implements Runnable {
 
         try {
 
-            var senderBalanceBefore = client.getAccountBalance(senderAccountID);
-            var operatorBalanceBefore = client.getAccountBalance(operatorId);
+            long senderBalanceBefore = client.getAccountBalance(senderAccountID);
+            long operatorBalanceBefore = client.getAccountBalance(operatorId);
             shellHelper.print(senderAccountID + " sender balance BEFORE = " + senderBalanceBefore);
             shellHelper.print(operatorId + " operator balance BEFORE = " + operatorBalanceBefore);
             TransactionReceipt transactionReceipt;
-            TransactionRecord record = null;
+            TransactionRecord record;
 
             TransactionId transactionId = new TransactionId(operatorId);
             cryptoTransferTransaction.setTransactionId(transactionId);
@@ -248,12 +289,12 @@ public class CryptoTransferMultiple implements Runnable {
     private void printBalance(Client client, AccountId operatorId, AccountId senderAccountID) {
         try {
             shellHelper.printInfo("transferring...");
-            var operatorBalanceAfter = client.getAccountBalance(operatorId);
-            var senderBalanceAfter = client.getAccountBalance(senderAccountID);
+            long operatorBalanceAfter = client.getAccountBalance(operatorId);
+            long senderBalanceAfter = client.getAccountBalance(senderAccountID);
             // Get balance is always free, does not require any keys
             shellHelper.print(senderAccountID + " sender balance AFTER = " + senderBalanceAfter);
             shellHelper.print(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
-        } catch(Exception e) {
+        } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
     }
@@ -272,12 +313,23 @@ public class CryptoTransferMultiple implements Runnable {
                 .toBytes();
     }
 
-    public Map<Integer, Recipient> verifiedRecipientMap(List<String> accountList, List<String> amountList) {
+    /**
+     * verifiedRecipientMap verifies that for every account there is an amount.
+     * It then verifies if
+     * @param accountList List of recipient accounts
+     * @param amountList List of recipient amounts
+     * @param isTiny Return true if arguments passed from CLI is -tb, else false if arguments passed from CLI is -hb
+     * @returns null if error, else returns a Map of recipients
+     */
+    public Map<Integer, Recipient> verifiedRecipientMap(List<String> accountList, List<String> amountList, boolean isTiny) {
         AccountId accountId;
         String acc;
         String amt;
+        long amountInTiny;
         Map<Integer, Recipient> map = new HashMap<>();
 
+        System.out.println("whatt is tiny here in map recipient");
+        System.out.println(isTiny);
         try {
             if (accountList.size() != amountList.size())
                 shellHelper.printError("Lists aren't the same size");
@@ -285,11 +337,28 @@ public class CryptoTransferMultiple implements Runnable {
                 for (int i = 0; i < accountList.size(); ++i) {
                     acc = accountList.get(i);
                     amt = amountList.get(i);
-                    if (accountUtils.isAccountId(acc) && isNumeric(amt)) {
+                    if (isTiny && accountUtils.isAccountId(acc)) {
+                        amountInTiny = cryptoTransferUtils.verifyTransferInTinyBars(amt);
+                        if (amountInTiny == 0L) {
+                            shellHelper.printError("Tinybars must be whole numbers");
+                            return null;
+                        }
                         accountId = AccountId.fromString(acc);
-                        var amount = new BigInteger(amt);
-                        Recipient recipient1 = new Recipient(accountId, amount.longValue());
-                        map.put(i, recipient1);
+                        Recipient verifiedRecipient = new Recipient(accountId, amountInTiny);
+                        map.put(i, verifiedRecipient);
+                    } else if (!isTiny && accountUtils.isAccountId(acc)) {
+                        amountInTiny = cryptoTransferUtils.verifyTransferInHbars(amt);
+                        if (amountInTiny == 0L) {
+                            shellHelper.printError("Hbar must be > 0");
+                            return null;
+                        }
+                        accountId = AccountId.fromString(acc);
+                        Recipient verifiedRecipient = new Recipient(accountId, amountInTiny);
+                        map.put(i, verifiedRecipient);
+                    }
+                    else {
+                        shellHelper.printError("Some error occurred");
+                        return null;
                     }
                 }
             }
@@ -299,12 +368,38 @@ public class CryptoTransferMultiple implements Runnable {
         return map;
     }
 
-    public long sumOfTransfer(String[] recipientAmt) {
+    /**
+     * sumOfTransfer verifies whether the amount in the recipient amount string array contains tinybars or hbars
+     * verifies accordingly and adds the total sum.
+     * @param recipientAmtStrArray
+     * @param isTiny return true if arguments passed from CLI is -tb, else false if arguments passed from CLI is -hb
+     * @returns 0L if error, else returns total sum of transfer in long
+     */
+    public long sumOfTransfer(String[] recipientAmtStrArray, boolean isTiny) {
         long sum = 0;
-
-        for (String amt : recipientAmt) {
-            var amount = new BigInteger(amt);
-            sum += amount.longValue();
+        long amountInTiny;
+        System.out.println("whatt is tiny here in sum of trasnfer");
+        System.out.println(isTiny);
+        if (isTiny) {
+            // Sum in tiny from tiny
+            for (String amt : recipientAmtStrArray) {
+                amountInTiny = cryptoTransferUtils.verifyTransferInTinyBars(amt);
+                if (amountInTiny == 0L) {
+                    shellHelper.printError("Tinybars must be whole numbers");
+                    return 0L;
+                }
+                sum += amountInTiny;
+            }
+        } else {
+            // Sum in tiny from hbar
+            for (String amt : recipientAmtStrArray) {
+                amountInTiny = cryptoTransferUtils.verifyTransferInHbars(amt);
+                if (amountInTiny == 0L) {
+                    shellHelper.printError("Hbar must be > 0");
+                    return 0L;
+                }
+                sum += amountInTiny;
+            }
         }
         return sum;
     }

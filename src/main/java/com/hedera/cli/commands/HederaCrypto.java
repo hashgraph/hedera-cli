@@ -104,7 +104,7 @@ public class HederaCrypto extends CliDefaults {
     @ShellMethod(value = "transfer hbars from one Hedera account to another")
     public void transfer(@ShellOption(defaultValue = "") String subCommand,
                          @ShellOption(value = {"-a", "--accountId"}, defaultValue = "") String[] aa,
-                         @ShellOption(value = {"-n", "--noPreview"}, arity = 0) boolean n,
+                         @ShellOption(value = {"-y", "--yesSkipPreview"}, arity = 0) boolean y,
                          @ShellOption(value = {"-hb", "--tinybars"}, defaultValue = "") String[] hb,
                          @ShellOption(value = {"-tb", "--hbars"}, defaultValue = "") String[] tb) {
 
@@ -127,10 +127,10 @@ public class HederaCrypto extends CliDefaults {
                     .replace("[", "")
                     .replace("]", "")
                     .replace(" ", ""));
-            if (n) {
-                argsList.add("-n=no");
+            if (y) {
+                argsList.add("-y=no");
             } else {
-                argsList.add("-n=yes");
+                argsList.add("-y=yes");
             }
         }
         if (!isEmptyStringArray(aa) && isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
@@ -143,10 +143,10 @@ public class HederaCrypto extends CliDefaults {
                     .replace("[", "")
                     .replace("]", "")
                     .replace(" ", ""));
-            if (n) {
-                argsList.add("-n=no");
+            if (y) {
+                argsList.add("-y=no");
             } else {
-                argsList.add("-n=yes");
+                argsList.add("-y=yes");
             }
         }
 
@@ -173,17 +173,4 @@ public class HederaCrypto extends CliDefaults {
         }
         return true;
     }
-
-//	public static String[] add(String[] originalArray, String newItem)
-//	{
-//		int currentSize = originalArray.length;
-//		int newSize = currentSize + 1;
-//		String[] tempArray = new String[ newSize ];
-//		for (int i=0; i < currentSize; i++)
-//		{
-//			tempArray[i] = originalArray [i];
-//		}
-//		tempArray[newSize- 1] = newItem;
-//		return tempArray;
-//	}
 }
