@@ -111,10 +111,6 @@ public class AccountManager {
         }
     }
 
-    public void setDefaultAccountPrivateKey(Ed25519PrivateKey pk) {
-
-    }
-
     public AccountId getDefaultAccountId() {
         String[] accountString = defaultAccountString();
         return AccountId.fromString(accountString[1]);

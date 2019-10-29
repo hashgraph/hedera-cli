@@ -12,7 +12,6 @@ import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 
@@ -38,9 +37,6 @@ public class SetupTest {
 
     @Mock
     private ShellHelper shellHelper;
-
-    @Mock
-    private AccountManager accountManager;
 
     @Mock
     private AccountRecovery accountRecovery;
