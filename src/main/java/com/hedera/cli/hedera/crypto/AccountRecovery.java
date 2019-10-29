@@ -23,7 +23,6 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
-import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -77,7 +76,7 @@ public class AccountRecovery implements Runnable {
     private InputReader inputReader;
     private AccountGetInfo accountInfo;
     private com.hedera.hashgraph.sdk.account.AccountInfo accountRes;
-    private KeyPair keyPair;
+    private KeyPair keypair;
 
     @Override
     public void run() {
@@ -94,22 +93,20 @@ public class AccountRecovery implements Runnable {
         if (strMethod == null) return;
 
         if ("bip".equals(method)) {
-            KeyPair keyPair = recoverEDKeypairPostBipMigration(phraseList);
-            boolean accountRecovered = verifyAndSaveAccount(accountId, keyPair, shellHelper);
+            KeyPair keypair = recoverEDKeypairPostBipMigration(phraseList);
+            boolean accountRecovered = verifyAndSaveAccount(accountId, keypair, shellHelper);
             if (accountRecovered) {
-                setup.printKeyPair(keyPair, accountId, shellHelper);
-                JsonObject account = setup.addAccountToJson(accountId, keyPair);
-                setup.saveToJson(accountId, account, shellHelper);
+                setup.printKeyPair(keypair, accountId, shellHelper);
+                hedera.accountUtils.setDefaultAccountId(AccountId.fromString(accountId), keypair);
             } else {
                 shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
         } else {
-            KeyPair keyPair = recoverEd25519AccountKeypair(phraseList, accountId, shellHelper);
-            boolean accountRecovered = verifyAndSaveAccount(accountId, keyPair, shellHelper);
+            KeyPair keypair = recoverEd25519AccountKeypair(phraseList, accountId, shellHelper);
+            boolean accountRecovered = verifyAndSaveAccount(accountId, keypair, shellHelper);
             if (accountRecovered) {
-                setup.printKeyPair(keyPair, accountId, shellHelper);
-                JsonObject account = setup.addAccountToJson(accountId, keyPair);
-                setup.saveToJson(accountId, account, shellHelper);
+                setup.printKeyPair(keypair, accountId, shellHelper);
+                hedera.accountUtils.setDefaultAccountId(AccountId.fromString(accountId), keypair);
             } else {
                 shellHelper.printError("Error in verifying that accountId and recovery words match");
             }
@@ -117,11 +114,11 @@ public class AccountRecovery implements Runnable {
 
     }
 
-    public boolean verifyAndSaveAccount(String accountId, KeyPair keyPair, ShellHelper shellHelper) {
+    public boolean verifyAndSaveAccount(String accountId, KeyPair keypair, ShellHelper shellHelper) {
         com.hedera.hashgraph.sdk.account.AccountInfo accountResponse;
         boolean accountRecovered;
         try {
-            accountResponse = getAccountInfoWithPrivKey(hedera, accountId, Ed25519PrivateKey.fromString(keyPair.getPrivateKeyHex()));
+            accountResponse = getAccountInfoWithPrivKey(hedera, accountId, Ed25519PrivateKey.fromString(keypair.getPrivateKeyHex()));
             if (accountResponse.getAccountId().equals(AccountId.fromString(accountId))
                     && !retrieveIndex()) {
                 // Check if account already exists in index.txt
@@ -163,17 +160,17 @@ public class AccountRecovery implements Runnable {
     }
 
     public KeyPair recoverEd25519AccountKeypair(List<String> phraseList, String accountId, ShellHelper shellHelper) {
-        KeyPair keyPair = null;
+        KeyPair keypair = null;
         Mnemonic mnemonic = new Mnemonic();
         try {
             byte[] entropy = mnemonic.toEntropy(phraseList);
             byte[] seed = CryptoUtils.deriveKey(entropy, index, 32);
-            keyPair = new EDKeyPair(seed);
-            setup.printKeyPair(keyPair, accountId, shellHelper);
+            keypair = new EDKeyPair(seed);
+            setup.printKeyPair(keypair, accountId, shellHelper);
         } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
             shellHelper.printError(e.getMessage());
         }
-        return keyPair;
+        return keypair;
     }
 
     public KeyPair recoverEDKeypairPostBipMigration(List<String> phraseList) {

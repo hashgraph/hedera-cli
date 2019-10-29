@@ -18,7 +18,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Component
 public class Hedera {
 
@@ -32,7 +36,7 @@ public class Hedera {
     private AddressBookManager addressBookManager;
 
     @Autowired
-    private AccountUtils accountUtils;
+    public AccountUtils accountUtils;
 
     private HederaNode node;
 
@@ -59,7 +63,7 @@ public class Hedera {
             String accountNumber = currentAccountId();
             operatorId = AccountId.fromString(accountNumber);
         } else {
-            operatorId = accountUtils.retrieveDefaultAccountID();
+            operatorId = accountUtils.getDefaultAccountId();
         }
         return operatorId;
     }
@@ -121,12 +125,12 @@ public class Hedera {
         if (currentAccountExist) {
             privateKeyInHexString = retrieveIndexAccountKeyInHexString();
         } else {
-            privateKeyInHexString = accountUtils.retrieveDefaultAccountKeyInHexString();
+            privateKeyInHexString = accountUtils.getDefaultAccountKeyInHexString();
         }
         return Ed25519PrivateKey.fromString(privateKeyInHexString);
     }
 
-    public Client createHederaClient() {
+    public Client createHederaClient() { // @formatter:off
         // To connect to a network with more nodes, add additional entries to the
         // network map
         node = getRandomNode(); // can only be invoked once
@@ -136,9 +140,11 @@ public class Hedera {
         // Defaults the operator account ID and key such that all generated transactions
         // will be paid for
         // by this account and be signed by this key
-        client.setOperator(getOperatorId(), getOperatorKey()).setMaxTransactionFee(100000000);
+        client
+            .setOperator(getOperatorId(), getOperatorKey())
+            .setMaxTransactionFee(100000000);
         return client;
-    }
+    }  // @formatter:on
 
     public static byte[] parseHex(String hex) {
         var len = hex.length();

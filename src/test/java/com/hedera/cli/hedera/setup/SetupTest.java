@@ -1,32 +1,25 @@
 package com.hedera.cli.hedera.setup;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.nio.file.Path;
-
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
-import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
-import com.hedera.cli.hedera.keygen.HGCSeed;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.utils.AccountUtils;
 import com.hedera.cli.hedera.utils.DataDirectory;
-
 import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
-import org.hjson.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +61,6 @@ public class SetupTest {
 
     // not a mock
     private DataDirectory dataDirectory;
-    private HGCSeed seed;
     private String accountId;
     private List<String> mnemonic;
     private KeyPair keyPair;
@@ -77,7 +69,6 @@ public class SetupTest {
     public void init() {
         mnemonic = Arrays.asList(
                 "hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
-        seed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
         accountId = "0.0.1234";
         EDBip32KeyChain keyChain = new EDBip32KeyChain();
         int index = 0;
@@ -103,47 +94,6 @@ public class SetupTest {
     }
 
     @Test
-    void testSaveToJson() {
-        prepareTestData();
-
-        JsonObject accountValue = new JsonObject();
-        accountValue.add("accountId", accountId);
-        accountValue.add("privateKey", keyPair.getPrivateKeyHex());
-        accountValue.add("publicKey", keyPair.getPublicKeyHex());
-
-        String randFileName = "mushy_daisy_4820";
-        HashMap<String, String> mHashMap = new HashMap<>();
-        mHashMap.put(accountId, randFileName);
-        when(randomNameGenerator.getRandomName()).thenReturn(randFileName);
-
-        setup.saveToJson(accountId, accountValue, shellHelper);
-
-        // read the mushy_daisy_4820.json file back from our temporary test directory
-        String pathToFile = "testnet/accounts/" + randFileName + ".json";
-        HashMap<String, String> jsonMap = dataDirectory.jsonToHashmap(pathToFile);
-
-        assertEquals(accountValue.get("accountId").asString(), jsonMap.get("accountId"));
-        assertEquals(accountValue.get("privateKey").asString(), jsonMap.get("privateKey"));
-        assertEquals(accountValue.get("publicKey").asString(), jsonMap.get("publicKey"));
-
-        setup.saveToJson("0.0.1235", null, shellHelper);
-        cleanUpTestData();
-    }
-
-    @Test
-    void accountToJsonInRightFormat() {
-        JsonObject objectExpected = new JsonObject();
-        objectExpected.add("accountId", accountId);
-        objectExpected.add("privateKey", keyPair.getPrivateKeyHex());
-        objectExpected.add("publicKey", keyPair.getPublicKeyHex());
-
-        when(keyGeneration.generateKeysAndWords(seed, mnemonic)).thenReturn(keyPair);
-        KeyPair keypairTest = keyGeneration.generateKeysAndWords(seed, mnemonic);
-        JsonObject objectActual = setup.addAccountToJson(accountId, keypairTest);
-        assertEquals(objectExpected, objectActual);
-    }
-
-    @Test
     void printKeyPairInRecoveredAccountModelFormat() {
         RecoveredAccountModel recoveredAccountModel;
         recoveredAccountModel = new RecoveredAccountModel();
@@ -160,17 +110,6 @@ public class SetupTest {
         assertEquals(keyPair.getPrivateKeyEncodedHex(), recoveredAccountModel.getPrivateKeyEncoded());
         assertEquals(keyPair.getPublicKeyEncodedHex(), recoveredAccountModel.getPublicKeyEncoded());
         assertEquals(keyPair.getSeedAndPublicKeyHex(), recoveredAccountModel.getPrivateKeyBrowserCompatible());
-    }
-
-    @Test
-    void createJsonObjWithPrivateKey() {
-        JsonObject objectExpected = new JsonObject();
-        objectExpected.add("accountId", accountId);
-        objectExpected.add("privateKey", keyPair.getPrivateKeyEncodedHex());
-        objectExpected.add("publicKey", keyPair.getPublicKeyEncodedHex());
-
-        JsonObject objectActual = setup.addAccountToJsonWithPrivateKey(accountId, Ed25519PrivateKey.fromString(keyPair.getPrivateKeyHex()));
-        assertEquals(objectExpected, objectActual);
     }
 
     @Test

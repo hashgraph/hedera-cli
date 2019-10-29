@@ -60,7 +60,7 @@ public class AccountUtilsTest {
         doAnswer(invocation -> "adjective_botanic_number:0.0.1234").when(dataDirectory)
                 .readFile("testnet/accounts/default.txt");
 
-        AccountId accountId = accountUtils.retrieveDefaultAccountID();
+        AccountId accountId = accountUtils.getDefaultAccountId();
         assertEquals("0.0.1234", accountId.toString());
     }
 
@@ -76,7 +76,7 @@ public class AccountUtilsTest {
             }
         }).when(dataDirectory).jsonToHashmap("testnet/accounts/adjective_botanic_number.json");
 
-        String publicKey = accountUtils.retrieveDefaultAccountPublicKeyInHexString();
+        String publicKey = accountUtils.getDefaultAccountPublicKeyInHexString();
         assertEquals("somepublickeyhex", publicKey);
     }
 
@@ -92,7 +92,7 @@ public class AccountUtilsTest {
             }
         }).when(dataDirectory).jsonToHashmap("testnet/accounts/adjective_botanic_number.json");
 
-        String privateKey = accountUtils.retrieveDefaultAccountKeyInHexString();
+        String privateKey = accountUtils.getDefaultAccountKeyInHexString();
         assertEquals("somesecretprivatekey", privateKey);
     }
 
