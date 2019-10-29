@@ -77,17 +77,23 @@ public class DataDirectory {
     }
 
     public String readFile(String pathToFile) {
-        String value = null;
+        String value = "";
         boolean directoryExists = Files.exists(dataDir);
         if (!directoryExists) {
             File directory = new File(dataDir.toString());
             directory.mkdir();
         }
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
+        File file = new File(filePath.toString());
 
+        // file does not exist, return ""
+        if (!file.exists()) {
+            return value;
+        }
+
+        // file exists, read it
         BufferedReader br = null;
         try {
-            File file = new File(filePath.toString());
             FileReader fr = new FileReader(file.getAbsolutePath());
             br = new BufferedReader(fr);
             value = br.readLine();
@@ -101,7 +107,6 @@ public class DataDirectory {
                 shellHelper.printError(e.getMessage());
             }
         }
-
         return value;
     }
 
