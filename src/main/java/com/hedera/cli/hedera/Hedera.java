@@ -3,7 +3,7 @@ package com.hedera.cli.hedera;
 import java.util.List;
 import java.util.Map;
 
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.HederaNode;
@@ -18,7 +18,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Component
 public class Hedera {
 
@@ -32,7 +36,7 @@ public class Hedera {
     private AddressBookManager addressBookManager;
 
     @Autowired
-    private AccountUtils accountUtils;
+    public AccountManager accountManager;
 
     private HederaNode node;
 
@@ -59,7 +63,7 @@ public class Hedera {
             String accountNumber = currentAccountId();
             operatorId = AccountId.fromString(accountNumber);
         } else {
-            operatorId = accountUtils.retrieveDefaultAccountID();
+            operatorId = accountManager.getDefaultAccountId();
         }
         return operatorId;
     }
@@ -74,7 +78,7 @@ public class Hedera {
     }
 
     public String retrieveIndexAccountKeyInHexString() {
-        String pathToIndexTxt = accountUtils.pathToIndexTxt();
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
 
         String accountId;
         String value;
@@ -86,7 +90,7 @@ public class Hedera {
             value = entry.getValue(); // value refers to the filename json
             String currentAccountId = currentAccountId();
             if (accountId.equals(currentAccountId)) {
-                String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
+                String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
                 Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
                 privateKey = currentJsonAccount.get("privateKey").toString();
             }
@@ -95,7 +99,7 @@ public class Hedera {
     }
 
     public String retrieveIndexAccountPublicKeyInHexString() {
-        String pathToIndexTxt = accountUtils.pathToIndexTxt();
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
 
         String publicKey = "";
         String accountId;
@@ -107,7 +111,7 @@ public class Hedera {
             value = entry.getValue(); // value refers to the filename json
             String currentAccountId = currentAccountId();
             if (accountId.equals(currentAccountId)) {
-                String pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
+                String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
                 Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
                 publicKey = currentJsonAccount.get("publicKey").toString();
             }
@@ -121,12 +125,12 @@ public class Hedera {
         if (currentAccountExist) {
             privateKeyInHexString = retrieveIndexAccountKeyInHexString();
         } else {
-            privateKeyInHexString = accountUtils.retrieveDefaultAccountKeyInHexString();
+            privateKeyInHexString = accountManager.getDefaultAccountKeyInHexString();
         }
         return Ed25519PrivateKey.fromString(privateKeyInHexString);
     }
 
-    public Client createHederaClient() {
+    public Client createHederaClient() { // @formatter:off
         // To connect to a network with more nodes, add additional entries to the
         // network map
         node = getRandomNode(); // can only be invoked once
@@ -136,9 +140,11 @@ public class Hedera {
         // Defaults the operator account ID and key such that all generated transactions
         // will be paid for
         // by this account and be signed by this key
-        client.setOperator(getOperatorId(), getOperatorKey()).setMaxTransactionFee(100000000);
+        client
+            .setOperator(getOperatorId(), getOperatorKey())
+            .setMaxTransactionFee(100000000);
         return client;
-    }
+    }  // @formatter:on
 
     public static byte[] parseHex(String hex) {
         var len = hex.length();
