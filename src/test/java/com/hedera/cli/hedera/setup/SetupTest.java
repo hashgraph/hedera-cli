@@ -51,7 +51,7 @@ public class SetupTest {
     }
 
     @Test
-    void printKeyPairInRecoveredAccountModelFormat() {
+    public void printKeyPairInRecoveredAccountModelFormat() {
         RecoveredAccountModel recoveredAccountModel;
         recoveredAccountModel = new RecoveredAccountModel();
         recoveredAccountModel.setAccountId(accountId);
