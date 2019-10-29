@@ -14,7 +14,7 @@ import java.util.Arrays;
 @Command(name = "account", description = "@|fg(225) Create, update, delete or querying an account by providing the <args>|@"
         + "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. account create <args>|@", subcommands = {
                 AccountCreate.class, AccountUpdate.class, AccountGetInfo.class, AccountDefault.class,
-                AccountDelete.class, AccountRecovery.class, AccountList.class, AccountUse.class })
+                AccountDelete.class, AccountRecovery.class, AccountList.class, AccountUse.class, AccountBalance.class })
 public class Account implements Runnable {
 
     @Override
@@ -109,6 +109,18 @@ public class Account implements Runnable {
                 try {
                     AccountUse accountUse = factory.create(AccountUse.class);
                     new CommandLine(accountUse).execute(args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            break;
+        case "balance":
+            if (args.length == 0) {
+                CommandLine.usage(new AccountUse(), System.out);
+            } else {
+                try {
+                    AccountBalance accountBalance = factory.create(AccountBalance.class);
+                    new CommandLine(accountBalance).execute(args);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

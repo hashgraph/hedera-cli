@@ -75,7 +75,7 @@ public class AccountCreate implements Runnable {
 
     private String strMethod = "bip";
 
-    private AccountId accountID;
+    private AccountId accountId;
 
     private JsonObject account;
 
@@ -90,22 +90,20 @@ public class AccountCreate implements Runnable {
             List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
             KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
             var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
-            accountID = createNewAccount(newPublicKey, hedera.getOperatorId());
-            account = printAccount(accountID.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
-            JsonObject jsonAccount = setup.addAccountToJson(accountID.toString(), keypair);
-            setup.saveToJson(accountID.toString(), jsonAccount, shellHelper);
+            accountId = createNewAccount(newPublicKey, hedera.getOperatorId());
+            account = printAccount(accountId.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
+            hedera.accountManager.setDefaultAccountId(accountId, keypair);
         } else {
             // Else keyGen always set to false and read from default.txt which contains
             // operator keys
             var operatorPrivateKey = hedera.getOperatorKey();
             var operatorPublicKey = operatorPrivateKey.getPublicKey();
-            accountID = createNewAccount(operatorPublicKey, hedera.getOperatorId());
+            accountId = createNewAccount(operatorPublicKey, hedera.getOperatorId());
             // save to local disk
             String privateKey = operatorPrivateKey.toString();
             String publicKey = operatorPublicKey.toString();
-            account = printAccount(accountID.toString(), privateKey, publicKey);
-            JsonObject jsonAccount = setup.addAccountToJsonWithPrivateKey(accountID.toString(), Ed25519PrivateKey.fromString(privateKey));
-            setup.saveToJson(accountID.toString(), jsonAccount, shellHelper);
+            account = printAccount(accountId.toString(), privateKey, publicKey);
+            hedera.accountManager.setDefaultAccountId(accountId, Ed25519PrivateKey.fromString(privateKey));
         }
     }
 

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.hedera.utils.DataDirectory;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class AccountListTest {
 
     @InjectMocks
-    private AccountUtils accountUtils;
+    private AccountManager accountManager;
 
     @Mock
     private DataDirectory dataDirectory;
@@ -33,7 +33,7 @@ public class AccountListTest {
 
     @Test
     public void testStreamList() {
-        String pathToIndexTxt = accountUtils.pathToIndexTxt();
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
 
         HashMap<String, String> testMap = new HashMap<>();
         testMap.put("0.0.90304", "aggressive_primerose_3092");

@@ -71,7 +71,11 @@ account create -b 100000000 -k
 account delete -o 0.0.1001 -n 0.0.1002
 account delete --oldAccount 0.0.1001 --newAccount 0.0.1002
 ```
-
+## Account Balance
+```bash
+# Gets the balance of an account
+account balance 0.0.xxxx
+```
 ## Crypto Transfer
 ```bash
 # valid commands
