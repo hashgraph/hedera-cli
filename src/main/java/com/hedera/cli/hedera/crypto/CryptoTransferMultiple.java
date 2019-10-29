@@ -151,8 +151,6 @@ public class CryptoTransferMultiple implements Runnable {
             AccountId senderAccountID = AccountId.fromString(senderAccountIDInString);
 
             // Simple check, can be more comprehensive
-            System.out.println("HELLOO");
-            System.out.println(isTiny);
             Map<Integer, Recipient> map = verifiedRecipientMap(recipientList, amountList, isTiny);
             if (map == null) {
                 return;
@@ -328,8 +326,6 @@ public class CryptoTransferMultiple implements Runnable {
         long amountInTiny;
         Map<Integer, Recipient> map = new HashMap<>();
 
-        System.out.println("whatt is tiny here in map recipient");
-        System.out.println(isTiny);
         try {
             if (accountList.size() != amountList.size())
                 shellHelper.printError("Lists aren't the same size");
@@ -378,8 +374,6 @@ public class CryptoTransferMultiple implements Runnable {
     public long sumOfTransfer(String[] recipientAmtStrArray, boolean isTiny) {
         long sum = 0;
         long amountInTiny;
-        System.out.println("whatt is tiny here in sum of trasnfer");
-        System.out.println(isTiny);
         if (isTiny) {
             // Sum in tiny from tiny
             for (String amt : recipientAmtStrArray) {

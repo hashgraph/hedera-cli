@@ -69,24 +69,6 @@ public class CryptoTransferMultipleTest {
     }
 
     @Test
-    public void testIsAccountId() {
-        String str = "1001";
-        assertTrue(accountUtils.isAccountId(str));
-
-        String str1 = " ";
-        assertFalse(accountUtils.isAccountId(str1));
-
-        String str2 = "10a01";
-        assertFalse(accountUtils.isAccountId(str2));
-
-        String str3 = "000";
-        assertFalse(accountUtils.isAccountId(str3));
-
-        String str4 = "-";
-        assertFalse(accountUtils.isAccountId(str4));
-    }
-
-    @Test
     public void recipientListInTiny() {
         List<String> accountList = Arrays.asList("0.0.1001", "0.0.1002", "0.0.1003");
         List<String> amountList = Arrays.asList("100", "9888486986", "10000001100000");
