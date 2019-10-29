@@ -1,7 +1,16 @@
 package com.hedera.cli.hedera.keygen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.hedera.cli.hedera.bip39.Mnemonic;
+import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicChecksumException;
+import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicLengthException;
+import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
 
 import org.junit.jupiter.api.Test;
 
@@ -59,8 +68,24 @@ public class CryptoUtilsTest {
 
   @Test
   public void testDeriveKey() {
-    // to be completed
-    assertTrue(true);
+
+    Mnemonic m = new Mnemonic();
+    // test data (recovery phrase list)
+    List<String> phraseList = Stream.of("opera", "critic", "capital", "genre", "soda", "glimpse", "isolate", "mistake",
+        "hobby", "nest", "waste", "beef", "under", "august", "either", "face", "home", "seek", "bike", "swear", "diet",
+        "body", "skirt", "charge").collect(Collectors.toList());
+
+    try {
+      byte[] entropy = m.toEntropy(phraseList);
+      int index = 0;
+      int length = 32;
+      byte[] seed = CryptoUtils.deriveKey(entropy, index, length);
+      assertNotNull(seed);
+      assertEquals(32, seed.length);
+    } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
+      e.printStackTrace();
+    }
+
   }
-  
+
 }
