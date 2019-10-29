@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
-import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
@@ -28,21 +27,16 @@ public class SetupTest {
 
     @TempDir
     public Path tempDir;
-
-    @Mock
-    private KeyGeneration keyGeneration;
-
     @Mock
     private ShellHelper shellHelper;
 
     // not a mock
     private String accountId;
-    private List<String> mnemonic;
     private KeyPair keyPair;
 
     @BeforeEach
     public void init() {
-        mnemonic = Arrays.asList(
+        List<String>mnemonic = Arrays.asList(
                 "hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
         accountId = "0.0.1234";
         EDBip32KeyChain keyChain = new EDBip32KeyChain();
