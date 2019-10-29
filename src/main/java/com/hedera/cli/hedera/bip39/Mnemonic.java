@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
@@ -28,53 +29,94 @@ public class Mnemonic {
     this.wordList = Arrays.asList(EnglishHelper.words);
   }
 
-  /**
-   * Convert mnemonic word list to original entropy value.
-   */
-  public byte[] toEntropy(List<String> words) throws MnemonicException.MnemonicLengthException,
-      MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException {
-    if (words.size() % 3 > 0)
-      throw new MnemonicException.MnemonicLengthException("Word list size must be multiple of three words.");
+  private int deriveConcatLenBits(List<String> words) {
+    return words.size() * 11;
+  }
 
-    if (words.size() == 0)
-      throw new MnemonicException.MnemonicLengthException("Word list is empty.");
-
-    // Look up all the words in the list and construct the
-    // concatenation of the original entropy and the checksum.
-    //
-    int concatLenBits = words.size() * 11;
+  private boolean[] deriveConcatBits(List<String> words) throws MnemonicWordException {
+    int concatLenBits = deriveConcatLenBits(words);
     boolean[] concatBits = new boolean[concatLenBits];
     int wordindex = 0;
     for (String word : words) {
       // Find the words index in the wordlist.
       int ndx = Collections.binarySearch(this.wordList, word);
-      if (ndx < 0)
+      if (ndx < 0) {
         throw new MnemonicException.MnemonicWordException(word);
+      }
 
       // Set the next 11 bits to the value of the index.
-      for (int ii = 0; ii < 11; ++ii)
+      for (int ii = 0; ii < 11; ++ii) {
         concatBits[(wordindex * 11) + ii] = (ndx & (1 << (10 - ii))) != 0;
+      }
+
       ++wordindex;
     }
 
-    int checksumLengthBits = concatLenBits / 33;
-    int entropyLengthBits = concatLenBits - checksumLengthBits;
+    return concatBits;
+  }
 
+  private byte[] deriveEntropy(boolean[] concatBits, int entropyLengthBits) {
     // Extract original entropy as bytes.
     byte[] entropy = new byte[entropyLengthBits / 8];
-    for (int ii = 0; ii < entropy.length; ++ii)
-      for (int jj = 0; jj < 8; ++jj)
-        if (concatBits[(ii * 8) + jj])
+    for (int ii = 0; ii < entropy.length; ++ii) {
+      for (int jj = 0; jj < 8; ++jj) {
+        if (concatBits[(ii * 8) + jj]) {
           entropy[ii] |= 1 << (7 - jj);
+        }
+      }
+    }
+    return entropy;
+  }
+  
+  private boolean verifyEntropy(byte[] entropy, List<String> words) {
+    boolean[] concatBits;
+    try {
+      concatBits = deriveConcatBits(words);
+    } catch (MnemonicWordException e) {
+      return false;
+    }
+    int concatLenBits = deriveConcatLenBits(words);
+    int checksumLengthBits = concatLenBits / 33;
+    int entropyLengthBits = concatLenBits - checksumLengthBits;
 
     // Take the digest of the entropy.
     byte[] hash = CryptoUtils.sha256Digest(entropy);
     boolean[] hashBits = bytesToBits(hash);
 
     // Check all the checksum bits.
-    for (int i = 0; i < checksumLengthBits; ++i)
-      if (concatBits[entropyLengthBits + i] != hashBits[i])
-        throw new MnemonicException.MnemonicChecksumException();
+    for (int i = 0; i < checksumLengthBits; ++i) {
+      if (concatBits[entropyLengthBits + i] != hashBits[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Convert mnemonic word list to original entropy value.
+   */
+  public byte[] toEntropy(List<String> words) throws MnemonicException.MnemonicLengthException,
+      MnemonicException.MnemonicWordException, MnemonicException.MnemonicChecksumException {
+    if (words.size() % 3 > 0) {
+      throw new MnemonicException.MnemonicLengthException("Word list size must be multiple of three words.");
+    }
+
+    if (words.size() == 0) {
+      throw new MnemonicException.MnemonicLengthException("Word list is empty.");
+    }
+
+    // Look up all the words in the list and construct the
+    // concatenation of the original entropy and the checksum.
+    int concatLenBits = deriveConcatLenBits(words);
+    boolean[] concatBits = deriveConcatBits(words);
+
+    int checksumLengthBits = concatLenBits / 33;
+    int entropyLengthBits = concatLenBits - checksumLengthBits;
+    byte[] entropy = deriveEntropy(concatBits, entropyLengthBits);
+
+    if (!verifyEntropy(entropy, words)) {
+      throw new MnemonicException.MnemonicChecksumException();
+    }
 
     return entropy;
   }
@@ -146,7 +188,8 @@ public class Mnemonic {
     if (isMnemonicEmpty(mnemonic)) {
       throw new IllegalArgumentException("Mnemonic is required to generate a seed");
     }
-    // A user may decide to protect their mnemonic with a passphrase. If a passphrase is not present, an empty string "" is used instead.
+    // A user may decide to protect their mnemonic with a passphrase. If a
+    // passphrase is not present, an empty string "" is used instead.
     passphrase = passphrase == null ? "" : passphrase;
 
     String salt = String.format("mnemonic%s", passphrase);
