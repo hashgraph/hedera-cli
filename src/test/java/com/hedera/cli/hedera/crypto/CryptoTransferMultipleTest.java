@@ -2,6 +2,7 @@ package com.hedera.cli.hedera.crypto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -72,8 +73,7 @@ public class CryptoTransferMultipleTest {
         CryptoTransferMultiple cryptoTransferMultiple = new CryptoTransferMultiple();
         cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList);
 
-        // This test needs an assertion to be completed. Please fix this.
-        assertTrue(true);
+        assertNotNull(cryptoTransferMultiple);
     }
 
     // @Test(expected = IllegalArgumentException.class)
