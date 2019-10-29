@@ -14,7 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountBalanceTest {
@@ -23,19 +26,19 @@ public class AccountBalanceTest {
     private AccountBalance accountBalance;
 
     @Mock
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Mock
-    AccountUtils accountUtils;
+    private AccountUtils accountUtils;
 
     @Mock
-    Hedera hedera;
+    private Hedera hedera;
 
 //    private final ByteArrayOutputStream output = new ByteArrayOutputStream();
 
     @Test
     public void getBalance() throws HederaException {
-        String accountId = "0.0.1001";
+//        String accountId = "0.0.1001";
         Client client = mock(Client.class);
         System.out.println(client);
 //        when(client.getAccountBalance(AccountId.fromString(accountId))).thenReturn(100L);
