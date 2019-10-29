@@ -27,25 +27,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class CryptoTransferTest {
 
     @InjectMocks
-    CryptoTransfer cryptoTransfer;
+    private CryptoTransfer cryptoTransfer;
 
     @Mock
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Mock
-    Composite composite;
+    private Composite composite;
 
     @Mock
-    AccountUtils accountUtils;
+    private AccountUtils accountUtils;
 
     @Mock
-    Hedera hedera;
+    private Hedera hedera;
 
     @Mock
-    InputReader inputReader;
-
-    @Mock
-    Client client;
+    private InputReader inputReader;
 
     @Test
     public void testCryptoTransferSingleArgs() {

@@ -1,7 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.hedera.cli.hedera.Hedera;
@@ -15,15 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.ParseResult;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class CryptoTransferMultipleTest {
@@ -74,28 +68,23 @@ public class CryptoTransferMultipleTest {
 //        assertFalse(cryptoTransferMultiple4.isNumeric(str4));
     }
 
-//    @Test
-//    public void testIsAccountId() {
-//        String str = "1001";
-//        CryptoTransferMultiple cryptoTransferMultiple = new CryptoTransferMultiple();
-//        assertTrue(accountUtils.isAccountId(str));
-//
-//        String str1 = " ";
-//        CryptoTransferMultiple cryptoTransferMultiple1 = new CryptoTransferMultiple();
-//        assertFalse(accountUtils.isAccountId(str1));
-//
-//        String str2 = "10a01";
-//        CryptoTransferMultiple cryptoTransferMultiple2 = new CryptoTransferMultiple();
-//        assertFalse(accountUtils.isAccountId(str2));
-//
-//        String str3 = "000";
-//        CryptoTransferMultiple cryptoTransferMultiple3 = new CryptoTransferMultiple();
-//        assertFalse(accountUtils.isAccountId(str3));
-//
-//        String str4 = "-";
-//        CryptoTransferMultiple cryptoTransferMultiple4 = new CryptoTransferMultiple();
-//        assertFalse(accountUtils.isAccountId(str4));
-//    }
+    @Test
+    public void testIsAccountId() {
+        String str = "1001";
+        assertTrue(accountUtils.isAccountId(str));
+
+        String str1 = " ";
+        assertFalse(accountUtils.isAccountId(str1));
+
+        String str2 = "10a01";
+        assertFalse(accountUtils.isAccountId(str2));
+
+        String str3 = "000";
+        assertFalse(accountUtils.isAccountId(str3));
+
+        String str4 = "-";
+        assertFalse(accountUtils.isAccountId(str4));
+    }
 
     @Test
     public void recipientListInTiny() {

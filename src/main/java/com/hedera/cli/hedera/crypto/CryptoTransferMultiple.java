@@ -10,7 +10,10 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.*;
+import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.Utils;
+import com.hedera.cli.hedera.utils.CryptoTransferUtils;
+import com.hedera.cli.hedera.utils.Composite2;
 import com.hedera.cli.models.Recipient;
 import com.hedera.cli.models.Sender;
 import com.hedera.cli.models.TransactionObj;
@@ -69,7 +72,7 @@ public class CryptoTransferMultiple implements Runnable {
     private CommandSpec spec;
 
     @ArgGroup(exclusive = false, multiplicity = "1")
-    List<Composite2> composites;
+    private List<Composite2> composites;
 
     private String springRecipient;
     private String springTinybarAmt;
@@ -149,8 +152,8 @@ public class CryptoTransferMultiple implements Runnable {
 
             // Simple check, can be more comprehensive
             System.out.println("HELLOO");
-            System.out.println(isTiny());
-            Map<Integer, Recipient> map = verifiedRecipientMap(recipientList, amountList, isTiny());
+            System.out.println(isTiny);
+            Map<Integer, Recipient> map = verifiedRecipientMap(recipientList, amountList, isTiny);
             if (map == null) {
                 return;
             }
@@ -163,9 +166,6 @@ public class CryptoTransferMultiple implements Runnable {
 
             // Dynamic population of recipient List
             map.forEach((key, value) -> {
-                if (map.size() != amountList.size()) {
-                    shellHelper.printError("Please check your recipient list");
-                }
                 AccountId account = value.getAccountId();
                 long amount = value.getAmount();
                 cryptoTransferTransaction.addTransfer(account, amount);
