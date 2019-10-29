@@ -190,9 +190,9 @@ public class Mnemonic {
     }
     // A user may decide to protect their mnemonic with a passphrase. If a
     // passphrase is not present, an empty string "" is used instead.
-    passphrase = passphrase == null ? "" : passphrase;
+    String passphraseFinal = passphrase == null ? "" : passphrase;
 
-    String salt = String.format("mnemonic%s", passphrase);
+    String salt = String.format("mnemonic%s", passphraseFinal);
     PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator(new SHA512Digest());
 
     // gen.int(passwordInBytes, saltInBytes, iterationsInInt);
