@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
 
+import com.hedera.cli.hedera.utils.CryptoTransferUtils;
 import com.hedera.cli.shell.ShellHelper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,10 +30,17 @@ public class CryptoTransferMultipleTest {
     @Mock
     private ShellHelper shellHelper;
 
+    @Mock
+    private CryptoTransferUtils cryptoTransferUtils;
+
     @BeforeEach
     public void init() {
         shellHelper = cryptoTransferMultiple.getShellHelper();
         assertNotNull(shellHelper);
+    }
+
+    @AfterEach
+    public void tearDown() {
     }
 
     @Test
@@ -69,6 +78,29 @@ public class CryptoTransferMultipleTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void nullIfAmountListContainsDecimals() {
+        List<String> accountList = Arrays.asList("0.0.1001", "0.0.1002", "0.0.1003");
+        List<String> amountList1 = Arrays.asList("0.1", "0.9888486986", "1000000.1100000");
+        ArgumentCaptor<String> valueCapture1 = ArgumentCaptor.forClass(String.class);
+        doNothing().when(shellHelper).printError(valueCapture1.capture());
+        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList1, true);
+        String actual1 = valueCapture1.getValue();
+        String expected1 = null;
+        assertEquals(expected1, actual1);
+    }
+
+    @Test
+    public void nullIfAmountListContainsZero() {
+        List<String> accountList = Arrays.asList("0.0.1001", "0.0.1002", "0.0.1003");
+        List<String> amountList2 = Arrays.asList("0", "0.9888486986", "1000000.1100000");
+        ArgumentCaptor<String> valueCapture2 = ArgumentCaptor.forClass(String.class);
+        doNothing().when(shellHelper).printError(valueCapture2.capture());
+        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList2, false);
+        String actual2 = valueCapture2.getValue();
+        String expected2 = null;
+        assertEquals(expected2, actual2);
+    }
     // @Test(expected = IllegalArgumentException.class)
     // public void testRecipientList1() {
     // List<String> accountList = Arrays.asList("1001", "1002", "1003");
