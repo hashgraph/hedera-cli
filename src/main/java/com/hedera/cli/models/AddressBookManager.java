@@ -35,7 +35,7 @@ public class AddressBookManager {
   static private String ADDRESSBOOK_DEFAULT = "addressbook.json";
   static private final String NETWORK_DEFAULT = "testnet";
   static private final String NETWORK_FILE = "network.txt";
-  static private final String ACCOUNT_DEFAULT_FILE = "default.txt";
+  static public final String ACCOUNT_DEFAULT_FILE = "default.txt";
 
   @PostConstruct
   public void init() {
@@ -106,21 +106,6 @@ public class AddressBookManager {
       }
 
     }
-  }
-
-  // This function should be moved some where else
-  // Returns an empty string if there's no default account
-  public String getDefaultAccount() {
-    String defaultAccount = "";
-    String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
-    String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + ACCOUNT_DEFAULT_FILE;
-    try {
-      defaultAccount = dataDirectory.readFile(pathToDefaultAccount);
-    } catch (Exception e) {
-      // no default account
-      return "";
-    }
-    return defaultAccount;
   }
 
 }
