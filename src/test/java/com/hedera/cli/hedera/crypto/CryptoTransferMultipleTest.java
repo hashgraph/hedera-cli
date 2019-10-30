@@ -1,18 +1,18 @@
 package com.hedera.cli.hedera.crypto;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 
 import java.util.Arrays;
 import java.util.List;
 
 import com.hedera.cli.shell.ShellHelper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -80,6 +80,7 @@ public class CryptoTransferMultipleTest {
 
     @Test
     public void testCryptoTransferMultipleArgs() {
+        assertNotNull(cryptoTransferMultiple);
 
 //        @Command
 //        class CryptoTransferMultipleAgain {
