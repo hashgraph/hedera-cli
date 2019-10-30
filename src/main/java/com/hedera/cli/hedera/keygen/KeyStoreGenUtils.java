@@ -76,10 +76,11 @@ public class KeyStoreGenUtils {
 	}
 
 	public static KeyPair createKeyStore(final char[] passphrase, String filename, final KeyPair keyPair) {
-		if ("".equals(filename)) {
-			filename = DEFAULT_KEY_STORE_FILE_NAME;
+		String filenameFinal = DEFAULT_KEY_STORE_FILE_NAME;
+		if (!filename.isEmpty()) {
+			filenameFinal = filename;
 		}
-		try (FileOutputStream fos = new FileOutputStream(filename)){
+		try (FileOutputStream fos = new FileOutputStream(filenameFinal)){
 			final Certificate[] certificates = new Certificate[]{ createCertificate(keyPair.getPublicKey(), keyPair.getPrivateKey()) };
 			final PrivateKeyEntry privateKeyEntry = new PrivateKeyEntry(keyPair.getPrivateKey(), certificates);
 			final PasswordProtection passwordProtection = new PasswordProtection(passphrase, DEFAULT_PROTECTION_ALGORITHM, null);
@@ -97,11 +98,12 @@ public class KeyStoreGenUtils {
 	}
 
 	public static KeyPair loadKey(final char[] passphrase, String filename) {
-		if ("".equals(filename)) {
-			filename = DEFAULT_KEY_STORE_FILE_NAME;
+		String filenameFinal = DEFAULT_KEY_STORE_FILE_NAME;
+		if (!filename.isEmpty()) {
+			filenameFinal = filename;
 		}
 		PrivateKeyEntry entry = null;
-		try (FileInputStream fis = new FileInputStream(filename)) {
+		try (FileInputStream fis = new FileInputStream(filenameFinal)) {
 			final PasswordProtection passwordProtection = new PasswordProtection(passphrase,
 					DEFAULT_PROTECTION_ALGORITHM, null);
 			final KeyStore keyStore = KeyStore.getInstance(DEFAULT_KEY_STORE_TYPE);

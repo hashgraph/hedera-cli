@@ -80,56 +80,11 @@ public class Reference {
    */
   public Reference(String dataString) {
     if (dataString.matches("^<[a-zA-Z0-9]*>$")) { // base 62 encoding
-      int lenString = dataString.length() - 2; // number of characters other than <>
-      int len128Bits = (int) Math.ceil((128 + 8) / log2(digits.length()));
-      int len256Bits = (int) Math.ceil((256 + 8) / log2(digits.length()));
-      int len384Bits = (int) Math.ceil((384 + 8) / log2(digits.length()));
-      if (lenString != len128Bits && lenString != len256Bits && lenString != len384Bits) {
-        throw new InvalidParameterException(
-            dataString + " is not a proper encoding of 128, 256, or 384 bits because it has " + lenString
-                + " digits instead of " + len128Bits + ", " + len256Bits + ", or " + len384Bits);
-      }
-      int arrayLen = (lenString == len128Bits) ? 16 + 1 : (lenString == len256Bits) ? 32 + 1 : 48 + 1;
-      data = new byte[arrayLen];
-
-      int[] inDigits = new int[lenString];
-      for (int i = 0; i < lenString; i++) {
-        inDigits[i] = digits.indexOf(dataString.charAt(i + 1));
-      }
-      int[] outDigits = convertRadix(inDigits, 62, 256, arrayLen);
-      data = new byte[arrayLen];
-      for (int i = 0; i < arrayLen; i++) {
-        data[i] = (byte) outDigits[i];
-      }
+      setDataFromString(dataString);
     } else { // list of words
-      List<String> words = Reference.lowercasedWords();
-      int len128Bits = (int) Math.ceil((128 + 8) / log2(words.size()));
-      int len256Bits = (int) Math.ceil((256 + 8) / log2(words.size()));
-      int len384Bits = (int) Math.ceil((384 + 8) / log2(words.size()));
-
-      List<String> allWords = Collections.synchronizedList(new ArrayList<String>());
-      Matcher m = Pattern.compile("[a-zA-Z]+").matcher(dataString.toLowerCase());
-      while (m.find()) {
-        allWords.add(m.group());
-      }
-      int[] indices = new int[allWords.size()];
-      int j = 0;
-      for (String word : allWords) {
-        indices[j++] = words.indexOf(word);
-      }
-
-      if (allWords.size() != len128Bits && allWords.size() != len256Bits) {
-        throw new InvalidParameterException("there should be " + len128Bits + ", " + len256Bits + ", or " + len384Bits
-            + " words, not " + allWords.size());
-      }
-
-      int dataLen = allWords.size() == len128Bits ? 16 + 1 : allWords.size() == len256Bits ? 32 + 1 : 48 + 1;
-      int[] toDigits = convertRadix(indices, words.size(), 256, dataLen);
-      data = new byte[dataLen];
-      for (int i = 0; i < dataLen; i++) {
-        data[i] = (byte) toDigits[i];
-      }
+      setDataFromWords(dataString);
     }
+    
     byte[] dataUnscrambled = new byte[32];
     byte crc = data[data.length - 1];
     for (int i = 0; i < data.length - 1; i++) {
@@ -138,6 +93,60 @@ public class Reference {
     crc = crc8(dataUnscrambled);
     if (data[data.length - 1] != crc) {
       throw new InvalidParameterException("Invalid string: fails the cyclic redundency check");
+    }
+  }
+
+  private void setDataFromWords(String dataString) {
+    List<String> words = Reference.lowercasedWords();
+    int len128Bits = (int) Math.ceil((128 + 8) / log2(words.size()));
+    int len256Bits = (int) Math.ceil((256 + 8) / log2(words.size()));
+    int len384Bits = (int) Math.ceil((384 + 8) / log2(words.size()));
+
+    List<String> allWords = Collections.synchronizedList(new ArrayList<String>());
+    Matcher m = Pattern.compile("[a-zA-Z]+").matcher(dataString.toLowerCase());
+    while (m.find()) {
+      allWords.add(m.group());
+    }
+    int[] indices = new int[allWords.size()];
+    int j = 0;
+    for (String word : allWords) {
+      indices[j++] = words.indexOf(word);
+    }
+
+    if (allWords.size() != len128Bits && allWords.size() != len256Bits) {
+      throw new InvalidParameterException("there should be " + len128Bits + ", " + len256Bits + ", or " + len384Bits
+          + " words, not " + allWords.size());
+    }
+
+    int dataLen = allWords.size() == len128Bits ? 16 + 1 : allWords.size() == len256Bits ? 32 + 1 : 48 + 1;
+    int[] toDigits = convertRadix(indices, words.size(), 256, dataLen);
+    data = new byte[dataLen];
+    for (int i = 0; i < dataLen; i++) {
+      data[i] = (byte) toDigits[i];
+    }
+  }
+
+  private void setDataFromString(String dataString) {
+    int lenString = dataString.length() - 2; // number of characters other than <>
+    int len128Bits = (int) Math.ceil((128 + 8) / log2(digits.length()));
+    int len256Bits = (int) Math.ceil((256 + 8) / log2(digits.length()));
+    int len384Bits = (int) Math.ceil((384 + 8) / log2(digits.length()));
+    if (lenString != len128Bits && lenString != len256Bits && lenString != len384Bits) {
+      throw new InvalidParameterException(
+          dataString + " is not a proper encoding of 128, 256, or 384 bits because it has " + lenString
+              + " digits instead of " + len128Bits + ", " + len256Bits + ", or " + len384Bits);
+    }
+    int arrayLen = (lenString == len128Bits) ? 16 + 1 : (lenString == len256Bits) ? 32 + 1 : 48 + 1;
+    data = new byte[arrayLen];
+
+    int[] inDigits = new int[lenString];
+    for (int i = 0; i < lenString; i++) {
+      inDigits[i] = digits.indexOf(dataString.charAt(i + 1));
+    }
+    int[] outDigits = convertRadix(inDigits, 62, 256, arrayLen);
+    data = new byte[arrayLen];
+    for (int i = 0; i < arrayLen; i++) {
+      data[i] = (byte) outDigits[i];
     }
   }
 
