@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
+import com.hedera.cli.config.InputReader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.RandomNameGenerator;
@@ -12,6 +13,7 @@ import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -170,5 +172,13 @@ public class AccountManager {
             shellHelper.printError("Enter hgc ONLY IF you have created your account via Hedera wallet and HAVE NOT updated, otherwise enter bip");
             return null;
         }
+    }
+
+    public String promptMemoString(InputReader inputReader) {
+        String memoString = inputReader.prompt("Memo field");
+        if (StringUtil.isNullOrEmpty(memoString)) {
+            memoString = "";
+        }
+        return  memoString;
     }
 }

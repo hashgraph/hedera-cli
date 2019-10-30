@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -33,6 +35,9 @@ public class AccountManagerTest {
 
     @Mock
     private ShellHelper shellHelper;
+
+    @Mock
+    private InputReader inputReader;
 
     @Test
     public void checkPaths() {
@@ -180,5 +185,19 @@ public class AccountManagerTest {
     public void verifyMethodFalse() {
         String method = "hellooo";
         assertNull(accountManager.verifyMethod(method, shellHelper));
+    }
+
+    @Test
+    public void promptMemoStringReturnsEmpty() {
+        when(inputReader.prompt("Memo field")).thenReturn(null);
+        String memo = accountManager.promptMemoString(inputReader);
+        assertEquals("", memo);
+    }
+
+    @Test
+    public void promptMemoStringReturnsMemo() {
+        when(inputReader.prompt("Memo field")).thenReturn("memo to send");
+        String memo = accountManager.promptMemoString(inputReader);
+        assertEquals("memo to send", memo);
     }
 }

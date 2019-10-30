@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
@@ -23,9 +22,6 @@ import picocli.CommandLine.Parameters;
 @Component
 @Command(name = "balance", description = "@|fg(225) Gets the balance of the requested account|@")
 public class AccountBalance implements Runnable, Operation {
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private Hedera hedera;
