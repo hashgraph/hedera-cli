@@ -2,12 +2,10 @@ package com.hedera.cli.hedera.crypto;
 
 import java.util.Arrays;
 
-import com.hedera.cli.hedera.utils.AccountManager;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -16,16 +14,12 @@ import picocli.CommandLine.ParseResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
 public class CryptoTransferTest {
 
     @InjectMocks
     private CryptoTransfer cryptoTransfer;
-
-    @Mock
-    private AccountManager accountManager;
 
     @Test
     public void testCryptoTransferSingleArgs() {
@@ -53,12 +47,6 @@ public class CryptoTransferTest {
         assertEquals("1000", result.matchedOptionValue("r", "1000"));
         assertEquals(Arrays.asList("-a=0.0.1111", "-r=1000"), result.originalArgs());
 
-    }
-
-    @Test
-    public void assertDependenciesNotNull() {
-        accountManager = cryptoTransfer.getAccountManager();
-        assertNotNull(accountManager);
     }
 
     @Test

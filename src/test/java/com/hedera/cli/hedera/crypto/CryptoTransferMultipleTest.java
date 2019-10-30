@@ -9,7 +9,6 @@ import static org.mockito.Mockito.doNothing;
 import java.util.Arrays;
 import java.util.List;
 
-import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,16 +26,10 @@ public class CryptoTransferMultipleTest {
     private CryptoTransferMultiple cryptoTransferMultiple;
 
     @Mock
-    private AccountManager accountManager;
-
-    @Mock
     private ShellHelper shellHelper;
 
     @BeforeEach
     public void init() {
-        accountManager = cryptoTransferMultiple.getAccountManager();
-        assertNotNull(accountManager);
-
         shellHelper = cryptoTransferMultiple.getShellHelper();
         assertNotNull(shellHelper);
     }
