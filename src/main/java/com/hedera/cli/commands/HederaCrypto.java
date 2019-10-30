@@ -153,8 +153,6 @@ public class HederaCrypto extends CliDefaults {
         Object[] objs = argsList.toArray();
         String[] args = Arrays.copyOf(objs, objs.length, String[].class);
         // @formatter:off
-        System.out.println("bb");
-        System.out.println(Arrays.toString(args));
 
         Transfer transfer = new Transfer();
         try {

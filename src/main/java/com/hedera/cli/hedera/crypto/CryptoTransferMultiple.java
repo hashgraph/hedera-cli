@@ -336,7 +336,6 @@ public class CryptoTransferMultiple implements Runnable {
                     if (isTiny && accountManager.isAccountId(acc)) {
                         amountInTiny = cryptoTransferUtils.verifyTransferInTinyBars(amt);
                         if (amountInTiny == 0L) {
-                            shellHelper.printError("Tinybars must be whole numbers");
                             return null;
                         }
                         accountId = AccountId.fromString(acc);
@@ -345,7 +344,6 @@ public class CryptoTransferMultiple implements Runnable {
                     } else if (!isTiny && accountManager.isAccountId(acc)) {
                         amountInTiny = cryptoTransferUtils.verifyTransferInHbars(amt);
                         if (amountInTiny == 0L) {
-                            shellHelper.printError("Hbar must be > 0");
                             return null;
                         }
                         accountId = AccountId.fromString(acc);
