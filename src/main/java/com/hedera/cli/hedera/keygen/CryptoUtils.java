@@ -4,6 +4,9 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.bouncycastle.asn1.pkcs.PBKDF2Params;
 import org.bouncycastle.crypto.digests.SHA512Digest;
@@ -18,23 +21,17 @@ public class CryptoUtils {
     return bytes;
   }
 
-  public static byte[] sha256Digest(byte[] message) {
+  public static byte[] shaDigest(byte[] message, String algo) throws NoSuchAlgorithmException {
     MessageDigest digest = null;
     try {
-      digest = MessageDigest.getInstance("SHA-256");
+      digest = MessageDigest.getInstance(algo);
     } catch (NoSuchAlgorithmException e) {
-      e.printStackTrace();
+      throw new NoSuchAlgorithmException(e.getMessage());
     }
-    byte[] hash = digest.digest(message);
-    return hash;
-  }
-
-  public static byte[] sha384Digest(byte[] message) {
-    MessageDigest digest = null;
-    try {
-      digest = MessageDigest.getInstance("SHA-384");
-    } catch (NoSuchAlgorithmException e) {
-      e.printStackTrace();
+    List<String> ourSupportedAlgo = Stream.of("SHA-256", "SHA-384")
+      .collect(Collectors.toList());
+    if (!ourSupportedAlgo.contains(algo)) {
+      throw new NoSuchAlgorithmException("We only support SHA-256 and SHA-384");
     }
     byte[] hash = digest.digest(message);
     return hash;

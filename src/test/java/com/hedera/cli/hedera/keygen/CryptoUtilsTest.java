@@ -2,7 +2,9 @@ package com.hedera.cli.hedera.keygen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,6 +19,12 @@ import org.junit.jupiter.api.Test;
 public class CryptoUtilsTest {
 
   @Test
+  public void cryptoUtils() {
+    CryptoUtils c = new CryptoUtils();
+    assertNotNull(c);
+  }
+
+  @Test
   public void testGetSecureRandomData() {
     int testLength = 10;
     byte[] randomBytes = CryptoUtils.getSecureRandomData(testLength);
@@ -27,43 +35,87 @@ public class CryptoUtilsTest {
   }
 
   @Test
-  public void testSha256Digest() {
+  public void testSha256Digest() throws NoSuchAlgorithmException {
     int expectedLength = 32;
 
-    byte[] message = "hello".getBytes();
-    byte[] hash = CryptoUtils.sha256Digest(message);
-    int testString1Length = hash.length;
-    assertEquals(expectedLength, testString1Length);
+    byte[] message;
+    byte[] hash;
 
-    message = "hedera hashgraph".getBytes();
-    hash = CryptoUtils.sha256Digest(message);
-    int testString2Length = hash.length;
-    assertEquals(expectedLength, testString2Length);
+    try {
+      message = "hello".getBytes();
+      hash = CryptoUtils.shaDigest(message, "SHA-256");
+      int testString1Length = hash.length;
+      assertEquals(expectedLength, testString1Length);
+    } catch (NoSuchAlgorithmException e) {
+      throw new NoSuchAlgorithmException(e.getMessage());
+    }
 
-    message = "this is the fastest, fairest and most secure consensus distributed ledger".getBytes();
-    hash = CryptoUtils.sha256Digest(message);
-    int testString3Length = hash.length;
-    assertEquals(expectedLength, testString3Length);
+    try {
+      message = "hedera hashgraph".getBytes();
+      hash = CryptoUtils.shaDigest(message, "SHA-256");
+      int testString2Length = hash.length;
+      assertEquals(expectedLength, testString2Length);
+    } catch (NoSuchAlgorithmException e) {
+      throw new NoSuchAlgorithmException(e.getMessage());
+    }
+
+    try {
+      message = "this is the fastest, fairest and most secure consensus distributed ledger".getBytes();
+      hash = CryptoUtils.shaDigest(message, "SHA-256");
+      int testString3Length = hash.length;
+      assertEquals(expectedLength, testString3Length);
+    } catch (NoSuchAlgorithmException e) {
+      throw new NoSuchAlgorithmException(e.getMessage());
+    }
+
   }
 
   @Test
-  public void testSha384Digest() {
+  public void testSha384Digest() throws NoSuchAlgorithmException {
     int expectedLength = 48;
 
-    byte[] message = "hello".getBytes();
-    byte[] hash = CryptoUtils.sha384Digest(message);
-    int testString1Length = hash.length;
-    assertEquals(expectedLength, testString1Length);
+    byte[] message;
+    byte[] hash;
 
-    message = "hedera hashgraph".getBytes();
-    hash = CryptoUtils.sha384Digest(message);
-    int testString2Length = hash.length;
-    assertEquals(expectedLength, testString2Length);
+    try {
+      message = "hello".getBytes();
+      hash = CryptoUtils.shaDigest(message, "SHA-384");
+      int testString1Length = hash.length;
+      assertEquals(expectedLength, testString1Length);
+    } catch (NoSuchAlgorithmException e) {
+      throw new NoSuchAlgorithmException(e.getMessage());
+    }
 
-    message = "this is the fastest, fairest and most secure consensus distributed ledger".getBytes();
-    hash = CryptoUtils.sha384Digest(message);
-    int testString3Length = hash.length;
-    assertEquals(expectedLength, testString3Length);
+    try {
+      message = "hedera hashgraph".getBytes();
+      hash = CryptoUtils.shaDigest(message, "SHA-384");
+      int testString2Length = hash.length;
+      assertEquals(expectedLength, testString2Length);
+    } catch (NoSuchAlgorithmException e) {
+      throw new NoSuchAlgorithmException(e.getMessage());
+    }
+
+    try {
+      message = "this is the fastest, fairest and most secure consensus distributed ledger".getBytes();
+      hash = CryptoUtils.shaDigest(message, "SHA-384");
+      int testString3Length = hash.length;
+      assertEquals(expectedLength, testString3Length);
+    } catch (NoSuchAlgorithmException e) {
+      throw new NoSuchAlgorithmException(e.getMessage());
+    }
+  }
+
+  @Test
+  public void testNotSupportedHashAlgo() {
+    assertThrows(NoSuchAlgorithmException.class, () -> {
+      byte[] message = "hello".getBytes();;
+      CryptoUtils.shaDigest(message, "SHA-512");
+    });
+
+    assertThrows(NoSuchAlgorithmException.class, () -> {
+      byte[] message = "hello".getBytes();;
+      CryptoUtils.shaDigest(message, "NO SUCH ALGO");
+    });
   }
 
   @Test

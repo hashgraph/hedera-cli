@@ -13,6 +13,8 @@ import org.bouncycastle.crypto.params.KeyParameter;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.security.NoSuchAlgorithmException;
+
 /**
  * A Mnemonic object may be used to convert lists of words per
  * <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">the
@@ -67,7 +69,7 @@ public class Mnemonic {
     }
     return entropy;
   }
-  
+
   private boolean verifyEntropy(byte[] entropy, List<String> words) {
     boolean[] concatBits;
     try {
@@ -80,9 +82,15 @@ public class Mnemonic {
     int entropyLengthBits = concatLenBits - checksumLengthBits;
 
     // Take the digest of the entropy.
-    byte[] hash = CryptoUtils.sha256Digest(entropy);
-    boolean[] hashBits = bytesToBits(hash);
-
+    byte[] hash;
+    boolean[] hashBits;
+    try {
+      hash = CryptoUtils.shaDigest(entropy, "SHA-256");
+      hashBits = bytesToBits(hash);
+    } catch (NoSuchAlgorithmException e) {
+      return false;
+    }
+   
     // Check all the checksum bits.
     for (int i = 0; i < checksumLengthBits; ++i) {
       if (concatBits[entropyLengthBits + i] != hashBits[i]) {
@@ -123,8 +131,11 @@ public class Mnemonic {
 
   /**
    * Convert entropy data to mnemonic word list.
+   * 
+   * @throws NoSuchAlgorithmException
    */
-  public List<String> toMnemonic(byte[] entropy) throws MnemonicException.MnemonicLengthException {
+  public List<String> toMnemonic(byte[] entropy)
+      throws MnemonicException.MnemonicLengthException, NoSuchAlgorithmException {
     if (entropy.length % 4 > 0)
       throw new MnemonicException.MnemonicLengthException("Entropy length not multiple of 32 bits.");
 
@@ -134,8 +145,15 @@ public class Mnemonic {
     // We take initial entropy of ENT bits and compute its
     // checksum by taking first ENT / 32 bits of its SHA256 hash.
 
-    byte[] hash = CryptoUtils.sha256Digest(entropy);
-    boolean[] hashBits = bytesToBits(hash);
+    byte[] hash;
+    boolean[] hashBits;
+
+    try {
+      hash = CryptoUtils.shaDigest(entropy, "SHA-256");
+      hashBits = bytesToBits(hash);
+    } catch (NoSuchAlgorithmException e) {
+      throw new NoSuchAlgorithmException(e.getMessage());
+    }
 
     boolean[] entropyBits = bytesToBits(entropy);
     int checksumLengthBits = entropyBits.length / 32;

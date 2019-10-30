@@ -4,6 +4,7 @@ import com.hedera.cli.hedera.bip39.Mnemonic;
 import com.hedera.cli.hedera.bip39.MnemonicException;
 import org.springframework.lang.NonNull;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public class HGCSeed {
@@ -28,6 +29,9 @@ public class HGCSeed {
         try {
             return new Mnemonic().toMnemonic(entropy);
         } catch (MnemonicException.MnemonicLengthException e) {
+            e.printStackTrace();
+            return null;
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return null;
         }
