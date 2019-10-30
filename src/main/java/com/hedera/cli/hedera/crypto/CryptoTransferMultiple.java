@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.cli.hedera.utils.CryptoTransferUtils;
 import com.hedera.cli.hedera.utils.Composite2;
@@ -60,7 +60,7 @@ public class CryptoTransferMultiple implements Runnable {
     private Utils utils;
 
     @Autowired
-    private AccountUtils accountUtils;
+    private AccountManager accountManager;
 
     @Autowired
     private CryptoTransferUtils cryptoTransferUtils;
@@ -108,7 +108,7 @@ public class CryptoTransferMultiple implements Runnable {
                 // tinybar arg
                 recipient = springRecipient.split(",");
                 recipientAmtStrArray = springTinybarAmt.split(",");
-                memoString = accountUtils.promptMemoString(inputReader);
+                memoString = accountManager.promptMemoString(inputReader);
                 senderAccountIDInString = promptSenderId(inputReader);
                 String transferAmountInStr = promptTransferAmount(inputReader);
                 transferAmount = cryptoTransferUtils.verifyTransferInTinyBars(transferAmountInStr);
@@ -123,7 +123,7 @@ public class CryptoTransferMultiple implements Runnable {
                 // hbar arg
                 recipient = springRecipient.split(",");
                 recipientAmtStrArray = springHbarAmt.split(",");
-                memoString = accountUtils.promptMemoString(inputReader);
+                memoString = accountManager.promptMemoString(inputReader);
                 senderAccountIDInString = promptSenderId(inputReader);
                 String transferAmountInStr = promptTransferAmount(inputReader);
                 transferAmount = cryptoTransferUtils.verifyTransferInHbars(transferAmountInStr);
@@ -333,7 +333,7 @@ public class CryptoTransferMultiple implements Runnable {
                 for (int i = 0; i < accountList.size(); ++i) {
                     acc = accountList.get(i);
                     amt = amountList.get(i);
-                    if (isTiny && accountUtils.isAccountId(acc)) {
+                    if (isTiny && accountManager.isAccountId(acc)) {
                         amountInTiny = cryptoTransferUtils.verifyTransferInTinyBars(amt);
                         if (amountInTiny == 0L) {
                             shellHelper.printError("Tinybars must be whole numbers");
@@ -342,7 +342,7 @@ public class CryptoTransferMultiple implements Runnable {
                         accountId = AccountId.fromString(acc);
                         Recipient verifiedRecipient = new Recipient(accountId, amountInTiny);
                         map.put(i, verifiedRecipient);
-                    } else if (!isTiny && accountUtils.isAccountId(acc)) {
+                    } else if (!isTiny && accountManager.isAccountId(acc)) {
                         amountInTiny = cryptoTransferUtils.verifyTransferInHbars(amt);
                         if (amountInTiny == 0L) {
                             shellHelper.printError("Hbar must be > 0");

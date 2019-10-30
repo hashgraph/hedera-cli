@@ -9,7 +9,7 @@ import java.util.Set;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
@@ -45,7 +45,7 @@ public class AccountDelete implements Runnable {
     private DataDirectory dataDirectory;
 
     @Autowired
-    private AccountUtils accountUtils;
+    private AccountManager accountManager;
 
     @Autowired
     private ShellHelper shellHelper;
@@ -162,7 +162,7 @@ public class AccountDelete implements Runnable {
     }
 
     public boolean deleteJsonAccountFromDisk(AccountId oldAccount) {
-        String pathToIndexTxt = accountUtils.pathToIndexTxt();
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
         boolean fileDeleted = false;
 
         String pathToCurrentJsonAccount;
@@ -180,7 +180,7 @@ public class AccountDelete implements Runnable {
 
             if (accountId.equals(oldAccount.toString())) {
                 // delete the associated json file in disk
-                pathToCurrentJsonAccount = accountUtils.pathToAccountsFolder() + value + ".json";
+                pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
                 Path filePathToJson = Paths.get(dataDirectory.getDataDir().toString(), pathToCurrentJsonAccount);
                 File file = new File(filePathToJson.toString());
                 fileDeleted = file.delete();

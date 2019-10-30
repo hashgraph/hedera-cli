@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.hedera.utils.Composite;
 import com.hedera.cli.hedera.utils.CryptoTransferUtils;
 import com.hedera.cli.shell.ShellHelper;
@@ -42,7 +42,7 @@ public class CryptoTransfer implements Runnable {
     private Hedera hedera;
 
     @Autowired
-    private AccountUtils accountUtils;
+    private AccountManager accountManager;
 
     @Autowired
     private CryptoTransferUtils cryptoTransferUtils;
@@ -54,7 +54,7 @@ public class CryptoTransfer implements Runnable {
     private CommandSpec spec;
 
     @ArgGroup(exclusive = false, multiplicity = "1")
-    List<Composite> composites;
+    private List<Composite> composites;
 
     private String mPreview;
     private String memoString;
@@ -80,7 +80,7 @@ public class CryptoTransfer implements Runnable {
             var recipientId = AccountId.fromString(recipient);
 
             if (!StringUtil.isNullOrEmpty(tinyBars) && StringUtil.isNullOrEmpty(hBars)) {
-                memoString = accountUtils.promptMemoString(inputReader);
+                memoString = accountManager.promptMemoString(inputReader);
                 amountInTiny = cryptoTransferUtils.verifyTransferInTinyBars(tinyBars);
                 if (amountInTiny == 0L) {
                     shellHelper.printError("Tinybars must be whole numbers");
@@ -88,7 +88,7 @@ public class CryptoTransfer implements Runnable {
                 }
                 reviewAndExecute(client, operatorId, recipientId, amountInTiny);
             } else if (StringUtil.isNullOrEmpty(tinyBars) && !StringUtil.isNullOrEmpty(hBars)) {
-                memoString = accountUtils.promptMemoString(inputReader);
+                memoString = accountManager.promptMemoString(inputReader);
                 amountInTiny = cryptoTransferUtils.verifyTransferInHbars(hBars);
                 if (amountInTiny == 0L) {
                     shellHelper.printError("Hbar must be > 0");
@@ -110,7 +110,7 @@ public class CryptoTransfer implements Runnable {
             executeCryptoTransfer(client, operatorId, recipientId, amountInTiny);
         } else if ("yes".equals(mPreview)) {
             isInfoCorrect = promptPreview(operatorId, recipientId, amountInTiny);
-            if (isInfoCorrect.equals("yes")) {
+            if ("yes".equals(isInfoCorrect)) {
                 shellHelper.print("Info is correct, let's go!");
                 executeCryptoTransfer(client, operatorId, recipientId, amountInTiny);
             } else if ("no".equals(isInfoCorrect)) {

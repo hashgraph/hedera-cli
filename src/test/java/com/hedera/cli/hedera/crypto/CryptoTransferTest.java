@@ -2,12 +2,7 @@ package com.hedera.cli.hedera.crypto;
 
 import java.util.Arrays;
 
-import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountUtils;
-import com.hedera.cli.hedera.utils.Composite;
-import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.Client;
+import com.hedera.cli.hedera.utils.AccountManager;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,19 +25,7 @@ public class CryptoTransferTest {
     private CryptoTransfer cryptoTransfer;
 
     @Mock
-    private ShellHelper shellHelper;
-
-    @Mock
-    private Composite composite;
-
-    @Mock
-    private AccountUtils accountUtils;
-
-    @Mock
-    private Hedera hedera;
-
-    @Mock
-    private InputReader inputReader;
+    private AccountManager accountManager;
 
     @Test
     public void testCryptoTransferSingleArgs() {
@@ -74,20 +57,8 @@ public class CryptoTransferTest {
 
     @Test
     public void assertDependenciesNotNull() {
-        shellHelper = cryptoTransfer.getShellHelper();
-        assertNotNull(shellHelper);
-
-        hedera = cryptoTransfer.getHedera();
-        assertNotNull(hedera);
-
-        accountUtils = cryptoTransfer.getAccountUtils();
-        assertNotNull(accountUtils);
-
-        composite = cryptoTransfer.getComposite();
-        assertNotNull(composite);
-
-        inputReader = cryptoTransfer.getInputReader();
-        assertNotNull(inputReader);
+        accountManager = cryptoTransfer.getAccountManager();
+        assertNotNull(accountManager);
     }
 
     @Test

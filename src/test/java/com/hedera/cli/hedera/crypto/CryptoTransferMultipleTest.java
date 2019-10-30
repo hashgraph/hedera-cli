@@ -1,23 +1,24 @@
 package com.hedera.cli.hedera.crypto;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.doNothing;
+
 import java.util.Arrays;
 import java.util.List;
 
-import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountUtils;
-import com.hedera.cli.hedera.utils.Utils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(MockitoExtension.class)
 public class CryptoTransferMultipleTest {
@@ -26,27 +27,18 @@ public class CryptoTransferMultipleTest {
     private CryptoTransferMultiple cryptoTransferMultiple;
 
     @Mock
-    private AccountUtils accountUtils;
-
-    @Mock
-    private Hedera hedera;
+    private AccountManager accountManager;
 
     @Mock
     private ShellHelper shellHelper;
 
-    @Mock
-    private Utils utils;
-
     @BeforeEach
     public void init() {
-        hedera = cryptoTransferMultiple.getHedera();
-        assertNotNull(hedera);
+        accountManager = cryptoTransferMultiple.getAccountManager();
+        assertNotNull(accountManager);
+
         shellHelper = cryptoTransferMultiple.getShellHelper();
         assertNotNull(shellHelper);
-        accountUtils = cryptoTransferMultiple.getAccountUtils();
-        assertNotNull(accountUtils);
-        utils = cryptoTransferMultiple.getUtils();
-        assertNotNull(utils);
     }
 
     @Test
@@ -54,18 +46,18 @@ public class CryptoTransferMultipleTest {
 
         String str = "111111111";
         assertTrue(cryptoTransferMultiple.isNumeric(str));
-//
-//        String str1 = " ";
-//        assertFalse(cryptoTransferMultiple1.isNumeric(str1));
-//
-//        String str2 = null;
-//        assertFalse(cryptoTransferMultiple2.isNumeric(str2));
-//
-//        String str3 = "0.1";
-//        assertFalse(cryptoTransferMultiple3.isNumeric(str3));
-//
-//        String str4 = "-9";
-//        assertFalse(cryptoTransferMultiple4.isNumeric(str4));
+
+        String str1 = " ";
+        assertFalse(cryptoTransferMultiple.isNumeric(str1));
+
+        String str2 = null;
+        assertFalse(cryptoTransferMultiple.isNumeric(str2));
+
+        String str3 = "0.1";
+        assertFalse(cryptoTransferMultiple.isNumeric(str3));
+
+        String str4 = "-9";
+        assertFalse(cryptoTransferMultiple.isNumeric(str4));
     }
 
     @Test
@@ -73,9 +65,15 @@ public class CryptoTransferMultipleTest {
         List<String> accountList = Arrays.asList("0.0.1001", "0.0.1002", "0.0.1003");
         List<String> amountList = Arrays.asList("100", "9888486986", "10000001100000");
         cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList, true);
+        assertNotNull(cryptoTransferMultiple);
 
-        // This test needs an assertion to be completed. Please fix this.
-        assertTrue(true);
+        List<String> amountListSize = Arrays.asList("100", "10000001100000");
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        doNothing().when(shellHelper).printError(valueCapture.capture());
+        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountListSize, true);
+        String actual = valueCapture.getValue();
+        String expected = "Lists aren't the same size";
+        assertEquals(expected, actual);
     }
 
     // @Test(expected = IllegalArgumentException.class)

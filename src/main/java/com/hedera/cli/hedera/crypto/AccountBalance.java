@@ -1,7 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountUtils;
+import com.hedera.cli.hedera.utils.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -25,7 +25,7 @@ public class AccountBalance implements Runnable {
     private Hedera hedera;
 
     @Autowired
-    private AccountUtils accountUtils;
+    private AccountManager accountManager;
 
     @Autowired
     private ShellHelper shellHelper;
@@ -37,7 +37,7 @@ public class AccountBalance implements Runnable {
 
     @Override
     public void run() {
-        String accountId = accountUtils.verifyAccountId(accountIdInString, shellHelper);
+        String accountId = accountManager.verifyAccountId(accountIdInString, shellHelper);
         if (accountId == null) return;
         getBalance();
     }
