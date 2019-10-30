@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountInfoSerializer;
+import com.hedera.cli.models.AccountInfoSerializer;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
@@ -37,6 +37,9 @@ public class AccountGetInfo implements Runnable, Operation {
     @Autowired
     private ShellHelper shellHelper;
 
+    @Autowired
+    private AccountInfoSerializer accountInfoSerializer;
+
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n"
             + "@|fg(yellow) account info 0.0.1003|@")
@@ -53,7 +56,7 @@ public class AccountGetInfo implements Runnable, Operation {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 SimpleModule module = new SimpleModule();
-                module.addSerializer(AccountInfo.class, new AccountInfoSerializer());
+                module.addSerializer(AccountInfo.class, accountInfoSerializer);
                 mapper.registerModule(module);
                 ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
                 shellHelper.printSuccess(ow.writeValueAsString(accountInfo));

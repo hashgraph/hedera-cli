@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.Utils;
+import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
@@ -30,7 +30,7 @@ public class FileCreate implements Runnable {
     private Hedera hedera;
 
     @Autowired
-    private Utils utils;
+    private TransactionManager txManager;
 
     @Autowired
     private ShellHelper shellHelper;
@@ -108,7 +108,7 @@ public class FileCreate implements Runnable {
             FileCreateTransaction tx = null;
             // ZonedDateTime zonedDateTime = utils.dateToMilliseconds(date);
             // Instant instant = zonedDateTime.toInstant();
-            Instant instant = utils.dateToMilliseconds(date);
+            Instant instant = txManager.dateToMilliseconds(date);
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
 
             boolean testSize = false;

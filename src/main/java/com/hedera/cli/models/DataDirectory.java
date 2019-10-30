@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.utils;
+package com.hedera.cli.models;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

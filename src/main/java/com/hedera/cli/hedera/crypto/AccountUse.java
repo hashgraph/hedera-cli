@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Map;
 
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.services.CurrentAccountService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,4 +81,3 @@ public class AccountUse implements Runnable, Operation {
     }
 
 }
-
