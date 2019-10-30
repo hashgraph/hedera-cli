@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.utils;
+package com.hedera.cli.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.FileSystemUtils;
 
 @ExtendWith(MockitoExtension.class)
-public class UtilsTest {
+public class TransactionManagerTest {
 
     @TempDir
     public Path tempDir;
@@ -30,14 +30,14 @@ public class UtilsTest {
     private DataDirectory dataDirectory;
 
     // class under test
-    private Utils utils;
+    private TransactionManager utils;
 
     @BeforeEach
     public void setUp() {
         // manual invocation of DataDirectory
         dataDirectory = new DataDirectory();
         dataDirectory.setDataDir(tempDir);
-        utils = new Utils();
+        utils = new TransactionManager();
         utils.setDataDirectory(dataDirectory);
 
         String accountId = "0.0.1234";

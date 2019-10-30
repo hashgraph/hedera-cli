@@ -2,7 +2,7 @@ package com.hedera.cli.defaults;
 
 import java.io.File;
 
-import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.models.DataDirectory;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +24,11 @@ public abstract class CliDefaults {
 
     // do we have a default account?
     String pathToDefaultAccount = defaultNetwork + File.separator + "accounts" + File.separator + "default.txt";
-    String defaultAccount = dataDirectory.readFile(pathToDefaultAccount);    
+    String defaultAccount = dataDirectory.readFile(pathToDefaultAccount);
     if (defaultAccount.isEmpty()) {
       return Availability.unavailable("you have not set your default account for the current network");
-    }  
-     // invoke isDefaultAccountSet
+    }
+    // invoke isDefaultAccountSet
     return Availability.available();
   }
 

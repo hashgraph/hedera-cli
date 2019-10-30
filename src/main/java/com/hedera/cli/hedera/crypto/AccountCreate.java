@@ -12,7 +12,6 @@ import com.hedera.cli.hedera.keygen.HGCSeed;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.Setup;
-import com.hedera.cli.hedera.utils.Utils;
 import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.TransactionId;
@@ -51,9 +50,6 @@ public class AccountCreate implements Runnable, Operation {
 
     @Autowired
     private Setup setup;
-
-    @Autowired
-    private Utils utils;
 
     @Spec
     private CommandSpec spec;
