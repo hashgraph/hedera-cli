@@ -18,9 +18,8 @@ public class HGCSeed {
     public HGCSeed(List<String> mnemonic) throws Exception {
         if (mnemonic.size() == HGCSeed.bip39WordListSize) {
             this.entropy = new Mnemonic().toEntropy(mnemonic);
-        } else  {
-            Reference reference = new Reference(String.join(" ", mnemonic));
-            this.entropy = reference.toBytes();
+        } else {
+            throw new Exception("Invalid word list");
         }
     }
 
