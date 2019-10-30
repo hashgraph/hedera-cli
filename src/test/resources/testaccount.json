@@ -1,0 +1,15 @@
+{
+  "key" : "302a300506032b6570032100387764a88a6fe2ecad50416c0b3138e7f4378c658bd24451c00ae30702480b4a",
+  "accountId" : "0.0.82319",
+  "contractId" : "000000000000000000000000000000000001418f",
+  "balance" : "603313838",
+  "claims" : [ ],
+  "autoRenewPeriod" : "PT2191H40M",
+  "expirationTime" : "2019-12-27T16:48:15Z",
+  "generateReceiveRecordThreshold" : 9223372036854775807,
+  "deleted" : false,
+  "proxyAccountId" : "0.0.0",
+  "proxyReceived" : 0,
+  "generateSendRecordThreshold" : 9223372036854775807,
+  "receiverSignatureRequired" : false
+}
