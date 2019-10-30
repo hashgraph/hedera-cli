@@ -113,7 +113,7 @@ public class CryptoUtilsTest {
     });
 
     assertThrows(NoSuchAlgorithmException.class, () -> {
-      byte[] message = "hello".getBytes();;
+      byte[] message = "hello".getBytes();
       CryptoUtils.shaDigest(message, "NO SUCH ALGO");
     });
   }

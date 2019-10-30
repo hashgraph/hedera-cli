@@ -20,7 +20,7 @@ public class HGCSeed {
         if (mnemonic.size() == HGCSeed.bip39WordListSize) {
             this.entropy = new Mnemonic().toEntropy(mnemonic);
         } else {
-            throw new Exception("Invalid word list");
+            throw new MnemonicException.MnemonicWordException("Invalid word list");
         }
     }
 
