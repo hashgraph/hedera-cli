@@ -15,11 +15,12 @@ import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.Setup;
-import com.hedera.cli.hedera.utils.AccountManager;
-import com.hedera.cli.hedera.utils.DataDirectory;
-import com.hedera.cli.hedera.utils.Utils;
+import com.hedera.cli.models.AccountManager;
+import com.hedera.cli.models.DataDirectory;
+import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
@@ -55,7 +56,7 @@ public class AccountRecovery implements Runnable, Operation {
     private AccountManager accountManager;
 
     @Autowired
-    private Utils utils;
+    private TransactionManager txManager;
 
     @Autowired
     private ShellHelper shellHelper;
@@ -64,15 +65,14 @@ public class AccountRecovery implements Runnable, Operation {
     private Setup setup;
 
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
-            + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) account recovery 0.0.1003|@")
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account recovery 0.0.1003|@")
     private String accountId;
 
     private String strMethod = "bip";
     private int index = 0;
     private InputReader inputReader;
     private AccountGetInfo accountInfo;
-    private com.hedera.hashgraph.sdk.account.AccountInfo accountRes;
+    private AccountInfo accountRes;
     private KeyPair keypair;
 
     @Override
@@ -80,14 +80,17 @@ public class AccountRecovery implements Runnable, Operation {
         accountInfo = new AccountGetInfo();
         shellHelper.print("Start the recovery process");
         String verifiedAccountId = accountManager.verifyAccountId(accountId, shellHelper);
-        if (verifiedAccountId == null) return;
+        if (verifiedAccountId == null)
+            return;
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
-        if (phraseList == null) return;
+        if (phraseList == null)
+            return;
         String method = inputReader
                 .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
         String strMethod = accountManager.verifyMethod(method, shellHelper);
-        if (strMethod == null) return;
+        if (strMethod == null)
+            return;
 
         if ("bip".equals(method)) {
             KeyPair keypair = recoverEDKeypairPostBipMigration(phraseList);
@@ -112,12 +115,12 @@ public class AccountRecovery implements Runnable, Operation {
     }
 
     public boolean verifyAndSaveAccount(String accountId, KeyPair keypair, ShellHelper shellHelper) {
-        com.hedera.hashgraph.sdk.account.AccountInfo accountResponse;
+        AccountInfo accountResponse;
         boolean accountRecovered;
         try {
-            accountResponse = getAccountInfoWithPrivKey(hedera, accountId, Ed25519PrivateKey.fromString(keypair.getPrivateKeyHex()));
-            if (accountResponse.getAccountId().equals(AccountId.fromString(accountId))
-                    && !retrieveIndex()) {
+            accountResponse = getAccountInfoWithPrivKey(hedera, accountId,
+                    Ed25519PrivateKey.fromString(keypair.getPrivateKeyHex()));
+            if (accountResponse.getAccountId().equals(AccountId.fromString(accountId)) && !retrieveIndex()) {
                 // Check if account already exists in index.txt
                 shellHelper.printSuccess("Account recovered and verified with Hedera");
                 accountRecovered = true;
@@ -132,12 +135,12 @@ public class AccountRecovery implements Runnable, Operation {
         return accountRecovered;
     }
 
-    public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId, Ed25519PrivateKey accPrivKey) {
+    public com.hedera.hashgraph.sdk.account.AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId,
+            Ed25519PrivateKey accPrivKey) {
         try {
             var client = hedera.createHederaClient();
             AccountInfoQuery q;
-            q = new AccountInfoQuery(client)
-                    .setAccountId(AccountId.fromString(accountId));
+            q = new AccountInfoQuery(client).setAccountId(AccountId.fromString(accountId));
             accountRes = q.execute();
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
