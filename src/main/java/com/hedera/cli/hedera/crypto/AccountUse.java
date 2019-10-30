@@ -3,6 +3,7 @@ package com.hedera.cli.hedera.crypto;
 import java.io.File;
 import java.util.Map;
 
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.services.CurrentAccountService;
 
@@ -11,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
@@ -21,7 +23,7 @@ import picocli.CommandLine.Parameters;
         separator = " ", 
         description = "@|fg(225) Switch to use a specific Hedera account as operator.|@",
         helpCommand = true) // @formatter:on
-public class AccountUse implements Runnable {
+public class AccountUse implements Runnable, Operation {
 
     @Autowired
     private ApplicationContext context;
@@ -30,9 +32,8 @@ public class AccountUse implements Runnable {
     private DataDirectory dataDirectory;
 
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
-            + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) account use 0.0.1003|@")
-    private String accountId;    
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account use 0.0.1003|@")
+    private String accountId;
 
     @Override
     public void run() {
@@ -64,6 +65,19 @@ public class AccountUse implements Runnable {
             }
         }
         return false;
+    }
+
+    @Override
+    public void executeSubCommand(InputReader inputReader, String... args) {
+        if (args.length == 0) {
+            CommandLine.usage(this, System.out);
+        } else {
+            try {
+                new CommandLine(this).execute(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

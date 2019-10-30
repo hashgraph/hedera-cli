@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 import lombok.Setter;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -34,7 +35,7 @@ import picocli.CommandLine.Spec;
 @Setter
 @Component
 @Command(name = "delete", separator = " ", description = "@|fg(225) Deletes the given old account and transfers any balance to the given new account.|@")
-public class AccountDelete implements Runnable {
+public class AccountDelete implements Runnable, Operation {
 
     @Spec
     private CommandSpec spec;
@@ -195,5 +196,19 @@ public class AccountDelete implements Runnable {
         updatedMap = readingIndexAccount;
         dataDirectory.writeFile(pathToIndexTxt, dataDirectory.formatMapToIndex(updatedMap));
         return fileDeleted;
+    }
+
+    @Override
+    public void executeSubCommand(InputReader inputReader, String... args) {
+        this.inputReader = inputReader;
+        if (args.length == 0) {
+            CommandLine.usage(this, System.out);
+        } else {
+            try {
+                new CommandLine(this).execute(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

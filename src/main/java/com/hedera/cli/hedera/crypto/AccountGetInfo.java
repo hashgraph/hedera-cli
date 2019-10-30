@@ -3,6 +3,7 @@ package com.hedera.cli.hedera.crypto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.utils.AccountInfoSerializer;
 import com.hedera.cli.shell.ShellHelper;
@@ -18,6 +19,7 @@ import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
@@ -28,7 +30,7 @@ import picocli.CommandLine.Parameters;
 @Command(name = "info",
         description = "@|fg(225) Gets the information of the paying/operator account"
                 + " returns a stateproof if requested|@")
-public class AccountGetInfo implements Runnable {
+public class AccountGetInfo implements Runnable, Operation {
 
     @Autowired
     private ApplicationContext context;
@@ -80,5 +82,19 @@ public class AccountGetInfo implements Runnable {
             shellHelper.printError(e.getMessage());
         }
         return accountInfo;
+    }
+
+    @Override
+    public void executeSubCommand(InputReader inputReader, String... args) {
+        if (args.length == 0) {
+            CommandLine.usage(this, System.out);
+        } else {
+            try {
+                // AccountGetInfo accountInfo = factory.create(AccountGetInfo.class);
+                new CommandLine(this).execute(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

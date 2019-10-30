@@ -97,7 +97,7 @@ public class HederaCrypto extends CliDefaults {
                 break;
         }
         // Pass args onwards and invoke our PicoCli classes
-        account.handle(context, inputReader, subCommand, args);
+        account.handle(inputReader, subCommand, args);
     }
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
