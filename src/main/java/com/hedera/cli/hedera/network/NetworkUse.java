@@ -1,12 +1,12 @@
 package com.hedera.cli.hedera.network;
 
-import com.hedera.cli.hedera.utils.DataDirectory;
-
+import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
-import lombok.NoArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.NoArgsConstructor;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 

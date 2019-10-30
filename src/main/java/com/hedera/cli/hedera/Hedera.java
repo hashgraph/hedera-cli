@@ -3,9 +3,9 @@ package com.hedera.cli.hedera;
 import java.util.List;
 import java.util.Map;
 
-import com.hedera.cli.hedera.utils.AccountManager;
-import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.AddressBookManager;
+import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.HederaNode;
 import com.hedera.cli.models.Network;
 import com.hedera.cli.services.CurrentAccountService;

@@ -9,7 +9,7 @@ import static org.mockito.Mockito.*;
 import java.util.Arrays;
 import java.util.List;
 
-import com.hedera.cli.hedera.utils.AccountManager;
+import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.junit.jupiter.api.AfterEach;

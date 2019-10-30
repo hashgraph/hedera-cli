@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.utils;
+package com.hedera.cli.models;
 
 import java.io.IOException;
 
@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.Claim;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class AccountInfoSerializer extends JsonSerializer<AccountInfo> {
 
   @Override

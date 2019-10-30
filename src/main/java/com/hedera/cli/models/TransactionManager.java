@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.utils;
+package com.hedera.cli.models;
 
 import java.io.File;
 import java.text.ParseException;
@@ -8,7 +8,6 @@ import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.models.TransactionObj;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +19,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Component
-public class Utils {
+public class TransactionManager {
 
     @Autowired
     private DataDirectory dataDirectory;
-
-    @Autowired
-    private Setup setup;
 
     public Instant dateToMilliseconds(String[] dateInString) throws ParseException {
         System.out.println("The date from cli is: ");

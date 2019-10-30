@@ -10,11 +10,11 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountManager;
-import com.hedera.cli.hedera.utils.Utils;
+import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.Recipient;
 import com.hedera.cli.models.Sender;
 import com.hedera.cli.models.TransactionObj;
+import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.Transaction;
@@ -26,16 +26,17 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import picocli.CommandLine;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.ArgGroup;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
 @NoArgsConstructor
@@ -51,7 +52,7 @@ public class CryptoTransferMultiple implements Runnable {
     private ShellHelper shellHelper;
 
     @Autowired
-    private Utils utils;
+    private TransactionManager txManager;
 
     @Autowired
     private AccountManager accountManager;
@@ -436,5 +437,6 @@ public class CryptoTransferMultiple implements Runnable {
 //            throw new CommandLine.ParameterException(spec.commandLine(), "Option -y removes preview");
 //        }
 //        return mPreview;
+//    }
     }
 }

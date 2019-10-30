@@ -2,7 +2,7 @@ package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountManager;
+import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import lombok.Getter;
