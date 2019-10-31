@@ -108,7 +108,7 @@ public class CryptoUtilsTest {
   @Test
   public void testNotSupportedHashAlgo() {
     assertThrows(NoSuchAlgorithmException.class, () -> {
-      byte[] message = "hello".getBytes();;
+      byte[] message = "hello".getBytes();
       CryptoUtils.shaDigest(message, "SHA-512");
     });
 
