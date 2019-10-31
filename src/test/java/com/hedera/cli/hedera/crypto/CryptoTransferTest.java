@@ -11,8 +11,6 @@ import java.util.List;
 
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,16 +21,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class CryptoTransferMultipleTest {
+public class CryptoTransferTest {
 
     @InjectMocks
-    private Crypto crypto;
+    private CryptoTransfer cryptoTransfer;
 
     @Mock
     private ShellHelper shellHelper;
 
     @Mock
-    AccountManager accountManager;
+    private AccountManager accountManager;
 
     @Mock
     private CryptoTransferOptions cryptoTransferOptions;
@@ -40,10 +38,9 @@ public class CryptoTransferMultipleTest {
     @Mock
     private List<CryptoTransferOptions> cryptoTransferOptionsList;
 
-
     @BeforeEach
     public void init() {
-        shellHelper = crypto.getShellHelper();
+        shellHelper = cryptoTransfer.getShellHelper();
         assertNotNull(shellHelper);
     }
 
@@ -134,18 +131,18 @@ public class CryptoTransferMultipleTest {
     public void verifyEqualListReturnsTrue() {
         List<String> transferList = Arrays.asList(("0.0.116681,0.0.117813,0.0.114152,0.0.11667").split(","));
         List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
-        assertTrue(crypto.verifyEqualList(transferList, amountList));
+        assertTrue(cryptoTransfer.verifyEqualList(transferList, amountList));
     }
 
     @Test
     public void verifyEqualListReturnsFalse() {
         List<String> transferList = Arrays.asList(("0.0.117813,0.0.114152,0.0.11667").split(","));
         List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
-        assertFalse(crypto.verifyEqualList(transferList, amountList));
+        assertFalse(cryptoTransfer.verifyEqualList(transferList, amountList));
 
         ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
         doNothing().when(shellHelper).printError(valueCapture.capture());
-        crypto.verifyEqualList(transferList, amountList);
+        cryptoTransfer.verifyEqualList(transferList, amountList);
         String actual = valueCapture.getValue();
         String expected = "Lists aren't the same size";
         assertEquals(expected, actual);
@@ -174,37 +171,25 @@ public class CryptoTransferMultipleTest {
     @Test
     public void verifyTransferInHbarsNotDeci() {
         List<String> amountList = Arrays.asList(("-10,-10,10,10").split(","));
-        assertTrue(crypto.verifyHbarsInLong(amountList));
-
-        boolean isTiny = false;
-        assertTrue(crypto.verifySumOfTransfer(amountList, isTiny));
+        assertTrue(cryptoTransfer.sumOfHbarsInLong(amountList));
     }
 
     @Test
     public void verifyTransferInHbarsResolveDecimals() {
         List<String> amountList = Arrays.asList(("-2.1,-0.0005,1.0005,1.1").split(","));
-        assertTrue(crypto.verifyHbarsInLong(amountList));
-
-        boolean isTiny = false;
-        assertTrue(crypto.verifySumOfTransfer(amountList, isTiny));
+        assertTrue(cryptoTransfer.sumOfHbarsInLong(amountList));
     }
 
     @Test
     public void verifyTransferInTinybarsNotDeci() {
         List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
-        assertTrue(crypto.verifyTinybarsInLong(amountList));
-
-        boolean isTiny = true;
-        assertTrue(crypto.verifySumOfTransfer(amountList, isTiny));
+        assertTrue(cryptoTransfer.sumOfTinybarsInLong(amountList));
     }
 
     @Test
     public void verifyTransferInTinybarsResolveDecimals() {
         List<String> amountList = Arrays.asList(("-0.7,-10000.6,10000,0.7").split(","));
-        assertFalse(crypto.verifyTinybarsInLong(amountList));
-
-        boolean isTiny = true;
-        assertFalse(crypto.verifySumOfTransfer(amountList, isTiny));
+        assertFalse(cryptoTransfer.sumOfTinybarsInLong(amountList));
     }
 
 //    @Test

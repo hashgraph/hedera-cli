@@ -29,7 +29,7 @@ public class CryptoTransferOptions {
     public static class Dependent {
 
         @Option(names = { "-s", "--sender" },  required = true,
-                description = "Sender accountID in the format shardNum.realmNum.accountNum")
+                description = "PreviewTransferList accountID in the format shardNum.realmNum.accountNum")
         public String senderList;
 
         @Option(names = { "-r", "--recipient" },  required = true,
