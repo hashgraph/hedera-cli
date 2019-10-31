@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.protobuf.ByteString;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.Claim;
@@ -44,6 +46,16 @@ public class AccountInfoSerializerTest {
     assertNotNull(accountInfoSerializer);
 
     Map<String, Object> testAccount = prepareTestAccount();
+
+    // add fake claims (not implemented on Hedera yet so our test data doesn't have
+    // it)
+    List<Claim> claims = new ArrayList<>();
+    String testHashString = "test";
+    com.hederahashgraph.api.proto.java.Claim claimProto = com.hederahashgraph.api.proto.java.Claim.newBuilder()
+        .setAccountID(AccountId.fromString(testAccount.get("accountId").toString()).toProto())
+        .setHash(ByteString.copyFrom(testHashString.getBytes())).build();
+    claims.add(new Claim(claimProto));
+    testAccount.put("claims", claims);
 
     // use testAccount data to mock AccountInfo class
     AccountInfo accountInfo = mock(AccountInfo.class);
@@ -73,22 +85,63 @@ public class AccountInfoSerializerTest {
       String result = ow.writeValueAsString(accountInfo); // serialized result shows accountInfoSerializer works as
                                                           // expected
 
-      System.out.println(result);
-      // innstantiate a new ObjectMapper and read it into a Map to verify                                                 
+      // innstantiate a new ObjectMapper and read it into a Map to verify
       ObjectMapper mapper2 = new ObjectMapper();
-      TypeReference<HashMap<String, Object>> t = new TypeReference<HashMap<String, Object>>() {};
+      TypeReference<HashMap<String, Object>> t = new TypeReference<HashMap<String, Object>>() {
+      };
       Map<String, Object> accountInfo2 = mapper2.readValue(result, t);
-      
+
       assertEquals(testAccount.get("key").toString(), accountInfo2.get("key").toString());
 
-      // note that claims feature is not live yet, so we have no test data for a list of claims that can be used to complete this test
-      assertEquals(testAccount.get("claims"), accountInfo2.get("claims"));
+      List<Claim> testAccountClaims = getClaims(testAccount);
+      assertEquals(1, testAccountClaims.size());
+
+      List<Claim> accountInfo2Claims = buildClaims(accountInfo2);
+      assertEquals(1, accountInfo2Claims.size());
+
+      String actualAccountString = accountInfo2Claims.get(0).getAcccount().toString();
+      String expectedAccountString = testAccount.get("accountId").toString();
+      assertEquals(expectedAccountString, actualAccountString);
+
+      byte[] actualHash = accountInfo2Claims.get(0).getHash();
+      byte[] decodedHash = Base64.getDecoder().decode(actualHash);
+      String actualHashString = new String(decodedHash);
+      String expectedHashString = testHashString;
+      assertEquals(expectedHashString, actualHashString);
 
     } catch (Exception e) {
       System.out.println("Serialization failed");
       e.printStackTrace();
     }
 
+  }
+
+  private List<Claim> buildClaims(Map<String, Object> accountInfo2) {
+    List<Claim> accountInfo2Claims = new ArrayList<>();
+    List<?> accountInfo2ClaimObjects = (List<?>) accountInfo2.get("claims");
+    if (accountInfo2ClaimObjects instanceof List<?>) {
+      for (Object o : accountInfo2ClaimObjects) {
+        String oString = o.toString();
+        String[] list = oString.replaceAll("\\{", "").replaceAll("\\}", "").split(",");
+
+        com.hederahashgraph.api.proto.java.Claim.Builder cBuilder = com.hederahashgraph.api.proto.java.Claim
+            .newBuilder();
+        for (String item : list) {
+          String[] kv = item.split("=", 2);
+          switch (kv[0].trim()) {
+          case "accountId":
+            cBuilder.setAccountID(AccountId.fromString(kv[1]).toProto());
+            break;
+          case "hash":
+            cBuilder.setHash(ByteString.copyFrom(kv[1].getBytes()));
+            break;
+          }
+        }
+        Claim claim = new Claim(cBuilder.build());
+        accountInfo2Claims.add(claim);
+      }
+    }
+    return accountInfo2Claims;
   }
 
   private Instant getExpirationTime(Map<String, Object> testAccount) {
@@ -130,9 +183,9 @@ public class AccountInfoSerializerTest {
     try {
       testAccount = mapper.readValue(input, new TypeReference<Map<String, Object>>() {
       });
-      for (Map.Entry<String, Object> e : testAccount.entrySet()) {
-        System.out.println(e.getKey() + ": " + e.getValue());
-      }
+      // for (Map.Entry<String, Object> e : testAccount.entrySet()) {
+      //   System.out.println(e.getKey() + ": " + e.getValue());
+      // }
     } catch (Exception e) {
       e.printStackTrace();
     }
