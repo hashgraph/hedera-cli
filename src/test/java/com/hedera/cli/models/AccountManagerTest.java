@@ -87,10 +87,8 @@ public class AccountManagerTest {
     @Test
     public void createAccountJsonWithPrivateKey() throws NoSuchMethodException, SecurityException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        KeyGeneration keyGeneration = new KeyGeneration("bip");
-        HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
-        List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
-        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+        
+        KeyPair keypair = prepareKeyPair();
         String privateKeyString = keypair.getPrivateKeyEncodedHex();
         Ed25519PrivateKey privateKey = Ed25519PrivateKey.fromString(privateKeyString);
 
@@ -106,10 +104,8 @@ public class AccountManagerTest {
     @Test
     public void createAccountJsonWithKeyPair() throws NoSuchMethodException, SecurityException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException {
-        KeyGeneration keyGeneration = new KeyGeneration("bip");
-        HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
-        List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
-        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+
+        KeyPair keypair = prepareKeyPair();
         String privateKeyString = keypair.getPrivateKeyHex();
 
         Method method = accountManager.getClass().getDeclaredMethod("createAccountJsonWithKeyPair", String.class,
@@ -127,10 +123,7 @@ public class AccountManagerTest {
             IllegalArgumentException, InvocationTargetException {
         doAnswer(invocation -> "adjective_botanic_number").when(randomNameGenerator).getRandomName();
         
-        KeyGeneration keyGeneration = new KeyGeneration("bip");
-        HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
-        List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
-        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+        KeyPair keypair = prepareKeyPair();
 
         Method method = accountManager.getClass().getDeclaredMethod("createAccountJsonWithKeyPair", String.class,
                 KeyPair.class);
@@ -161,6 +154,14 @@ public class AccountManagerTest {
         method.setAccessible(false);
 
         assertNotNull(accountManager);
+    }
+
+    private KeyPair prepareKeyPair() {
+        KeyGeneration keyGeneration = new KeyGeneration("bip");
+        HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
+        List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
+        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+        return keypair;
     }
 
     @SuppressWarnings("serial")
