@@ -156,6 +156,32 @@ public class AccountManagerTest {
         assertNotNull(accountManager);
     }
 
+    @Test
+    public void setDefaultAccountIdWithKeyPair() {
+        KeyPair keypair = prepareKeyPair();
+
+        accountManager.setDefaultAccountId(AccountId.fromString("0.0.1001"), keypair);
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printInfo(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "0.0.1001 saved";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void setDefaultAccountIdWithPrivateKey() {
+        KeyPair keypair = prepareKeyPair();
+        String privateKeyString = keypair.getPrivateKeyEncodedHex();
+        Ed25519PrivateKey privateKey = Ed25519PrivateKey.fromString(privateKeyString);
+
+        accountManager.setDefaultAccountId(AccountId.fromString("0.0.1001"), privateKey);
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printInfo(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "0.0.1001 saved";
+        assertEquals(expected, actual);
+    }
+
     private KeyPair prepareKeyPair() {
         KeyGeneration keyGeneration = new KeyGeneration("bip");
         HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
