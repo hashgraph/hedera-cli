@@ -7,17 +7,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.models.AccountManager;
-import com.hedera.cli.models.DataDirectory;
+import com.hedera.cli.hedera.keygen.CryptoUtils;
+import com.hedera.cli.hedera.keygen.HGCSeed;
+import com.hedera.cli.hedera.keygen.KeyGeneration;
+import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
+import org.hjson.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
 @ExtendWith(MockitoExtension.class)
-@ContextConfiguration(classes = {CurrentAccountService.class})
+@ContextConfiguration(classes = { CurrentAccountService.class })
 public class AccountManagerTest {
 
     @InjectMocks
@@ -69,6 +75,25 @@ public class AccountManagerTest {
 
         AccountId accountId = accountManager.getDefaultAccountId();
         assertEquals("0.0.1234", accountId.toString());
+    }
+
+    @Test
+    public void createAccountJsonWithPrivateKey() throws NoSuchMethodException, SecurityException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        KeyGeneration keyGeneration = new KeyGeneration("bip");
+        HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
+        List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
+        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+        String privateKeyString = keypair.getPrivateKeyEncodedHex();
+        Ed25519PrivateKey privateKey = Ed25519PrivateKey.fromString(privateKeyString);
+
+        Method method = accountManager.getClass().getDeclaredMethod("createAccountJsonWithPrivateKey", String.class, Ed25519PrivateKey.class);
+        method.setAccessible(true);
+        JsonObject account = (JsonObject) method.invoke(accountManager, "0.0.1001", privateKey);
+        method.setAccessible(false);
+
+        assertEquals("0.0.1001", account.get("accountId").asString());
+        assertEquals(privateKeyString, account.get("privateKey").asString());
     }
 
     @SuppressWarnings("serial")
@@ -138,11 +163,14 @@ public class AccountManagerTest {
         String str10 = "0.0.010";
         assertFalse(accountManager.isAccountId(str10));
 
-        String str11 = "";
+        String str11 = "0.a.1001";
         assertFalse(accountManager.isAccountId(str11));
 
-        String str12 = null;
+        String str12 = "";
         assertFalse(accountManager.isAccountId(str12));
+
+        String str13 = null;
+        assertFalse(accountManager.isAccountId(str13));
     }
 
     @Test
