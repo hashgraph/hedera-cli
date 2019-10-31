@@ -135,6 +135,8 @@ public class AccountInfoSerializerTest {
           case "hash":
             cBuilder.setHash(ByteString.copyFrom(kv[1].getBytes()));
             break;
+          default:
+            // do nothing
           }
         }
         Claim claim = new Claim(cBuilder.build());
