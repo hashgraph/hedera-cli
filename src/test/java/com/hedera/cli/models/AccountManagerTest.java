@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +19,7 @@ import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.HGCSeed;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
+import com.hedera.cli.hedera.setup.RandomNameGenerator;
 import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -46,6 +48,9 @@ public class AccountManagerTest {
 
     @Mock
     private InputReader inputReader;
+
+    @Mock
+    private RandomNameGenerator randomNameGenerator;
 
     @Test
     public void checkPaths() {
@@ -94,6 +99,50 @@ public class AccountManagerTest {
 
         assertEquals("0.0.1001", account.get("accountId").asString());
         assertEquals(privateKeyString, account.get("privateKey").asString());
+    }
+
+    @Test
+    public void createAccountJsonWithKeyPair() throws NoSuchMethodException, SecurityException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException {
+        KeyGeneration keyGeneration = new KeyGeneration("bip");
+        HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
+        List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
+        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+        String privateKeyString = keypair.getPrivateKeyHex();
+
+        Method method = accountManager.getClass().getDeclaredMethod("createAccountJsonWithKeyPair", String.class,
+                KeyPair.class);
+        method.setAccessible(true);
+        JsonObject account = (JsonObject) method.invoke(accountManager, "0.0.1001", keypair);
+        method.setAccessible(false);
+
+        assertEquals("0.0.1001", account.get("accountId").asString());
+        assertEquals(privateKeyString, account.get("privateKey").asString());
+    }
+
+    @Test
+    public void writeAccountId() throws NoSuchMethodException, SecurityException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException {
+        doAnswer(invocation -> "adjective_botanic_number").when(randomNameGenerator).getRandomName();
+        
+        KeyGeneration keyGeneration = new KeyGeneration("bip");
+        HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
+        List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
+        KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+
+        Method method = accountManager.getClass().getDeclaredMethod("createAccountJsonWithKeyPair", String.class,
+                KeyPair.class);
+        method.setAccessible(true);
+        JsonObject account = (JsonObject) method.invoke(accountManager, "0.0.1001", keypair);
+        method.setAccessible(false);
+
+        method = accountManager.getClass().getDeclaredMethod("writeAccountId", AccountId.class,
+                JsonObject.class);
+        method.setAccessible(true);
+        method.invoke(accountManager, AccountId.fromString("0.0.1001"), account);
+        method.setAccessible(false);
+
+        assertNotNull(accountManager);
     }
 
     @SuppressWarnings("serial")
