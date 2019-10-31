@@ -146,6 +146,16 @@ public class Hedera {
         return client;
     }  // @formatter:on
 
+    public Client createHederaClientWithoutSettingOperator() { // @formatter:off
+        // To connect to a network with more nodes, add additional entries to the
+        // network map
+        node = getRandomNode(); // can only be invoked once
+        var nodeAddress = node.getAddress();
+        var client = new Client(Map.of(this.getNodeId(), nodeAddress));
+        client.setMaxTransactionFee(100000000);
+        return client;
+    }
+
     public static byte[] parseHex(String hex) {
         var len = hex.length();
         var data = new byte[len / 2];

@@ -21,7 +21,6 @@ public class Transfer implements Runnable {
     }
 
     public void handle(InputReader inputReader, String... args) {
-
         cryptoTransfer.setInputReader(inputReader);
         if (args.length == 0) {
             CommandLine.usage(cryptoTransfer, System.out);
