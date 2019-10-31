@@ -2,10 +2,11 @@ package com.hedera.cli.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +29,7 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.hjson.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -139,7 +141,23 @@ public class AccountManagerTest {
         method = accountManager.getClass().getDeclaredMethod("writeAccountId", AccountId.class,
                 JsonObject.class);
         method.setAccessible(true);
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+
+        // succeeds
         method.invoke(accountManager, AccountId.fromString("0.0.1001"), account);
+        verify(shellHelper).printInfo(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "0.0.1001 saved";
+        assertEquals(expected, actual);
+
+        // fails
+        method.invoke(accountManager, AccountId.fromString("0.0.1001"), null);
+        verify(shellHelper).printError(valueCapture.capture());
+        actual = valueCapture.getValue();
+        expected = "Failed to save 0.0.1001";
+        assertEquals(expected, actual);
+
         method.setAccessible(false);
 
         assertNotNull(accountManager);

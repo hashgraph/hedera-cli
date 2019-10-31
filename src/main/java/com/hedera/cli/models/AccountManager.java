@@ -108,8 +108,9 @@ public class AccountManager {
             // current account
             // write to index if account does not yet exist in index
             dataDirectory.readWriteToIndex(pathToIndexTxt, mHashMap);
+            shellHelper.printInfo(accountId.toString() + " saved");
         } catch (Exception e) {
-            shellHelper.printError("did not save json");
+            shellHelper.printError("Failed to save " + accountId.toString());
         }
     }
 
