@@ -100,9 +100,10 @@ public class DataDirectory {
         return file;
     }
 
-    public String readFile(String pathToFile) {
+    public String readFile(@NonNull String pathToFile) {
         mkDataDir();
 
+        // defaults to return an empty string
         String value = "";
 
         // return empty string if file does not exist
@@ -114,42 +115,22 @@ public class DataDirectory {
             FileReader fr = new FileReader(file.getAbsolutePath());
             br = new BufferedReader(fr);
             value = br.readLine();
+            br.close();
         } catch (IOException e) {
-            // e.printStackTrace();
             return value;
-        } finally {
-            try {
-                br.close();
-            } catch (IOException e) {
-                shellHelper.printError(e.getMessage());
-            }
         }
         return value;
     }
 
+    // attempts to read a file, if file does not exist, write the default value into it
+    // and return default value
     public String readFile(@NonNull String pathToFile, String defaultValue) {
-        mkDataDir();
-
-        // read the data from file
-        Path filePath = Paths.get(dataDir.toString(), pathToFile);
-        File file = new File(filePath.toString());
-        boolean fileExists = Files.exists(filePath);
-        if (!fileExists) {
+        String value = readFile(pathToFile);
+        if (value.isEmpty()) {
             writeFile(pathToFile, defaultValue);
             return defaultValue;
         }
-
-        String resultValue = defaultValue;
-        try {
-            // file exist, check if empty
-            FileReader fr = new FileReader(file.getAbsoluteFile());
-            BufferedReader br = new BufferedReader(fr);
-            resultValue = br.readLine();
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return resultValue;
+        return value;
     }
 
     public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> defaultValue) {

@@ -129,4 +129,40 @@ public class DataDirectoryTest {
     assertEquals(expected, actual);
   }
 
+  @Test
+  public void readFile() {
+    String testFile = "testfolder" + File.separator + "testfile.txt";
+
+    // write testFile
+    dataDirectory.writeFile(testFile, "testValue");
+    String actual = dataDirectory.readFile(testFile);
+    String expected = "testValue";
+    assertEquals(expected, actual);
+
+    String testFile2 = "testfolder" + File.separator + "testfile2.txt";
+
+    // testFile2 is not written
+    actual = dataDirectory.readFile(testFile2);
+    expected = "";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void readFileWithDefaultValue() {
+    String testFile = "testfolder" + File.separator + "testfile.txt";
+    String value = dataDirectory.readFile(testFile, "defaultValue");
+    assertEquals("defaultValue", value);
+  }
+
+  @Test
+  public void readFileFails() {
+    assertThrows(NullPointerException.class, () -> {
+      dataDirectory.readFile(null);
+    });
+
+    assertThrows(NullPointerException.class, () -> {
+      dataDirectory.readFile(null, "someDefaultValue");
+    });
+  }
+
 }
