@@ -32,7 +32,6 @@ public class TransactionManager {
     public void init() {
         objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
     }
-
     public Instant dateToMilliseconds(String[] dateInString) throws ParseException {
         System.out.println("The date from cli is: ");
         StringBuilder sb = new StringBuilder();
