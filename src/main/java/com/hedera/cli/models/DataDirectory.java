@@ -220,48 +220,22 @@ public class DataDirectory {
         return map;
     }
 
-    public HashMap<String, String> readFileHashmap(String pathToFile) {
-        // check if index.txt exists, if not, create one
+    public HashMap<String, String> readJsonToHashmap(String pathToFile) {
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
-        HashMap<String, String> mHashmap = new HashMap<>();
-
-        try {
-            // file exist
-            Scanner reader = new Scanner(file);
-            while (reader.hasNext()) {
-                // checks the old map
-                String line = reader.nextLine();
-                String sliceLine = line.substring(1, line.length() - 1);
-                String[] splitLines = sliceLine.split(", ");
-                for (int i = 0; i < splitLines.length; i++) {
-                    String[] keyValuePairs = splitLines[i].split("=");
-                    mHashmap.put(keyValuePairs[0], keyValuePairs[1]);
-                }
-            }
-            reader.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return mHashmap;
-    }
-
-    public HashMap<String, String> jsonToHashmap(String pathToFile) {
-        Path filePath = Paths.get(dataDir.toString(), pathToFile);
-        File file = new File(filePath.toString());
-        HashMap<String, String> newHashmap = new HashMap<>();
+        HashMap<String, String> map = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         try {
             Scanner reader = new Scanner(file);
             String json = reader.useDelimiter("\\Z").next();
             TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {
             };
-            newHashmap = mapper.readValue(json, typeRef);
+            map = mapper.readValue(json, typeRef);
             reader.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return newHashmap;
+        return map;
     }
 
     public void listFiles(String pathToSubDir) {

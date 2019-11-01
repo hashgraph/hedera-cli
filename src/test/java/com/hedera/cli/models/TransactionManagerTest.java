@@ -94,7 +94,7 @@ public class TransactionManagerTest {
         String pathToTransactionFolder = networkName + File.separator + "transactions" + File.separator;
         String filename = txId + ".json";
         String pathToTransactionFile = pathToTransactionFolder + filename;
-        HashMap<String, String> transactionHashMap = dataDirectory.jsonToHashmap(pathToTransactionFile);
+        HashMap<String, String> transactionHashMap = dataDirectory.readJsonToHashmap(pathToTransactionFile);
 
         assertEquals("sometransactionid", transactionHashMap.get("txID"));
         assertEquals("100000000", transactionHashMap.get("txFee"));

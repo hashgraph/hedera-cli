@@ -121,13 +121,13 @@ public class AccountManager {
 
     public String getDefaultAccountKeyInHexString() {
         String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap<String, String> defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
+        HashMap<String, String> defaultJsonAccount = dataDirectory.readJsonToHashmap(pathToDefaultJsonAccount);
         return defaultJsonAccount.get(PRIVATEKEY).toString();
     }
 
     public String getDefaultAccountPublicKeyInHexString() {
         String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap<String, String> defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
+        HashMap<String, String> defaultJsonAccount = dataDirectory.readJsonToHashmap(pathToDefaultJsonAccount);
         return defaultJsonAccount.get(PUBLICKEY).toString();
     }
 

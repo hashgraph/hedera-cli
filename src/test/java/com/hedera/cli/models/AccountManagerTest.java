@@ -200,7 +200,7 @@ public class AccountManagerTest {
             {
                 put("publicKey", "somepublickeyhex");
             }
-        }).when(dataDirectory).jsonToHashmap("testnet/accounts/adjective_botanic_number.json");
+        }).when(dataDirectory).readJsonToHashmap("testnet/accounts/adjective_botanic_number.json");
 
         String publicKey = accountManager.getDefaultAccountPublicKeyInHexString();
         assertEquals("somepublickeyhex", publicKey);
@@ -216,7 +216,7 @@ public class AccountManagerTest {
             {
                 put("privateKey", "somesecretprivatekey");
             }
-        }).when(dataDirectory).jsonToHashmap("testnet/accounts/adjective_botanic_number.json");
+        }).when(dataDirectory).readJsonToHashmap("testnet/accounts/adjective_botanic_number.json");
 
         String privateKey = accountManager.getDefaultAccountKeyInHexString();
         assertEquals("somesecretprivatekey", privateKey);
