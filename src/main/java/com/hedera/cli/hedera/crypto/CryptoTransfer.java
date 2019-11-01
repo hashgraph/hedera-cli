@@ -216,23 +216,23 @@ public class CryptoTransfer implements Runnable {
         }
     }
 
-    private byte[] signAndCreateTxBytesWithoutOperator() throws InvalidProtocolBufferException {
-        byte[] signedTxnBytes = new byte[0];
-        String senderPrivKeyInString;
-        for (int i = 0; i < senderList.size(); i++) {
-            if (senderList.get(i).equals(hedera.getOperatorId().toString())) {
-                signedTxnBytes = cryptoTransferTransaction.sign(hedera.getOperatorKey()).toBytes();
-            } else {
-                senderPrivKeyInString = inputReader.prompt(
-                        "Input private key of sender: " + senderList.get(i) + " to sign transaction", "secret", false);
-                if (!StringUtil.isNullOrEmpty(senderPrivKeyInString)) {
-                    Ed25519PrivateKey senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
-                    signedTxnBytes = senderSignsTransaction(senderPrivKey, cryptoTransferTransaction.toBytes());
-                }
-            }
-        }
-        return signedTxnBytes;
-    }
+//    private byte[] signAndCreateTxBytesWithoutOperator() throws InvalidProtocolBufferException {
+//        byte[] signedTxnBytes = new byte[0];
+//        String senderPrivKeyInString;
+//        for (int i = 0; i < senderList.size(); i++) {
+//            if (senderList.get(i).equals(hedera.getOperatorId().toString())) {
+//                signedTxnBytes = cryptoTransferTransaction.sign(hedera.getOperatorKey()).toBytes();
+//            } else {
+//                senderPrivKeyInString = inputReader.prompt(
+//                        "Input private key of sender: " + senderList.get(i) + " to sign transaction", "secret", false);
+//                if (!StringUtil.isNullOrEmpty(senderPrivKeyInString)) {
+//                    Ed25519PrivateKey senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
+//                    signedTxnBytes = senderSignsTransaction(senderPrivKey, cryptoTransferTransaction.toBytes());
+//                }
+//            }
+//        }
+//        return signedTxnBytes;
+//    }
 
     private byte[] signAndCreateTxBytesWithOperator() throws InvalidProtocolBufferException {
         byte[] signedTxnBytes = new byte[0];
@@ -254,7 +254,6 @@ public class CryptoTransfer implements Runnable {
 
     private CryptoTransferTransaction addTransferList() {
         for (int i = 0; i < amountList.size(); ++i) {
-            System.out.println("transferlist " + transferList.get(i));
             if (isTiny) {
                 amountInTiny = Long.parseLong(amountList.get(i));
                 account = AccountId.fromString(transferList.get(i));
@@ -345,7 +344,6 @@ public class CryptoTransfer implements Runnable {
             sum += hbarsToTiny;
         }
         if (verifyZeroSum(sum)) {
-            System.out.println("sum of hbar is zero");
             zeroSum = true;
         }
         return zeroSum;
@@ -384,7 +382,6 @@ public class CryptoTransfer implements Runnable {
             sum += tinyBarsVerified;
         }
         if (verifyZeroSum(sum)) {
-            System.out.println("sum of tiny is zero");
             zeroSum = true;
         }
         return zeroSum;

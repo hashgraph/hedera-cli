@@ -164,8 +164,6 @@ public class HederaCrypto extends CliDefaults {
         String[] args = Arrays.copyOf(objs, objs.length, String[].class);
         // @formatter:off
 
-        System.out.println("the args that are passed into hedera crypto");
-        System.out.println(Arrays.asList(args));
         try {
             transfer.handle(inputReader, args);
         } catch (Exception e) {
