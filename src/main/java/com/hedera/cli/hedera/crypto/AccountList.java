@@ -1,9 +1,8 @@
 package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.utils.AccountManager;
-import com.hedera.cli.hedera.utils.DataDirectory;
-
+import com.hedera.cli.models.AccountManager;
+import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +27,7 @@ public class AccountList implements Runnable, Operation {
     public void run() {
         shellHelper.print("List of accounts in the current network");
         String pathToIndexTxt = accountManager.pathToIndexTxt();
-        dataDirectory.readIndex(pathToIndexTxt);
+        dataDirectory.listIndex(pathToIndexTxt);
     }
 
     @Override

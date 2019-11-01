@@ -1,6 +1,6 @@
 package com.hedera.cli.shell;
 
-import com.hedera.cli.models.AddressBookManager;
+import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.services.CurrentAccountService;
 
 import org.jline.utils.AttributedString;
@@ -20,14 +20,14 @@ public class CliPromptProvider implements PromptProvider {
     private ApplicationContext context;
 
     @Autowired
-    private AddressBookManager addressBookManager;
+    private Hedera hedera;
 
     private AttributedString currentAccountAttr;
 
     @Override
     public AttributedString getPrompt() {
-        String currentNetwork = addressBookManager.getCurrentNetworkAsString();
-        String defaultAccount = addressBookManager.getDefaultAccount();
+        String currentNetwork = hedera.addressBookManager.getCurrentNetworkAsString();
+        String defaultAccount = hedera.getDefaultAccount();
 
         // red
         AttributedString noDefaultAccountAttr = new AttributedString(

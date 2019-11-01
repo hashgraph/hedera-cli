@@ -1,23 +1,27 @@
-package com.hedera.cli.hedera.utils;
+package com.hedera.cli.models;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
-import com.hedera.cli.config.InputReader;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.RandomNameGenerator;
-import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @Component
 public class AccountManager {
 
@@ -57,7 +61,7 @@ public class AccountManager {
         return fileString.split(":");
     }
 
-    private JsonObject addAccountToJsonWithPrivateKey(String accountId, Ed25519PrivateKey privateKey) {
+    public JsonObject createAccountJsonWithPrivateKey(String accountId, Ed25519PrivateKey privateKey) {
         JsonObject account = new JsonObject();
         account.add("accountId", accountId);
         account.add("privateKey", privateKey.toString());
@@ -65,7 +69,7 @@ public class AccountManager {
         return account;
     }
 
-    private JsonObject addAccountToJson(String accountId, KeyPair keypair) {
+    private JsonObject createAccountJsonWithKeyPair(String accountId, KeyPair keypair) {
         JsonObject account = new JsonObject();
         account.add("accountId", accountId);
         account.add("privateKey", keypair.getPrivateKeyHex());
@@ -74,16 +78,16 @@ public class AccountManager {
     }
 
     public void setDefaultAccountId(AccountId accountId, KeyPair keypair) {
-        JsonObject account = addAccountToJson(accountId.toString(), keypair);
-        extracted(accountId, account);
+        JsonObject account = createAccountJsonWithKeyPair(accountId.toString(), keypair);
+        writeAccountId(accountId, account);
     }
 
     public void setDefaultAccountId(AccountId accountId, Ed25519PrivateKey privateKey) {
-        JsonObject account = addAccountToJsonWithPrivateKey(accountId.toString(), privateKey);
-        extracted(accountId, account);
+        JsonObject account = createAccountJsonWithPrivateKey(accountId.toString(), privateKey);
+        writeAccountId(accountId, account);
     }
 
-    private void extracted(AccountId accountId, JsonObject account) {
+    private void writeAccountId(AccountId accountId, JsonObject account) {
         // ~/.hedera/[network_name]/accounts/[account_name].json
         String fileName = randomNameGenerator.getRandomName();
         String fileNameWithExt = fileName + ".json";
@@ -108,8 +112,9 @@ public class AccountManager {
             // current account
             // write to index if account does not yet exist in index
             dataDirectory.readWriteToIndex(pathToIndexTxt, mHashMap);
+            shellHelper.printInfo(accountId.toString() + " saved");
         } catch (Exception e) {
-            shellHelper.printError("did not save json");
+            shellHelper.printError("Failed to save " + accountId.toString());
         }
     }
 
@@ -120,13 +125,13 @@ public class AccountManager {
 
     public String getDefaultAccountKeyInHexString() {
         String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap<String, String> defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
+        HashMap<String, String> defaultJsonAccount = dataDirectory.readJsonToHashmap(pathToDefaultJsonAccount);
         return defaultJsonAccount.get(PRIVATEKEY).toString();
     }
 
     public String getDefaultAccountPublicKeyInHexString() {
         String pathToDefaultJsonAccount = pathToAccountsFolder() + defaultAccountString()[0] + ".json";
-        HashMap<String, String> defaultJsonAccount = dataDirectory.jsonToHashmap(pathToDefaultJsonAccount);
+        HashMap<String, String> defaultJsonAccount = dataDirectory.readJsonToHashmap(pathToDefaultJsonAccount);
         return defaultJsonAccount.get(PUBLICKEY).toString();
     }
 

@@ -4,6 +4,7 @@ import com.hedera.cli.hedera.bip39.Mnemonic;
 import com.hedera.cli.hedera.bip39.MnemonicException;
 import org.springframework.lang.NonNull;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 public class HGCSeed {
@@ -18,9 +19,8 @@ public class HGCSeed {
     public HGCSeed(List<String> mnemonic) throws Exception {
         if (mnemonic.size() == HGCSeed.bip39WordListSize) {
             this.entropy = new Mnemonic().toEntropy(mnemonic);
-        } else  {
-            Reference reference = new Reference(String.join(" ", mnemonic));
-            this.entropy = reference.toBytes();
+        } else {
+            throw new MnemonicException.MnemonicWordException("Invalid word list");
         }
     }
 
@@ -29,6 +29,9 @@ public class HGCSeed {
         try {
             return new Mnemonic().toMnemonic(entropy);
         } catch (MnemonicException.MnemonicLengthException e) {
+            e.printStackTrace();
+            return null;
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return null;
         }

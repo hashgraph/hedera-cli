@@ -9,8 +9,8 @@ import java.util.Set;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.utils.AccountManager;
-import com.hedera.cli.hedera.utils.DataDirectory;
+import com.hedera.cli.models.AccountManager;
+import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.TransactionId;

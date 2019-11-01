@@ -6,7 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.hedera.cli.hedera.utils.AccountManager;
+import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.utils;
+package com.hedera.cli.models;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,12 +9,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
@@ -26,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 @Getter
@@ -46,6 +45,14 @@ public class DataDirectory {
         this.dataDir = Paths.get(userHome, directoryName);
     }
 
+    private void mkDataDir() {
+        boolean directoryExists = Files.exists(dataDir);
+        if (!directoryExists) {
+            File directory = new File(dataDir.toString());
+            directory.mkdir();
+        }
+    }
+
     // Example usage:
     // String currentNetwork = DataDirectory.readFile("network.txt", "testnet");
     // String pathToSubDir = currentNetwork + File.separator + "accounts"
@@ -57,12 +64,17 @@ public class DataDirectory {
     }
 
     // pathToFile instead of fileName
-    public void writeFile(String pathToFile, String value) {
-        boolean directoryExists = Files.exists(dataDir);
-        if (!directoryExists) {
-            File directory = new File(dataDir.toString());
-            directory.mkdir();
+    public void writeFile(@NonNull String pathToFile, String value) {
+        mkDataDir();
+
+        // if pathToFile includes a folder path
+        String[] paths = pathToFile.split(File.separator);
+        if (paths.length > 1) {
+            String[] folderPaths = Arrays.copyOf(paths, paths.length - 1);
+            String folderPath = String.join(File.separator, folderPaths);
+            mkHederaSubDir(folderPath);
         }
+
         // write the data
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
@@ -72,82 +84,58 @@ public class DataDirectory {
             bw.write(value);
             bw.close();
         } catch (IOException e) {
-            shellHelper.printError(e.getMessage());
+            shellHelper.printError("Failed to save");
         }
     }
 
-    public String readFile(String pathToFile) {
-        String value = "";
-        boolean directoryExists = Files.exists(dataDir);
-        if (!directoryExists) {
-            File directory = new File(dataDir.toString());
-            directory.mkdir();
-        }
+    private File checkFileExists(String pathToFile) {
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
-
-        // file does not exist, return ""
         if (!file.exists()) {
-            return value;
+            return null;
         }
+        return file;
+    }
 
-        // file exists, read it
+    public String readFile(@NonNull String pathToFile) {
+        mkDataDir();
+
+        // defaults to return an empty string
+        String value = "";
+
+        // return empty string if file does not exist
+        File file = checkFileExists(pathToFile);
+        if (file == null) return value;
+
         BufferedReader br = null;
         try {
             FileReader fr = new FileReader(file.getAbsolutePath());
             br = new BufferedReader(fr);
             value = br.readLine();
+            br.close();
         } catch (IOException e) {
-            // e.printStackTrace();
             return value;
-        } finally {
-            try {
-                br.close();
-            } catch (IOException e) {
-                shellHelper.printError(e.getMessage());
-            }
         }
         return value;
     }
 
-    public String readFile(String pathToFile, String defaultValue) {
-        boolean directoryExists = Files.exists(dataDir);
-        if (!directoryExists) {
-            File directory = new File(dataDir.toString());
-            directory.mkdir();
-        }
-
-        // read the data from file
-        Path filePath = Paths.get(dataDir.toString(), pathToFile);
-        File file = new File(filePath.toString());
-        boolean fileExists = Files.exists(filePath);
-        if (!fileExists) {
+    // attempts to read a file, if file does not exist, write the default value into it
+    // and return default value
+    public String readFile(@NonNull String pathToFile, String defaultValue) {
+        String value = readFile(pathToFile);
+        if (value.isEmpty()) {
             writeFile(pathToFile, defaultValue);
             return defaultValue;
         }
-
-        String resultValue = defaultValue;
-        try {
-            // file exist, check if empty
-            FileReader fr = new FileReader(file.getAbsoluteFile());
-            BufferedReader br = new BufferedReader(fr);
-            resultValue = br.readLine();
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return resultValue;
+        return value;
     }
 
-    public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> defaultValue) {
+    public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> defaultMap) {
         // check if index.txt exists, if not, create one
-        Path filePath = Paths.get(dataDir.toString(), pathToFile);
-        File file = new File(filePath.toString());
-        boolean fileExists = Files.exists(filePath);
-        if (!fileExists) {
-            // file does not exist so create a new file and write value
-            writeFile(pathToFile, formatMapToIndex(defaultValue));
-            return defaultValue;
+        File file = checkFileExists(pathToFile);
+        if (file == null) {
+            writeFile(pathToFile, formatMapToIndex(defaultMap));
+            return defaultMap;
         }
 
         try {
@@ -156,7 +144,7 @@ public class DataDirectory {
             // read the new value
             String key = "";
             String value = "";
-            for (Map.Entry<String, String> entry : defaultValue.entrySet()) {
+            for (Map.Entry<String, String> entry : defaultMap.entrySet()) {
                 key = entry.getKey();
                 value = entry.getValue();
             }
@@ -180,37 +168,35 @@ public class DataDirectory {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return defaultValue;
+        return defaultMap;
     }
 
     public String formatMapToIndex(Map<String, String> updatedHashmap) {
         return updatedHashmap.toString().substring(1, updatedHashmap.toString().length() - 1).replace(", ", "\n");
     }
 
-    public void readIndex(String pathToFile) {
+    public void listIndex(String pathToFile) {
         // check if index.txt exists, if not, create one
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
-
         try {
             // file exist
             Scanner reader = new Scanner(file);
             while (reader.hasNext()) {
-                // checks the old map
                 String line = reader.nextLine();
                 System.out.println(line);
             }
             reader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            shellHelper.printError("Unable to read index");
         }
     }
 
-    public Map<String, String> readIndexToHashmap(String pathToFile) {
+    public HashMap<String, String> readIndexToHashmap(String pathToFile) {
         // check if index.txt exists, if not, create one
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
-        HashMap<String, String> mHashmap = new HashMap<>();
+        HashMap<String, String> map = new HashMap<>();
 
         try {
             // file exist
@@ -221,76 +207,32 @@ public class DataDirectory {
                 String[] splitLines = line.split("\n");
                 for (int i = 0; i < splitLines.length; i++) {
                     String[] keyValuePairs = splitLines[i].split("=");
-                    mHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+                    map.put(keyValuePairs[0], keyValuePairs[1]);
                 }
             }
             reader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         }
-        return mHashmap;
+        return map;
     }
 
-    public HashMap<String, String> readFileHashmap(String pathToFile) {
-        // check if index.txt exists, if not, create one
+    public HashMap<String, String> readJsonToHashmap(String pathToFile) {
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
-        HashMap<String, String> mHashmap = new HashMap<>();
-
-        try {
-            // file exist
-            Scanner reader = new Scanner(file);
-            while (reader.hasNext()) {
-                // checks the old map
-                String line = reader.nextLine();
-                String sliceLine = line.substring(1, line.length() - 1);
-                String[] splitLines = sliceLine.split(", ");
-                for (int i = 0; i < splitLines.length; i++) {
-                    String[] keyValuePairs = splitLines[i].split("=");
-                    mHashmap.put(keyValuePairs[0], keyValuePairs[1]);
-                }
-            }
-            reader.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return mHashmap;
-    }
-
-    public HashMap<String, String> jsonToHashmap(String pathToFile) {
-        Path filePath = Paths.get(dataDir.toString(), pathToFile);
-        File file = new File(filePath.toString());
-        HashMap<String, String> newHashmap = new HashMap<>();
+        HashMap<String, String> map = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         try {
             Scanner reader = new Scanner(file);
             String json = reader.useDelimiter("\\Z").next();
             TypeReference<HashMap<String, String>> typeRef = new TypeReference<HashMap<String, String>>() {
             };
-            newHashmap = mapper.readValue(json, typeRef);
+            map = mapper.readValue(json, typeRef);
             reader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         }
-        return newHashmap;
-    }
-
-    public void listFiles(String pathToSubDir) {
-        Path subdirpath = Paths.get(pathToSubDir);
-        Path path = Paths.get(dataDir.toString(), subdirpath.toString());
-
-        try {
-            Stream<Path> walk = Files.walk(path);
-            List<String> result = walk.map(x -> x.toString()).filter(f -> f.endsWith(".json"))
-                    .collect(Collectors.toList());
-            if (result.isEmpty()) {
-                System.out.println("No Hedera accounts have created in the current network");
-            }
-            result.forEach(System.out::println);
-            walk.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return map;
     }
 
 }

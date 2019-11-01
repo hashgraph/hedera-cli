@@ -11,7 +11,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hedera.cli.hedera.utils.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ public class AddressBookManager {
   static private String ADDRESSBOOK_DEFAULT = "addressbook.json";
   static private final String NETWORK_DEFAULT = "testnet";
   static private final String NETWORK_FILE = "network.txt";
-  static private final String ACCOUNT_DEFAULT_FILE = "default.txt";
+  static public final String ACCOUNT_DEFAULT_FILE = "default.txt";
 
   @PostConstruct
   public void init() {
@@ -98,8 +97,8 @@ public class AddressBookManager {
   }
 
   public void listNetworks() {
+    String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
     for (Network network : networks) {
-      String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
       if (currentNetwork.equals(network.getName())) {
         System.out.println("* " + network.getName());
       } else {
@@ -107,21 +106,6 @@ public class AddressBookManager {
       }
 
     }
-  }
-
-  // This function should be moved some where else
-  // Returns an empty string if there's no default account
-  public String getDefaultAccount() {
-    String defaultAccount = "";
-    String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
-    String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + ACCOUNT_DEFAULT_FILE;
-    try {
-      defaultAccount = dataDirectory.readFile(pathToDefaultAccount);
-    } catch (Exception e) {
-      // no default account
-      return "";
-    }
-    return defaultAccount;
   }
 
 }
