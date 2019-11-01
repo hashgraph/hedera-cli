@@ -3,6 +3,7 @@ package com.hedera.cli.models;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -53,6 +54,7 @@ public class DataDirectoryTest {
   public void init() {
     assertNotNull(dataDirectory);
     assertNotNull(dataDirectory.getShellHelper());
+    assertEquals(shellHelper, dataDirectory.getShellHelper());
     
     // Prove that tempDir's value has been set to dataDir
     String actual = tempDir.toAbsolutePath().toString();
@@ -110,5 +112,11 @@ public class DataDirectoryTest {
     method.setAccessible(false);
   }
 
+  @Test
+  public void writeFile() {
+    assertThrows(NullPointerException.class, () -> {
+      dataDirectory.writeFile(null, "anything");
+    });
+  }
 
 }
