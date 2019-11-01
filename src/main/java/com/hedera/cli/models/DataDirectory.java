@@ -46,6 +46,14 @@ public class DataDirectory {
         this.dataDir = Paths.get(userHome, directoryName);
     }
 
+    private void mkDataDir() {
+        boolean directoryExists = Files.exists(dataDir);
+        if (!directoryExists) {
+            File directory = new File(dataDir.toString());
+            directory.mkdir();
+        }
+    }
+
     // Example usage:
     // String currentNetwork = DataDirectory.readFile("network.txt", "testnet");
     // String pathToSubDir = currentNetwork + File.separator + "accounts"
@@ -58,11 +66,7 @@ public class DataDirectory {
 
     // pathToFile instead of fileName
     public void writeFile(String pathToFile, String value) {
-        boolean directoryExists = Files.exists(dataDir);
-        if (!directoryExists) {
-            File directory = new File(dataDir.toString());
-            directory.mkdir();
-        }
+        mkDataDir();
         // write the data
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
