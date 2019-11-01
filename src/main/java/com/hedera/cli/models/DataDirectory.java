@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 @Getter
@@ -65,8 +67,17 @@ public class DataDirectory {
     }
 
     // pathToFile instead of fileName
-    public void writeFile(String pathToFile, String value) {
+    public void writeFile(@NonNull String pathToFile, String value) {
         mkDataDir();
+
+        // if pathToFile includes a folder path
+        String[] paths = pathToFile.split(File.separator);
+        if (paths.length > 1) {
+            String[] folderPaths = Arrays.copyOf(paths, paths.length - 1);
+            String folderPath = String.join(File.separator, folderPaths);
+            mkHederaSubDir(folderPath);
+        }
+
         // write the data
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
@@ -80,22 +91,24 @@ public class DataDirectory {
         }
     }
 
-    public String readFile(String pathToFile) {
-        String value = "";
-        boolean directoryExists = Files.exists(dataDir);
-        if (!directoryExists) {
-            File directory = new File(dataDir.toString());
-            directory.mkdir();
-        }
+    private File checkFileExists(String pathToFile) {
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
-
-        // file does not exist, return ""
         if (!file.exists()) {
-            return value;
+            return null;
         }
+        return file;
+    }
 
-        // file exists, read it
+    public String readFile(String pathToFile) {
+        mkDataDir();
+
+        String value = "";
+
+        // return empty string if file does not exist
+        File file = checkFileExists(pathToFile);
+        if (file == null) return value;
+
         BufferedReader br = null;
         try {
             FileReader fr = new FileReader(file.getAbsolutePath());
@@ -114,12 +127,8 @@ public class DataDirectory {
         return value;
     }
 
-    public String readFile(String pathToFile, String defaultValue) {
-        boolean directoryExists = Files.exists(dataDir);
-        if (!directoryExists) {
-            File directory = new File(dataDir.toString());
-            directory.mkdir();
-        }
+    public String readFile(@NonNull String pathToFile, String defaultValue) {
+        mkDataDir();
 
         // read the data from file
         Path filePath = Paths.get(dataDir.toString(), pathToFile);

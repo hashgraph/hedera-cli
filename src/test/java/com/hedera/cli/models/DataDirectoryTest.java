@@ -2,6 +2,7 @@ package com.hedera.cli.models;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -13,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.hedera.cli.models.DataDirectory;
+import com.hedera.cli.shell.ShellHelper;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.FileSystemUtils;
 
@@ -31,6 +34,9 @@ public class DataDirectoryTest {
 
   @InjectMocks
   private DataDirectory dataDirectory;
+
+  @Mock
+  private ShellHelper shellHelper;
 
   @BeforeEach
   public void setUp() {
@@ -46,6 +52,8 @@ public class DataDirectoryTest {
   @Test
   public void init() {
     assertNotNull(dataDirectory);
+    assertNotNull(dataDirectory.getShellHelper());
+    
     // Prove that tempDir's value has been set to dataDir
     String actual = tempDir.toAbsolutePath().toString();
     String expected = dataDirectory.getDataDir().toAbsolutePath().toString();
@@ -72,7 +80,8 @@ public class DataDirectoryTest {
       boolean expected = true;
       assertEquals(expected, actual);
 
-      // deliberately delete dataDir, but our dataDir will still exist
+      // deliberately delete dataDir, but our dataDir will still exist 
+      // when mkDataDir method is invoked
       FileSystemUtils.deleteRecursively(tempDir);
       method.setAccessible(true);
       method.invoke(dataDirectory);
@@ -82,5 +91,24 @@ public class DataDirectoryTest {
       expected = true;
       assertEquals(expected, actual);
   }
+
+  @Test
+  public void checkFileExists() throws NoSuchMethodException, SecurityException, IllegalAccessException,
+      IllegalArgumentException, InvocationTargetException, IOException {
+        
+    String pathToSomeTestFile = "somefolder" + File.separator + "somefile.txt";
+    
+    Method method = dataDirectory.getClass().getDeclaredMethod("checkFileExists", String.class);
+    method.setAccessible(true);
+    File file = (File) method.invoke(dataDirectory, pathToSomeTestFile);
+    assertNull(file);
+
+    // deliberately write this test file
+    dataDirectory.writeFile(pathToSomeTestFile, "sometext");
+    file = (File) method.invoke(dataDirectory, pathToSomeTestFile);
+    assertNotNull(file);
+    method.setAccessible(false);
+  }
+
 
 }
