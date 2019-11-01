@@ -20,9 +20,16 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.hedera.cli.hedera.keygen.CryptoUtils;
+import com.hedera.cli.hedera.keygen.HGCSeed;
+import com.hedera.cli.hedera.keygen.KeyGeneration;
+import com.hedera.cli.hedera.keygen.KeyPair;
+import com.hedera.cli.hedera.setup.RandomNameGenerator;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.account.AccountId;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -257,5 +264,52 @@ public class DataDirectoryTest {
     HashMap<String, String> map = dataDirectory.readIndexToHashmap("/");
     assertNull(map);
   }
+
+  @Test
+  public void readJsonToHashmap() {
+    // manually setup AccountManager to create a json account on disk
+    AccountManager accountManager = new AccountManager();
+    accountManager.setDataDirectory(dataDirectory);
+    accountManager.setRandomNameGenerator(new RandomNameGenerator());
+    accountManager.setShellHelper(shellHelper); // shellHelper is a mock from above
+    
+    // test data
+    KeyPair keypair = prepareKeyPair();
+    String testAccountId = "0.0.1001";
+    AccountId accountId = AccountId.fromString(testAccountId); 
+    accountManager.setDefaultAccountId(accountId, keypair); // writes into dataDir (i.e. tmpDir)
+
+    // This can be simplified by implementing an actual function in AccountManager
+    Map<String, String> defaultAccountJson = new HashMap<String, String>();
+    String pathToIndexTxt = accountManager.pathToIndexTxt();
+    Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
+    for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
+        String key = entry.getKey(); // key refers to the account id
+        String value = entry.getValue(); // value refers to the filename json
+        if (testAccountId.equals(key)) {
+            String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
+            defaultAccountJson = dataDirectory.readJsonToHashmap(pathToCurrentJsonAccount);
+        }
+    }
+
+    // the defaultAccountJson that is read out via readJsonToHashmap must match our expected test data
+    assertEquals(testAccountId, defaultAccountJson.get("accountId"));
+    assertEquals(keypair.getPrivateKeyHex(), defaultAccountJson.get("privateKey"));
+    assertEquals(keypair.getPublicKeyHex(), defaultAccountJson.get("publicKey"));    
+  }
+
+  @Test
+  public void readJsonToHashmapFails() {
+    Map<String, String> defaultAccountJson = dataDirectory.readJsonToHashmap("/");
+    assertNull(defaultAccountJson);
+  }
+
+  private KeyPair prepareKeyPair() {
+    KeyGeneration keyGeneration = new KeyGeneration("bip");
+    HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
+    List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
+    KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+    return keypair;
+}
 
 }

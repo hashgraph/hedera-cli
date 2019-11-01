@@ -55,6 +55,13 @@ public class AccountManagerTest {
     private RandomNameGenerator randomNameGenerator;
 
     @Test
+    public void getters() {
+        assertNotNull(accountManager.getDataDirectory());
+        assertNotNull(accountManager.getShellHelper());
+        assertNotNull(accountManager.getRandomNameGenerator());
+    }
+
+    @Test
     public void checkPaths() {
         doAnswer(invocation -> "testnet").when(dataDirectory).readFile("network.txt");
 

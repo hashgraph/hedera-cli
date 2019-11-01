@@ -17,7 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Component
 public class AccountManager {
 

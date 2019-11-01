@@ -233,7 +233,7 @@ public class DataDirectory {
             map = mapper.readValue(json, typeRef);
             reader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         }
         return map;
     }
