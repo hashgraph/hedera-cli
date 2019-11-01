@@ -2,6 +2,7 @@ package com.hedera.cli.hedera.crypto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountManager;
@@ -137,46 +138,28 @@ public class CryptoTransfer implements Runnable {
             if (!isZeroSum) return;
         }
 
-        // Create a crypto transfer transaction
-        client = hedera.createHederaClientWithoutSettingOperator();
-        cryptoTransferTransaction = new CryptoTransferTransaction(client);
-
-        // .addTransfer can be called as many times as you want as long as
-        // the total sum of all transfers adds up to zero
-        // Dynamic population of transfer List
-        for (int i = 0; i < transferList.size(); ++i) {
-            if (isTiny) {
-                amountInTiny = Long.parseLong(amountList.get(i));
-                account = AccountId.fromString(transferList.get(i));
-            } else {
-                amountInTiny = convertHbarToLong(amountList.get(i));
-                account = AccountId.fromString(transferList.get(i));
-            }
-            cryptoTransferTransaction.addTransfer(account, amountInTiny);
-        }
-
-        // Prompt memostring input
-        memoString = accountManager.promptMemoString(inputReader);
-        cryptoTransferTransaction.setMemo(memoString);
-        AccountId operatorId = hedera.getOperatorId();
-
-        senderList = Arrays.asList((cryptoTransferOptions.dependent.senderList).split(","));
         // Preview for user
         Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap(transferList, amountList);
         // handle preview error gracefully here
-        reviewAndExecute(client, operatorId, map, senderList);
+        AccountId operatorId = hedera.getOperatorId();
+        try {
+            reviewAndExecute(operatorId, map);
+        } catch (InvalidProtocolBufferException e) {
+            shellHelper.printError(e.getMessage());
+        }
     }
 
-    public void reviewAndExecute(Client client, AccountId operatorId,
-                                 Map<Integer, PreviewTransferList> map,
-                                 List<String> senderList) {
+    public void reviewAndExecute(AccountId operatorId,
+                                 Map<Integer, PreviewTransferList> map) throws InvalidProtocolBufferException {
         if ("no".equals(mPreview)) {
-            executeCryptoTransfer(client, operatorId, senderList);
+            executeCryptoTransfer(operatorId);
         } else if ("yes".equals(mPreview)) {
+            // Prompt memostring input
+            memoString = accountManager.promptMemoString(inputReader);
             isInfoCorrect = promptPreview(operatorId, map);
             if ("yes".equals(isInfoCorrect)) {
                 shellHelper.print("Info is correct, senders will need to sign the transaction to release funds");
-                executeCryptoTransfer(client, operatorId, senderList);
+                executeCryptoTransfer(operatorId);
             } else if ("no".equals(isInfoCorrect)) {
                 shellHelper.print("Nope, incorrect, let's make some changes");
             } else {
@@ -187,59 +170,103 @@ public class CryptoTransfer implements Runnable {
         }
     }
 
-    private void executeCryptoTransfer(Client client, AccountId operatorId, List<String> senderList) {
-        String senderPrivKeyInString;
-        Ed25519PrivateKey senderPrivKey = null;
-        boolean operatorExistInTransferList = false;
+    private void executeCryptoTransfer(AccountId operatorId) throws InvalidProtocolBufferException {
         TransactionReceipt transactionReceipt;
-        Transaction tx = null;
+        byte[] signedTxnBytes;
         transactionId = new TransactionId(operatorId);
-        cryptoTransferTransaction.setTransactionId(transactionId);
-        cryptoTransferTransaction.sign(hedera.getOperatorKey());
-        for (int i = 0; i < senderList.size(); i++) {
-            if (hedera.getOperatorId().toString().equals(senderList.get(i))) {
-                operatorExistInTransferList = true;
-            }
+        senderList = Arrays.asList((cryptoTransferOptions.dependent.senderList).split(","));
+
+        // SDKs does not currently support more than 2 senders
+        // ie 1 operator, 1 sender, x recipients (supported)
+        // ie 1 operator, 0 sender, x recipients (supported)
+        if (senderList.size() > 1) {
+            shellHelper.printError("Currently does not support more than 2 senders");
+            return;
+//            client = hedera.createHederaClientWithoutSettingOperator();
+//            cryptoTransferTransaction = new CryptoTransferTransaction(client);
+//            cryptoTransferTransaction.sign(hedera.getOperatorKey());
+//            cryptoTransferTransaction.setMemo(memoString);
+//            cryptoTransferTransaction.setTransactionId(transactionId);
+//            // the total sum of all transfers adds up to zero
+//            // Dynamic population of transfer List
+//            cryptoTransferTransaction = addTransferList();
+//            // sender list exist, check if sender
+//            signedTxnBytes = signAndCreateTxBytesWithoutOperator();
+        } else {
+            client = hedera.createHederaClient();
+            cryptoTransferTransaction = new CryptoTransferTransaction(client);
+            cryptoTransferTransaction.setMemo(memoString);
+            cryptoTransferTransaction.setTransactionId(transactionId);
+            cryptoTransferTransaction = addTransferList();
+            signedTxnBytes = signAndCreateTxBytesWithOperator();
         }
         try {
-            // If list of transfer already contain operatorId, sign only once;
-            if (operatorExistInTransferList) {
-                tx = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes());
-                transactionReceipt = tx.executeForReceipt();
-                System.out.println("transactionReceipt " + transactionReceipt.getStatus());
-                if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
-                    printAndSaveRecords(client, transactionId, operatorId, tx);
-                }
-            } else {
-                // Since there are more than 1 sender in this multi-sender transaction
-                // ie operator and sender are different,
-                // PreviewTransferList must obviously sign to allow funds to be transferred out
-                for (int i = 0; i < senderList.size(); i++) {
-                    senderPrivKeyInString = inputReader.prompt(
-                            "Input private key of sender: " + senderList.get(i) + " to sign transaction", "secret", false);
-                    if (!StringUtil.isNullOrEmpty(senderPrivKeyInString)) {
-                        senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
-                    } else {
-                        return;
-                    }
-                    tx = cryptoTransferTransaction.sign(senderPrivKey);
-                }
-                transactionReceipt = tx.executeForReceipt();
-                System.out.println("transactionReceipt " + transactionReceipt.getStatus());
-                if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
-                    printAndSaveRecords(client, transactionId, operatorId, tx);
-                }
+            transactionReceipt = Transaction.fromBytes(client, signedTxnBytes)
+                    .executeForReceipt();
+            if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
+                printAndSaveRecords(client, transactionId, operatorId);
             }
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
     }
 
-    private void printAndSaveRecords(Client client, TransactionId transactionId, AccountId operatorId,
-                                     Transaction tx) throws HederaException {
+    private byte[] signAndCreateTxBytesWithoutOperator() throws InvalidProtocolBufferException {
+        byte[] signedTxnBytes = new byte[0];
+        String senderPrivKeyInString;
+        for (int i = 0; i < senderList.size(); i++) {
+            if (senderList.get(i).equals(hedera.getOperatorId().toString())) {
+                signedTxnBytes = cryptoTransferTransaction.sign(hedera.getOperatorKey()).toBytes();
+            } else {
+                senderPrivKeyInString = inputReader.prompt(
+                        "Input private key of sender: " + senderList.get(i) + " to sign transaction", "secret", false);
+                if (!StringUtil.isNullOrEmpty(senderPrivKeyInString)) {
+                    Ed25519PrivateKey senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
+                    signedTxnBytes = senderSignsTransaction(senderPrivKey, cryptoTransferTransaction.toBytes());
+                }
+            }
+        }
+        return signedTxnBytes;
+    }
+
+    private byte[] signAndCreateTxBytesWithOperator() throws InvalidProtocolBufferException {
+        byte[] signedTxnBytes = new byte[0];
+        String senderPrivKeyInString;
+        for (int i = 0; i < senderList.size(); i++) {
+            if (senderList.get(i).equals(hedera.getOperatorId().toString())) {
+                signedTxnBytes = cryptoTransferTransaction.toBytes();
+            } else {
+                senderPrivKeyInString = inputReader.prompt(
+                        "Input private key of sender: " + senderList.get(i) + " to sign transaction", "secret", false);
+                if (!StringUtil.isNullOrEmpty(senderPrivKeyInString)) {
+                    Ed25519PrivateKey senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
+                    signedTxnBytes = senderSignsTransaction(senderPrivKey, cryptoTransferTransaction.toBytes());
+                }
+            }
+        }
+        return signedTxnBytes;
+    }
+
+    private CryptoTransferTransaction addTransferList() {
+        for (int i = 0; i < amountList.size(); ++i) {
+            System.out.println("transferlist " + transferList.get(i));
+            if (isTiny) {
+                amountInTiny = Long.parseLong(amountList.get(i));
+                account = AccountId.fromString(transferList.get(i));
+            } else {
+                amountInTiny = convertHbarToLong(amountList.get(i));
+                account = AccountId.fromString(transferList.get(i));
+            }
+            cryptoTransferTransaction.addTransfer(account, amountInTiny);
+        }
+        return cryptoTransferTransaction;
+    }
+
+    private void printAndSaveRecords(Client client, TransactionId transactionId, AccountId operatorId) throws HederaException {
         TransactionRecord record;
         record = new TransactionRecordQuery(client)
                 .setTransactionId(transactionId)
+                .setPaymentDefault(5000000)
                 .execute();
         printBalance(client, operatorId);
         // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
@@ -248,11 +275,11 @@ public class CryptoTransfer implements Runnable {
         }
     }
 
-//    private byte[] senderSignsTransaction(Ed25519PrivateKey senderPrivKey, byte[] transactionData) throws InvalidProtocolBufferException {
-//        return Transaction.fromBytes(transactionData)
-//                .sign(senderPrivKey)
-//                .toBytes();
-//    }
+    private byte[] senderSignsTransaction(Ed25519PrivateKey senderPrivKey, byte[] transactionData) throws InvalidProtocolBufferException {
+        return Transaction.fromBytes(transactionData)
+                .sign(senderPrivKey)
+                .toBytes();
+    }
 
     public Map<Integer, PreviewTransferList> transferListToPromptPreviewMap(List<String> transferList, List<String> amountList) {
         Map<Integer, PreviewTransferList> map = new HashMap<>();
