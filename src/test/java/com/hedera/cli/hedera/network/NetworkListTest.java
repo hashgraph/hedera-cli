@@ -19,9 +19,6 @@ public class NetworkListTest {
   @Mock
   private AddressBookManager addressBookManager;
 
-  // captures our stdout
-  // public OutputCaptureRule capture = new OutputCaptureRule();
-
   @Test
   public void testListNetwork() {
     assertNotNull(networkList);

@@ -7,15 +7,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.shell.ShellHelper;
 
 import org.junit.jupiter.api.AfterEach;
@@ -41,14 +47,19 @@ public class DataDirectoryTest {
   @Mock
   private ShellHelper shellHelper;
 
+  private final PrintStream stdout = System.out;
+  private final ByteArrayOutputStream output = new ByteArrayOutputStream();
+
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws UnsupportedEncodingException {
+    System.setOut(new PrintStream(output, true, "UTF-8"));
     // this will override dataDir's default value "~/.hedera"
     dataDirectory.setDataDir(tempDir);
   }
 
   @AfterEach
   public void tearDown() throws IOException {
+    System.setOut(stdout);
     FileSystemUtils.deleteRecursively(tempDir);
   }
 
@@ -57,7 +68,7 @@ public class DataDirectoryTest {
     assertNotNull(dataDirectory);
     assertNotNull(dataDirectory.getShellHelper());
     assertEquals(shellHelper, dataDirectory.getShellHelper());
-    
+
     // Prove that tempDir's value has been set to dataDir
     String actual = tempDir.toAbsolutePath().toString();
     String expected = dataDirectory.getDataDir().toAbsolutePath().toString();
@@ -74,34 +85,34 @@ public class DataDirectoryTest {
   @Test
   public void mkDataDir() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, IOException {
-      Method method = dataDirectory.getClass().getDeclaredMethod("mkDataDir");
-      method.setAccessible(true);
-      method.invoke(dataDirectory);
-      method.setAccessible(false);
+    Method method = dataDirectory.getClass().getDeclaredMethod("mkDataDir");
+    method.setAccessible(true);
+    method.invoke(dataDirectory);
+    method.setAccessible(false);
 
-      Path directory = Paths.get(dataDirectory.getDataDir().toString());
-      boolean actual = Files.exists(directory);
-      boolean expected = true;
-      assertEquals(expected, actual);
+    Path directory = Paths.get(dataDirectory.getDataDir().toString());
+    boolean actual = Files.exists(directory);
+    boolean expected = true;
+    assertEquals(expected, actual);
 
-      // deliberately delete dataDir, but our dataDir will still exist 
-      // when mkDataDir method is invoked
-      FileSystemUtils.deleteRecursively(tempDir);
-      method.setAccessible(true);
-      method.invoke(dataDirectory);
-      method.setAccessible(false);
-      directory = Paths.get(dataDirectory.getDataDir().toString());
-      actual = Files.exists(directory);
-      expected = true;
-      assertEquals(expected, actual);
+    // deliberately delete dataDir, but our dataDir will still exist
+    // when mkDataDir method is invoked
+    FileSystemUtils.deleteRecursively(tempDir);
+    method.setAccessible(true);
+    method.invoke(dataDirectory);
+    method.setAccessible(false);
+    directory = Paths.get(dataDirectory.getDataDir().toString());
+    actual = Files.exists(directory);
+    expected = true;
+    assertEquals(expected, actual);
   }
 
   @Test
   public void checkFileExists() throws NoSuchMethodException, SecurityException, IllegalAccessException,
       IllegalArgumentException, InvocationTargetException, IOException {
-        
+
     String pathToSomeTestFile = "somefolder" + File.separator + "somefile.txt";
-    
+
     Method method = dataDirectory.getClass().getDeclaredMethod("checkFileExists", String.class);
     method.setAccessible(true);
     File file = (File) method.invoke(dataDirectory, pathToSomeTestFile);
@@ -120,7 +131,8 @@ public class DataDirectoryTest {
       dataDirectory.writeFile(null, "anything");
     });
 
-    // Supplying a pathToFile "/" will cause an IOException that invokes shellHelper.printError
+    // Supplying a pathToFile "/" will cause an IOException that invokes
+    // shellHelper.printError
     dataDirectory.writeFile("/", "anything");
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
     verify(shellHelper).printError(valueCapture.capture());
@@ -164,9 +176,66 @@ public class DataDirectoryTest {
       dataDirectory.readFile(null, "someDefaultValue");
     });
 
-    // Supplying a pathToFile "/" will cause an IOException that will return empty string
+    // Supplying a pathToFile "/" will cause an IOException that will return empty
+    // string
     String value = dataDirectory.readFile("/");
     assertEquals("", value);
+  }
+
+  @Test
+  public void readWriteToIndex() {
+    String testIndexFile = "testfolder" + File.separator + "index.txt";
+    HashMap<String, String> testDefaultMap = new HashMap<String, String>();
+    testDefaultMap.put("0.0.1001", "some_random_name_a");
+    testDefaultMap.put("0.0.1002", "some_random_name_b");
+    testDefaultMap.put("0.0.1003", "some_random_name_c");
+
+    HashMap<String, String> resultMap = dataDirectory.readWriteToIndex(testIndexFile, testDefaultMap);
+
+    assertTrue(resultMap.equals(testDefaultMap));
+
+    // HashMap<String, String> resultMapAgain = dataDirectory.readWriteToIndex(testIndexFile, testDefaultMap);
+    // TODO: incomplete tests for readWriteToIndex
+  }
+
+  @Test
+  public void listIndex() throws UnsupportedEncodingException {
+    String testIndexFile = "testfolder" + File.separator + "index.txt";
+    HashMap<String, String> testDefaultMap = new HashMap<String, String>();
+    testDefaultMap.put("0.0.1001", "some_random_name_a");
+    testDefaultMap.put("0.0.1002", "some_random_name_b");
+    testDefaultMap.put("0.0.1003", "some_random_name_c");
+    HashMap<String, String> resultMap = dataDirectory.readWriteToIndex(testIndexFile, testDefaultMap);
+    
+    dataDirectory.listIndex(testIndexFile);
+    List<String> outputResultArray = captureSystemOut();
+    System.setOut(stdout);
+
+    HashMap<String, String> outputMap = new HashMap<String, String>();
+    for (String line: outputResultArray) {
+      String[] kv = line.split("=");
+      outputMap.put(kv[0], kv[1]);
+    }
+
+    assertTrue(resultMap.equals(testDefaultMap));
+    assertTrue(outputMap.equals(testDefaultMap));
+  }
+
+  @Test
+  public void listIndexFails() {
+    dataDirectory.listIndex("/");
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    verify(shellHelper).printError(valueCapture.capture());
+    String actual = valueCapture.getValue();
+    String expected = "Unable to read index";
+    assertEquals(expected, actual);
+  }
+
+  private List<String> captureSystemOut() {
+    String outputResult = new String(output.toByteArray());
+    List<String> outputResultArray = Arrays.asList(outputResult.split("\n"));
+    outputResultArray.stream().map(s -> s.trim()).collect(Collectors.toList());
+    return outputResultArray;
   }
 
 }

@@ -27,7 +27,7 @@ public class AccountList implements Runnable, Operation {
     public void run() {
         shellHelper.print("List of accounts in the current network");
         String pathToIndexTxt = accountManager.pathToIndexTxt();
-        dataDirectory.readIndex(pathToIndexTxt);
+        dataDirectory.listIndex(pathToIndexTxt);
     }
 
     @Override

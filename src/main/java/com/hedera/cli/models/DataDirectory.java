@@ -133,15 +133,12 @@ public class DataDirectory {
         return value;
     }
 
-    public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> defaultValue) {
+    public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> defaultMap) {
         // check if index.txt exists, if not, create one
-        Path filePath = Paths.get(dataDir.toString(), pathToFile);
-        File file = new File(filePath.toString());
-        boolean fileExists = Files.exists(filePath);
-        if (!fileExists) {
-            // file does not exist so create a new file and write value
-            writeFile(pathToFile, formatMapToIndex(defaultValue));
-            return defaultValue;
+        File file = checkFileExists(pathToFile);
+        if (file == null) {
+            writeFile(pathToFile, formatMapToIndex(defaultMap));
+            return defaultMap;
         }
 
         try {
@@ -150,7 +147,7 @@ public class DataDirectory {
             // read the new value
             String key = "";
             String value = "";
-            for (Map.Entry<String, String> entry : defaultValue.entrySet()) {
+            for (Map.Entry<String, String> entry : defaultMap.entrySet()) {
                 key = entry.getKey();
                 value = entry.getValue();
             }
@@ -174,29 +171,27 @@ public class DataDirectory {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return defaultValue;
+        return defaultMap;
     }
 
     public String formatMapToIndex(Map<String, String> updatedHashmap) {
         return updatedHashmap.toString().substring(1, updatedHashmap.toString().length() - 1).replace(", ", "\n");
     }
 
-    public void readIndex(String pathToFile) {
+    public void listIndex(String pathToFile) {
         // check if index.txt exists, if not, create one
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
-
         try {
             // file exist
             Scanner reader = new Scanner(file);
             while (reader.hasNext()) {
-                // checks the old map
                 String line = reader.nextLine();
                 System.out.println(line);
             }
             reader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            shellHelper.printError("Unable to read index");
         }
     }
 
