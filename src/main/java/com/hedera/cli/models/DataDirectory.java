@@ -11,11 +11,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
@@ -236,24 +233,6 @@ public class DataDirectory {
             return null;
         }
         return map;
-    }
-
-    public void listFiles(String pathToSubDir) {
-        Path subdirpath = Paths.get(pathToSubDir);
-        Path path = Paths.get(dataDir.toString(), subdirpath.toString());
-
-        try {
-            Stream<Path> walk = Files.walk(path);
-            List<String> result = walk.map(x -> x.toString()).filter(f -> f.endsWith(".json"))
-                    .collect(Collectors.toList());
-            if (result.isEmpty()) {
-                System.out.println("No Hedera accounts have created in the current network");
-            }
-            result.forEach(System.out::println);
-            walk.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 }
