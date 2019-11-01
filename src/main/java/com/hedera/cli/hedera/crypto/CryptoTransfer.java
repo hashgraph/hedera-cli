@@ -10,7 +10,10 @@ import com.hedera.cli.models.PreviewTransferList;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.models.TransactionObj;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.*;
+import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.TransactionId;
+import com.hedera.hashgraph.sdk.HederaException;
+import com.hedera.hashgraph.sdk.TransactionRecordQuery;
 import com.hedera.hashgraph.sdk.Transaction;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.TransactionRecord;
@@ -252,7 +255,7 @@ public class CryptoTransfer implements Runnable {
         return signedTxnBytes;
     }
 
-    private CryptoTransferTransaction addTransferList() {
+    public CryptoTransferTransaction addTransferList() {
         for (int i = 0; i < amountList.size(); ++i) {
             if (isTiny) {
                 amountInTiny = Long.parseLong(amountList.get(i));

@@ -4,13 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.hedera.cli.models.AccountManager;
+import com.hedera.cli.models.PreviewTransferList;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.account.AccountId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,36 +37,11 @@ public class CryptoTransferTest {
     @Mock
     private AccountManager accountManager;
 
-    @Mock
-    private CryptoTransferOptions cryptoTransferOptions;
-
-    @Mock
-    private List<CryptoTransferOptions> cryptoTransferOptionsList;
-
     @BeforeEach
     public void init() {
         shellHelper = cryptoTransfer.getShellHelper();
         assertNotNull(shellHelper);
     }
-
-//    @Test
-//    public void testIsNumeric() {
-//
-//        String str = "111111111";
-//        assertTrue(cryptoTransferMultiple.isNumeric(str));
-//
-//        String str1 = " ";
-//        assertFalse(cryptoTransferMultiple.isNumeric(str1));
-//
-//        String str2 = null;
-//        assertFalse(cryptoTransferMultiple.isNumeric(str2));
-//
-//        String str3 = "0.1";
-//        assertFalse(cryptoTransferMultiple.isNumeric(str3));
-//
-//        String str4 = "-9";
-//        assertFalse(cryptoTransferMultiple.isNumeric(str4));
-//    }
 
 //    @Test
 //    public void tinyBarsLoop() {
@@ -73,12 +53,12 @@ public class CryptoTransferTest {
 //
 //        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
 //        doNothing().when(shellHelper).printInfo(valueCapture.capture());
-//        crypto.run();
+//        cryptoTransfer.run();
 //        String actual = valueCapture.getValue();
 //        String expected = "here in tiny loop";
 //        assertEquals(expected, actual);
 //    }
-//
+
 //    @Test
 //    public void hBarsLoop() {
 //        cryptoTransferOptions.dependent.senderList = "0.0.116681,0.0.117813";
@@ -89,12 +69,12 @@ public class CryptoTransferTest {
 //
 //        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
 //        doNothing().when(shellHelper).printInfo(valueCapture.capture());
-//        crypto.run();
+//        cryptoTransfer.run();
 //        String actual = valueCapture.getValue();
 //        String expected = "here in hbar loop";
 //        assertEquals(expected, actual);
 //    }
-//
+
 //    @Test
 //    public void noArgsLoopReturnsError() {
 //        cryptoTransferOptions.dependent.senderList = "0.0.116681,0.0.117813";
@@ -105,12 +85,12 @@ public class CryptoTransferTest {
 //
 //        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
 //        doNothing().when(shellHelper).printError(valueCapture.capture());
-//        crypto.run();
+//        cryptoTransfer.run();
 //        String actual = valueCapture.getValue();
 //        String expected = "You have to provide a transaction amount in hbars or tinybars";
 //        assertEquals(expected, actual);
 //    }
-//
+
 //    @Test
 //    public void bothArgsLoopReturnsError() {
 //        cryptoTransferOptions.dependent.senderList = "0.0.116681,0.0.117813";
@@ -121,7 +101,7 @@ public class CryptoTransferTest {
 //
 //        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
 //        doNothing().when(shellHelper).printError(valueCapture.capture());
-//        crypto.run();
+//        cryptoTransfer.run();
 //        String actual = valueCapture.getValue();
 //        String expected = "You have to provide a transaction amount in hbars or tinybars";
 //        assertEquals(expected, actual);
@@ -148,25 +128,44 @@ public class CryptoTransferTest {
         assertEquals(expected, actual);
     }
 
-//    @Test
-//    public void verifyTransferListReturnsTrue() {
-//        List<String> transferList = Arrays.asList(("0.0.116681,0.0.117813,0.0.114152,0.0.11667").split(","));
-//        assertTrue(crypto.verifyTransferList(transferList));
-//    }
-//
-//    @Test
-//    public void verifyTransferListReturnsFalse() {
-//        List<String> transferList = Arrays.asList(("0.117813,114152,0.0.11667").split(","));
-//        List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
-//        assertFalse(crypto.verifyEqualList(transferList, amountList));
-//
-//        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-//        doNothing().when(shellHelper).printError(valueCapture.capture());
-//        crypto.verifyEqualList(transferList, amountList);
-//        String actual = valueCapture.getValue();
-//        String expected = "Please check that accountId is in the right format";
-//        assertEquals(expected, actual);
-//    }
+    @Test
+    public void verifyTransferListReturnsFalseAccounts() {
+        List<String> transferList = Arrays.asList(("0.117813,114152,0.0.11667").split(","));
+        List<String> amountList = Arrays.asList(("-100,100,100").split(","));
+        when(accountManager.isAccountId("0.117813")).thenReturn(false);
+        assertTrue(cryptoTransfer.verifyEqualList(transferList, amountList));
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        doNothing().when(shellHelper).printError(valueCapture.capture());
+        cryptoTransfer.verifyTransferList(transferList);
+        String actual = valueCapture.getValue();
+        String expected = "Please check that accountId is in the right format";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void verifyTransferListReturnsTrue() {
+        List<String> transferList = Arrays.asList(("0.0.116681,0.0.117813,0.0.114152,0.0.11667").split(","));
+        when(accountManager.isAccountId("0.0.116681")).thenReturn(true);
+        when(accountManager.isAccountId("0.0.117813")).thenReturn(true);
+        when(accountManager.isAccountId("0.0.114152")).thenReturn(true);
+        when(accountManager.isAccountId("0.0.11667")).thenReturn(true);
+        assertTrue(cryptoTransfer.verifyTransferList(transferList));
+    }
+
+    @Test
+    public void verifyTransferListReturnsFalse() {
+        List<String> transferList = Arrays.asList(("0.0.116681,0.0.114152,0.0.11667").split(","));
+        List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
+        assertFalse(cryptoTransfer.verifyEqualList(transferList, amountList));
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        doNothing().when(shellHelper).printError(valueCapture.capture());
+        cryptoTransfer.verifyEqualList(transferList, amountList);
+        String actual = valueCapture.getValue();
+        String expected = "Lists aren't the same size";
+        assertEquals(expected, actual);
+    }
 
     @Test
     public void verifyTransferInHbarsNotDeci() {
@@ -192,53 +191,47 @@ public class CryptoTransferTest {
         assertFalse(cryptoTransfer.sumOfTinybarsInLong(amountList));
     }
 
-//    @Test
-//    public void recipientListInTiny() {
-//        List<String> accountList = Arrays.asList("0.0.1001", "0.0.1002", "0.0.1003");
-//        List<String> amountList = Arrays.asList("100", "9888486986", "10000001100000");
-//        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList, true);
-//        assertNotNull(cryptoTransferMultiple);
-//
-//        List<String> amountListSize = Arrays.asList("100", "10000001100000");
-//        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-//        doNothing().when(shellHelper).printError(valueCapture.capture());
-//        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountListSize, true);
-//        String actual = valueCapture.getValue();
-//        String expected = "Lists aren't the same size";
-//        assertEquals(expected, actual);
-//    }
-//
-//    @Test
-//    public void nullIfAmountListContainsDecimals() {
-//        List<String> accountList = Arrays.asList("0.0.1001", "0.0.1002", "0.0.1003");
-//        List<String> amountList1 = Arrays.asList("0.1", "0.9888486986", "1000000.1100000");
-//        ArgumentCaptor<String> valueCapture1 = ArgumentCaptor.forClass(String.class);
-//        doNothing().when(shellHelper).printError(valueCapture1.capture());
-//        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList1, true);
-//        String actual1 = valueCapture1.getValue();
-//        String expected1 = null;
-//        assertEquals(expected1, actual1);
-//    }
-//
-//    @Test
-//    public void nullIfAmountListContainsZero() {
-//        List<String> accountList = Arrays.asList("0.0.1001", "0.0.1002", "0.0.1003");
-//        List<String> amountList2 = Arrays.asList("0", "0.9888486986", "1000000.1100000");
-//        ArgumentCaptor<String> valueCapture2 = ArgumentCaptor.forClass(String.class);
-//        doNothing().when(shellHelper).printError(valueCapture2.capture());
-//        cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList2, false);
-//        String actual2 = valueCapture2.getValue();
-//        String expected2 = null;
-//        assertEquals(expected2, actual2);
-//    }
-    // @Test(expected = IllegalArgumentException.class)
-    // public void testRecipientList1() {
-    // List<String> accountList = Arrays.asList("1001", "1002", "1003");
-    // List<String> amountList= Arrays.asList("100", "9888486986", "1000000
-    // 1100000");
-    // CryptoTransferMultiple cryptoTransferMultiple = new CryptoTransferMultiple();
-    // cryptoTransferMultiple.verifiedRecipientMap(accountList, amountList);
-    // }
+    @Test
+    public void convertHbarToLong() {
+        long amt, amt1, amt2, amt3;
+        List<String> amountList = Arrays.asList(("-0.7,-10000.6,10000.6,0.7").split(","));
+
+        amt = cryptoTransfer.convertHbarToLong(amountList.get(0));
+        assertEquals(-70000000L, amt);
+        amt1 = cryptoTransfer.convertHbarToLong(amountList.get(1));
+        assertEquals(-1000060000000L, amt1);
+        amt2 = cryptoTransfer.convertHbarToLong(amountList.get(2));
+        assertEquals(1000060000000L, amt2);
+        amt3 = cryptoTransfer.convertHbarToLong(amountList.get(3));
+        assertEquals(70000000L, amt3);
+    }
+
+    @Test
+    public void convertTinybarToLong() {
+        long amt, amt1, amt2;
+        List<String> amountList = Arrays.asList(("-10,-222200,10000000000000000").split(","));
+        amt = cryptoTransfer.convertTinybarToLong(amountList.get(0));
+        assertEquals(-10L, amt);
+        amt1 = cryptoTransfer.convertTinybarToLong(amountList.get(1));
+        assertEquals(-222200L, amt1);
+        amt2 = cryptoTransfer.convertTinybarToLong(amountList.get(2));
+        assertEquals(10000000000000000L, amt2);
+    }
+
+    @Test
+    public void transferListToPromptPreviewMap() {
+        List<String> transferList = Arrays.asList(("0.0.116681,0.0.117813").split(","));
+        List<String> amountList = Arrays.asList(("-100,100").split(","));
+
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString("0.0.116681"), "-100");
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString("0.0.117813"), "100");
+        expectedMap.put(0, previewTransferList);
+        expectedMap.put(1, previewTransferList1);
+
+        Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap(transferList, amountList);
+        assertEquals(expectedMap.get("0.0.116681"), actualMap.get("0.0.116681"));
+    }
 
     @Test
     public void testCryptoTransferMultipleArgs() {

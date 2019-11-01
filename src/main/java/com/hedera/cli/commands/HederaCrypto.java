@@ -2,7 +2,6 @@ package com.hedera.cli.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.defaults.CliDefaults;
