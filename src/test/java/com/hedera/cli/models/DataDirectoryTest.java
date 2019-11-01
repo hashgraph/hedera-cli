@@ -163,6 +163,10 @@ public class DataDirectoryTest {
     assertThrows(NullPointerException.class, () -> {
       dataDirectory.readFile(null, "someDefaultValue");
     });
+
+    // Supplying a pathToFile "/" will cause an IOException that will return empty string
+    String value = dataDirectory.readFile("/");
+    assertEquals("", value);
   }
 
 }
