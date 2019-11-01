@@ -195,11 +195,11 @@ public class DataDirectory {
         }
     }
 
-    public Map<String, String> readIndexToHashmap(String pathToFile) {
+    public HashMap<String, String> readIndexToHashmap(String pathToFile) {
         // check if index.txt exists, if not, create one
         Path filePath = Paths.get(dataDir.toString(), pathToFile);
         File file = new File(filePath.toString());
-        HashMap<String, String> mHashmap = new HashMap<>();
+        HashMap<String, String> map = new HashMap<>();
 
         try {
             // file exist
@@ -210,14 +210,14 @@ public class DataDirectory {
                 String[] splitLines = line.split("\n");
                 for (int i = 0; i < splitLines.length; i++) {
                     String[] keyValuePairs = splitLines[i].split("=");
-                    mHashmap.put(keyValuePairs[0], keyValuePairs[1]);
+                    map.put(keyValuePairs[0], keyValuePairs[1]);
                 }
             }
             reader.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         }
-        return mHashmap;
+        return map;
     }
 
     public HashMap<String, String> readFileHashmap(String pathToFile) {

@@ -238,4 +238,24 @@ public class DataDirectoryTest {
     return outputResultArray;
   }
 
+  @Test
+  public void readIndexToHashmap() {
+    String testIndexFile = "testfolder" + File.separator + "index.txt";
+    HashMap<String, String> testDefaultMap = new HashMap<String, String>();
+    testDefaultMap.put("0.0.1001", "some_random_name_a");
+    testDefaultMap.put("0.0.1002", "some_random_name_b");
+    testDefaultMap.put("0.0.1003", "some_random_name_c");
+    HashMap<String, String> resultMap = dataDirectory.readWriteToIndex(testIndexFile, testDefaultMap);
+
+    HashMap<String, String> map = dataDirectory.readIndexToHashmap(testIndexFile);
+
+    assertTrue(map.equals(resultMap));
+  }
+
+  @Test
+  public void readIndexToHashmapFails() {
+    HashMap<String, String> map = dataDirectory.readIndexToHashmap("/");
+    assertNull(map);
+  }
+
 }
