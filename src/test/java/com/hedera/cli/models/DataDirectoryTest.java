@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -113,10 +115,18 @@ public class DataDirectoryTest {
   }
 
   @Test
-  public void writeFile() {
+  public void writeFileFails() {
     assertThrows(NullPointerException.class, () -> {
       dataDirectory.writeFile(null, "anything");
     });
+
+    // Supplying a pathToFile "/" will cause an IOException that invokes shellHelper.printError
+    dataDirectory.writeFile("/", "anything");
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    verify(shellHelper).printError(valueCapture.capture());
+    String actual = valueCapture.getValue();
+    String expected = "Failed to save";
+    assertEquals(expected, actual);
   }
 
 }

@@ -87,7 +87,7 @@ public class DataDirectory {
             bw.write(value);
             bw.close();
         } catch (IOException e) {
-            shellHelper.printError(e.getMessage());
+            shellHelper.printError("Failed to save");
         }
     }
 

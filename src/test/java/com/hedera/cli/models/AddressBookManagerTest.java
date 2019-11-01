@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.FileSystemUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class AddressBookManagerTest {
@@ -68,24 +69,24 @@ public class AddressBookManagerTest {
   }
 
   @AfterEach
-  public void tearDown() {
+  public void tearDown() throws IOException {
     System.setOut(stdout);
+    FileSystemUtils.deleteRecursively(tempDir);
   }
 
   @Test
-  public void listNetworks() {
+  public void listNetworks() throws UnsupportedEncodingException {
     assertNotNull(addressBookManager);
 
     // since we are manually instantiating AddressBookManager with new,
     // we have to manually invoke init() in order to parse our default
-    // addressbook.jsom
+    // addressbook.json
     addressBookManager.init();
 
     addressBookManager.listNetworks();
 
     // Retrieve the captured output
     List<String> outputResultArray = captureSystemOut();
-
     assertThat(outputResultArray, containsInAnyOrder("  mainnet", "* testnet"));
   }
 

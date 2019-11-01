@@ -97,8 +97,8 @@ public class AddressBookManager {
   }
 
   public void listNetworks() {
+    String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
     for (Network network : networks) {
-      String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
       if (currentNetwork.equals(network.getName())) {
         System.out.println("* " + network.getName());
       } else {
