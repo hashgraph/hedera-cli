@@ -176,12 +176,17 @@ public class CryptoTransfer implements Runnable {
         transactionId = new TransactionId(operatorId);
         senderList = Arrays.asList((cryptoTransferOptions.dependent.senderList).split(","));
 
-        // SDKs does not currently support more than 2 senders
+        // SDKs does not currently support more than 2 senders.
+        // Instantiating Client client = hedera.createHederaClient() sets the operator
         // ie 1 operator, 1 sender, x recipients (supported)
         // ie 1 operator, 0 sender, x recipients (supported)
         if (senderList.size() > 1) {
             shellHelper.printError("Currently does not support more than 2 senders");
             return;
+            // If more than 2 senders are created in list, and client.setsOperator()
+            // transactions are not allowed to .sign() more than once, otherwise SDK throws "transaction already signed with key: "
+            // If more than 2 senders are created in list and we do not setOperator when we instantiate a new Client,
+            // SDK throws "java.lang.IllegalStateException: transaction builder failed validation: at least one transfer required "
 //            client = hedera.createHederaClientWithoutSettingOperator();
 //            cryptoTransferTransaction = new CryptoTransferTransaction(client);
 //            cryptoTransferTransaction.sign(hedera.getOperatorKey());
