@@ -193,7 +193,10 @@ public class CryptoTransferTest {
 
     @Test
     public void convertHbarToLong() {
-        long amt, amt1, amt2, amt3;
+        long amt;
+        long amt1;
+        long amt2;
+        long amt3;
         List<String> amountList = Arrays.asList(("-0.7,-10000.6,10000.6,0.7").split(","));
 
         amt = cryptoTransfer.convertHbarToLong(amountList.get(0));
@@ -208,7 +211,9 @@ public class CryptoTransferTest {
 
     @Test
     public void convertTinybarToLong() {
-        long amt, amt1, amt2;
+        long amt;
+        long amt1;
+        long amt2;
         List<String> amountList = Arrays.asList(("-10,-222200,10000000000000000").split(","));
         amt = cryptoTransfer.convertTinybarToLong(amountList.get(0));
         assertEquals(-10L, amt);
