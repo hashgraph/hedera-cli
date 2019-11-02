@@ -7,17 +7,17 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class ShellHelper {
 
-    @Value("${shell.out.info:CYAN}")
-    public String infoColor;
+    @Value("${shell.out.info}")
+    public String infoColor = "CYAN";
 
-    @Value("${shell.out.success:GREEN}")
-    public String successColor;
+    @Value("${shell.out.success}")
+    public String successColor = "GREEN";
 
-    @Value("${shell.out.warning:YELLOW}")
-    public String warningColor;
+    @Value("${shell.out.warning}")
+    public String warningColor = "YELLOW";
 
-    @Value("${shell.out.error:RED}")
-    public String errorColor;
+    @Value("${shell.out.error}")
+    public String errorColor = "RED";
 
     private Terminal terminal;
 
