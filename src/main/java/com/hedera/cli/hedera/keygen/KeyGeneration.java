@@ -138,7 +138,8 @@ public class KeyGeneration implements Runnable {
     return new EDKeyPair(seed);
   }
 
-  public List<String> compareMnemonicFromBipEntropy(byte[] entropy) throws MnemonicException.MnemonicLengthException {
+  public List<String> compareMnemonicFromBipEntropy(byte[] entropy)
+      throws MnemonicException.MnemonicLengthException, NoSuchAlgorithmException {
     List<String> mnemonic = new Mnemonic().toMnemonic(entropy);
     return mnemonic;
   }

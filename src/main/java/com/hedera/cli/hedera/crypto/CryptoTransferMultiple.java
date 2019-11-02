@@ -5,19 +5,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-
 import com.hedera.cli.hedera.utils.Composite2;
 import com.hedera.cli.hedera.utils.CryptoTransferUtils;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.Recipient;
 import com.hedera.cli.models.Sender;
-import com.hedera.cli.models.TransactionObj;
 import com.hedera.cli.models.TransactionManager;
+import com.hedera.cli.models.TransactionObj;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.Transaction;
@@ -190,7 +190,8 @@ public class CryptoTransferMultiple implements Runnable {
                 isInfoCorrect = promptPreview(operatorId, jsonStringSender, jsonStringRecipient);
                 if ("yes".equals(isInfoCorrect)) {
                     shellHelper.print("Info is correct, let's go!");
-                    executeCryptoTransferMultiple(hedera, client, senderAccountID, operatorId, cryptoTransferTransaction);
+                    executeCryptoTransferMultiple(hedera, client, senderAccountID, operatorId,
+                            cryptoTransferTransaction);
                 } else if ("no".equals(isInfoCorrect)) {
                     shellHelper.print("Nope, incorrect, let's make some changes");
                 } else {
@@ -213,14 +214,13 @@ public class CryptoTransferMultiple implements Runnable {
         return inputReader.prompt("Input transfer amount");
     }
 
-
     private String promptPreview(AccountId operatorId, String jsonStringSender, String jsonStringRecipient) {
         return inputReader.prompt("\nOperator\n" + operatorId + "\nSender\n" + jsonStringSender + "\nRecipient\n"
                 + jsonStringRecipient + "\n\nIs this correct?" + "\nyes/no");
     }
 
-    private void executeCryptoTransferMultiple(Hedera hedera, Client client, AccountId senderAccountID, AccountId operatorId,
-                                               CryptoTransferTransaction cryptoTransferTransaction) {
+    private void executeCryptoTransferMultiple(Hedera hedera, Client client, AccountId senderAccountID,
+            AccountId operatorId, CryptoTransferTransaction cryptoTransferTransaction) {
 
         try {
 
@@ -236,12 +236,13 @@ public class CryptoTransferMultiple implements Runnable {
 
             // if accountId of sender is the same as the operatorId, only sign once
             if (senderAccountID.toString().equals(hedera.getOperatorId().toString())) {
-                transactionReceipt = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes()).executeForReceipt();
+                transactionReceipt = Transaction.fromBytes(client, cryptoTransferTransaction.toBytes())
+                        .executeForReceipt();
                 if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
-                    record = new TransactionRecordQuery(client).setTransactionId(transactionId)
-                            .execute();
+                    record = new TransactionRecordQuery(client).setTransactionId(transactionId).execute();
                     printBalance(client, operatorId, senderAccountID);
-                    // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
+                    // save all transaction record into
+                    // ~/.hedera/[network_name]/transaction/[file_name].json
                     saveTransactionToJson(record);
                 }
             } else {
@@ -253,10 +254,10 @@ public class CryptoTransferMultiple implements Runnable {
                 var signedTxnBytes = senderSignsTransaction(client, senderPrivKey, cryptoTransferTransaction.toBytes());
                 transactionReceipt = Transaction.fromBytes(client, signedTxnBytes).executeForReceipt();
                 if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
-                    record = new TransactionRecordQuery(client).setTransactionId(transactionId)
-                            .execute();
+                    record = new TransactionRecordQuery(client).setTransactionId(transactionId).execute();
                     printBalance(client, operatorId, senderAccountID);
-                    // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
+                    // save all transaction record into
+                    // ~/.hedera/[network_name]/transaction/[file_name].json
                     saveTransactionToJson(record);
                 }
             }
@@ -282,7 +283,11 @@ public class CryptoTransferMultiple implements Runnable {
         txObj.setTxValidStart(record.getTransactionId().getValidStart().getEpochSecond() + "-"
                 + record.getTransactionId().getValidStart().getNano());
 
-        txManager.saveTransactionsToJson(txID, txObj);
+        try {
+            txManager.saveTransactionsToJson(txID, txObj);
+        } catch (JsonProcessingException e) {
+            shellHelper.printError("Failed to save your transaction");
+        }
     }
 
     private void printBalance(Client client, AccountId operatorId, AccountId senderAccountID) {
