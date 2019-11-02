@@ -38,11 +38,9 @@ public class ShellHelperTest {
 
   private Terminal terminal;
 
-  private Terminal terminal2;
-
-  private String testMessage = "the message";
-
   private ShellHelper shellHelper2;
+  
+  private String testMessage = "the message";
 
   @BeforeEach
   public void setUp() throws IOException {
@@ -50,7 +48,7 @@ public class ShellHelperTest {
     terminal = t.name("test name").jna(false).streams(System.in, System.out).build();
 
     InputStream mockIn = mock(InputStream.class);
-    terminal2 = t.jna(false).streams(mockIn, output).build();
+    Terminal terminal2 = t.jna(false).streams(mockIn, output).build();
     shellHelper2 = new ShellHelper(terminal2);
 
     System.setOut(new PrintStream(output, true, "UTF-8"));
@@ -71,12 +69,12 @@ public class ShellHelperTest {
     assertEquals("RED", shellHelper.errorColor);
 
     TerminalBuilder t = TerminalBuilder.builder();
-    Terminal terminal2 = t
+    Terminal anotherTerminal = t
       .name("another terminal")
       .jna(false)
       .streams(System.in, System.out)
       .build();
-    shellHelper.setTerminal(terminal2);
+    shellHelper.setTerminal(anotherTerminal);
     // verify that we are able to retrieve the same terminal instance
     assertEquals("another terminal", shellHelper.getTerminal().getName());
   } // @formatter:on
