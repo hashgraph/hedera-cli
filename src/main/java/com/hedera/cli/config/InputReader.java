@@ -22,11 +22,11 @@ public class InputReader {
       return prompt(prompt, null, true);
   }
 
-  public String prompt(String  prompt, String defaultValue) {
+  public String prompt(String prompt, String defaultValue) {
       return prompt(prompt, defaultValue, true);
   }
 
-  public String prompt(String  prompt, String defaultValue, boolean echo) {
+  public String prompt(String prompt, String defaultValue, boolean echo) {
       String answer = "";
       if (echo) {
           answer = lineReader.readLine(prompt + ": ");
