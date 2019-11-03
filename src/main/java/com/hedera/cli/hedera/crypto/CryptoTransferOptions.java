@@ -1,9 +1,13 @@
 package com.hedera.cli.hedera.crypto;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Component;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ArgGroup;
 
+@Getter
+@Setter
 @Component
 public class CryptoTransferOptions {
 
@@ -15,17 +19,21 @@ public class CryptoTransferOptions {
     @ArgGroup(exclusive = false, multiplicity = "0..1")
     public Dependent dependent;
 
+    @Getter
+    @Setter
     public static class Exclusive {
         @Option(names = {"-tb", "--recipientAmtTinyBars"}, required = true, description = "Amount to transfer in tinybars"
                 + "%n@|bold,underline Usage:|@%n"
                 + "@|fg(yellow) transfer -s 0.0.1001 -r 0.0.1002 -tb 100|@"
                 + "%n@|fg(yellow) transfer -s 0.0.1001 -r 0.0.1002 -hb 0.1|@")
-        public String recipientAmtTinyBars;
+        public String transferListAmtTinyBars;
 
         @Option(names = {"-hb", "--recipientAmtHBars"}, arity = "1..*", required = true, description = "Amount to transfer in hbars")
-        public String recipientAmtHBars;
+        public String transferListAmtHBars;
     }
 
+    @Getter
+    @Setter
     public static class Dependent {
 
         @Option(names = { "-s", "--sender" },  required = true,

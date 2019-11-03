@@ -1,19 +1,16 @@
 package com.hedera.cli.hedera.crypto;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import com.hedera.cli.config.InputReader;
+import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.PreviewTransferList;
+import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @ExtendWith(MockitoExtension.class)
 public class CryptoTransferTest {
@@ -37,19 +35,76 @@ public class CryptoTransferTest {
     @Mock
     private AccountManager accountManager;
 
+    @Mock
+    private Hedera hedera;
+
+    @Mock
+    private InputReader inputReader;
+
+    @Mock
+    private TransactionManager transactionManager;
+
+    private CryptoTransferOptions cryptoTransferOptions;
+    private List<CryptoTransferOptions> cryptoTransferOptionsList;
+    private CryptoTransferOptions.Exclusive exclusive;
+    private CryptoTransferOptions.Dependent dependent;
+
     @BeforeEach
-    public void init() {
-        shellHelper = cryptoTransfer.getShellHelper();
-        assertNotNull(shellHelper);
+    public void setUp() {
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
+        dependent = new CryptoTransferOptions.Dependent();
+        exclusive = new CryptoTransferOptions.Exclusive();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        dependent.setMPreview("no");
+        dependent.setRecipientList("0.0.114152,0.0.11667");
+        dependent.setSenderList("0.0.116681,0.0.117813");
+        exclusive.setTransferListAmtHBars("0.4,0.01,1.33");
+        exclusive.setTransferListAmtTinyBars("400,1000,10030");
     }
 
-//    @Test
-//    public void tinyBarsLoop() {
-//        cryptoTransferOptions.dependent.senderList = "0.0.116681,0.0.117813";
-//        cryptoTransferOptions.dependent.recipientList = "0.0.114152,0.0.11667";
-//        cryptoTransferOptions.exclusive.recipientAmtTinyBars = "-100,-100,100,100";
-//        cryptoTransferOptions.exclusive.recipientAmtHBars = null;
-//        cryptoTransferOptions.dependent.mPreview = "no";
+    @Test
+    public void assertGettersExists() {
+        assertEquals(shellHelper, cryptoTransfer.getShellHelper());
+        assertEquals(accountManager, cryptoTransfer.getAccountManager());
+        assertEquals(hedera, cryptoTransfer.getHedera());
+        assertEquals(inputReader, cryptoTransfer.getInputReader());
+        assertEquals(transactionManager, cryptoTransfer.getTransactionManager());
+        assertEquals(cryptoTransferOptions, cryptoTransfer.getCryptoTransferOptions());
+        assertEquals(dependent, cryptoTransfer.getCryptoTransferOptions().getDependent());
+        assertEquals(exclusive, cryptoTransfer.getCryptoTransferOptions().getExclusive());
+    }
+
+    @Test
+    public void assertAutowiredDependenciesNotNull() {
+        assertNotNull(shellHelper);
+        assertNotNull(accountManager);
+        assertNotNull(hedera);
+        assertNotNull(inputReader);
+        assertNotNull(transactionManager);
+        assertNotNull(cryptoTransferOptions);
+    }
+
+    @Test
+    public void tinyBarsLoop() {
+
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptionsList = Arrays.asList(
+                new CryptoTransferOptions(),
+                new CryptoTransferOptions()
+        );
+
+        cryptoTransfer.setHbarAmtArgs("0.4,0.01,1.33");
+        cryptoTransfer.setTinybarAmtArgs("400,1000,10030");
+        cryptoTransfer.setTransferListArgs("0.0.116681,0.0.117813,0.0.114152,0.0.11667");
+        cryptoTransfer.setMPreview("no");
+
+        assertEquals(dependent.getMPreview(), cryptoTransfer.getMPreview());
+        assertEquals(exclusive.transferListAmtTinyBars, cryptoTransfer.getTinybarAmtArgs());
+        assertEquals(exclusive.transferListAmtHBars, cryptoTransfer.getHbarAmtArgs());
+        assertEquals(dependent.senderList + "," + dependent.recipientList, cryptoTransfer.getTransferListArgs());
+        assertNull(null, cryptoTransfer.getHbarAmtArgs());
 //
 //        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
 //        doNothing().when(shellHelper).printInfo(valueCapture.capture());
@@ -57,7 +112,7 @@ public class CryptoTransferTest {
 //        String actual = valueCapture.getValue();
 //        String expected = "here in tiny loop";
 //        assertEquals(expected, actual);
-//    }
+    }
 
 //    @Test
 //    public void hBarsLoop() {

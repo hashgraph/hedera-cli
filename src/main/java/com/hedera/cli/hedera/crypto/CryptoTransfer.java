@@ -91,8 +91,8 @@ public class CryptoTransfer implements Runnable {
             cryptoTransferOptions = cryptoTransferOptionsList.get(i);
         }
 
-        hbarAmtArgs = cryptoTransferOptions.exclusive.recipientAmtHBars;
-        tinybarAmtArgs = cryptoTransferOptions.exclusive.recipientAmtTinyBars;
+        hbarAmtArgs = cryptoTransferOptions.exclusive.transferListAmtHBars;
+        tinybarAmtArgs = cryptoTransferOptions.exclusive.transferListAmtTinyBars;
         transferListArgs = cryptoTransferOptions.dependent.senderList + "," + cryptoTransferOptions.dependent.recipientList;
         mPreview = cryptoTransferOptions.dependent.mPreview;
 
