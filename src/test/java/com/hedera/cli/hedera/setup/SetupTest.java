@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -112,6 +113,45 @@ public class SetupTest {
         // assertions
         verify(accountRecovery, times(1)).printKeyPair(keyPair, accountId);
         verify(accountManager, times(1)).setDefaultAccountId(AccountId.fromString(accountId), keyPair);
+    }
+
+    @Test 
+    public void runFails() {
+        System.setOut(stdout);
+        String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
+        String prompt2 = "24 words phrase";
+        String prompt3 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`";
+        String secret = "secret";
+        boolean echo = false;
+        String phraseInput = String.join(" ", phraseList).trim();
+
+        AccountManager accountManager = mock(AccountManager.class);
+        when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
+        when(hedera.getAccountManager()).thenReturn(accountManager);
+        when(inputReader.prompt(eq(prompt1))).thenReturn(accountId);
+        System.out.println(phraseInput);
+        System.out.println(phraseInput.length());
+        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(phraseInput);
+        when(inputReader.prompt(eq(prompt3))).thenReturn("bip");
+        when(accountManager.verifyPhraseList(eq(phraseList))).thenReturn(phraseList);
+        when(accountManager.verifyMethod(eq("bip"))).thenReturn("bip");
+
+        lenient().when(accountRecovery.recoverEDKeypairPostBipMigration(eq(phraseList))).thenReturn(keyPair);
+        lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList), eq(accountId))).thenReturn(keyPair);
+
+        // when checking against Hedera, we find out that the account id and re-generated keyPair do not match!
+        // mock this failure by returningh false
+        when(accountRecovery.verifyAndSaveAccount(eq(accountId), eq(keyPair))).thenReturn(false);
+
+        // execute function under test        
+        setup.run();
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printError(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "Error in verifying that accountId and recovery words match";
+    
+        assertEquals(expected, actual);
     }
 
     private String captureLine() {
