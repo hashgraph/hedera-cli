@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.setup;
+package com.hedera.cli.models;
 
 import com.hedera.cli.hedera.botany.AdjectivesWordListHelper;
 import com.hedera.cli.hedera.botany.BotanyWordListHelper;
@@ -19,7 +19,6 @@ public class RandomNameGeneratorTest {
 
     @InjectMocks
     private RandomNameGenerator randomNameGenerator;
-
 
     @BeforeEach
     public void init() {

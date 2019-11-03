@@ -7,7 +7,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.setup.RandomNameGenerator;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
