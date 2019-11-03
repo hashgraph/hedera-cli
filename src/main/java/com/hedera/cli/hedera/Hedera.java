@@ -1,5 +1,6 @@
 package com.hedera.cli.hedera;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -33,12 +34,26 @@ public class Hedera {
     private ApplicationContext context;
 
     @Autowired
-    private AddressBookManager addressBookManager;
+    public AddressBookManager addressBookManager;
 
     @Autowired
     public AccountManager accountManager;
 
     private HederaNode node;
+
+    public String getDefaultAccount() {
+        String defaultAccount = "";
+        String currentNetwork = addressBookManager.getCurrentNetworkAsString();
+        String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator
+                + AddressBookManager.ACCOUNT_DEFAULT_FILE;
+        try {
+            defaultAccount = dataDirectory.readFile(pathToDefaultAccount);
+        } catch (Exception e) {
+            // no default account
+            return "";
+        }
+        return defaultAccount;
+    }
 
     private HederaNode getRandomNode() {
         return addressBookManager.getCurrentNetwork().getRandomNode();
@@ -91,7 +106,7 @@ public class Hedera {
             String currentAccountId = currentAccountId();
             if (accountId.equals(currentAccountId)) {
                 String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
-                Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
+                Map<String, String> currentJsonAccount = dataDirectory.readJsonToHashmap(pathToCurrentJsonAccount);
                 privateKey = currentJsonAccount.get("privateKey").toString();
             }
         }
@@ -112,7 +127,7 @@ public class Hedera {
             String currentAccountId = currentAccountId();
             if (accountId.equals(currentAccountId)) {
                 String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
-                Map<String, String> currentJsonAccount = dataDirectory.jsonToHashmap(pathToCurrentJsonAccount);
+                Map<String, String> currentJsonAccount = dataDirectory.readJsonToHashmap(pathToCurrentJsonAccount);
                 publicKey = currentJsonAccount.get("publicKey").toString();
             }
         }

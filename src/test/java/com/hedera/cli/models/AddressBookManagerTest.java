@@ -8,12 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doNothing;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.FileSystemUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class AddressBookManagerTest {
@@ -70,24 +69,24 @@ public class AddressBookManagerTest {
   }
 
   @AfterEach
-  public void tearDown() {
+  public void tearDown() throws IOException {
     System.setOut(stdout);
+    FileSystemUtils.deleteRecursively(tempDir);
   }
 
   @Test
-  public void listNetworks() {
+  public void listNetworks() throws UnsupportedEncodingException {
     assertNotNull(addressBookManager);
 
     // since we are manually instantiating AddressBookManager with new,
     // we have to manually invoke init() in order to parse our default
-    // addressbook.jsom
+    // addressbook.json
     addressBookManager.init();
 
     addressBookManager.listNetworks();
 
     // Retrieve the captured output
     List<String> outputResultArray = captureSystemOut();
-
     assertThat(outputResultArray, containsInAnyOrder("  mainnet", "* testnet"));
   }
 
@@ -106,17 +105,6 @@ public class AddressBookManagerTest {
     assertEquals(expected, actual);
 
     ReflectionTestUtils.setField(addressBookManager, "ADDRESSBOOK_DEFAULT", "addressbook.json");
-  }
-
-  @Test
-  public void getDefaultAccount() {
-    assertEquals("mushy_daisy_4820:0.0.1234", addressBookManager.getDefaultAccount());
-
-    // delete the default.txt file and we will no longer have a default account
-    String currentNetwork = dataDirectory.readFile("network.txt", "testnet");
-    String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator + "default.txt";
-    Paths.get(tempDir.toString(), pathToDefaultAccount).toFile().delete();
-    assertEquals("", addressBookManager.getDefaultAccount());
   }
 
   @Test

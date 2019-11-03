@@ -1,5 +1,6 @@
 package com.hedera.cli.hedera.crypto;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -269,7 +270,7 @@ public class CryptoTransfer implements Runnable {
         return cryptoTransferTransaction;
     }
 
-    private void printAndSaveRecords(Client client, TransactionId transactionId, AccountId operatorId) throws HederaException {
+    private void printAndSaveRecords(Client client, TransactionId transactionId, AccountId operatorId) throws HederaException, JsonProcessingException {
         TransactionRecord record;
         record = new TransactionRecordQuery(client)
                 .setTransactionId(transactionId)
@@ -398,7 +399,7 @@ public class CryptoTransfer implements Runnable {
         return sum == 0L;
     }
 
-    private void saveTransactionToJson(TransactionRecord record) {
+    private void saveTransactionToJson(TransactionRecord record) throws JsonProcessingException {
         shellHelper.printSuccess("Transfer receipt status: " + record.getReceipt().getStatus());
         shellHelper.printSuccess("Transfer transaction fee: " + record.getTransactionFee());
         shellHelper.printSuccess("Transfer consensus timestamp: " + record.getConsensusTimestamp());

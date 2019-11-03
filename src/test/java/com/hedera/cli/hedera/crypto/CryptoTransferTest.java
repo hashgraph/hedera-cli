@@ -1,10 +1,17 @@
 package com.hedera.cli.hedera.crypto;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
@@ -21,7 +28,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @ExtendWith(MockitoExtension.class)
 public class CryptoTransferTest {
@@ -45,7 +51,6 @@ public class CryptoTransferTest {
     private TransactionManager transactionManager;
 
     private CryptoTransferOptions cryptoTransferOptions;
-    private List<CryptoTransferOptions> cryptoTransferOptionsList;
     private CryptoTransferOptions.Exclusive exclusive;
     private CryptoTransferOptions.Dependent dependent;
 
@@ -90,10 +95,11 @@ public class CryptoTransferTest {
     public void tinyBarsLoop() {
 
         cryptoTransferOptions = new CryptoTransferOptions();
-        cryptoTransferOptionsList = Arrays.asList(
-                new CryptoTransferOptions(),
-                new CryptoTransferOptions()
-        );
+
+//        List<CryptoTransferOptions> cryptoTransferOptionsList = Arrays.asList(
+//                new CryptoTransferOptions(),
+//                new CryptoTransferOptions()
+//        );
 
         cryptoTransfer.setHbarAmtArgs("0.4,0.01,1.33");
         cryptoTransfer.setTinybarAmtArgs("400,1000,10030");
