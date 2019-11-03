@@ -32,17 +32,23 @@ import picocli.CommandLine.Command;
 public class Setup implements Runnable {
 
     @Autowired
+    private ShellHelper shellHelper;
+
+    @Autowired
+    private InputReader inputReader;
+
+    @Autowired
     private AccountRecovery accountRecovery;
 
     @Autowired
     private Hedera hedera;
 
-    @Override
-    public void run() {
+    public void help() {
         CommandLine.usage(this, System.out);
     }
 
-    public void handle(InputReader inputReader, ShellHelper shellHelper) {
+    @Override
+    public void run() {
         shellHelper.print("Start the setup process");
         String accountIdInString = inputReader
                 .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");

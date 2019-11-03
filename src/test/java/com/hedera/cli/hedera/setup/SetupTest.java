@@ -2,7 +2,6 @@ package com.hedera.cli.hedera.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,7 +13,6 @@ import com.hedera.cli.shell.ShellHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,8 +23,6 @@ public class SetupTest {
     @InjectMocks
     private Setup setup;
 
-    @TempDir
-    public Path tempDir;
     @Mock
     private ShellHelper shellHelper;
 
