@@ -44,8 +44,8 @@ public class AccountBalanceTest {
     public void runAccountBalanceVerifies() {
         String accountId = "0.0.1121";
         accountBalance.setAccountIdInString(accountId);
-        when(accountManager.verifyAccountId(accountId, shellHelper)).thenReturn(accountId);
+        when(accountManager.verifyAccountId(accountId)).thenReturn(accountId);
         accountBalance.run();
-        verify(accountManager, times(1)).verifyAccountId(accountId, shellHelper);
+        verify(accountManager, times(1)).verifyAccountId(accountId);
     }
 }

@@ -1,15 +1,29 @@
 package com.hedera.cli.hedera.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 
+import com.hedera.cli.config.InputReader;
+import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.models.RecoveredAccountModel;
+import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.account.AccountId;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,42 +34,88 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class SetupTest {
 
+    private final PrintStream stdout = System.out;
+    private final ByteArrayOutputStream output = new ByteArrayOutputStream();
+
     @InjectMocks
     private Setup setup;
 
     @Mock
     private ShellHelper shellHelper;
 
-    // not a mock
-    private String accountId;
+    @Mock
+    private InputReader inputReader;
+
+    @Mock
+    private AccountRecovery accountRecovery;
+
+    @Mock
+    private Hedera hedera;
+
+    // test data
+    private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet",
+            "fan", "donkey", "carry", "chuckle", "assault", "leopard", "fee", "kingdom", "cheap", "odor", "okay",
+            "crazy", "raven", "goose", "focus", "shrimp", "carbon");
+    private String accountId = "0.0.1234";
     private KeyPair keyPair;
 
     @BeforeEach
-    public void init() {
-        List<String>mnemonic = Arrays.asList(
-                "hello, fine, demise, ladder, glow, hard, magnet, fan, donkey, carry, chuckle, assault, leopard, fee, kingdom, cheap, odor, okay, crazy, raven, goose, focus, shrimp, carbon");
-        accountId = "0.0.1234";
+    public void setUp() throws UnsupportedEncodingException {
+        System.setOut(new PrintStream(output, true, "UTF-8"));
+        // generate keyPair from phraseList (test data) for tests
         EDBip32KeyChain keyChain = new EDBip32KeyChain();
         int index = 0;
-        keyPair = keyChain.keyPairFromWordList(index, mnemonic);
+        keyPair = keyChain.keyPairFromWordList(index, phraseList);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        System.setOut(stdout);
     }
 
     @Test
-    public void printKeyPairInRecoveredAccountModelFormat() {
-        RecoveredAccountModel recoveredAccountModel;
-        recoveredAccountModel = new RecoveredAccountModel();
-        recoveredAccountModel.setAccountId(accountId);
-        recoveredAccountModel.setPrivateKey(keyPair.getPrivateKeyHex());
-        recoveredAccountModel.setPublicKey(keyPair.getPublicKeyHex());
-        recoveredAccountModel.setPrivateKeyEncoded(keyPair.getPrivateKeyEncodedHex());
-        recoveredAccountModel.setPublicKeyEncoded(keyPair.getPublicKeyEncodedHex());
-        recoveredAccountModel.setPrivateKeyBrowserCompatible(keyPair.getSeedAndPublicKeyHex());
-        setup.printKeyPair(keyPair, accountId, shellHelper);
-        assertEquals(accountId, recoveredAccountModel.getAccountId());
-        assertEquals(keyPair.getPrivateKeyHex(), recoveredAccountModel.getPrivateKey());
-        assertEquals(keyPair.getPublicKeyHex(), recoveredAccountModel.getPublicKey());
-        assertEquals(keyPair.getPrivateKeyEncodedHex(), recoveredAccountModel.getPrivateKeyEncoded());
-        assertEquals(keyPair.getPublicKeyEncodedHex(), recoveredAccountModel.getPublicKeyEncoded());
-        assertEquals(keyPair.getSeedAndPublicKeyHex(), recoveredAccountModel.getPrivateKeyBrowserCompatible());
+    public void help() {
+        setup.help();
+        String actual = captureLine().trim();
+        String expected = "Usage: setup";
+        assertEquals(expected, actual);
     }
+
+    @Test
+    public void run() {
+        System.setOut(stdout);
+        String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
+        String prompt2 = "24 words phrase";
+        String prompt3 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`";
+        String secret = "secret";
+        boolean echo = false;
+        String phraseInput = String.join(" ", phraseList).trim();
+
+        AccountManager accountManager = mock(AccountManager.class);
+        when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
+        when(hedera.getAccountManager()).thenReturn(accountManager);
+        when(inputReader.prompt(eq(prompt1))).thenReturn(accountId);
+        System.out.println(phraseInput);
+        System.out.println(phraseInput.length());
+        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(phraseInput);
+        when(inputReader.prompt(eq(prompt3))).thenReturn("bip");
+        when(accountManager.verifyPhraseList(eq(phraseList))).thenReturn(phraseList);
+        when(accountManager.verifyMethod(eq("bip"))).thenReturn("bip");
+
+        lenient().when(accountRecovery.recoverEDKeypairPostBipMigration(eq(phraseList))).thenReturn(keyPair);
+        lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList), eq(accountId))).thenReturn(keyPair);
+        when(accountRecovery.verifyAndSaveAccount(eq(accountId), eq(keyPair))).thenReturn(true);
+
+        // execute function under test        
+        setup.run();
+
+        // assertions
+        verify(accountRecovery, times(1)).printKeyPair(keyPair, accountId);
+        verify(accountManager, times(1)).setDefaultAccountId(AccountId.fromString(accountId), keyPair);
+    }
+
+    private String captureLine() {
+        return new String(output.toByteArray());
+    }
+
 }
