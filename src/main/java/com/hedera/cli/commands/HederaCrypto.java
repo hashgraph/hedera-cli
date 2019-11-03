@@ -2,6 +2,7 @@ package com.hedera.cli.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.defaults.CliDefaults;
@@ -50,53 +51,54 @@ public class HederaCrypto extends CliDefaults {
                         @ShellOption(value = {"-n", "--newAccount"}, defaultValue = "") String n) {
 
         // convert our Spring Shell arguments into an argument list that PicoCli can use.
-        String[] args = new String[]{};
-        ArrayList<String> argsList = new ArrayList<>();
+        String[] args;
+        List<String> argsList = new ArrayList<>();
         Object[] objs;
 
         switch (subCommand) {
             case "create":
                 if (k) argsList.add("-k");
                 if (!b.isEmpty()) argsList.add("-b " + b);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
                 break;
             case "update":
-                break;
+                shellHelper.printError("To be implemented");
+                return;
             case "info":
-                if (!accountId.isEmpty()) argsList.add(accountId);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
+                argsList = addAccountToArgsList(accountId, argsList);
                 break;
             case "delete":
                 if (y) argsList.add("-y");
                 if (!o.isEmpty()) argsList.add("-o " + o);
                 if (!n.isEmpty()) argsList.add("-n " + n);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
                 break;
             case "recovery":
-                if (!accountId.isEmpty()) argsList.add(accountId);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
+                argsList = addAccountToArgsList(accountId, argsList);
                 break;
             case "ls":
                 break;
             case "use":
-                if (!accountId.isEmpty()) argsList.add(accountId);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
+                argsList = addAccountToArgsList(accountId, argsList);
                 break;
             case "balance":
-                if (!accountId.isEmpty()) argsList.add(accountId);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
+                argsList = addAccountToArgsList(accountId, argsList);
                 break;
             default:
                 break;
         }
+
+        objs = argsList.toArray();
+        args = Arrays.copyOf(objs, objs.length, String[].class);
         // Pass args onwards and invoke our PicoCli classes
         account.handle(inputReader, subCommand, args);
+    }
+
+    public List<String> addAccountToArgsList(String accountId, List<String> argsList) {
+        if (!accountId.isEmpty()) {
+            argsList.add(accountId);
+            return argsList;
+        } else {
+            return null;
+        }
     }
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
@@ -104,13 +106,11 @@ public class HederaCrypto extends CliDefaults {
     public void transfer(@ShellOption(value = {"-s", "--sender"}, arity = 1, defaultValue = "") String[] sender,
                          @ShellOption(value = {"-r", "--recipient"}, arity = 1, defaultValue = "") String[] recipient,
                          @ShellOption(value = {"-y", "--yesSkipPreview"}, arity = 0) boolean y,
-                         @ShellOption(value = {"-hb", "--tinybars"}, defaultValue = "") String[] hb,
-                         @ShellOption(value = {"-tb", "--hbars"}, defaultValue = "") String[] tb) {
-
-        // TODO check that sender is not empty before proceeding
+                         @ShellOption(value = {"-hb", "--hbars"}, defaultValue = "") String[] hb,
+                         @ShellOption(value = {"-tb", "--tinybars"}, defaultValue = "") String[] tb) {
 
         // @formatter:on
-        ArrayList<String> argsList = new ArrayList<>();
+        List<String> argsList = new ArrayList<>();
 
         if (!isEmptyStringArray(recipient) && !isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
             shellHelper.printError("Amount must be in hbar or tinybar");
@@ -120,43 +120,11 @@ public class HederaCrypto extends CliDefaults {
         }
         if (!isEmptyStringArray(recipient) && !isEmptyStringArray(hb) && isEmptyStringArray(tb)) {
             // hbar args
-            argsList.add("-r=" + Arrays.toString(recipient)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            argsList.add("-s=" + Arrays.toString(sender)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            argsList.add("-hb=" + Arrays.toString(hb)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            if (y) {
-                argsList.add("-y=no");
-            } else {
-                argsList.add("-y=yes");
-            }
+            argsList = createArgList(argsList, hb, sender, recipient, y, false);
         }
         if (!isEmptyStringArray(recipient) && isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
             // tinybar args
-            argsList.add("-r=" + Arrays.toString(recipient)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            argsList.add("-s=" + Arrays.toString(sender)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            argsList.add("-tb=" + Arrays.toString(tb)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            if (y) {
-                argsList.add("-y=no");
-            } else {
-                argsList.add("-y=yes");
-            }
+            argsList = createArgList(argsList, tb, sender, recipient, y, true);
         }
 
         Object[] objs = argsList.toArray();
@@ -169,6 +137,38 @@ public class HederaCrypto extends CliDefaults {
             e.printStackTrace();
             // print out a useful message for end user here
         }
+    }
+
+    public List<String> createArgList(List<String> argsList, String[] amount,
+                                      String[] sender, String[] recipient, boolean y, boolean isTiny) {
+        argsList.add("-r=" + Arrays.toString(recipient)
+                .replace("[", "")
+                .replace("]", "")
+                .replace(" ", ""));
+        argsList.add("-s=" + Arrays.toString(sender)
+                .replace("[", "")
+                .replace("]", "")
+                .replace(" ", ""));
+        if (y) {
+            argsList.add("-y=no");
+        } else {
+            argsList.add("-y=yes");
+        }
+
+        if (isTiny) {
+            // amount in tinybars
+            argsList.add("-tb=" + Arrays.toString(amount)
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", ""));
+        } else {
+            // amount in hbars
+            argsList.add("-hb=" + Arrays.toString(amount)
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", ""));
+        }
+        return argsList;
     }
 
     public boolean isEmptyStringArray(String[] array) {

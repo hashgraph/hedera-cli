@@ -105,8 +105,6 @@ public class CryptoTransfer implements Runnable {
 
         if (!StringUtil.isNullOrEmpty(tinybarAmtArgs)) {
             // tinybars not empty
-            shellHelper.printInfo("here in tiny loop");
-
             // Verify transferlist and amountlist are equal
             transferList = Arrays.asList(transferListArgs.split(","));
             amountList = Arrays.asList(tinybarAmtArgs.split(","));
@@ -124,8 +122,6 @@ public class CryptoTransfer implements Runnable {
         }
         if (!StringUtil.isNullOrEmpty(hbarAmtArgs)) {
             //hbars not empty
-            shellHelper.printInfo("here in hbar loop");
-
             // Verify transferlist and amountlist are equal
             transferList = Arrays.asList(transferListArgs.split(","));
             amountList = Arrays.asList(hbarAmtArgs.split(","));

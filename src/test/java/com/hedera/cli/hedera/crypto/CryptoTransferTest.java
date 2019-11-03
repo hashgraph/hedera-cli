@@ -8,10 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
@@ -297,31 +294,5 @@ public class CryptoTransferTest {
 
         Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap(transferList, amountList);
         assertEquals(expectedMap.get("0.0.116681"), actualMap.get("0.0.116681"));
-    }
-
-    @Test
-    public void testCryptoTransferMultipleArgs() {
-
-//        @Command
-//        class CryptoTransferMultipleAgain {
-//
-//            @Option(names = { "-a", "--accountId" }, split = " ", arity = "0..*")
-//            private String[] recipient;
-//
-//            @Option(names = { "-r", "--recipientAmt" }, split = " ", arity = "0..*")
-//            private String[] recipientAmt;
-//
-//        }
-//
-//        CryptoTransferMultipleAgain ct = CommandLine.populateCommand(new CryptoTransferMultipleAgain(), "-a=0.0.1001,0.0.1002,0.0.1003",
-//                "-r=100,200,300");
-//        assertEquals(Collections.singletonList("0.0.1001,0.0.1002,0.0.1003"), Arrays.asList(ct.recipient));
-//        assertEquals(Collections.singletonList("100,200,300"), Arrays.asList(ct.recipientAmt));
-//
-//        CommandLine cmd = new CommandLine(new CryptoTransfer());
-//        ParseResult result = cmd.parseArgs("-a=0.0.1111,0.0.2222,0.0.3333", "-r=1000,200,3000");
-//        assertTrue(result.hasMatchedOption("a"));
-//        assertTrue(result.hasMatchedOption("r"));
-//        assertEquals(Arrays.asList("-a=0.0.1111,0.0.2222,0.0.3333", "-r=1000,200,3000"), result.originalArgs());
     }
 }
