@@ -1,10 +1,11 @@
 package com.hedera.cli.hedera.network;
 
-import com.hedera.cli.shell.ShellHelper;
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.Setter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
@@ -19,8 +20,17 @@ public class Network implements Runnable {
     @Autowired
     private NetworkUse networkUse;
 
-    @Autowired
-    private ShellHelper shellHelper;
+    @Setter
+    private CommandLine networkListCmd;
+
+    @Setter
+    private CommandLine networkUseCmd;
+
+    @PostConstruct
+    public void init() {
+        this.networkListCmd = new CommandLine(networkList);
+        this.networkUseCmd = new CommandLine(networkUse);
+    }
 
     @Override
     public void run() {
@@ -30,25 +40,13 @@ public class Network implements Runnable {
     public void handle(String subCommand, String... args) {
         switch (subCommand) {
         case "ls":
-            try {
-                if (args.length == 0) {
-                    new CommandLine(networkList).execute(args);
-                } else {
-                    CommandLine.usage(networkList, System.out);
-                }
-            } catch (Exception e) {
-                shellHelper.printError(e.getMessage());
-            }
+            networkListCmd.execute(args);
             break;
         case "use":
             if (args.length == 0) {
-                CommandLine.usage(new NetworkUse(), System.out);
+                CommandLine.usage(networkUse, System.out);
             } else {
-                try {
-                    new CommandLine(networkUse).execute(args);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                networkUseCmd.execute(args);
             }
             break;
         default:
