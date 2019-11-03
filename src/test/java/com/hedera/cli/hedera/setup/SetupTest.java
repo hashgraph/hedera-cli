@@ -217,6 +217,32 @@ public class SetupTest {
         verify(accountRecovery).recoverEd25519AccountKeypair(eq(phraseList), eq(accountId));
     }
 
+    @Test
+    public void runFailsWithInvalidMethod() {
+        System.setOut(stdout);
+        String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
+        String prompt2 = "24 words phrase";
+        String secret = "secret";
+        boolean echo = false;
+        String prompt3 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`";
+        String phraseInput = String.join(" ", phraseList).trim();
+
+        AccountManager accountManager = mock(AccountManager.class);
+        when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
+        when(hedera.getAccountManager()).thenReturn(accountManager);
+        when(inputReader.prompt(eq(prompt1))).thenReturn(accountId);
+        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(phraseInput);
+        when(inputReader.prompt(eq(prompt3))).thenReturn("");
+        when(accountManager.verifyPhraseList(eq(phraseList))).thenReturn(phraseList);
+        when(accountManager.verifyMethod(eq(""))).thenReturn(null);
+
+        // execute function under test
+        setup.run();
+
+        // prompt with anyString() was invoked twice
+        verify(inputReader, times(2)).prompt(anyString());
+    }
+
     private String captureLine() {
         return new String(output.toByteArray());
     }
