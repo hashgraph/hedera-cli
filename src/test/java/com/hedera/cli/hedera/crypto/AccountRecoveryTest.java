@@ -1,10 +1,15 @@
 package com.hedera.cli.hedera.crypto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.RecoveredAccountModel;
@@ -26,21 +31,21 @@ public class AccountRecoveryTest {
   @Mock
   private ShellHelper shellHelper;
 
-  private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet",
-      "fan", "donkey", "carry", "chuckle", "assault", "leopard", "fee", "kingdom", "cheap", "odor", "okay", "crazy",
-      "raven", "goose", "focus", "shrimp", "carbon");
+  private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet", "fan",
+      "donkey", "carry", "chuckle", "assault", "leopard", "fee", "kingdom", "cheap", "odor", "okay", "crazy", "raven",
+      "goose", "focus", "shrimp", "carbon");
   private String accountId = "0.0.1234";
   private KeyPair keyPair;
 
   @BeforeEach
   public void setUp() {
-      EDBip32KeyChain keyChain = new EDBip32KeyChain();
-      int index = 0;
-      keyPair = keyChain.keyPairFromWordList(index, phraseList);
+    EDBip32KeyChain keyChain = new EDBip32KeyChain();
+    int index = 0;
+    keyPair = keyChain.keyPairFromWordList(index, phraseList);
   }
 
   @Test
-  public void printKeyPairInRecoveredAccountModelFormat() {
+  public void printKeyPairInRecoveredAccountModelFormat() throws JsonProcessingException {
       RecoveredAccountModel recoveredAccountModel;
       recoveredAccountModel = new RecoveredAccountModel();
       recoveredAccountModel.setAccountId(accountId);
@@ -56,6 +61,10 @@ public class AccountRecoveryTest {
       assertEquals(keyPair.getPrivateKeyEncodedHex(), recoveredAccountModel.getPrivateKeyEncoded());
       assertEquals(keyPair.getPublicKeyEncodedHex(), recoveredAccountModel.getPublicKeyEncoded());
       assertEquals(keyPair.getSeedAndPublicKeyHex(), recoveredAccountModel.getPrivateKeyBrowserCompatible());
+
+      ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+      String result = ow.writeValueAsString(recoveredAccountModel);
+      verify(shellHelper, times(1)).printSuccess(result);
   }
   
 }

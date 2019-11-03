@@ -34,8 +34,6 @@ public class Setup implements Runnable {
     @Autowired
     private Hedera hedera;
 
-    private AccountManager accountManager;
-
     public void help() {
         CommandLine.usage(this, System.out);
     }
@@ -43,7 +41,7 @@ public class Setup implements Runnable {
     @Override
     public void run() {
         shellHelper.print("Start the setup process");
-        accountManager = hedera.getAccountManager();
+        AccountManager accountManager = hedera.getAccountManager();
         String accountIdInString = inputReader
                 .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
         String accountId = accountManager.verifyAccountId(accountIdInString);
