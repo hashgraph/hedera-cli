@@ -2,11 +2,7 @@ package com.hedera.cli.hedera.file;
 
 import java.util.Arrays;
 
-import com.hedera.cli.config.InputReader;
-import com.hedera.cli.hedera.crypto.PicocliSpringFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
