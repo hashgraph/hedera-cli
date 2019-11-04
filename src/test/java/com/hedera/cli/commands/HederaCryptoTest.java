@@ -42,7 +42,7 @@ public class HederaCryptoTest {
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
     ArgumentCaptor<String> valueCapture2 = ArgumentCaptor.forClass(String.class);
     verify(account).handle(valueCapture.capture(), valueCapture2.capture());
-    
+
     String actual = valueCapture.getValue();
     String expected = "create";
     assertEquals(expected, actual);
@@ -56,6 +56,32 @@ public class HederaCryptoTest {
   @Test
   public void transfer() {
     assertNotNull(transfer);
+
+    // transfer
+    String[] sender = {};
+    String[] recipient = {};
+    boolean y = false;
+    String[] hb = {};
+    String[] tb = {};
+    hederaCrypto.transfer(sender, recipient, y, hb, tb);
+    verify(shellHelper).printError("Recipient cannot be empty");
+
+    String[] recipient2 = { "0.0.1001" };
+    String[] hb2 = { "1" };
+    String[] tb2 = { "100000000" };
+    hederaCrypto.transfer(sender, recipient2, y, hb2, tb2);
+    verify(shellHelper).printError("Transfer amounts must either be in hbars or tinybars, not both");
+
+    String[] hb3 = { "1" };
+    hederaCrypto.transfer(sender, recipient2, y, hb3, tb);
+
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    verify(transfer).handle(valueCapture.capture());
+    List<String> varArgs = valueCapture.getAllValues();
+    assertEquals("-s=", varArgs.get(0));
+    assertEquals("-r=0.0.1001", varArgs.get(1));
+    assertEquals("-y=yes", varArgs.get(2));
+    assertEquals("-hb=1", varArgs.get(3));
   }
 
 }

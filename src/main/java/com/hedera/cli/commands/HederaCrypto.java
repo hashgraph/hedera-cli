@@ -15,6 +15,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -29,6 +30,9 @@ public class HederaCrypto extends CliDefaults {
 
     @Autowired
     private Transfer transfer;
+
+    @Getter
+    private String[] transferArgs;
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "manage Hedera account")
@@ -94,6 +98,7 @@ public class HederaCrypto extends CliDefaults {
         }
     }
 
+    // @formatter:off
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "transfer hbars from one Hedera account to another")
     public void transfer(@ShellOption(value = {"-s", "--sender"}, defaultValue = "") String[] sender,
@@ -101,7 +106,6 @@ public class HederaCrypto extends CliDefaults {
                          @ShellOption(value = {"-y", "--yesSkipPreview"}, arity = 0) boolean y,
                          @ShellOption(value = {"-hb", "--hbars"}, defaultValue = "") String[] hb,
                          @ShellOption(value = {"-tb", "--tinybars"}, defaultValue = "") String[] tb) {
-
         // @formatter:on
         List<String> argsList = new ArrayList<>();
 
@@ -109,29 +113,28 @@ public class HederaCrypto extends CliDefaults {
             shellHelper.printError("Recipient cannot be empty");
             return;
         }
-        if (!isEmptyStringArray(hb)) {
-            if (!isEmptyStringArray(tb)) {
-                shellHelper.printError("Amount must be in hbar or tinybar");
-                return;
-            } else {
-                // hbar args
-                argsList = createArgList(argsList, hb, sender, recipient, y, false);
-            }
-        }
-        if (isEmptyStringArray(hb)) {
-            if (isEmptyStringArray(tb)) {
-                shellHelper.printError("Amount cannot be empty");
-                return;
-            } else {
-                // tinybar args
-                argsList = createArgList(argsList, tb, sender, recipient, y, true);
-            }
+
+        if (!isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
+            shellHelper.printError("Transfer amounts must either be in hbars or tinybars, not both");
+            return;
         }
 
+        if (!isEmptyStringArray(hb)) { // hbar args
+            argsList = createArgList(argsList, hb, sender, recipient, y, false);
+        }
+
+        if (!isEmptyStringArray(tb)) { // tinybar args
+            argsList = createArgList(argsList, tb, sender, recipient, y, true);
+        }
+
+        setTransferArgs(argsList);
+
+        transfer.handle(transferArgs);
+    }
+
+    private void setTransferArgs(List<String> argsList) {
         Object[] objs = argsList.toArray();
-        String[] args = Arrays.copyOf(objs, objs.length, String[].class);
-        // @formatter:off
-        transfer.handle(args);
+        transferArgs = Arrays.copyOf(objs, objs.length, String[].class);
     }
 
     public List<String> createArgList(List<String> argsList, String[] amount,
