@@ -43,37 +43,4 @@ public class ProgressBar {
         started = false;
     }
 
-    //--- set / get methods ---------------------------------------------------
-
-    public String getDoneMarker() {
-        return doneMarker;
-    }
-
-    public void setDoneMarker(String doneMarker) {
-        this.doneMarker = doneMarker;
-    }
-
-    public String getRemainsMarker() {
-        return remainsMarker;
-    }
-
-    public void setRemainsMarker(String remainsMarker) {
-        this.remainsMarker = remainsMarker;
-    }
-
-    public String getLeftDelimiter() {
-        return leftDelimiter;
-    }
-
-    public void setLeftDelimiter(String leftDelimiter) {
-        this.leftDelimiter = leftDelimiter;
-    }
-
-    public String getRightDelimiter() {
-        return rightDelimiter;
-    }
-
-    public void setRightDelimiter(String rightDelimiter) {
-        this.rightDelimiter = rightDelimiter;
-    }
 }

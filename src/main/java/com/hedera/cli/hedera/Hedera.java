@@ -34,12 +34,30 @@ public class Hedera {
     private ApplicationContext context;
 
     @Autowired
-    public AddressBookManager addressBookManager;
+    private AddressBookManager addressBookManager;
 
     @Autowired
     public AccountManager accountManager;
 
     private HederaNode node;
+
+    // Our operator account is returned, in order of priority,
+    // current account, default account, no account (empty string)
+    public String getOperatorAccount() {
+        // is there an in-memory current account?
+        String currentAccount = currentAccountId();
+        if (!StringUtil.isNullOrEmpty(currentAccount)) {
+            return currentAccount;
+        }
+        // is there an on-disk default account?
+        String defaultAccountNameAndId = getDefaultAccount();
+        if (!defaultAccountNameAndId.isEmpty()) {
+            String[] defaultArray = defaultAccountNameAndId.split(":");
+            return defaultArray[1];
+        }
+        // no account, so empty string
+        return "";
+    }
 
     public String getDefaultAccount() {
         String defaultAccount = "";
@@ -88,7 +106,7 @@ public class Hedera {
     }
 
     public String currentAccountId() {
-        CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount");
+        CurrentAccountService currentAccountService = context.getBean("currentAccount", CurrentAccountService.class);
         return currentAccountService.getAccountNumber();
     }
 
