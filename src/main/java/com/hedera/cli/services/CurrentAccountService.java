@@ -13,6 +13,7 @@ import lombok.Setter;
 @Service
 public class CurrentAccountService {
 
+  private String network;
   private String accountNumber;
   private String privateKey;
   private String publicKey;
