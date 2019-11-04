@@ -62,25 +62,22 @@ public class HederaCrypto extends CliDefaults {
                 break;
             case "update":
                 shellHelper.printError("To be implemented");
-                return;
+                break;
             case "info":
+            case "recovery":
+            case "use":
+            case "balance":
                 argsList = addAccountToArgsList(accountId, argsList);
+                if (argsList.isEmpty()) {
+                    shellHelper.printError("Input an account Id");
+                }
                 break;
             case "delete":
                 if (y) argsList.add("-y");
                 if (!o.isEmpty()) argsList.add("-o " + o);
                 if (!n.isEmpty()) argsList.add("-n " + n);
                 break;
-            case "recovery":
-                argsList = addAccountToArgsList(accountId, argsList);
-                break;
             case "ls":
-                break;
-            case "use":
-                argsList = addAccountToArgsList(accountId, argsList);
-                break;
-            case "balance":
-                argsList = addAccountToArgsList(accountId, argsList);
                 break;
             default:
                 break;
@@ -97,14 +94,14 @@ public class HederaCrypto extends CliDefaults {
             argsList.add(accountId);
             return argsList;
         } else {
-            return null;
+            return argsList;
         }
     }
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "transfer hbars from one Hedera account to another")
-    public void transfer(@ShellOption(value = {"-s", "--sender"}, arity = 1, defaultValue = "") String[] sender,
-                         @ShellOption(value = {"-r", "--recipient"}, arity = 1, defaultValue = "") String[] recipient,
+    public void transfer(@ShellOption(value = {"-s", "--sender"}, defaultValue = "") String[] sender,
+                         @ShellOption(value = {"-r", "--recipient"}, defaultValue = "") String[] recipient,
                          @ShellOption(value = {"-y", "--yesSkipPreview"}, arity = 0) boolean y,
                          @ShellOption(value = {"-hb", "--hbars"}, defaultValue = "") String[] hb,
                          @ShellOption(value = {"-tb", "--tinybars"}, defaultValue = "") String[] tb) {
@@ -112,40 +109,43 @@ public class HederaCrypto extends CliDefaults {
         // @formatter:on
         List<String> argsList = new ArrayList<>();
 
-        if (!isEmptyStringArray(recipient) && !isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
-            shellHelper.printError("Amount must be in hbar or tinybar");
+        if (isEmptyStringArray(recipient)) {
+            shellHelper.printError("Recipient cannot be empty");
+            return;
         }
-        if (isEmptyStringArray(recipient) && (isEmptyStringArray(hb) && isEmptyStringArray(tb))) {
-            shellHelper.printError("Recipient and amount cannot be empty");
+        if (!isEmptyStringArray(hb)) {
+            if (!isEmptyStringArray(tb)) {
+                shellHelper.printError("Amount must be in hbar or tinybar");
+                return;
+            } else {
+                // hbar args
+                argsList = createArgList(argsList, hb, sender, recipient, y, false);
+            }
         }
-        if (!isEmptyStringArray(recipient) && !isEmptyStringArray(hb) && isEmptyStringArray(tb)) {
-            // hbar args
-            argsList = createArgList(argsList, hb, sender, recipient, y, false);
-        }
-        if (!isEmptyStringArray(recipient) && isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
-            // tinybar args
-            argsList = createArgList(argsList, tb, sender, recipient, y, true);
+        if (isEmptyStringArray(hb)) {
+            if (isEmptyStringArray(tb)) {
+                shellHelper.printError("Amount cannot be empty");
+                return;
+            } else {
+                // tinybar args
+                argsList = createArgList(argsList, tb, sender, recipient, y, true);
+            }
         }
 
         Object[] objs = argsList.toArray();
         String[] args = Arrays.copyOf(objs, objs.length, String[].class);
         // @formatter:off
-
-        try {
-            transfer.handle(inputReader, args);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // print out a useful message for end user here
-        }
+        transfer.handle(inputReader, args);
     }
 
     public List<String> createArgList(List<String> argsList, String[] amount,
                                       String[] sender, String[] recipient, boolean y, boolean isTiny) {
-        argsList.add("-r=" + Arrays.toString(recipient)
+
+        argsList.add("-s=" + Arrays.toString(sender)
                 .replace("[", "")
                 .replace("]", "")
                 .replace(" ", ""));
-        argsList.add("-s=" + Arrays.toString(sender)
+        argsList.add("-r=" + Arrays.toString(recipient)
                 .replace("[", "")
                 .replace("]", "")
                 .replace(" ", ""));
@@ -164,7 +164,7 @@ public class HederaCrypto extends CliDefaults {
         } else {
             // amount in hbars
             argsList.add("-hb=" + Arrays.toString(amount)
-                    .replace("[", "")
+            .replace("[", "")
                     .replace("]", "")
                     .replace(" ", ""));
         }
