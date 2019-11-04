@@ -1,6 +1,7 @@
 package com.hedera.cli.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class HederaCryptoTest {
 
   @Test
   public void accountCreate() {
+    assertNotNull(shellHelper);
 
     // account create
     hederaCrypto.account("create", "", true, "", true, "", false, "", "");
@@ -49,6 +51,11 @@ public class HederaCryptoTest {
     String actual2 = varArgs.get(0);
     String expected2 = "-k";
     assertEquals(expected2, actual2);
+  }
+
+  @Test
+  public void transfer() {
+    assertNotNull(transfer);
   }
 
 }
