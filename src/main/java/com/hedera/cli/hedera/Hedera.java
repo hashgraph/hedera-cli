@@ -44,6 +44,7 @@ public class Hedera {
     // Our operator account is returned, in order of priority,
     // current account, default account, no account (empty string)
     public String getOperatorAccount() {
+
         // is there an in-memory current account?
         String currentAccount = currentAccountId();
         if (!StringUtil.isNullOrEmpty(currentAccount)) {
@@ -107,7 +108,12 @@ public class Hedera {
 
     public String currentAccountId() {
         CurrentAccountService currentAccountService = context.getBean("currentAccount", CurrentAccountService.class);
-        return currentAccountService.getAccountNumber();
+        String network = currentAccountService.getNetwork();
+        String currentNetwork = addressBookManager.getCurrentNetworkAsString();
+        if (currentNetwork.equals(network)) {
+            return currentAccountService.getAccountNumber();
+        }
+        return "";
     }
 
     public String retrieveIndexAccountKeyInHexString() {

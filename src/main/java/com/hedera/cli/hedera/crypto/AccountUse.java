@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Map;
 
 import com.hedera.cli.config.InputReader;
+import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.services.CurrentAccountService;
 
@@ -29,6 +31,9 @@ public class AccountUse implements Runnable, Operation {
     private ApplicationContext context;
 
     @Autowired
+    private Hedera hedera;
+
+    @Autowired
     private DataDirectory dataDirectory;
 
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
@@ -40,9 +45,12 @@ public class AccountUse implements Runnable, Operation {
         boolean exists = accountIdExistsInIndex(dataDirectory, accountId);
         if (exists) {
             // since this accountId exists, we set it into our CurrentAccountService
-            // singleton
+            // singleton and ensure that we know that this account is only for the specified network
             CurrentAccountService currentAccountService = (CurrentAccountService) context.getBean("currentAccount",
                     CurrentAccountService.class);
+            AddressBookManager addressBookManager = hedera.getAddressBookManager();
+            String network = addressBookManager.getCurrentNetworkAsString();
+            currentAccountService.setNetwork(network);
             currentAccountService.setAccountNumber(accountId);
         } else {
             System.out.println("This account does not exist, please add new account using `account recovery`");
