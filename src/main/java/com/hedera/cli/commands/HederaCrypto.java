@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.hedera.cli.config.InputReader;
 import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.crypto.Account;
 import com.hedera.cli.hedera.crypto.Transfer;
@@ -24,9 +23,6 @@ public class HederaCrypto extends CliDefaults {
 
     @Autowired
     private ShellHelper shellHelper;
-
-    @Autowired
-    private InputReader inputReader;
 
     @Autowired
     private Account account;
@@ -86,7 +82,7 @@ public class HederaCrypto extends CliDefaults {
         objs = argsList.toArray();
         args = Arrays.copyOf(objs, objs.length, String[].class);
         // Pass args onwards and invoke our PicoCli classes
-        account.handle(inputReader, subCommand, args);
+        account.handle(subCommand, args);
     }
 
     public List<String> addAccountToArgsList(String accountId, List<String> argsList) {
@@ -135,7 +131,7 @@ public class HederaCrypto extends CliDefaults {
         Object[] objs = argsList.toArray();
         String[] args = Arrays.copyOf(objs, objs.length, String[].class);
         // @formatter:off
-        transfer.handle(inputReader, args);
+        transfer.handle(args);
     }
 
     public List<String> createArgList(List<String> argsList, String[] amount,
