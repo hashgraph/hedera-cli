@@ -9,20 +9,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class SenderTest {
+public class PreviewTransferListTest {
 
   @Test
-  public void sender() {
+  public void previewTransferList() {
 
     AccountId accountId = AccountId.fromString("0.0.1001");
-    Long amount = 1000L;
+    String amount = "1000";
 
-    Sender sender = new Sender();
-    sender.setAccountId(accountId);
-    sender.setAmount(amount);
+    PreviewTransferList previewTransferList = new PreviewTransferList(accountId, amount);
 
-    assertEquals(accountId, sender.getAccountId());
-    assertEquals(amount, sender.getAmount());
+
+    assertEquals(accountId, previewTransferList.getAccountId());
+    assertEquals(amount, previewTransferList.getAmount());
   }
 
 }

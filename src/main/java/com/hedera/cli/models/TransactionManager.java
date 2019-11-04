@@ -52,7 +52,7 @@ public class TransactionManager {
         String pathToTransactionFolder = networkName + File.separator + "transactions" + File.separator;
         String filename = txID + ".json";
         String pathToTransactionFile = pathToTransactionFolder + filename;
-        
+
         dataDirectory.mkHederaSubDir(pathToTransactionFolder);
         dataDirectory.writeFile(pathToTransactionFile, jsonString);
     }

@@ -2,6 +2,7 @@ package com.hedera.cli.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.defaults.CliDefaults;
@@ -10,7 +11,6 @@ import com.hedera.cli.hedera.crypto.Transfer;
 import com.hedera.cli.shell.ShellHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
@@ -23,9 +23,6 @@ import lombok.NoArgsConstructor;
 public class HederaCrypto extends CliDefaults {
 
     @Autowired
-    private ApplicationContext context;
-
-    @Autowired
     private ShellHelper shellHelper;
 
     @Autowired
@@ -33,6 +30,9 @@ public class HederaCrypto extends CliDefaults {
 
     @Autowired
     private Account account;
+
+    @Autowired
+    private Transfer transfer;
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "manage Hedera account")
@@ -51,118 +51,124 @@ public class HederaCrypto extends CliDefaults {
                         @ShellOption(value = {"-n", "--newAccount"}, defaultValue = "") String n) {
 
         // convert our Spring Shell arguments into an argument list that PicoCli can use.
-        String[] args = new String[]{};
-        ArrayList<String> argsList = new ArrayList<String>();
-        Object[] objs = null;
+        String[] args;
+        List<String> argsList = new ArrayList<>();
+        Object[] objs;
 
         switch (subCommand) {
             case "create":
                 if (k) argsList.add("-k");
                 if (!b.isEmpty()) argsList.add("-b " + b);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
                 break;
             case "update":
+                shellHelper.printError("To be implemented");
                 break;
             case "info":
-                if (!accountId.isEmpty()) argsList.add(accountId);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
+            case "recovery":
+            case "use":
+            case "balance":
+                argsList = addAccountToArgsList(accountId, argsList);
+                if (argsList.isEmpty()) {
+                    shellHelper.printError("Input an account Id");
+                }
                 break;
             case "delete":
                 if (y) argsList.add("-y");
                 if (!o.isEmpty()) argsList.add("-o " + o);
                 if (!n.isEmpty()) argsList.add("-n " + n);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
-                break;
-            case "recovery":
-                if (!accountId.isEmpty()) argsList.add(accountId);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
                 break;
             case "ls":
-                break;
-            case "use":
-                if (!accountId.isEmpty()) argsList.add(accountId);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
-                break;
-            case "balance":
-                if (!accountId.isEmpty()) argsList.add(accountId);
-                objs = argsList.toArray();
-                args = Arrays.copyOf(objs, objs.length, String[].class);
                 break;
             default:
                 break;
         }
+
+        objs = argsList.toArray();
+        args = Arrays.copyOf(objs, objs.length, String[].class);
         // Pass args onwards and invoke our PicoCli classes
         account.handle(inputReader, subCommand, args);
     }
 
+    public List<String> addAccountToArgsList(String accountId, List<String> argsList) {
+        if (!accountId.isEmpty()) {
+            argsList.add(accountId);
+            return argsList;
+        } else {
+            return argsList;
+        }
+    }
+
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "transfer hbars from one Hedera account to another")
-    public void transfer(@ShellOption(defaultValue = "") String subCommand,
-                         @ShellOption(value = {"-a", "--accountId"}, defaultValue = "") String[] aa,
+    public void transfer(@ShellOption(value = {"-s", "--sender"}, defaultValue = "") String[] sender,
+                         @ShellOption(value = {"-r", "--recipient"}, defaultValue = "") String[] recipient,
                          @ShellOption(value = {"-y", "--yesSkipPreview"}, arity = 0) boolean y,
-                         @ShellOption(value = {"-hb", "--tinybars"}, defaultValue = "") String[] hb,
-                         @ShellOption(value = {"-tb", "--hbars"}, defaultValue = "") String[] tb) {
+                         @ShellOption(value = {"-hb", "--hbars"}, defaultValue = "") String[] hb,
+                         @ShellOption(value = {"-tb", "--tinybars"}, defaultValue = "") String[] tb) {
 
         // @formatter:on
-        ArrayList<String> argsList = new ArrayList<>();
+        List<String> argsList = new ArrayList<>();
 
-        if (!isEmptyStringArray(aa) && !isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
-            shellHelper.printError("Amount must be in hbar or tinybar");
+        if (isEmptyStringArray(recipient)) {
+            shellHelper.printError("Recipient cannot be empty");
+            return;
         }
-        if (isEmptyStringArray(aa) && (isEmptyStringArray(hb) && isEmptyStringArray(tb))) {
-            shellHelper.printError("Recipient and amount cannot be empty");
-        }
-        if (!isEmptyStringArray(aa) && !isEmptyStringArray(hb) && isEmptyStringArray(tb)) {
-            // hbar args
-            argsList.add("-a=" + Arrays.toString(aa)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            argsList.add("-hb=" + Arrays.toString(hb)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            if (y) {
-                argsList.add("-y=no");
+        if (!isEmptyStringArray(hb)) {
+            if (!isEmptyStringArray(tb)) {
+                shellHelper.printError("Amount must be in hbar or tinybar");
+                return;
             } else {
-                argsList.add("-y=yes");
+                // hbar args
+                argsList = createArgList(argsList, hb, sender, recipient, y, false);
             }
         }
-        if (!isEmptyStringArray(aa) && isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
-            // tinybar args
-            argsList.add("-a=" + Arrays.toString(aa)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            argsList.add("-tb=" + Arrays.toString(tb)
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(" ", ""));
-            if (y) {
-                argsList.add("-y=no");
+        if (isEmptyStringArray(hb)) {
+            if (isEmptyStringArray(tb)) {
+                shellHelper.printError("Amount cannot be empty");
+                return;
             } else {
-                argsList.add("-y=yes");
+                // tinybar args
+                argsList = createArgList(argsList, tb, sender, recipient, y, true);
             }
         }
 
         Object[] objs = argsList.toArray();
         String[] args = Arrays.copyOf(objs, objs.length, String[].class);
         // @formatter:off
-        System.out.println("bb");
-        System.out.println(Arrays.toString(args));
+        transfer.handle(inputReader, args);
+    }
 
-        Transfer transfer = new Transfer();
-        try {
-            transfer.handle(context, inputReader, subCommand, args);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // print out a useful message for end user here
+    public List<String> createArgList(List<String> argsList, String[] amount,
+                                      String[] sender, String[] recipient, boolean y, boolean isTiny) {
+
+        argsList.add("-s=" + Arrays.toString(sender)
+                .replace("[", "")
+                .replace("]", "")
+                .replace(" ", ""));
+        argsList.add("-r=" + Arrays.toString(recipient)
+                .replace("[", "")
+                .replace("]", "")
+                .replace(" ", ""));
+        if (y) {
+            argsList.add("-y=no");
+        } else {
+            argsList.add("-y=yes");
         }
+
+        if (isTiny) {
+            // amount in tinybars
+            argsList.add("-tb=" + Arrays.toString(amount)
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", ""));
+        } else {
+            // amount in hbars
+            argsList.add("-hb=" + Arrays.toString(amount)
+            .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", ""));
+        }
+        return argsList;
     }
 
     public boolean isEmptyStringArray(String[] array) {

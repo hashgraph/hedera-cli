@@ -93,7 +93,7 @@ public class AccountManagerTest {
     @Test
     public void createAccountJsonWithPrivateKey() throws NoSuchMethodException, SecurityException,
             IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        
+
         KeyPair keypair = prepareKeyPair();
         String privateKeyString = keypair.getPrivateKeyEncodedHex();
         Ed25519PrivateKey privateKey = Ed25519PrivateKey.fromString(privateKeyString);
@@ -128,7 +128,7 @@ public class AccountManagerTest {
     public void writeAccountId() throws NoSuchMethodException, SecurityException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException {
         doAnswer(invocation -> "adjective_botanic_number").when(randomNameGenerator).getRandomName();
-        
+
         KeyPair keypair = prepareKeyPair();
 
         Method method = accountManager.getClass().getDeclaredMethod("createAccountJsonWithKeyPair", String.class,
