@@ -20,7 +20,6 @@ import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.HGCSeed;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.setup.RandomNameGenerator;
 import com.hedera.cli.services.CurrentAccountService;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -278,44 +277,44 @@ public class AccountManagerTest {
     public void verifyPhaseListSizeTrue() {
         String phrase = "once busy dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
         List<String> phraseList = Arrays.asList(phrase.split(" "));
-        assertEquals(phraseList, accountManager.verifyPhraseList(phraseList, shellHelper));
+        assertEquals(phraseList, accountManager.verifyPhraseList(phraseList));
     }
 
     @Test
     public void verifyPhaseListSizeFalse() {
         String not24WordPhrase = "dash argue stuff quarter property west tackle swamp enough brisk split code borrow ski soccer tip churn kitten congress admit april defy";
         List<String> phraseList = Arrays.asList(not24WordPhrase.split(" "));
-        assertNull(accountManager.verifyPhraseList(phraseList, shellHelper));
+        assertNull(accountManager.verifyPhraseList(phraseList));
     }
 
     @Test
     public void verifyAccountIdTrue() {
         String accountId = "0.0.1234";
-        assertEquals(accountId, accountManager.verifyAccountId(accountId, shellHelper));
+        assertEquals(accountId, accountManager.verifyAccountId(accountId));
     }
 
     @Test
     public void verifyAccountIdFalseReturnsNull() {
         String accountId = "0.0";
-        assertNull(accountManager.verifyAccountId(accountId, shellHelper));
+        assertNull(accountManager.verifyAccountId(accountId));
     }
 
     @Test
     public void verifyMethodBipTrue() {
         String method = "bip";
-        assertEquals(method, accountManager.verifyMethod(method, shellHelper));
+        assertEquals(method, accountManager.verifyMethod(method));
     }
 
     @Test
     public void verifyMethodHgcTrue() {
         String method = "hgc";
-        assertEquals(method, accountManager.verifyMethod(method, shellHelper));
+        assertEquals(method, accountManager.verifyMethod(method));
     }
 
     @Test
     public void verifyMethodFalse() {
         String method = "hellooo";
-        assertNull(accountManager.verifyMethod(method, shellHelper));
+        assertNull(accountManager.verifyMethod(method));
     }
 
     @Test

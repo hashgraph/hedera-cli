@@ -1,6 +1,6 @@
 package com.hedera.cli.commands;
 
-import com.hedera.cli.config.InputReader;
+import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.shell.ShellHelper;
@@ -9,16 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
-import picocli.CommandLine;
-
 @ShellComponent(value = "Get Started")
-public class GetStarted {
+public class GetStarted extends CliDefaults {
 
   @Autowired
   private ShellHelper shellHelper;
-
-  @Autowired
-  private InputReader inputReader;
 
   @Autowired
   private Hedera hedera;
@@ -30,11 +25,14 @@ public class GetStarted {
   public void setup() {
     String defaultAccount = hedera.getDefaultAccount();
     if (defaultAccount.isEmpty()) {
-      System.out.println("defaultAccount does not exist");
-      setup.handle(inputReader, shellHelper);
+      shellHelper.printInfo("default account does not exist");
+      setup.run();
     } else {
-      System.out.println("defaultAccount already exists");
-      CommandLine.usage(this, System.out);
+      shellHelper.printInfo("\nYou have already setup a default Hedera account.\n"
+          + "Use `account recovery` command to import another account\n"
+          + "or `account default` command to set a different default account\n"
+          + "if you would like to change this default account.\n");
+      setup.help();
     }
   }
 

@@ -38,7 +38,7 @@ public class AccountBalance implements Runnable, Operation {
 
     @Override
     public void run() {
-        String accountId = accountManager.verifyAccountId(accountIdInString, shellHelper);
+        String accountId = accountManager.verifyAccountId(accountIdInString);
         if (accountId == null)
             return;
         getBalance();

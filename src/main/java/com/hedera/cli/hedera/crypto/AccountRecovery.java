@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.bip39.Mnemonic;
@@ -14,9 +16,9 @@ import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.DataDirectory;
+import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -61,9 +63,6 @@ public class AccountRecovery implements Runnable, Operation {
     @Autowired
     private ShellHelper shellHelper;
 
-    @Autowired
-    private Setup setup;
-
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account recovery 0.0.1003|@")
     private String accountId;
@@ -79,33 +78,33 @@ public class AccountRecovery implements Runnable, Operation {
     public void run() {
         accountInfo = new AccountGetInfo();
         shellHelper.print("Start the recovery process");
-        String verifiedAccountId = accountManager.verifyAccountId(accountId, shellHelper);
+        String verifiedAccountId = accountManager.verifyAccountId(accountId);
         if (verifiedAccountId == null)
             return;
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
-        List<String> phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")), shellHelper);
+        List<String> phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
         if (phraseList == null)
             return;
         String method = inputReader
                 .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        String strMethod = accountManager.verifyMethod(method, shellHelper);
+        String strMethod = accountManager.verifyMethod(method);
         if (strMethod == null)
             return;
 
         if ("bip".equals(method)) {
             KeyPair keypair = recoverEDKeypairPostBipMigration(phraseList);
-            boolean accountRecovered = verifyAndSaveAccount(accountId, keypair, shellHelper);
+            boolean accountRecovered = verifyAndSaveAccount(accountId, keypair);
             if (accountRecovered) {
-                setup.printKeyPair(keypair, accountId, shellHelper);
+                printKeyPair(keypair, accountId);
                 hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keypair);
             } else {
                 shellHelper.printError("Error in recovering account");
             }
         } else {
-            KeyPair keypair = recoverEd25519AccountKeypair(phraseList, accountId, shellHelper);
-            boolean accountRecovered = verifyAndSaveAccount(accountId, keypair, shellHelper);
+            KeyPair keypair = recoverEd25519AccountKeypair(phraseList, accountId);
+            boolean accountRecovered = verifyAndSaveAccount(accountId, keypair);
             if (accountRecovered) {
-                setup.printKeyPair(keypair, accountId, shellHelper);
+                printKeyPair(keypair, accountId);
                 hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keypair);
             } else {
                 shellHelper.printError("Error in recovering account");
@@ -114,7 +113,7 @@ public class AccountRecovery implements Runnable, Operation {
 
     }
 
-    public boolean verifyAndSaveAccount(String accountId, KeyPair keypair, ShellHelper shellHelper) {
+    public boolean verifyAndSaveAccount(String accountId, KeyPair keypair) {
         AccountInfo accountResponse;
         boolean accountRecovered;
         try {
@@ -134,6 +133,7 @@ public class AccountRecovery implements Runnable, Operation {
         }
         return accountRecovered;
     }
+
 
     public AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId, Ed25519PrivateKey accPrivKey) {
         try {
@@ -159,14 +159,14 @@ public class AccountRecovery implements Runnable, Operation {
         return accountExists;
     }
 
-    public KeyPair recoverEd25519AccountKeypair(List<String> phraseList, String accountId, ShellHelper shellHelper) {
+    public KeyPair recoverEd25519AccountKeypair(List<String> phraseList, String accountId) {
         KeyPair keypair = null;
         Mnemonic mnemonic = new Mnemonic();
         try {
             byte[] entropy = mnemonic.toEntropy(phraseList);
             byte[] seed = CryptoUtils.deriveKey(entropy, index, 32);
             keypair = new EDKeyPair(seed);
-            setup.printKeyPair(keypair, accountId, shellHelper);
+            printKeyPair(keypair, accountId);
         } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
             shellHelper.printError(e.getMessage());
         }
@@ -190,6 +190,21 @@ public class AccountRecovery implements Runnable, Operation {
                 e.printStackTrace();
             }
         }
+    }
 
+    public void printKeyPair(KeyPair keypair, String accountId) {
+        RecoveredAccountModel recoveredAccountModel = new RecoveredAccountModel();
+        recoveredAccountModel.setAccountId(accountId);
+        recoveredAccountModel.setPrivateKey(keypair.getPrivateKeyHex());
+        recoveredAccountModel.setPublicKey(keypair.getPublicKeyHex());
+        recoveredAccountModel.setPrivateKeyEncoded(keypair.getPrivateKeyEncodedHex());
+        recoveredAccountModel.setPublicKeyEncoded(keypair.getPublicKeyEncodedHex());
+        recoveredAccountModel.setPrivateKeyBrowserCompatible(keypair.getSeedAndPublicKeyHex());
+        try {
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            shellHelper.printSuccess(ow.writeValueAsString(recoveredAccountModel));
+        } catch (Exception e) {
+            shellHelper.printError(e.getMessage());
+        }
     }
 }

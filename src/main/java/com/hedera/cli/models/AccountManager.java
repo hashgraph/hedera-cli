@@ -7,7 +7,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.hedera.setup.RandomNameGenerator;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -151,7 +150,7 @@ public class AccountManager {
     }
 
 
-    public List<String> verifyPhraseList(List<String> phraseList, ShellHelper shellHelper) {
+    public List<String> verifyPhraseList(List<String> phraseList) {
         if (phraseList.size() != 24) {
             shellHelper.printError("Recovery words must contain 24 words");
             return null;
@@ -159,7 +158,7 @@ public class AccountManager {
         return phraseList;
     }
 
-    public String verifyAccountId(String accountIdInString, ShellHelper shellHelper) {
+    public String verifyAccountId(String accountIdInString) {
         boolean isAccountId = isAccountId(accountIdInString);
         if (!isAccountId) {
             shellHelper.printError("AccountId must be in the format of 0.0.xxxx");
@@ -168,7 +167,7 @@ public class AccountManager {
         return accountIdInString;
     }
 
-    public String verifyMethod(String method, ShellHelper shellHelper) {
+    public String verifyMethod(String method) {
         if ("bip".equals(method)) {
             return method;
         } else if ("hgc".equals(method)) {
@@ -186,4 +185,5 @@ public class AccountManager {
         }
         return  memoString;
     }
+    
 }
