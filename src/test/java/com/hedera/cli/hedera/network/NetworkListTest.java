@@ -1,6 +1,7 @@
 package com.hedera.cli.hedera.network;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.hedera.cli.models.AddressBookManager;
 
@@ -21,27 +22,9 @@ public class NetworkListTest {
 
   @Test
   public void testListNetwork() {
-    assertNotNull(networkList);
-    // how do we capture the output?
-    addressBookManager.listNetworks();
-    
-    // String addressBookJson = File.separator + "addressbook.json";
-    // NetworkList networkList = new NetworkList();
-    // networkList.setAddressBookJson(addressBookJson);
-    // networkList.run();
+    networkList.run();
 
-    // // tokenize our stdout capture
-    // List<String> tokens = new ArrayList<>();
-    // String lineSeparator = System.getProperty("line.separator");
-    // StringTokenizer tokenizer = new StringTokenizer(capture.toString(), lineSeparator);
-    // while (tokenizer.hasMoreElements()) {
-    //   tokens.add(tokenizer.nextToken().trim());
-    // }
-
-    // compare test data against stdout capture on a per-line basis
-//    assertEquals("mainnet", tokens.get(0));
-//    assertEquals("* aspen", tokens.get(1));
-//    assertEquals("external", tokens.get(2));
+    verify(addressBookManager, times(1)).listNetworks();
   }
 
 }

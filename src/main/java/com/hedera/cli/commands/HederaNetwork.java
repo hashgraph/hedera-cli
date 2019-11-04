@@ -6,16 +6,12 @@ import java.util.Arrays;
 import com.hedera.cli.hedera.network.Network;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 @ShellComponent
 public class HederaNetwork {
-
-    @Autowired
-    private ApplicationContext context;
 
     @Autowired
     private Network network;
@@ -29,7 +25,6 @@ public class HederaNetwork {
         ArrayList<String> argsList = new ArrayList<>();
         Object[] objs;
 
-
         switch (subCommand) {
             case "ls":
                 break;
@@ -42,6 +37,6 @@ public class HederaNetwork {
                 break;
         }
         // Pass args onwards and invoke our PicoCli classes
-        network.handle(context, subCommand, args);
+        network.handle(subCommand, args);
     }
 }
