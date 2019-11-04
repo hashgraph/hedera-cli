@@ -3,6 +3,7 @@ package com.hedera.cli.models;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -105,7 +106,8 @@ public class DataDirectory {
 
         // return empty string if file does not exist
         File file = checkFileExists(pathToFile);
-        if (file == null) return value;
+        if (file == null)
+            return value;
 
         BufferedReader br = null;
         try {
@@ -119,7 +121,8 @@ public class DataDirectory {
         return value;
     }
 
-    // attempts to read a file, if file does not exist, write the default value into it
+    // attempts to read a file, if file does not exist, write the default value into
+    // it
     // and return default value
     public String readFile(@NonNull String pathToFile, String defaultValue) {
         String value = readFile(pathToFile);
@@ -130,45 +133,60 @@ public class DataDirectory {
         return value;
     }
 
-    public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> defaultMap) {
-        // check if index.txt exists, if not, create one
+    // read out a HashMap from our index.txt file, which is structured in a
+    // particular way
+    private HashMap<String, String> readMap(File file) throws FileNotFoundException {
+        HashMap<String, String> map = new HashMap<>();
+        Scanner reader = new Scanner(file);
+        while (reader.hasNext()) {
+            // checks the old map
+            String line = reader.nextLine();
+            String[] splitLines = line.split(", ");
+            for (int i = 0; i < splitLines.length; i++) {
+                String[] keyValuePairs = splitLines[i].split("=");
+                map.put(keyValuePairs[0], keyValuePairs[1]);
+            }
+        }
+        reader.close();
+        return map;
+    }
+
+    private HashMap<String, String> mergeMap(HashMap<String, String> finalMap, HashMap<String, String> map) {
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (finalMap.get(key) == null) {
+                finalMap.put(key, value);
+            }
+        }
+        return finalMap;
+    }
+
+    public HashMap<String, String> readWriteToIndex(String pathToFile, HashMap<String, String> map) {
+        // check if index.txt exists, if not, create one with the entire map
+        // which can comprise many key-value-pairs
         File file = checkFileExists(pathToFile);
         if (file == null) {
-            writeFile(pathToFile, formatMapToIndex(defaultMap));
-            return defaultMap;
+            writeFile(pathToFile, formatMapToIndex(map));
+            return map;
         }
 
+        // file already exists, so this is the append-more-key-value-pairs scenario
+        HashMap<String, String> finalMap = new HashMap<>();
         try {
-            // file exist
-            Scanner reader = new Scanner(file);
-            // read the new value
-            String key = "";
-            String value = "";
-            for (Map.Entry<String, String> entry : defaultMap.entrySet()) {
-                key = entry.getKey();
-                value = entry.getValue();
+            finalMap = readMap(file);
+            if (map.isEmpty()) {
+                return finalMap;
             }
-            // creates a new map
-            HashMap<String, String> updatedHashmap = new HashMap<>();
-            while (reader.hasNext()) {
-                // checks the old map
-                String line = reader.nextLine();
-                String[] splitLines = line.split(", ");
-                for (int i = 0; i < splitLines.length; i++) {
-                    String[] keyValuePairs = splitLines[i].split("=");
-                    updatedHashmap.put(keyValuePairs[0], keyValuePairs[1]);
-                }
-            }
-            // appends old map with new value
-            updatedHashmap.put(key, value);
+
+            // appends old map with more key-value-pairs if key does not already exist
+            finalMap = mergeMap(finalMap, map);
             // write to file
-            writeFile(pathToFile, formatMapToIndex(updatedHashmap));
-            reader.close();
-            return updatedHashmap;
+            writeFile(pathToFile, formatMapToIndex(finalMap));
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         }
-        return defaultMap;
+        return finalMap;
     }
 
     public String formatMapToIndex(Map<String, String> updatedHashmap) {

@@ -189,19 +189,46 @@ public class DataDirectoryTest {
   }
 
   @Test
-  public void readWriteToIndex() {
+  public void readWriteToIndexNoData() {
+    // prepare data
     String testIndexFile = "testfolder" + File.separator + "index.txt";
     HashMap<String, String> testDefaultMap = new HashMap<String, String>();
     testDefaultMap.put("0.0.1001", "some_random_name_a");
     testDefaultMap.put("0.0.1002", "some_random_name_b");
     testDefaultMap.put("0.0.1003", "some_random_name_c");
-
     HashMap<String, String> resultMap = dataDirectory.readWriteToIndex(testIndexFile, testDefaultMap);
 
     assertTrue(resultMap.equals(testDefaultMap));
+  }
 
-    // HashMap<String, String> resultMapAgain = dataDirectory.readWriteToIndex(testIndexFile, testDefaultMap);
-    // TODO: incomplete tests for readWriteToIndex
+  @Test
+  public void readWriteToIndexWithNewData() {
+    // prepare data
+    String testIndexFile = "testfolder" + File.separator + "index.txt";
+    HashMap<String, String> testDefaultMap = new HashMap<String, String>();
+    testDefaultMap.put("0.0.1001", "some_random_name_a");
+    testDefaultMap.put("0.0.1002", "some_random_name_b");
+    testDefaultMap.put("0.0.1003", "some_random_name_c");
+    HashMap<String, String> resultMap = dataDirectory.readWriteToIndex(testIndexFile, testDefaultMap);
+    assertEquals(3, resultMap.size());
+
+    // add in a newMap and the number of entries will increase by one
+    HashMap<String, String> newMap = new HashMap<String, String>();
+    newMap.put("0.0.10014", "some_random_name_d");
+    HashMap<String, String> resultMap2 = dataDirectory.readWriteToIndex(testIndexFile, newMap);
+    assertEquals(4, resultMap2.size());
+
+    // add in the same newMap and the number of entries in our  map will remain unchanged
+    HashMap<String, String> resultMap3 = dataDirectory.readWriteToIndex(testIndexFile, newMap);
+    assertEquals(4, resultMap3.size());
+
+    // provide an empty newMap and the number of entries in our map will remain unchanged
+    HashMap<String, String> resultMap4 = dataDirectory.readWriteToIndex(testIndexFile, new HashMap<String, String>());
+    assertEquals(4, resultMap4.size());
+
+    // write to an invalid index file and we will get a null map back
+    HashMap<String, String> resultMap5 = dataDirectory.readWriteToIndex("/", new HashMap<String, String>());
+    assertNull(resultMap5);
   }
 
   @Test
