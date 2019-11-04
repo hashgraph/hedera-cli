@@ -19,9 +19,17 @@ public class PreviewTransferListTest {
 
     PreviewTransferList previewTransferList = new PreviewTransferList(accountId, amount);
 
-
     assertEquals(accountId, previewTransferList.getAccountId());
     assertEquals(amount, previewTransferList.getAmount());
+
+    AccountId accountId2 = AccountId.fromString("0.0.1002");
+    String amount2 = "2000";
+
+    previewTransferList.setAccountId(accountId2);
+    previewTransferList.setAmount(amount2);
+
+    assertEquals(accountId2, previewTransferList.getAccountId());
+    assertEquals(amount2, previewTransferList.getAmount());
   }
 
 }
