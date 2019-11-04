@@ -293,6 +293,6 @@ public class CryptoTransferTest {
         expectedMap.put(1, previewTransferList1);
 
         Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap(transferList, amountList);
-        assertEquals(expectedMap.get("0.0.116681"), actualMap.get("0.0.116681"));
+        assertEquals(expectedMap.get(0).getAccountId(), actualMap.get(0).getAccountId());
     }
 }
