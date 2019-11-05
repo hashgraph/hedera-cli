@@ -34,19 +34,21 @@ public class HederaCryptoTest {
   @Mock
   private Transfer transfer;
 
+  // test data, with default test values
+  String subCommand = "create";
+  String accountId = "";
+  boolean y = true;
+  String b = "";
+  boolean k = true;
+  String pk = "";
+  String o = "";
+  String n = "";
+
   @Test
   public void accountCreate() {
     assertNotNull(shellHelper);
 
     // account create
-    String subCommand = "create";
-    String accountId = "";
-    boolean y = true;
-    String b = "";
-    boolean k = true;
-    String pk = "";
-    String o = "";
-    String n = "";
     hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
 
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
@@ -66,14 +68,8 @@ public class HederaCryptoTest {
   @Test
   public void accountUpdate() {
     // account update
-    String subCommand = "update";
-    String accountId = "";
-    boolean y = true;
-    String b = "";
-    boolean k = true;
-    String pk = "";
-    String o = "";
-    String n = "";
+    subCommand = "update";
+
     hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
     verify(shellHelper).printError(valueCapture.capture());
@@ -85,14 +81,8 @@ public class HederaCryptoTest {
   @Test
   public void accountInfo() {
     // account info
-    String subCommand = "info";
-    String accountId = "";
-    boolean y = true;
-    String b = "";
-    boolean k = true;
-    String pk = "";
-    String o = "";
-    String n = "";
+    subCommand = "info";
+
     hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
     verify(shellHelper).printError(valueCapture.capture());
@@ -104,14 +94,7 @@ public class HederaCryptoTest {
   @Test
   public void accountRecovery() {
     // account recovery
-    String subCommand = "recovery";
-    String accountId = "";
-    boolean y = true;
-    String b = "";
-    boolean k = true;
-    String pk = "";
-    String o = "";
-    String n = "";
+    subCommand = "recovery";
     hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
     verify(shellHelper).printError(valueCapture.capture());
@@ -123,14 +106,7 @@ public class HederaCryptoTest {
   @Test
   public void accountUse() {
     // account use
-    String subCommand = "use";
-    String accountId = "";
-    boolean y = true;
-    String b = "";
-    boolean k = true;
-    String pk = "";
-    String o = "";
-    String n = "";
+    subCommand = "use";
     hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
     verify(shellHelper).printError(valueCapture.capture());
@@ -142,14 +118,7 @@ public class HederaCryptoTest {
   @Test
   public void accountBalance() {
     // account balance
-    String subCommand = "balance";
-    String accountId = "";
-    boolean y = true;
-    String b = "";
-    boolean k = true;
-    String pk = "";
-    String o = "";
-    String n = "";
+    subCommand = "balance";
     hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
     verify(shellHelper).printError(valueCapture.capture());
@@ -161,14 +130,7 @@ public class HederaCryptoTest {
   @Test
   public void accountList() {
     // account ls
-    String subCommand = "ls";
-    String accountId = "";
-    boolean y = true;
-    String b = "";
-    boolean k = true;
-    String pk = "";
-    String o = "";
-    String n = "";
+    subCommand = "ls";
     hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
 
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
@@ -185,14 +147,7 @@ public class HederaCryptoTest {
   @Test
   public void accountDelete() {
     // account delete
-    String subCommand = "delete";
-    String accountId = "";
-    boolean y = true;
-    String b = "";
-    boolean k = true;
-    String pk = "";
-    String o = "";
-    String n = "";
+    subCommand = "delete";
     hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
     
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
