@@ -115,7 +115,7 @@ MultiSig account creation (not yet supported)
 # Creates a new Hedera account using NEW recovery words and keypair. This is default.
 account create -b 100000000
 
-# Creates a new Hedera account using OPERATOR's keypair 
+# Creates a new Hedera account using Operator's public key 
 account create -b 100000000 -k
 ```
 
