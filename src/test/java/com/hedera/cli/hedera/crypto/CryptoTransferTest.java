@@ -96,6 +96,28 @@ public class CryptoTransferTest {
     }
 
     @Test
+    public void runFailsWithNoHbAndNoTb() {
+        // test data: replace specified hb and specified tb with blank string
+        CryptoTransferOptions.Exclusive exclusive = cryptoTransferOptions.getExclusive();
+        exclusive.setTransferListAmtHBars("");
+        exclusive.setTransferListAmtTinyBars("");
+        cryptoTransferOptions.setExclusive(exclusive);
+        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
+        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
+        cryptoTransfer.setCryptoTransferOptionsList(cList);
+
+        // execute
+        cryptoTransfer.run();
+
+        // verify
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printError(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "You have to provide transaction amounts in hbars or tinybars";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void assertAutowiredDependenciesNotNull() {
         assertNotNull(shellHelper);
         assertNotNull(accountManager);
