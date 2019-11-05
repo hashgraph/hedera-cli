@@ -66,7 +66,8 @@ ___
 There is the concept of an operator account where the operator can pay for the transaction costs, ie network and node fees.
 
 Cli will prompt `setup` on first run to save default operator key into `~/.hedera`. You will need to have an accountID and 24 words ready.
-
+AccountGetInfo is called during setup to confirm the account exists. This will cost some tinybars.
+ 
 The default operator can be changed anytime by using `account use 0.0.xxxx`.
 ```bash
 # Sets the default operator
