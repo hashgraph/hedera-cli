@@ -308,9 +308,9 @@ public class CryptoTransferTest {
 
         ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
         doNothing().when(shellHelper).printError(valueCapture.capture());
-        cryptoTransfer.verifyEqualList(senderList, recipientList, transferList, amountList);
+        cryptoTransfer.verifyTransferList(transferList);
         String actual = valueCapture.getValue();
-        String expected = "Lists aren't the same size";
+        String expected = "Please check that accountId is in the right format";
         assertEquals(expected, actual);
     }
 
