@@ -74,7 +74,7 @@ public class CryptoTransfer implements Runnable {
     private String tinybarAmtArgs;
     private String hbarAmtArgs;
     private boolean skipPreview;
-    private boolean isTiny;
+    private boolean isTiny = true;
     private String isInfoCorrect;
     private String memoString = "";
 
@@ -116,49 +116,32 @@ public class CryptoTransfer implements Runnable {
             return;
         }
 
+        transferList = Arrays.asList(transferListArgs.split(","));
         if (!StringUtil.isNullOrEmpty(tinybarAmtArgs)) {
-            // tinybars not empty
-            // Verify transferlist and amountlist are equal
-            transferList = Arrays.asList(transferListArgs.split(","));
+            // using tinybars
             amountList = Arrays.asList(tinybarAmtArgs.split(","));
-            boolean listAreEqual = verifyEqualList(senderList, recipientList, transferList, amountList);
-            if (!listAreEqual)
-                return;
-
-            // Verify list of senders and recipients
-            boolean transferListVerified = verifyTransferList(transferList);
-            if (!transferListVerified)
-                return;
-
-            // Check sum of transfer is zero
-            isTiny = true;
-            boolean isZeroSum = sumOfTinybarsInLong(senderList, recipientList, amountList);
-            if (!isZeroSum)
-                return;
-        }
-
-        if (!StringUtil.isNullOrEmpty(hbarAmtArgs)) {
-            // hbars not empty
-            // Verify transferlist and amountlist are equal
-            transferList = Arrays.asList(transferListArgs.split(","));
+        } else {
+            // using hbars
             amountList = Arrays.asList(hbarAmtArgs.split(","));
-            boolean listAreEqual = verifyEqualList(senderList, recipientList, transferList, amountList);
-            if (!listAreEqual)
-                return;
-
-            // Verify list of senders and recipients
-            boolean transferListVerified = verifyTransferList(transferList);
-            if (!transferListVerified)
-                return;
-
-            // Check sum of transfer is zero
             isTiny = false;
-            boolean isZeroSum = sumOfHbarsInLong(senderList, recipientList, amountList);
-            if (!isZeroSum)
-                return;
         }
 
-        // Preview for user
+        // Verify transferlist and amountlist are equal
+        if (!verifyEqualList(senderList, recipientList, transferList, amountList)) {
+            return;
+        }
+
+        // Verify list of senders and recipients
+        if (!verifyTransferList(transferList)) {
+            return;
+        }
+
+        // Check sum of transfer is zero
+        if (!isSumZero(senderList, recipientList, amountList, isTiny)) {
+            return;
+        }
+
+        // transfer preview for user
         Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap(senderList, recipientList, transferList,
                 amountList);
         // handle preview error gracefully here
@@ -334,6 +317,13 @@ public class CryptoTransfer implements Runnable {
             }
         }
         return true;
+    }
+
+    private boolean isSumZero(List<String> senderList, List<String> recipientList, List<String> amountList, boolean isTiny) {
+        if (isTiny) {
+            return sumOfTinybarsInLong(senderList, recipientList, amountList);
+        }
+        return sumOfHbarsInLong(senderList, recipientList, amountList);
     }
 
     public boolean sumOfHbarsInLong(List<String> senderList, List<String> recipientList, List<String> amountList) {
