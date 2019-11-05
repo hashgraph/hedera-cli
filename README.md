@@ -21,12 +21,11 @@ To read what Hedera has to offer, you can check out
 2) [hedera.com](https://www.hedera.com)
 3) [Hedera's whitepaper](https://www.hedera.com/whitepaper)
 
-## Description
+### Description
 **Release notes:**
 Command line changes for cryptotransfer in the latest release version `0.1.0`. Refer to **CryptoTransfer** below
 
-
-##### Requirements
+#### Requirements
 Java 10/11/12
 
 ##### Prerequisites
@@ -60,7 +59,7 @@ Once that is running, you should see
 ___
 ___
 
-## Commands
+### Commands
 
 #### Setup operator account
 There is the concept of an operator account where the operator can pay for the transaction costs, ie network and node fees.
@@ -152,7 +151,6 @@ transfer --sender 0.0.1001 --recipient 0.0.1002 --recipientAmtHBars -4.4,4.4
 
 transfer -s 0.0.1001,0.0.1002 -r 0.0.1003,0.0.1004,0.0.1005 -hb -4.4,-50,4.4,20,30 
 ```
-
 
 ### VERSION 0.0.4
 
