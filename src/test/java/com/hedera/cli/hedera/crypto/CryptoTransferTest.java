@@ -117,7 +117,7 @@ public class CryptoTransferTest {
     }
 
     @Test
-    public void run_tbars_Fails_MismatchedTransferListAmountList() {
+    public void runFailstbarsMismatchedTransferListAmountList() {
         // test data: replace specified hb and specified tb with blank string
         exclusive.setTransferListAmtHBars("");
         cryptoTransferOptions.setExclusive(exclusive);
@@ -136,7 +136,7 @@ public class CryptoTransferTest {
     }
 
     @Test
-    public void runFails_hbars_MismatchedTransferListAmountList() {
+    public void runFailshbarsMismatchedTransferListAmountList() {
         // test data: replace specified hb and specified tb with blank string
         exclusive.setTransferListAmtTinyBars("");
         cryptoTransferOptions.setExclusive(exclusive);
