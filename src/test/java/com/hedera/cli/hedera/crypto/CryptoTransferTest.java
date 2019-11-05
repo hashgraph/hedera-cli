@@ -98,7 +98,6 @@ public class CryptoTransferTest {
     @Test
     public void runFailsWithNoHbAndNoTb() {
         // test data: replace specified hb and specified tb with blank string
-        CryptoTransferOptions.Exclusive exclusive = cryptoTransferOptions.getExclusive();
         exclusive.setTransferListAmtHBars("");
         exclusive.setTransferListAmtTinyBars("");
         cryptoTransferOptions.setExclusive(exclusive);
@@ -114,6 +113,44 @@ public class CryptoTransferTest {
         verify(shellHelper).printError(valueCapture.capture());
         String actual = valueCapture.getValue();
         String expected = "You have to provide transaction amounts in hbars or tinybars";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void run_tbars_Fails_MismatchedTransferListAmountList() {
+        // test data: replace specified hb and specified tb with blank string
+        exclusive.setTransferListAmtHBars("");
+        cryptoTransferOptions.setExclusive(exclusive);
+        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
+        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
+        cryptoTransfer.setCryptoTransferOptionsList(cList);
+
+        // execute
+        cryptoTransfer.run();
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printError(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "Lists aren't the same size";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void runFails_hbars_MismatchedTransferListAmountList() {
+        // test data: replace specified hb and specified tb with blank string
+        exclusive.setTransferListAmtTinyBars("");
+        cryptoTransferOptions.setExclusive(exclusive);
+        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
+        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
+        cryptoTransfer.setCryptoTransferOptionsList(cList);
+
+        // execute
+        cryptoTransfer.run();
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printError(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "Lists aren't the same size";
         assertEquals(expected, actual);
     }
 

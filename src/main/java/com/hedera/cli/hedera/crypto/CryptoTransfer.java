@@ -121,7 +121,6 @@ public class CryptoTransfer implements Runnable {
             // Verify transferlist and amountlist are equal
             transferList = Arrays.asList(transferListArgs.split(","));
             amountList = Arrays.asList(tinybarAmtArgs.split(","));
-
             boolean listAreEqual = verifyEqualList(senderList, recipientList, transferList, amountList);
             if (!listAreEqual)
                 return;
@@ -313,7 +312,7 @@ public class CryptoTransfer implements Runnable {
 
     public boolean verifyEqualList(List<String> senderList, List<String> recipientList, List<String> transferList,
             List<String> amountList) {
-        // support the declaration `ransfer -s 0.0.1001 -r 0.0.1002 -hb 10_000` so user
+        // support the declaration `transfer -s 0.0.1001 -r 0.0.1002 -hb 10_000` so user
         // does not have to provide additional negative amount
         if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
             return true;
