@@ -138,10 +138,8 @@ public class HederaCryptoTest {
     verify(account).handle(valueCapture.capture(), valueCapture2.capture());
     String arg = valueCapture.getValue();
     List<String> varArgs = valueCapture2.getAllValues();
-    System.out.println(arg);
-    for (String s: varArgs) {
-      System.out.println(s);
-    }
+    assertEquals("ls", arg);
+    assertEquals(0, varArgs.size());
   }
 
   @Test
@@ -155,10 +153,9 @@ public class HederaCryptoTest {
     verify(account).handle(valueCapture.capture(), valueCapture2.capture());
     String arg = valueCapture.getValue();
     List<String> varArgs = valueCapture2.getAllValues();
-    System.out.println(arg);
-    for (String s: varArgs) {
-      System.out.println(s);
-    }
+    assertEquals("delete", arg);
+    // assertEquals()
+    assertEquals("-y true", varArgs.get(0));
   }
 
   @Test
