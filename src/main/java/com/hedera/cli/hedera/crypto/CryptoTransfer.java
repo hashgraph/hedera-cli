@@ -98,7 +98,8 @@ public class CryptoTransfer implements Runnable {
 
         hbarAmtArgs = cryptoTransferOptions.exclusive.transferListAmtHBars;
         tinybarAmtArgs = cryptoTransferOptions.exclusive.transferListAmtTinyBars;
-        transferListArgs = cryptoTransferOptions.dependent.senderList + "," + cryptoTransferOptions.dependent.recipientList;
+        transferListArgs = cryptoTransferOptions.dependent.senderList + ","
+                + cryptoTransferOptions.dependent.recipientList;
         skipPreview = cryptoTransferOptions.dependent.skipPreview;
         senderList = Arrays.asList((cryptoTransferOptions.dependent.senderList).split(","));
         recipientList = Arrays.asList((cryptoTransferOptions.dependent.recipientList).split(","));
@@ -120,40 +121,47 @@ public class CryptoTransfer implements Runnable {
             // Verify transferlist and amountlist are equal
             transferList = Arrays.asList(transferListArgs.split(","));
             amountList = Arrays.asList(tinybarAmtArgs.split(","));
-            
+
             boolean listAreEqual = verifyEqualList(senderList, recipientList, transferList, amountList);
-            if (!listAreEqual) return;
+            if (!listAreEqual)
+                return;
 
             // Verify list of senders and recipients
             boolean transferListVerified = verifyTransferList(transferList);
-            if (!transferListVerified) return;
+            if (!transferListVerified)
+                return;
 
             // Check sum of transfer is zero
             isTiny = true;
             boolean isZeroSum = sumOfTinybarsInLong(senderList, recipientList, amountList);
-            if (!isZeroSum) return;
+            if (!isZeroSum)
+                return;
         }
 
         if (!StringUtil.isNullOrEmpty(hbarAmtArgs)) {
-            //hbars not empty
+            // hbars not empty
             // Verify transferlist and amountlist are equal
             transferList = Arrays.asList(transferListArgs.split(","));
             amountList = Arrays.asList(hbarAmtArgs.split(","));
             boolean listAreEqual = verifyEqualList(senderList, recipientList, transferList, amountList);
-            if (!listAreEqual) return;
+            if (!listAreEqual)
+                return;
 
             // Verify list of senders and recipients
             boolean transferListVerified = verifyTransferList(transferList);
-            if (!transferListVerified) return;
+            if (!transferListVerified)
+                return;
 
             // Check sum of transfer is zero
             isTiny = false;
             boolean isZeroSum = sumOfHbarsInLong(senderList, recipientList, amountList);
-            if (!isZeroSum) return;
+            if (!isZeroSum)
+                return;
         }
 
         // Preview for user
-        Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap(senderList, recipientList, transferList, amountList);
+        Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap(senderList, recipientList, transferList,
+                amountList);
         // handle preview error gracefully here
         AccountId operatorId = hedera.getOperatorId();
         try {
@@ -163,8 +171,8 @@ public class CryptoTransfer implements Runnable {
         }
     }
 
-    public void reviewAndExecute(AccountId operatorId,
-                                 Map<Integer, PreviewTransferList> map) throws InvalidProtocolBufferException {
+    public void reviewAndExecute(AccountId operatorId, Map<Integer, PreviewTransferList> map)
+            throws InvalidProtocolBufferException {
         if (skipPreview) {
             executeCryptoTransfer(operatorId);
         } else {
@@ -196,19 +204,12 @@ public class CryptoTransfer implements Runnable {
             shellHelper.printError("Currently does not support more than 2 senders");
             return;
             // If more than 2 senders are created in list, and client.setsOperator()
-            // transactions are not allowed to .sign() more than once, otherwise SDK throws "transaction already signed with key: "
-            // If more than 2 senders are created in list and we do not setOperator when we instantiate a new Client,
-            // SDK throws "java.lang.IllegalStateException: transaction builder failed validation: at least one transfer required "
-//            client = hedera.createHederaClientWithoutSettingOperator();
-//            cryptoTransferTransaction = new CryptoTransferTransaction(client);
-//            cryptoTransferTransaction.sign(hedera.getOperatorKey());
-//            cryptoTransferTransaction.setMemo(memoString);
-//            cryptoTransferTransaction.setTransactionId(transactionId);
-//            // the total sum of all transfers adds up to zero
-//            // Dynamic population of transfer List
-//            cryptoTransferTransaction = addTransferList();
-//            // sender list exist, check if sender
-//            signedTxnBytes = signAndCreateTxBytesWithoutOperator();
+            // transactions are not allowed to .sign() more than once, otherwise SDK throws
+            // "transaction already signed with key: "
+            // If more than 2 senders are created in list and we do not setOperator when we
+            // instantiate a new Client,
+            // SDK throws "java.lang.IllegalStateException: transaction builder failed
+            // validation: at least one transfer required "
         } else {
             client = hedera.createHederaClient();
             cryptoTransferTransaction = new CryptoTransferTransaction(client);
@@ -218,8 +219,7 @@ public class CryptoTransfer implements Runnable {
             signedTxnBytes = signAndCreateTxBytesWithOperator();
         }
         try {
-            transactionReceipt = Transaction.fromBytes(client, signedTxnBytes)
-                    .executeForReceipt();
+            transactionReceipt = Transaction.fromBytes(client, signedTxnBytes).executeForReceipt();
             if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
                 printAndSaveRecords(client, transactionId, operatorId);
             }
@@ -260,28 +260,28 @@ public class CryptoTransfer implements Runnable {
         return cryptoTransferTransaction;
     }
 
-    private void printAndSaveRecords(Client client, TransactionId transactionId, AccountId operatorId) throws HederaException, JsonProcessingException {
+    private void printAndSaveRecords(Client client, TransactionId transactionId, AccountId operatorId)
+            throws HederaException, JsonProcessingException {
         TransactionRecord record;
-        record = new TransactionRecordQuery(client)
-                .setTransactionId(transactionId)
-                .setPaymentDefault(5000000)
+        record = new TransactionRecordQuery(client).setTransactionId(transactionId).setPaymentDefault(5000000)
                 .execute();
         printBalance(client, operatorId);
-        // save all transaction record into ~/.hedera/[network_name]/transaction/[file_name].json
+        // save all transaction record into
+        // ~/.hedera/[network_name]/transaction/[file_name].json
         if (record != null) {
             saveTransactionToJson(record);
         }
     }
 
-    private byte[] senderSignsTransaction(Ed25519PrivateKey senderPrivKey, byte[] transactionData) throws InvalidProtocolBufferException {
-        return Transaction.fromBytes(transactionData)
-                .sign(senderPrivKey)
-                .toBytes();
+    private byte[] senderSignsTransaction(Ed25519PrivateKey senderPrivKey, byte[] transactionData)
+            throws InvalidProtocolBufferException {
+        return Transaction.fromBytes(transactionData).sign(senderPrivKey).toBytes();
     }
 
-    public Map<Integer, PreviewTransferList> transferListToPromptPreviewMap(List<String> senderList, List<String> recipientList, List<String> transferList, List<String> amountList) {
+    public Map<Integer, PreviewTransferList> transferListToPromptPreviewMap(List<String> senderList,
+            List<String> recipientList, List<String> transferList, List<String> amountList) {
         ArrayList<String> finalAmountList = new ArrayList<>(amountList);
-        if (senderList.size() == 1 && recipientList.size() == 1 && amountList.size() == 1) {
+        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
             String amount = "-" + String.valueOf(amountList.get(0));
             finalAmountList.add(0, amount);
             this.amountList = finalAmountList;
@@ -303,17 +303,19 @@ public class CryptoTransfer implements Runnable {
         try {
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             String jsonStringTransferList = ow.writeValueAsString(previewTransferListMap);
-            return inputReader.prompt("\nOperator\n" + operatorId + "\nTransfer List\n"
-                    + jsonStringTransferList + "\n\nIs this correct?" + "\nyes/no");
+            return inputReader.prompt("\nOperator\n" + operatorId + "\nTransfer List\n" + jsonStringTransferList
+                    + "\n\nIs this correct?" + "\nyes/no");
         } catch (Exception e) {
             shellHelper.printError("Some error occurred");
             return null;
         }
     }
 
-    public boolean verifyEqualList(List<String> senderList, List<String> recipientList, List<String> transferList, List<String> amountList) {
-        // support the declaration `ransfer -s 0.0.1001 -r 0.0.1002 -hb 10_000` so user does not have to provide additional negative amount
-        if (senderList.size() == 1 && recipientList.size() == 1 && amountList.size() == 1) {
+    public boolean verifyEqualList(List<String> senderList, List<String> recipientList, List<String> transferList,
+            List<String> amountList) {
+        // support the declaration `ransfer -s 0.0.1001 -r 0.0.1002 -hb 10_000` so user
+        // does not have to provide additional negative amount
+        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
             return true;
         }
         if (transferList.size() != amountList.size()) {
@@ -336,7 +338,7 @@ public class CryptoTransfer implements Runnable {
     }
 
     public boolean sumOfHbarsInLong(List<String> senderList, List<String> recipientList, List<String> amountList) {
-        if (senderList.size() == 1 && recipientList.size() == 1 && amountList.size() == 1) {
+        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
             return true;
         }
 
@@ -373,7 +375,7 @@ public class CryptoTransfer implements Runnable {
     }
 
     public boolean sumOfTinybarsInLong(List<String> senderList, List<String> recipientList, List<String> amountList) {
-        if (senderList.size() == 1 && recipientList.size() == 1 && amountList.size() == 1) {
+        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
             return true;
         }
 
@@ -398,6 +400,10 @@ public class CryptoTransfer implements Runnable {
             zeroSum = true;
         }
         return zeroSum;
+    }
+
+    private boolean isSingleSenderRecipientAmount(List<String> senderList, List<String> recipientList, List<String> amountList) {
+        return senderList.size() == 1 && recipientList.size() == 1 && amountList.size() == 1;
     }
 
     public long convertTinybarToLong(String amountInTinybar) {
