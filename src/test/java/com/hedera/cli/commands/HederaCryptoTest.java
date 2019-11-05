@@ -35,14 +35,14 @@ public class HederaCryptoTest {
   private Transfer transfer;
 
   // test data, with default test values
-  String subCommand = "create";
-  String accountId = "";
-  boolean y = true;
-  String b = "";
-  boolean k = true;
-  String pk = "";
-  String o = "";
-  String n = "";
+  private String subCommand = "create";
+  private String accountId = "";
+  private boolean y = true;
+  private String b = "";
+  private boolean k = true;
+  private String pk = "";
+  private String o = "";
+  private String n = "";
 
   @Test
   public void accountCreate() {
