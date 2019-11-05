@@ -154,7 +154,6 @@ public class HederaCryptoTest {
     String arg = valueCapture.getValue();
     List<String> varArgs = valueCapture2.getAllValues();
     assertEquals("delete", arg);
-    // assertEquals()
     assertEquals("-y true", varArgs.get(0));
   }
 
