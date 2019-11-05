@@ -150,10 +150,7 @@ public class CryptoTransfer implements Runnable {
             return false;
         }
         // Check sum of transfer is zero
-        if (!isSumZero(senderList, recipientList, amountList, isTiny)) {
-            return false;
-        }
-        return true;
+        return isSumZero(senderList, recipientList, amountList, isTiny);
     }
 
     public void reviewAndExecute(AccountId operatorId, List<String> senderList, List<String> recipientList,
