@@ -2,8 +2,10 @@ package com.hedera.cli.hedera.crypto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.hedera.cli.config.InputReader;
+import com.hedera.cli.services.Hapi;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
@@ -32,6 +35,9 @@ public class AccountDeleteTest {
 
     @Mock
     private InputReader inputReader;
+
+    @Mock
+    private Hapi hapi;
 
     @Test
     public void testDeletingAFile() throws IOException {
@@ -86,5 +92,10 @@ public class AccountDeleteTest {
         String actual4 = valueCapture.getValue();
         String expected4 = "Nope, incorrect, let's make some changes";
         assertEquals(expected4, actual4);
+
+        accountDelete.setSkipPreview(true);
+        accountDelete.run();
+
+        verify(hapi, times(1)).executeAccountDelete(any(), any(), any());
     }
 }
