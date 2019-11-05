@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyPair;
-import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 
@@ -32,9 +31,6 @@ public class AccountRecoveryTest {
 
   @Mock
   private ShellHelper shellHelper;
-
-  @Mock
-  private AccountManager accountManager;
 
   private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet", "fan",
       "donkey", "carry", "chuckle", "assault", "leopard", "fee", "kingdom", "cheap", "odor", "okay", "crazy", "raven",
