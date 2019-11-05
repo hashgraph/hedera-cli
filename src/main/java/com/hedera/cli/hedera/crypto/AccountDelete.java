@@ -62,7 +62,7 @@ public class AccountDelete implements Runnable, Operation {
     private String newAccountInString;
 
     @Option(names = {"-y", "--yes"}, description = "Yes, skip preview")
-    private boolean yes;
+    private boolean skipPreview;
 
     private InputReader inputReader;
     private Ed25519PrivateKey oldAccountPrivKey;
@@ -78,7 +78,7 @@ public class AccountDelete implements Runnable, Operation {
                     .prompt("Enter the private key of the account to be deleted", "secret", false);
             oldAccountPrivKey = Ed25519PrivateKey.fromString(privKeyOfAccountToBeDeleted);
 
-            if (!yes) {
+            if (!skipPreview) {
                 boolean correctInfo = promptPreview(oldAccount, newAccount);
                 if (correctInfo) {
                     shellHelper.print("Info is correct, let's go!");

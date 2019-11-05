@@ -70,7 +70,7 @@ public class CryptoTransfer implements Runnable {
     private String transferListArgs;
     private String tinybarAmtArgs;
     private String hbarAmtArgs;
-    private String mPreview = "no";
+    private boolean skipPreview;
     private boolean isTiny;
     private String isInfoCorrect;
     private String memoString = "";
@@ -95,8 +95,7 @@ public class CryptoTransfer implements Runnable {
         hbarAmtArgs = cryptoTransferOptions.exclusive.transferListAmtHBars;
         tinybarAmtArgs = cryptoTransferOptions.exclusive.transferListAmtTinyBars;
         transferListArgs = cryptoTransferOptions.dependent.senderList + "," + cryptoTransferOptions.dependent.recipientList;
-        mPreview = cryptoTransferOptions.dependent.mPreview;
-
+        skipPreview = cryptoTransferOptions.dependent.skipPreview;
         if (StringUtil.isNullOrEmpty(tinybarAmtArgs) && StringUtil.isNullOrEmpty(hbarAmtArgs)
                 || (!StringUtil.isNullOrEmpty(tinybarAmtArgs) && !StringUtil.isNullOrEmpty(hbarAmtArgs))) {
             shellHelper.printError("You have to provide a transaction amount in hbars or tinybars");
@@ -151,9 +150,9 @@ public class CryptoTransfer implements Runnable {
 
     public void reviewAndExecute(AccountId operatorId,
                                  Map<Integer, PreviewTransferList> map) throws InvalidProtocolBufferException {
-        if ("no".equals(mPreview)) {
+        if (skipPreview) {
             executeCryptoTransfer(operatorId);
-        } else if ("yes".equals(mPreview)) {
+        } else {
             // Prompt memostring input
             memoString = accountManager.promptMemoString(inputReader);
             isInfoCorrect = promptPreview(operatorId, map);
@@ -165,8 +164,6 @@ public class CryptoTransfer implements Runnable {
             } else {
                 shellHelper.printError("Input must be either yes or no");
             }
-        } else {
-            shellHelper.printError("Error in commandline");
         }
     }
 

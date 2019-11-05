@@ -40,10 +40,12 @@ public class HederaCrypto extends CliDefaults {
                         // account use
                         @ShellOption(defaultValue = "") String accountId,
                         // Specifying -y flag will set y to be true (which will skip the preview)
-                        @ShellOption(value = {"-y", "--yes"}, defaultValue = "false") boolean y,
+                        @ShellOption(value = {"-y", "--skipPreview"}, arity = 0, defaultValue = "false") boolean y,
                         // account create
                         @ShellOption(value = {"-b", "--balance"}, defaultValue = "") String b,
-                        @ShellOption(value = {"-k", "--keygen"}, defaultValue = "true") boolean k,
+                        // Specifying -k flag will set k to be false (and not create a new keypair)
+                        @ShellOption(value = {"-k", "--keygen"}, arity = 0, defaultValue = "true") boolean k,
+                        @ShellOption(value = {"-pk", "--publicKey"}, defaultValue = "") String pk,
                         @ShellOption(value = {"-m", "--method"}, defaultValue = "") String m,
                         @ShellOption(value = {"-r", "--record"}, defaultValue = "false") boolean r,
                         // account delete
@@ -57,8 +59,9 @@ public class HederaCrypto extends CliDefaults {
 
         switch (subCommand) {
             case "create":
-                if (k) argsList.add("-k");
+                argsList.add("-k " + k);
                 if (!b.isEmpty()) argsList.add("-b " + b);
+                if (!pk.isEmpty()) argsList.add("-pk " + pk);
                 break;
             case "update":
                 shellHelper.printError("To be implemented");
@@ -73,7 +76,7 @@ public class HederaCrypto extends CliDefaults {
                 }
                 break;
             case "delete":
-                if (y) argsList.add("-y");
+                argsList.add("-y " + y);
                 if (!o.isEmpty()) argsList.add("-o " + o);
                 if (!n.isEmpty()) argsList.add("-n " + n);
                 break;
@@ -103,7 +106,7 @@ public class HederaCrypto extends CliDefaults {
     @ShellMethod(value = "transfer hbars from one Hedera account to another")
     public void transfer(@ShellOption(value = {"-s", "--sender"}, defaultValue = "") String[] sender,
                          @ShellOption(value = {"-r", "--recipient"}, defaultValue = "") String[] recipient,
-                         @ShellOption(value = {"-y", "--yesSkipPreview"}, arity = 0) boolean y,
+                         @ShellOption(value = {"-y", "--skipPreview"}, arity = 0, defaultValue = "false") boolean y,
                          @ShellOption(value = {"-hb", "--hbars"}, defaultValue = "") String[] hb,
                          @ShellOption(value = {"-tb", "--tinybars"}, defaultValue = "") String[] tb) {
         // @formatter:on
@@ -148,11 +151,8 @@ public class HederaCrypto extends CliDefaults {
                 .replace("[", "")
                 .replace("]", "")
                 .replace(" ", ""));
-        if (y) {
-            argsList.add("-y=no");
-        } else {
-            argsList.add("-y=yes");
-        }
+
+        argsList.add("-y=" + y);
 
         if (isTiny) {
             // amount in tinybars
@@ -163,7 +163,7 @@ public class HederaCrypto extends CliDefaults {
         } else {
             // amount in hbars
             argsList.add("-hb=" + Arrays.toString(amount)
-            .replace("[", "")
+                    .replace("[", "")
                     .replace("]", "")
                     .replace(" ", ""));
         }
