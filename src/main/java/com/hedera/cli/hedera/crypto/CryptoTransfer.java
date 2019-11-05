@@ -130,13 +130,10 @@ public class CryptoTransfer implements Runnable {
             return;
         }
 
-        // transfer preview for user
-        Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap(senderList, recipientList, transferList,
-                amountList);
         // handle preview error gracefully here
         AccountId operatorId = hedera.getOperatorId();
         try {
-            reviewAndExecute(operatorId, map);
+            reviewAndExecute(operatorId, senderList, recipientList, transferList, amountList);
         } catch (InvalidProtocolBufferException e) {
             shellHelper.printError(e.getMessage());
         }
@@ -159,8 +156,12 @@ public class CryptoTransfer implements Runnable {
         return true;
     }
 
-    public void reviewAndExecute(AccountId operatorId, Map<Integer, PreviewTransferList> map)
-            throws InvalidProtocolBufferException {
+    public void reviewAndExecute(AccountId operatorId, List<String> senderList, List<String> recipientList,
+            List<String> transferList, List<String> amountList) throws InvalidProtocolBufferException {
+        // transfer preview for user
+        Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap(senderList, recipientList, transferList,
+                amountList);
+
         if (skipPreview) {
             executeCryptoTransfer(operatorId);
         } else {

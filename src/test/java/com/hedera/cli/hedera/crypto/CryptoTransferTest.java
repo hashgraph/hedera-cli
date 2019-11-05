@@ -199,6 +199,29 @@ public class CryptoTransferTest {
     }
 
     @Test
+    public void runValidButFailsYesNo() {
+        dependent.setSenderList("0.0.116681");
+        cryptoTransferOptions.setDependent(dependent);
+        exclusive.setTransferListAmtTinyBars("");
+        exclusive.setTransferListAmtHBars("-1000,400,600");
+        cryptoTransferOptions.setExclusive(exclusive);
+        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
+        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
+        cryptoTransfer.setCryptoTransferOptionsList(cList);
+
+        when(accountManager.isAccountId(anyString())).thenReturn(true);
+
+        // execute
+        cryptoTransfer.run();
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printError(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "Input must be either yes or no";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void assertAutowiredDependenciesNotNull() {
         assertNotNull(shellHelper);
         assertNotNull(accountManager);
