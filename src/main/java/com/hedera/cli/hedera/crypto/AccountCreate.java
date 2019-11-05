@@ -67,6 +67,11 @@ public class AccountCreate implements Runnable, Operation {
                     + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000|@")
     private boolean keyGen;
 
+    @Option(names = { "-pk",
+            "--publicKey" }, description = "Associates a public key for an account creation"
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account create -b 100000000 -pk|@")
+    private String privateKeyFromArgs;
+
     private String strMethod = "bip";
 
     private AccountId accountId;

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(MockitoExtension.class)
 public class CryptoTransferOptionsTest {
@@ -24,10 +25,10 @@ public class CryptoTransferOptionsTest {
     @Test
     public void nestedDependent() {
         CryptoTransferOptions.Dependent dependent = new CryptoTransferOptions.Dependent();
-        dependent.setMPreview("no");
+        dependent.setSkipPreview(false);
         dependent.setRecipientList("0.0.114152,0.0.11667");
         dependent.setSenderList("0.0.116681,0.0.117813");
-        assertEquals("no", dependent.getMPreview());
+        assertFalse(dependent.isSkipPreview());
         assertEquals("0.0.114152,0.0.11667", dependent.getRecipientList());
         assertEquals("0.0.116681,0.0.117813", dependent.getSenderList());
 }

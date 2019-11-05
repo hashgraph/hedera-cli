@@ -50,7 +50,6 @@ public class AccountBalance implements Runnable, Operation {
             Client client = hedera.createHederaClient();
             balance = client.getAccountBalance(AccountId.fromString(accountIdInString));
             shellHelper.printSuccess("Balance: " + balance);
-            client.close();
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
