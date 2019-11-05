@@ -69,7 +69,7 @@ public class HederaCrypto extends CliDefaults {
             case "balance":
                 argsList = addAccountToArgsList(accountId, argsList);
                 if (argsList.isEmpty()) {
-                    shellHelper.printError("Input an account Id");
+                    shellHelper.printError("Please provide an account id");
                 }
                 break;
             case "delete":

@@ -2,8 +2,10 @@ package com.hedera.cli.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.hedera.cli.hedera.crypto.Account;
@@ -54,6 +56,93 @@ public class HederaCryptoTest {
   }
 
   @Test
+  public void accountUpdate() {
+    // account create
+    hederaCrypto.account("update", "", true, "", true, "", false, "", "");
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    verify(shellHelper).printError(valueCapture.capture());
+    String actual = valueCapture.getValue();
+    String expected = "To be implemented";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void accountInfo() {
+    // account info
+    hederaCrypto.account("info", "", true, "", true, "", false, "", "");
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    verify(shellHelper).printError(valueCapture.capture());
+    String actual = valueCapture.getValue();
+    String expected = "Please provide an account id";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void accountRecovery() {
+    // account info
+    hederaCrypto.account("recovery", "", true, "", true, "", false, "", "");
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    verify(shellHelper).printError(valueCapture.capture());
+    String actual = valueCapture.getValue();
+    String expected = "Please provide an account id";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void accountUse() {
+    // account info
+    hederaCrypto.account("use", "", true, "", true, "", false, "", "");
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    verify(shellHelper).printError(valueCapture.capture());
+    String actual = valueCapture.getValue();
+    String expected = "Please provide an account id";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void accountBalance() {
+    // account info
+    hederaCrypto.account("balance", "", true, "", true, "", false, "", "");
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    verify(shellHelper).printError(valueCapture.capture());
+    String actual = valueCapture.getValue();
+    String expected = "Please provide an account id";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void accountList() {
+    // account info
+    hederaCrypto.account("ls", "", true, "", true, "", false, "", "");
+
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> valueCapture2 = ArgumentCaptor.forClass(String.class);
+    verify(account).handle(valueCapture.capture(), valueCapture2.capture());
+    String arg = valueCapture.getValue();
+    List<String> varArgs = valueCapture2.getAllValues();
+    System.out.println(arg);
+    for (String s: varArgs) {
+      System.out.println(s);
+    }
+  }
+
+  @Test
+  public void accountDelete() {
+    // account delete
+    hederaCrypto.account("delete", "", true, "", true, "", false, "", "");
+    
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<String> valueCapture2 = ArgumentCaptor.forClass(String.class);
+    verify(account).handle(valueCapture.capture(), valueCapture2.capture());
+    String arg = valueCapture.getValue();
+    List<String> varArgs = valueCapture2.getAllValues();
+    System.out.println(arg);
+    for (String s: varArgs) {
+      System.out.println(s);
+    }
+  }
+
+  @Test
   public void transfer() {
     assertNotNull(transfer);
 
@@ -82,6 +171,10 @@ public class HederaCryptoTest {
     assertEquals("-r=0.0.1001", varArgs.get(1));
     assertEquals("-y=yes", varArgs.get(2));
     assertEquals("-hb=1", varArgs.get(3));
+
+    String[] transferArgs = hederaCrypto.getTransferArgs();
+    List<String> transferArgsList = Arrays.asList(transferArgs);
+    assertTrue(transferArgsList.containsAll(varArgs));
   }
 
 }
