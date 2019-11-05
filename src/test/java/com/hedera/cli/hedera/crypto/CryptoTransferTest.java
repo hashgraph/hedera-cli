@@ -59,7 +59,7 @@ public class CryptoTransferTest {
         exclusive = new CryptoTransferOptions.Exclusive();
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransferOptions.setExclusive(exclusive);
-        dependent.setMPreview("no");
+        dependent.setSkipPreview(false);
         dependent.setRecipientList("0.0.114152,0.0.11667");
         dependent.setSenderList("0.0.116681,0.0.117813");
         exclusive.setTransferListAmtHBars("0.4,0.01,1.33");
@@ -101,9 +101,9 @@ public class CryptoTransferTest {
         cryptoTransfer.setHbarAmtArgs("0.4,0.01,1.33");
         cryptoTransfer.setTinybarAmtArgs("400,1000,10030");
         cryptoTransfer.setTransferListArgs("0.0.116681,0.0.117813,0.0.114152,0.0.11667");
-        cryptoTransfer.setMPreview("no");
+        cryptoTransfer.setSkipPreview(false);
 
-        assertEquals(dependent.getMPreview(), cryptoTransfer.getMPreview());
+        assertEquals(dependent.isSkipPreview(), cryptoTransfer.isSkipPreview());
         assertEquals(exclusive.transferListAmtTinyBars, cryptoTransfer.getTinybarAmtArgs());
         assertEquals(exclusive.transferListAmtHBars, cryptoTransfer.getHbarAmtArgs());
         assertEquals(dependent.senderList + "," + dependent.recipientList, cryptoTransfer.getTransferListArgs());

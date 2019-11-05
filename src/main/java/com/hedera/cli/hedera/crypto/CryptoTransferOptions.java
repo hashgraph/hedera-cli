@@ -44,10 +44,7 @@ public class CryptoTransferOptions {
                 description = "Recipient accountID in the format shardNum.realmNum.accountNum")
         public String recipientList;
 
-        @Option(names = {"-y", "--yes"}, arity = "0..1", defaultValue = "yes", fallbackValue = "no",
-                description = "Yes, skip preview"
-                + "\noption with optional parameter. Default: ${DEFAULT-VALUE},\n"
-                + "if specified without parameter: ${FALLBACK-VALUE}")
-        public String mPreview = "no";
+        @Option(names = {"-y", "--yes"}, description = "Yes, skip preview")
+        public boolean skipPreview;
     }
 }
