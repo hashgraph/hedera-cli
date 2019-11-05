@@ -143,15 +143,20 @@ help
 ### VERSION 0.1.0 (Latest)
 
 ```bash
+
 # Transfer in tinybars
+
+# valid command for single sender and single recipient
+transfer -s 0.0.1001 -r 0.0.1002 -tb 4400 
+
+# valid command for single sender and single recipient
 transfer -s 0.0.1001 -r 0.0.1002 -tb -4400,4400 
 transfer --sender 0.0.1001 --recipient 0.0.1002 --recipientAmtTinyBars -4400,4400
 
 transfer -s 0.0.1001,0.0.1002 -r 0.0.1003,0.0.1004,0.0.1005 -tb -440000,-500000,440000,200000,300000 
 
-
 # Transfer in hbars
-transfer -s 0.0.1001 -r 0.0.1002 -hb -4.4,4.4 
+transfer -s 0.0.1001 -r 0.0.1002 -hb 4.4 
 transfer --sender 0.0.1001 --recipient 0.0.1002 --recipientAmtHBars -4.4,4.4
 
 transfer -s 0.0.1001,0.0.1002 -r 0.0.1003,0.0.1004,0.0.1005 -hb -4.4,-50,4.4,20,30 
