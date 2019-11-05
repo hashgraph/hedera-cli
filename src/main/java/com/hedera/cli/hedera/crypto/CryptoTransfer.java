@@ -126,18 +126,7 @@ public class CryptoTransfer implements Runnable {
             isTiny = false;
         }
 
-        // Verify transferlist and amountlist are equal
-        if (!verifyEqualList(senderList, recipientList, transferList, amountList)) {
-            return;
-        }
-
-        // Verify list of senders and recipients
-        if (!verifyTransferList(transferList)) {
-            return;
-        }
-
-        // Check sum of transfer is zero
-        if (!isSumZero(senderList, recipientList, amountList, isTiny)) {
+        if (!validateUserInput(senderList, recipientList, transferList, amountList, isTiny)) {
             return;
         }
 
@@ -151,6 +140,23 @@ public class CryptoTransfer implements Runnable {
         } catch (InvalidProtocolBufferException e) {
             shellHelper.printError(e.getMessage());
         }
+    }
+
+    private boolean validateUserInput(List<String> senderList, List<String> recipientList, List<String> transferList,
+            List<String> amountList, boolean isTiny) {
+        // Verify transferlist and amountlist are equal
+        if (!verifyEqualList(senderList, recipientList, transferList, amountList)) {
+            return false;
+        }
+        // Verify list of senders and recipients
+        if (!verifyTransferList(transferList)) {
+            return false;
+        }
+        // Check sum of transfer is zero
+        if (!isSumZero(senderList, recipientList, amountList, isTiny)) {
+            return false;
+        }
+        return true;
     }
 
     public void reviewAndExecute(AccountId operatorId, Map<Integer, PreviewTransferList> map)
