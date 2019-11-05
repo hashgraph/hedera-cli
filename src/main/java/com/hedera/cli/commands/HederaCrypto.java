@@ -46,8 +46,6 @@ public class HederaCrypto extends CliDefaults {
                         // Specifying -k flag will set k to be false (and not create a new keypair)
                         @ShellOption(value = {"-k", "--keygen"}, arity = 0, defaultValue = "true") boolean k,
                         @ShellOption(value = {"-pk", "--publicKey"}, defaultValue = "") String pk,
-                        @ShellOption(value = {"-m", "--method"}, defaultValue = "") String m,
-                        @ShellOption(value = {"-r", "--record"}, defaultValue = "false") boolean r,
                         // account delete
                         @ShellOption(value = {"-o", "--oldAccount"}, defaultValue = "") String o,
                         @ShellOption(value = {"-n", "--newAccount"}, defaultValue = "") String n) {
