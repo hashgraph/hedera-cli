@@ -27,10 +27,9 @@ To read what Hedera has to offer, you can check out
 
 ### Description
 
-##### Prerequisites
+#### Prerequisites
 
 Hedera CLI works with Java versions 10/11/12.
-
 
 #### Quick Start
 There are 2 ways to start Hedera CLI.
