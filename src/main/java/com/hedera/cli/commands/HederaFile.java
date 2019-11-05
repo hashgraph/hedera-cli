@@ -3,12 +3,10 @@ package com.hedera.cli.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.hedera.cli.config.InputReader;
 import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.file.File;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
@@ -18,10 +16,7 @@ import org.springframework.shell.standard.ShellOption;
 public class HederaFile extends CliDefaults {
 
     @Autowired
-    private ApplicationContext context;
-
-    @Autowired
-    private InputReader inputReader;
+    private File file;
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "manage hedera file")
@@ -56,7 +51,6 @@ public class HederaFile extends CliDefaults {
         }
         // @formatter:on
         
-        File file = new File();
-        file.handle(context, inputReader, subCommand, args);
+        file.handle(subCommand, args);
     }
 }

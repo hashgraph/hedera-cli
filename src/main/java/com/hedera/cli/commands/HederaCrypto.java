@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.hedera.cli.config.InputReader;
 import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.crypto.Account;
 import com.hedera.cli.hedera.crypto.Transfer;
@@ -16,6 +15,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -26,13 +26,13 @@ public class HederaCrypto extends CliDefaults {
     private ShellHelper shellHelper;
 
     @Autowired
-    private InputReader inputReader;
-
-    @Autowired
     private Account account;
 
     @Autowired
     private Transfer transfer;
+
+    @Getter
+    private String[] transferArgs;
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "manage Hedera account")
@@ -46,8 +46,6 @@ public class HederaCrypto extends CliDefaults {
                         // Specifying -k flag will set k to be false (and not create a new keypair)
                         @ShellOption(value = {"-k", "--keygen"}, arity = 0, defaultValue = "true") boolean k,
                         @ShellOption(value = {"-pk", "--publicKey"}, defaultValue = "") String pk,
-                        @ShellOption(value = {"-m", "--method"}, defaultValue = "") String m,
-                        @ShellOption(value = {"-r", "--record"}, defaultValue = "false") boolean r,
                         // account delete
                         @ShellOption(value = {"-o", "--oldAccount"}, defaultValue = "") String o,
                         @ShellOption(value = {"-n", "--newAccount"}, defaultValue = "") String n) {
@@ -72,7 +70,7 @@ public class HederaCrypto extends CliDefaults {
             case "balance":
                 argsList = addAccountToArgsList(accountId, argsList);
                 if (argsList.isEmpty()) {
-                    shellHelper.printError("Input an account Id");
+                    shellHelper.printError("Please provide an account id");
                 }
                 break;
             case "delete":
@@ -89,7 +87,7 @@ public class HederaCrypto extends CliDefaults {
         objs = argsList.toArray();
         args = Arrays.copyOf(objs, objs.length, String[].class);
         // Pass args onwards and invoke our PicoCli classes
-        account.handle(inputReader, subCommand, args);
+        account.handle(subCommand, args);
     }
 
     public List<String> addAccountToArgsList(String accountId, List<String> argsList) {
@@ -101,6 +99,7 @@ public class HederaCrypto extends CliDefaults {
         }
     }
 
+    // @formatter:off
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "transfer hbars from one Hedera account to another")
     public void transfer(@ShellOption(value = {"-s", "--sender"}, defaultValue = "") String[] sender,
@@ -108,7 +107,6 @@ public class HederaCrypto extends CliDefaults {
                          @ShellOption(value = {"-y", "--skipPreview"}, arity = 0, defaultValue = "false") boolean y,
                          @ShellOption(value = {"-hb", "--hbars"}, defaultValue = "") String[] hb,
                          @ShellOption(value = {"-tb", "--tinybars"}, defaultValue = "") String[] tb) {
-
         // @formatter:on
         List<String> argsList = new ArrayList<>();
 
@@ -116,29 +114,28 @@ public class HederaCrypto extends CliDefaults {
             shellHelper.printError("Recipient cannot be empty");
             return;
         }
-        if (!isEmptyStringArray(hb)) {
-            if (!isEmptyStringArray(tb)) {
-                shellHelper.printError("Amount must be in hbar or tinybar");
-                return;
-            } else {
-                // hbar args
-                argsList = createArgList(argsList, hb, sender, recipient, y, false);
-            }
-        }
-        if (isEmptyStringArray(hb)) {
-            if (isEmptyStringArray(tb)) {
-                shellHelper.printError("Amount cannot be empty");
-                return;
-            } else {
-                // tinybar args
-                argsList = createArgList(argsList, tb, sender, recipient, y, true);
-            }
+
+        if (!isEmptyStringArray(hb) && !isEmptyStringArray(tb)) {
+            shellHelper.printError("Transfer amounts must either be in hbars or tinybars, not both");
+            return;
         }
 
+        if (!isEmptyStringArray(hb)) { // hbar args
+            argsList = createArgList(argsList, hb, sender, recipient, y, false);
+        }
+
+        if (!isEmptyStringArray(tb)) { // tinybar args
+            argsList = createArgList(argsList, tb, sender, recipient, y, true);
+        }
+
+        setTransferArgs(argsList);
+
+        transfer.handle(transferArgs);
+    }
+
+    private void setTransferArgs(List<String> argsList) {
         Object[] objs = argsList.toArray();
-        String[] args = Arrays.copyOf(objs, objs.length, String[].class);
-        // @formatter:off
-        transfer.handle(inputReader, args);
+        transferArgs = Arrays.copyOf(objs, objs.length, String[].class);
     }
 
     public List<String> createArgList(List<String> argsList, String[] amount,

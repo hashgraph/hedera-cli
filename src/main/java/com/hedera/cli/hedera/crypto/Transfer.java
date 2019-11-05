@@ -13,6 +13,9 @@ import picocli.CommandLine.Command;
 public class Transfer implements Runnable {
 
     @Autowired
+    private InputReader inputReader;
+
+    @Autowired
     private CryptoTransfer cryptoTransfer;
 
     @Override
@@ -20,7 +23,7 @@ public class Transfer implements Runnable {
         CommandLine.usage(this, System.out);
     }
 
-    public void handle(InputReader inputReader, String... args) {
+    public void handle(String... args) {
         cryptoTransfer.setInputReader(inputReader);
         if (args.length == 0) {
             CommandLine.usage(cryptoTransfer, System.out);

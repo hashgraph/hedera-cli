@@ -16,6 +16,9 @@ import picocli.CommandLine.Command;
 public class Account implements Runnable { 
     
     @Autowired
+    private InputReader inputReader;
+
+    @Autowired
     private AccountOperationFactory accountOperationFactory;
 
     @Override
@@ -23,7 +26,7 @@ public class Account implements Runnable {
         CommandLine.usage(this, System.out);
     }
 
-    public void handle(InputReader inputReader, String subCommand, String... args) {
+    public void handle(String subCommand, String... args) {
         if (!subCommand.isEmpty()) {
             Operation o = accountOperationFactory.getOperation(subCommand).orElseThrow();
             o.executeSubCommand(inputReader, args);
