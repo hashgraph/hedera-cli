@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.*;
@@ -53,17 +54,20 @@ public class CryptoTransferTest {
 
     @BeforeEach
     public void setUp() {
-        cryptoTransferOptions = new CryptoTransferOptions();
-        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
         dependent = new CryptoTransferOptions.Dependent();
-        exclusive = new CryptoTransferOptions.Exclusive();
-        cryptoTransferOptions.setDependent(dependent);
-        cryptoTransferOptions.setExclusive(exclusive);
         dependent.setSkipPreview(false);
         dependent.setRecipientList("0.0.114152,0.0.11667");
         dependent.setSenderList("0.0.116681,0.0.117813");
+        
+        exclusive = new CryptoTransferOptions.Exclusive();
         exclusive.setTransferListAmtHBars("0.4,0.01,1.33");
         exclusive.setTransferListAmtTinyBars("400,1000,10030");
+
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+
+        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
     }
 
     @Test
@@ -79,6 +83,19 @@ public class CryptoTransferTest {
     }
 
     @Test
+    public void runFailsWithBothHbAndTb() {
+        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
+        cryptoTransfer.setCryptoTransferOptionsList(cList);
+        cryptoTransfer.run();
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printError(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "Transfer amounts must either be in hbars or tinybars, not both";
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void assertAutowiredDependenciesNotNull() {
         assertNotNull(shellHelper);
         assertNotNull(accountManager);
@@ -90,14 +107,7 @@ public class CryptoTransferTest {
 
     @Test
     public void tinyBarsLoop() {
-
         cryptoTransferOptions = new CryptoTransferOptions();
-
-//        List<CryptoTransferOptions> cryptoTransferOptionsList = Arrays.asList(
-//                new CryptoTransferOptions(),
-//                new CryptoTransferOptions()
-//        );
-
         cryptoTransfer.setHbarAmtArgs("0.4,0.01,1.33");
         cryptoTransfer.setTinybarAmtArgs("400,1000,10030");
         cryptoTransfer.setTransferListArgs("0.0.116681,0.0.117813,0.0.114152,0.0.11667");
@@ -108,62 +118,7 @@ public class CryptoTransferTest {
         assertEquals(exclusive.transferListAmtHBars, cryptoTransfer.getHbarAmtArgs());
         assertEquals(dependent.senderList + "," + dependent.recipientList, cryptoTransfer.getTransferListArgs());
         assertNull(null, cryptoTransfer.getHbarAmtArgs());
-//
-//        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-//        doNothing().when(shellHelper).printInfo(valueCapture.capture());
-//        cryptoTransfer.run();
-//        String actual = valueCapture.getValue();
-//        String expected = "here in tiny loop";
-//        assertEquals(expected, actual);
     }
-
-//    @Test
-//    public void hBarsLoop() {
-//        cryptoTransferOptions.dependent.senderList = "0.0.116681,0.0.117813";
-//        cryptoTransferOptions.dependent.recipientList = "0.0.114152,0.0.11667";
-//        cryptoTransferOptions.exclusive.recipientAmtTinyBars = null;
-//        cryptoTransferOptions.exclusive.recipientAmtHBars = "20,-20,20,20";
-//        cryptoTransferOptions.dependent.mPreview = "no";
-//
-//        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-//        doNothing().when(shellHelper).printInfo(valueCapture.capture());
-//        cryptoTransfer.run();
-//        String actual = valueCapture.getValue();
-//        String expected = "here in hbar loop";
-//        assertEquals(expected, actual);
-//    }
-
-//    @Test
-//    public void noArgsLoopReturnsError() {
-//        cryptoTransferOptions.dependent.senderList = "0.0.116681,0.0.117813";
-//        cryptoTransferOptions.dependent.recipientList = "0.0.114152,0.0.11667";
-//        cryptoTransferOptions.exclusive.recipientAmtTinyBars = null;
-//        cryptoTransferOptions.exclusive.recipientAmtHBars = null;
-//        cryptoTransferOptions.dependent.mPreview = "no";
-//
-//        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-//        doNothing().when(shellHelper).printError(valueCapture.capture());
-//        cryptoTransfer.run();
-//        String actual = valueCapture.getValue();
-//        String expected = "You have to provide a transaction amount in hbars or tinybars";
-//        assertEquals(expected, actual);
-//    }
-
-//    @Test
-//    public void bothArgsLoopReturnsError() {
-//        cryptoTransferOptions.dependent.senderList = "0.0.116681,0.0.117813";
-//        cryptoTransferOptions.dependent.recipientList = "0.0.114152,0.0.11667";
-//        cryptoTransferOptions.exclusive.recipientAmtTinyBars = "-100,-100,100,100";
-//        cryptoTransferOptions.exclusive.recipientAmtHBars = "20,-20,20,20";
-//        cryptoTransferOptions.dependent.mPreview = "no";
-//
-//        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-//        doNothing().when(shellHelper).printError(valueCapture.capture());
-//        cryptoTransfer.run();
-//        String actual = valueCapture.getValue();
-//        String expected = "You have to provide a transaction amount in hbars or tinybars";
-//        assertEquals(expected, actual);
-//}
 
     @Test
     public void verifyEqualListReturnsTrue() {
