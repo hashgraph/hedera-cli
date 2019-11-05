@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import java.util.*;
 
@@ -151,6 +152,49 @@ public class CryptoTransferTest {
         verify(shellHelper).printError(valueCapture.capture());
         String actual = valueCapture.getValue();
         String expected = "Lists aren't the same size";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void runFailsMatchedTransferListAmountListButFailsTransferListVerification() {
+        dependent.setSenderList("0.116681");
+        cryptoTransferOptions.setDependent(dependent);
+        exclusive.setTransferListAmtTinyBars("");
+        cryptoTransferOptions.setExclusive(exclusive);
+        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
+        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
+        cryptoTransfer.setCryptoTransferOptionsList(cList);
+
+        // execute
+        cryptoTransfer.run();
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printError(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        System.out.println("actual: " + actual);
+        String expected = "Please check that accountId is in the right format";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void runFailsSumOfTransferZero() {
+        dependent.setSenderList("0.0.116681");
+        cryptoTransferOptions.setDependent(dependent);
+        exclusive.setTransferListAmtTinyBars("");
+        cryptoTransferOptions.setExclusive(exclusive);
+        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
+        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
+        cryptoTransfer.setCryptoTransferOptionsList(cList);
+
+        when(accountManager.isAccountId(anyString())).thenReturn(true);
+
+        // execute
+        cryptoTransfer.run();
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printError(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "Invalid transfer list. Your transfer list must sum up to 0";
         assertEquals(expected, actual);
     }
 

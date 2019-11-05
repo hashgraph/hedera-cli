@@ -345,6 +345,8 @@ public class CryptoTransfer implements Runnable {
         }
         if (verifyZeroSum(sum)) {
             zeroSum = true;
+        } else {
+            shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
         }
         return zeroSum;
     }
@@ -387,6 +389,8 @@ public class CryptoTransfer implements Runnable {
         }
         if (verifyZeroSum(sum)) {
             zeroSum = true;
+        } else {
+            shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
         }
         return zeroSum;
     }
