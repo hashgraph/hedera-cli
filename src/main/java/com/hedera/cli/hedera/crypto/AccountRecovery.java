@@ -63,21 +63,24 @@ public class AccountRecovery implements Runnable, Operation {
     @Autowired
     private ShellHelper shellHelper;
 
+    @Autowired
+    private AccountGetInfo accountGetInfo;
+
+    @Autowired
+    private InputReader inputReader;
+
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account recovery 0.0.1003|@")
     private String accountId;
 
     private String strMethod = "bip";
     private int index = 0;
-    private InputReader inputReader;
-    private AccountGetInfo accountInfo;
-    private AccountInfo accountRes;
+    private AccountInfo accountInfo;
     private KeyPair keypair;
 
     @Override
     public void run() {
-        accountInfo = new AccountGetInfo();
-        shellHelper.print("Start the recovery process");
+        shellHelper.printInfo("Start the recovery process");
         String verifiedAccountId = accountManager.verifyAccountId(accountId);
         if (verifiedAccountId == null)
             return;
@@ -114,12 +117,12 @@ public class AccountRecovery implements Runnable, Operation {
     }
 
     public boolean verifyAndSaveAccount(String accountId, KeyPair keypair) {
-        AccountInfo accountResponse;
+        AccountInfo accountInfo;
         boolean accountRecovered;
         try {
-            accountResponse = getAccountInfoWithPrivKey(hedera, accountId,
+            accountInfo = getAccountInfoWithPrivKey(hedera, accountId,
                     Ed25519PrivateKey.fromString(keypair.getPrivateKeyHex()));
-            if (accountResponse.getAccountId().equals(AccountId.fromString(accountId)) && !retrieveIndex()) {
+            if (accountInfo.getAccountId().equals(AccountId.fromString(accountId)) && !retrieveIndex()) {
                 // Check if account already exists in index.txt
                 shellHelper.printSuccess("Account recovered and verified with Hedera");
                 accountRecovered = true;
@@ -134,18 +137,17 @@ public class AccountRecovery implements Runnable, Operation {
         return accountRecovered;
     }
 
-
     public AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId, Ed25519PrivateKey accPrivKey) {
         try {
             var client = hedera.createHederaClientWithoutSettingOperator();
             client.setOperator(AccountId.fromString(accountId), accPrivKey);
             AccountInfoQuery q;
             q = new AccountInfoQuery(client).setAccountId(AccountId.fromString(accountId));
-            accountRes = q.execute();
+            accountInfo = q.execute();
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
-        return accountRes;
+        return accountInfo;
     }
 
     public boolean retrieveIndex() {
