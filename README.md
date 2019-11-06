@@ -81,22 +81,25 @@ network use mainnet
 network use testnet
 ```
 #### List Accounts
-
+Accounts that have been created or recovered with Hedera CLI will be saved to local disk and shown here.
 ```bash
 # Lists all accounts associated with current network
 account ls
 ```
 
 #### Switch Accounts
+Switch to use any account that has been recovered and exists in `account ls`
 ```bash
-# Switch to use any account that has been recovered and exists in `account ls`
+# Switches from default operator to current operator (in-memory) 
 account use 0.0.xxxx
 ```
 
 #### Recover Accounts
-
+Recovering a Hedera account using 24 recovery words, where words are separated by spaces.
+AccountGetInfo is called during recovery to confirm the account exists. This will cost some tinybars.
+Account recovered will be saved to local disk.
 ```bash
-# Recovering a Hedera account using 24 recovery words, where words are separated by spaces. This is default.
+# 
 account recovery 0.0.xxxx
 ```
 
@@ -105,9 +108,9 @@ account recovery 0.0.xxxx
 Account creation can be done in multiple ways.
 
 Simple Key
-1) Creating an account using new recovery words and keypair.
+1) Creating an account using new recovery words and keypair (safest).
 2) Creating an account using operator's keypair.
-3) Creating an account using any public key.
+3) Creating an account using any public key. (not yet supported)
 
 MultiSig account creation (not yet supported)
 
@@ -120,17 +123,26 @@ account create -b 100000000 -k
 ```
 
 #### Delete Account
-
+Deletes an account from Hedera, and transfers the remaining funds from the deleted account to the new account.
+The account that is to be delete will be required to sign the transaction for its deletion.
 ```bash
 # Deletes an account from Hedera, and transfers the remaining funds from the deleted account to the new account
 account delete -o 0.0.1001 -n 0.0.1002
 account delete --oldAccount 0.0.1001 --newAccount 0.0.1002
 ```
-#### Account Balance
 
+#### Account Balance
+Account get balance is free.
 ```bash
 # Gets the balance of an account
 account balance 0.0.xxxx
+```
+
+#### Account Info
+Public key and stateproof (upcoming) are some of the information that you can retrieve from the said account.
+```bash
+# Gets the info of an account
+account info 0.0.xxxx
 ```
 
 #### Help
@@ -141,25 +153,29 @@ help
 ```
 
 ### VERSION 0.1.0 (Latest)
+#### Crypto Transfer
+Currently supports 1 Operator, 1 Sender, multiple recipients
+The account(s) that are releasing funds will be required to sign the transaction.
 
+Caveat: Does not allow transferring an amount of 0.
 ```bash
+# Transfer in tinybars (whole numbers)
 
-# Transfer in tinybars
-
-# valid command for single sender and single recipient
+# valid command for single sender [-s] and single recipient [-r]
 transfer -s 0.0.1001 -r 0.0.1002 -tb 4400 
 
-# valid command for single sender and single recipient
+# valid command for single sender [-s] and single recipient [-r]
 transfer -s 0.0.1001 -r 0.0.1002 -tb -4400,4400 
-transfer --sender 0.0.1001 --recipient 0.0.1002 --recipientAmtTinyBars -4400,4400
 
-transfer -s 0.0.1001,0.0.1002 -r 0.0.1003,0.0.1004,0.0.1005 -tb -440000,-500000,440000,200000,300000 
+# valid command for single sender [-s] and multiple recipient [-r]
+transfer -s 0.0.1001 -r 0.0.1003,0.0.1004,0.0.1005 -tb -500000,100000,100000,300000 
 
-# Transfer in hbars
+
+# Transfer in hbars (can be in decimals)
 transfer -s 0.0.1001 -r 0.0.1002 -hb 4.4 
-transfer --sender 0.0.1001 --recipient 0.0.1002 --recipientAmtHBars -4.4,4.4
+transfer --sender 0.0.1001 --recipient 0.0.1002 --recipientAmtHBars 4.4
 
-transfer -s 0.0.1001,0.0.1002 -r 0.0.1003,0.0.1004,0.0.1005 -hb -4.4,-50,4.4,20,30 
+transfer -s 0.0.1001 -r 0.0.1003,0.0.1004,0.0.1005 -hb -50,10,10,30 
 ```
 
 ### VERSION 0.0.4
