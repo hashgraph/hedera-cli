@@ -33,7 +33,17 @@ public class ShellHelper {
      * @return colored message
      */
     public String getColored(String message, PromptColor color) {
-        return (new AttributedStringBuilder()).append(message, AttributedStyle.DEFAULT.foreground(color.toJlineAttributedStyle())).toAnsi();
+        // handle default values if message is null
+        if (message == null) message = "";
+        // handle default attributedStyle if color is null
+        AttributedStyle attributedStyle = AttributedStyle.DEFAULT.foreground(PromptColor.WHITE.toJlineAttributedStyle());
+        if (color != null) {
+            attributedStyle = AttributedStyle.DEFAULT.foreground(color.toJlineAttributedStyle());
+        }
+        // build our attributed string with message and attributedStyle
+        AttributedStringBuilder asb = new AttributedStringBuilder();
+        asb.append(message, attributedStyle);
+        return asb.toAnsi();
     }
 
     public String getInfoMessage(String message) {
