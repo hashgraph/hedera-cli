@@ -145,7 +145,6 @@ public class AccountRecovery implements Runnable, Operation {
             AccountInfoQuery q;
             q = new AccountInfoQuery(client).setAccountId(AccountId.fromString(accountId));
             accountInfo = q.execute();
-            System.out.println(accountInfo);
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
