@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.services.Hapi;
+import com.hedera.cli.services.HederaGrpc;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
@@ -37,7 +37,7 @@ public class AccountDeleteTest {
     private InputReader inputReader;
 
     @Mock
-    private Hapi hapi;
+    private HederaGrpc hederaGrpc;
 
     @Test
     public void testDeletingAFile() throws IOException {
@@ -96,6 +96,6 @@ public class AccountDeleteTest {
         accountDelete.setSkipPreview(true);
         accountDelete.run();
 
-        verify(hapi, times(1)).executeAccountDelete(any(), any(), any());
+        verify(hederaGrpc, times(1)).executeAccountDelete(any(), any(), any());
     }
 }

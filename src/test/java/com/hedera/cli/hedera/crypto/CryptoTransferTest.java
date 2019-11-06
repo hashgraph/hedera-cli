@@ -257,9 +257,9 @@ public class CryptoTransferTest {
 
     @Test
     public void verifyEqualListReturnsFalse() {
-        List<String> senderList = Arrays.asList("0.0.116681,0.0.117813".split(","));
+        List<String> senderList = Arrays.asList("0.0.116681".split(","));
         List<String> recipientList = Arrays.asList("0.0.114152,0.0.11667".split(","));
-        List<String> transferList = Arrays.asList(("0.0.117813,0.0.114152,0.0.11667").split(","));
+        List<String> transferList = Arrays.asList(("0.0.116681,0.0.114152,0.0.11667").split(","));
         List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
         assertFalse(cryptoTransfer.verifyEqualList(senderList, recipientList, transferList, amountList));
 
@@ -272,7 +272,7 @@ public class CryptoTransferTest {
     }
 
     @Test
-    public void verifyTransferListReturnsFalseAccounts() {
+    public void verifyTransferListReturnsFalse() {
         List<String> senderList = Arrays.asList("0.117813".split(","));
         List<String> recipientList = Arrays.asList("114152,0.0.11667".split(","));
         List<String> transferList = Arrays.asList(("0.117813,114152,0.0.11667").split(","));
@@ -296,22 +296,6 @@ public class CryptoTransferTest {
         when(accountManager.isAccountId("0.0.114152")).thenReturn(true);
         when(accountManager.isAccountId("0.0.11667")).thenReturn(true);
         assertTrue(cryptoTransfer.verifyTransferList(transferList));
-    }
-
-    @Test
-    public void verifyTransferListReturnsFalse() {
-        List<String> senderList = Arrays.asList("0.0.116681,0.0.114152".split(","));
-        List<String> recipientList = Arrays.asList("0.0.11667".split(","));
-        List<String> transferList = Arrays.asList(("0.0.116681,0.0.114152,0.0.11667").split(","));
-        List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
-        assertFalse(cryptoTransfer.verifyEqualList(senderList, recipientList, transferList, amountList));
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        doNothing().when(shellHelper).printError(valueCapture.capture());
-        cryptoTransfer.verifyTransferList(transferList);
-        String actual = valueCapture.getValue();
-        String expected = "Please check that accountId is in the right format";
-        assertEquals(expected, actual);
     }
 
     @Test

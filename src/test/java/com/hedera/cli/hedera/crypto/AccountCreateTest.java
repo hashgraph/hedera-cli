@@ -15,7 +15,7 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
-import com.hedera.cli.services.Hapi;
+import com.hedera.cli.services.HederaGrpc;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
@@ -39,7 +39,7 @@ public class AccountCreateTest {
   private Hedera hedera;
 
   @Mock
-  private Hapi hapi;
+  private HederaGrpc hederaGrpc;
 
   private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet", "fan",
       "donkey", "carry", "chuckle", "assault", "leopard", "fee", "kingdom", "cheap", "odor", "okay", "crazy", "raven",
@@ -59,13 +59,13 @@ public class AccountCreateTest {
     Ed25519PrivateKey operatorKey = Ed25519PrivateKey.fromString(keyPair.getPrivateKeyHex());
     when(hedera.getOperatorKey()).thenReturn(operatorKey);
     when(hedera.getOperatorId()).thenReturn(AccountId.fromString(accountId));
-    when(hapi.createNewAccount(any(Ed25519PublicKey.class), any(AccountId.class), anyLong()))
+    when(hederaGrpc.createNewAccount(any(Ed25519PublicKey.class), any(AccountId.class), anyLong()))
         .thenReturn(AccountId.fromString("0.0.1235"));
     JsonObject account = new JsonObject();
     account.add("accountId", "0.0.1235");
     account.add("privateKey", "somePrivateKey");
     account.add("publicKey", "somePublicKey");
-    when(hapi.printAccount(anyString(), anyString(), anyString())).thenReturn(account);
+    when(hederaGrpc.printAccount(anyString(), anyString(), anyString())).thenReturn(account);
     AccountManager accountManager = mock(AccountManager.class);
     when(hedera.getAccountManager()).thenReturn(accountManager);
 

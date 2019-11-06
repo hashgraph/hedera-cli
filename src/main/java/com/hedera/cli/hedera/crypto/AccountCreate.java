@@ -10,7 +10,7 @@ import com.hedera.cli.hedera.keygen.HGCSeed;
 import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.setup.Setup;
-import com.hedera.cli.services.Hapi;
+import com.hedera.cli.services.HederaGrpc;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -47,7 +47,7 @@ public class AccountCreate implements Runnable, Operation {
     private Setup setup;
 
     @Autowired
-    private Hapi hapi;
+    private HederaGrpc hederaGrpc;
 
     @Spec
     private CommandSpec spec;
@@ -85,19 +85,19 @@ public class AccountCreate implements Runnable, Operation {
             List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
             KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
             var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
-            accountId = hapi.createNewAccount(newPublicKey, hedera.getOperatorId(), initBal);
-            account = hapi.printAccount(accountId.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
+            accountId = hederaGrpc.createNewAccount(newPublicKey, hedera.getOperatorId(), initBal);
+            account = hederaGrpc.printAccount(accountId.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
             hedera.getAccountManager().setDefaultAccountId(accountId, keypair);
         } else {
             // Else keyGen always set to false and read from default.txt which contains
             // operator keys
             var operatorPrivateKey = hedera.getOperatorKey();
             var operatorPublicKey = operatorPrivateKey.getPublicKey();
-            accountId = hapi.createNewAccount(operatorPublicKey, hedera.getOperatorId(), initBal);
+            accountId = hederaGrpc.createNewAccount(operatorPublicKey, hedera.getOperatorId(), initBal);
             // save to local disk
             String privateKey = operatorPrivateKey.toString();
             String publicKey = operatorPublicKey.toString();
-            account = hapi.printAccount(accountId.toString(), privateKey, publicKey);
+            account = hederaGrpc.printAccount(accountId.toString(), privateKey, publicKey);
             hedera.getAccountManager().setDefaultAccountId(accountId, Ed25519PrivateKey.fromString(privateKey));
         }
     }

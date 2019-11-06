@@ -49,7 +49,7 @@ public class Setup implements Runnable {
             return;
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         List<String> phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
-        if (phraseList.size() != 24)
+        if (phraseList == null)
             return;
         String method = inputReader
                 .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
