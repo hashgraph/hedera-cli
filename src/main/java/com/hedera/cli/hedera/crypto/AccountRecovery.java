@@ -122,7 +122,8 @@ public class AccountRecovery implements Runnable, Operation {
         try {
             accountInfo = getAccountInfoWithPrivKey(hedera, accountId,
                     Ed25519PrivateKey.fromString(keypair.getPrivateKeyHex()));
-            if (accountInfo.getAccountId().equals(AccountId.fromString(accountId)) && !retrieveIndex()) {
+            boolean accountIdMatches = accountInfo.getAccountId().equals(AccountId.fromString(accountId));
+            if (accountIdMatches && !retrieveIndex()) {
                 // Check if account already exists in index.txt
                 shellHelper.printSuccess("Account recovered and verified with Hedera");
                 accountRecovered = true;
@@ -144,6 +145,7 @@ public class AccountRecovery implements Runnable, Operation {
             AccountInfoQuery q;
             q = new AccountInfoQuery(client).setAccountId(AccountId.fromString(accountId));
             accountInfo = q.execute();
+            System.out.println(accountInfo);
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
@@ -154,6 +156,9 @@ public class AccountRecovery implements Runnable, Operation {
         String pathToIndexTxt = accountManager.pathToIndexTxt();
         boolean accountExists = false;
         Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
+        if (readingIndexAccount == null) {
+            return false;
+        }
         for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
             if (entry.getKey().equals(accountId)) {
                 accountExists = true;
