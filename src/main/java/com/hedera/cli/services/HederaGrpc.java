@@ -23,6 +23,7 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
+import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,10 +56,15 @@ public class HederaGrpc {
     TransactionReceipt receipt;
     try {
       receipt = tx.executeForReceipt();
-      if (receipt != null) {
+      if (ResponseCodeEnum.SUCCESS.equals(receipt.getStatus())) {
         accountId = receipt.getAccountId();
+      }
+      else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
+        shellHelper.printError("Seems like your current operator's key does not match");
+        return null;
       } else {
-        shellHelper.printError("Receipt is null");
+        shellHelper.printError(receipt.getStatus().toString());
+        return null;
       }
     } catch (Exception e) {
       shellHelper.printError(e.getMessage());
@@ -100,7 +106,6 @@ public class HederaGrpc {
             .executeForReceipt();
         receiptStatus(receipt, hedera, newAccount, oldAccount);
       }
-
     } catch (Exception e) {
       shellHelper.printError(e.getMessage());
     }
@@ -111,13 +116,15 @@ public class HederaGrpc {
   }
 
   private void receiptStatus(TransactionReceipt receipt, Hedera hedera, AccountId newAccount, AccountId oldAccount) {
-    if (receipt.getStatus().toString().equals("SUCCESS")) {
+    if (receipt.getStatus().equals(ResponseCodeEnum.SUCCESS)) {
       shellHelper.printSuccess(receipt.getStatus().toString());
       getBalance(hedera, newAccount);
       boolean fileDeleted = deleteJsonAccountFromDisk(oldAccount);
       shellHelper.printSuccess("File deleted from disk " + fileDeleted);
+    } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
+        shellHelper.printError("Seems like your current operator's key does not match");
     } else {
-      shellHelper.printError("Some error, account not deleted");
+      shellHelper.printError("Error: " + receipt.getStatus().toString());
     }
   }
 
