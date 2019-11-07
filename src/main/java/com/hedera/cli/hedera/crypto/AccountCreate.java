@@ -86,23 +86,27 @@ public class AccountCreate implements Runnable, Operation {
             KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
             var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
             accountId = hederaGrpc.createNewAccount(newPublicKey, hedera.getOperatorId(), initBal);
-            account = hederaGrpc.printAccount(accountId.toString(), keypair.getPrivateKeyHex(), keypair.getPublicKeyHex());
-            hedera.getAccountManager().setDefaultAccountId(accountId, keypair);
+            if (accountId != null && keypair != null) {
+                account = hederaGrpc.printAccount(accountId.toString(), keypair.getPrivateKeyHex(),
+                        keypair.getPublicKeyHex());
+                hedera.getAccountManager().setDefaultAccountId(accountId, keypair);
+            }
+
         } else {
             // Else keyGen always set to false and read from default.txt which contains
             // operator keys
             var operatorPrivateKey = hedera.getOperatorKey();
             var operatorPublicKey = operatorPrivateKey.getPublicKey();
             accountId = hederaGrpc.createNewAccount(operatorPublicKey, hedera.getOperatorId(), initBal);
-            // save to local disk
-            String privateKey = operatorPrivateKey.toString();
-            String publicKey = operatorPublicKey.toString();
-            account = hederaGrpc.printAccount(accountId.toString(), privateKey, publicKey);
-            hedera.getAccountManager().setDefaultAccountId(accountId, Ed25519PrivateKey.fromString(privateKey));
+            if (operatorPrivateKey != null && operatorPublicKey != null && accountId != null) {
+                // save to local disk
+                String privateKey = operatorPrivateKey.toString();
+                String publicKey = operatorPublicKey.toString();
+                account = hederaGrpc.printAccount(accountId.toString(), privateKey, publicKey);
+                hedera.getAccountManager().setDefaultAccountId(accountId, Ed25519PrivateKey.fromString(privateKey));
+            }
         }
     }
-
-
 
     private void setMinimum(int min) {
         if (min < 0) {
