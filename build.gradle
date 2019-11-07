@@ -96,6 +96,12 @@ application {
     mainClassName = 'com.hedera.cli.Application'
 }
 
+processResources {
+    filesMatching('application.properties') {
+        expand(project.properties)
+    }
+}
+
 dokka {
     outputFormat = 'markdown' 
     outputDirectory = "$buildDir/javadoc"
