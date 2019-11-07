@@ -62,8 +62,6 @@ public class HederaCrypto extends CliDefaults {
                 if (!pk.isEmpty()) argsList.add("-pk " + pk);
                 break;
             case "update":
-                shellHelper.printError("To be implemented");
-                break;
             case "info":
             case "recovery":
             case "use":
@@ -79,6 +77,9 @@ public class HederaCrypto extends CliDefaults {
                 if (!n.isEmpty()) argsList.add("-n " + n);
                 break;
             case "ls":
+                break;
+            case "default":
+                shellHelper.printError("To be implemented");
                 break;
             default:
                 break;

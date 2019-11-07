@@ -65,18 +65,18 @@ public class HederaCryptoTest {
     assertEquals(expected2, actual2);
   }
 
-  @Test
-  public void accountUpdate() {
-    // account update
-    subCommand = "update";
-
-    hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
-    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-    verify(shellHelper).printError(valueCapture.capture());
-    String actual = valueCapture.getValue();
-    String expected = "To be implemented";
-    assertEquals(expected, actual);
-  }
+//  @Test
+//  public void accountUpdate() {
+//    // account update
+//    subCommand = "update";
+//
+//    hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
+//    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+//    verify(shellHelper).printError(valueCapture.capture());
+//    String actual = valueCapture.getValue();
+//    String expected = "To be implemented";
+//    assertEquals(expected, actual);
+//  }
 
   @Test
   public void accountInfo() {
