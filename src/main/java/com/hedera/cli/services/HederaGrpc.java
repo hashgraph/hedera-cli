@@ -15,11 +15,10 @@ import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
-import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
-import com.hedera.hashgraph.sdk.account.AccountDeleteTransaction;
-import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.account.*;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
@@ -175,4 +174,62 @@ public class HederaGrpc {
     return fileDeleted;
   }
 
+    public void executeAccountUpdate(AccountId accountId, Ed25519PrivateKey newKey, Ed25519PrivateKey originalKey) {
+        Client client = hedera.createHederaClient();
+        try {
+            TransactionId transactionId = new TransactionId(hedera.getOperatorId());
+            TransactionReceipt receipt = new AccountUpdateTransaction(client).setAccountForUpdate(accountId)
+                    .setTransactionId(transactionId).setKey(newKey.getPublicKey())
+                    // Sign with the previous key and the new key
+                    .sign(originalKey).sign(newKey).executeForReceipt();
+            // Now we fetch the account information to check if the key was changed
+            if (receipt.getStatus().equals(ResponseCodeEnum.SUCCESS)) {
+                shellHelper.printSuccess("Account updated: " + receipt.getStatus().toString());
+                shellHelper.printInfo("Retrieving account info to verify the current key..");
+                AccountInfo info = client.getAccount(accountId);
+                shellHelper.printInfo("Public key: " + info.getKey());
+                boolean fileUpdated = updateJsonAccountInDisk(accountId, newKey);
+                shellHelper.printSuccess("File updated in disk " + fileUpdated);
+            } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
+                shellHelper.printError("Seems like your current operator's key does not match");
+            } else {
+                shellHelper.printError("Error: " + receipt.getStatus().toString());
+            }
+        } catch (HederaException e) {
+            shellHelper.printError(e.getMessage());
+        }
+    }
+
+    public boolean updateJsonAccountInDisk(AccountId accountId, Ed25519PrivateKey newKey) {
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
+        boolean fileUpdated = false;
+
+        String pathToCurrentJsonAccount;
+        Map<String, String> updatedMap;
+
+        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
+
+        Set<Map.Entry<String, String>> setOfEntries = readingIndexAccount.entrySet();
+        Iterator<Map.Entry<String, String>> iterator = setOfEntries.iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            String accountIdIndex = entry.getKey(); // key refers to the account id
+            String valueIndex = entry.getValue(); // value refers to the filename json
+
+            if (accountIdIndex.equals(accountId.toString())) {
+                // update the associated json file in disk
+                pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + valueIndex + ".json";
+                Path filePathToJson = Paths.get(dataDirectory.getDataDir().toString(), pathToCurrentJsonAccount);
+                // TODO
+                File file = new File(filePathToJson.toString());
+                fileUpdated = file.delete();
+                iterator.remove();
+            }
+        }
+        // write to file
+        updatedMap = readingIndexAccount;
+        dataDirectory.writeFile(pathToIndexTxt, dataDirectory.formatMapToIndex(updatedMap));
+        return fileUpdated;
+    }
 }
