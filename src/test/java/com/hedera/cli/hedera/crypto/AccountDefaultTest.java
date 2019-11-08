@@ -1,6 +1,5 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.config.InputReader;
 import com.hedera.cli.services.HederaGrpc;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -10,7 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 public class AccountDefaultTest {
