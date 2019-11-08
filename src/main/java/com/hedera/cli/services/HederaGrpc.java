@@ -11,6 +11,7 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountManager;
+import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.shell.ShellHelper;
@@ -45,6 +46,9 @@ public class HederaGrpc {
 
     @Autowired
     private AccountManager accountManager;
+
+    @Autowired
+    private AddressBookManager addressBookManager;
 
     public AccountId createNewAccount(Ed25519PublicKey publicKey, AccountId operatorId, long initBal) {
         AccountId accountId = null;
@@ -233,5 +237,32 @@ public class HederaGrpc {
             }
         }
         return fileUpdated;
+    }
+
+    public boolean updateDefaultAccountInDisk(AccountId accountId) {
+        String pathToIndexTxt = accountManager.pathToIndexTxt();
+        String currentNetwork = addressBookManager.getCurrentNetworkAsString();
+        String pathToDefaultAccount = currentNetwork + File.separator + "accounts" + File.separator
+                + AddressBookManager.ACCOUNT_DEFAULT_FILE;
+
+        // Check if the account chosen as default exists in index.txt
+        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
+
+        Set<Map.Entry<String, String>> setOfEntries = readingIndexAccount.entrySet();
+        Iterator<Map.Entry<String, String>> iterator = setOfEntries.iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            String accountIdIndex = entry.getKey(); // key refers to the account id
+            String valueIndex = entry.getValue(); // value refers to the filename json
+            // If account chosen exists, update default.txt with new operator's filename
+            if (AccountId.fromString(accountIdIndex).equals(accountId)) {
+                dataDirectory.writeFile(pathToDefaultAccount, valueIndex + ":" + accountId);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
     }
 }
