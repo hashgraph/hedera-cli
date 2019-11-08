@@ -186,7 +186,8 @@ public class HederaGrpc {
                 shellHelper.printSuccess("Account updated: " + receipt.getStatus().toString());
                 shellHelper.printInfo("Retrieving account info to verify the current key..");
                 AccountInfo info = client.getAccount(accountId);
-                shellHelper.printInfo("Public key: " + info.getKey());
+                shellHelper.printInfo("\nPublic key in Encoded form: " + info.getKey());
+                shellHelper.printInfo("\nPublic key in HEX: " + info.getKey().toString().substring(24));
                 boolean fileUpdated = updateJsonAccountInDisk(accountId, newKey);
                 shellHelper.printSuccess("File updated in disk " + fileUpdated);
             } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {

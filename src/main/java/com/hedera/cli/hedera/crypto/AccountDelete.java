@@ -83,8 +83,9 @@ public class AccountDelete implements Runnable, Operation {
             shellHelper.print("Info is correct, let's go!");
             hederaGrpc.executeAccountDelete(oldAccount, oldAccountPrivKey, newAccount);
             return;
+        } else {
+            shellHelper.printError("Nope, incorrect, let's make some changes");
         }
-        shellHelper.printError("Nope, incorrect, let's make some changes");
     }
 
     private boolean promptPreview(AccountId oldAccountId, AccountId newAccount) {
