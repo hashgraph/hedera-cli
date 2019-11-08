@@ -9,6 +9,8 @@ plugins {
     id 'net.researchgate.release' version '2.6.0'
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.4'
+    // Lint and code standards
+    id 'pmd'
 }
 
 release {
@@ -94,6 +96,12 @@ dependencies {
 application {
     // Define the main class for the application
     mainClassName = 'com.hedera.cli.Application'
+}
+
+pmd {
+  ignoreFailures = true // temporarily set to true
+  reportsDir = file("$project.buildDir/reports/pmd")
+  toolVersion = "6.19.0"
 }
 
 dokka {
