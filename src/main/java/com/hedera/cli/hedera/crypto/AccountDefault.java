@@ -30,7 +30,7 @@ public class AccountDefault implements Runnable, Operation {
 
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) account info 0.0.1003|@")
+            + "@|fg(yellow) account default 0.0.1003|@")
     private String accountIDInString;
 
     @Override
