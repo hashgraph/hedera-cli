@@ -93,6 +93,13 @@ account ls
 account use 0.0.xxxx
 ```
 
+#### Default Accounts (v0.1.3)
+The account must have been recovered and exists in `account ls`
+```bash
+# Sets the account as default operator. 
+account default 0.0.xxxx
+```
+
 #### Recover Accounts
 
 ```bash
@@ -120,7 +127,8 @@ account create -b 100000000 -k
 ```
 
 #### Delete Account
-
+Cli will prompt for key of account that is set for deletion. 
+Only the account for deletion can sign the transaction.
 ```bash
 # Deletes an account from Hedera, and transfers the remaining funds from the deleted account to the new account
 account delete -o 0.0.1001 -n 0.0.1002
@@ -133,6 +141,20 @@ account delete --oldAccount 0.0.1001 --newAccount 0.0.1002
 account balance 0.0.xxxx
 ```
 
+#### Account Get Info
+Gets the information of an account, such as the public keys, and stateproofs (upcoming)
+```bash
+# Gets the information of an account
+account info 0.0.xxxx
+```
+
+#### Account Update (v0.1.3)
+Cli will prompt for original key as well as the new key that said account will be updated with.
+```bash
+# Updated the keypair of account
+account info 0.0.xxxx 
+```
+
 #### Help
 
 ```bash
@@ -140,7 +162,7 @@ account balance 0.0.xxxx
 help
 ```
 
-### VERSION 0.1.0 (Latest)
+### VERSION 0.1.0
 
 ```bash
 
