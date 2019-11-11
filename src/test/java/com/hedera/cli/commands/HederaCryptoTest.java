@@ -74,7 +74,20 @@ public class HederaCryptoTest {
     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
     verify(shellHelper).printError(valueCapture.capture());
     String actual = valueCapture.getValue();
-    String expected = "To be implemented";
+    String expected = "Please provide an account id";
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  public void accountDefault() {
+    // account update
+    subCommand = "default";
+
+    hederaCrypto.account(subCommand, accountId, y, b, k, pk, o, n);
+    ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+    verify(shellHelper).printError(valueCapture.capture());
+    String actual = valueCapture.getValue();
+    String expected = "Please provide an account id";
     assertEquals(expected, actual);
   }
 

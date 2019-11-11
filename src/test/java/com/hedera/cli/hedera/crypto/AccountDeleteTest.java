@@ -61,7 +61,7 @@ public class AccountDeleteTest {
     }
 
     @Test
-    public void run() {
+    public void runWithoutPreview() {
         accountDelete.setOldAccountInString("0.0.1001");
         accountDelete.setNewAccountInString("0.0.1002");
         // generate an Ed25519 private key for testing
@@ -97,5 +97,21 @@ public class AccountDeleteTest {
         accountDelete.run();
 
         verify(hederaGrpc, times(1)).executeAccountDelete(any(), any(), any());
+    }
+
+    @Test
+    public void runWithPreviewCorrectInfo() {
+        accountDelete.setOldAccountInString("0.0.1001");
+        accountDelete.setNewAccountInString("0.0.1002");
+        // generate an Ed25519 private key for testing
+        Ed25519PrivateKey oldAccountPrivKey = Ed25519PrivateKey.generate();
+        when(inputReader.prompt(anyString(), anyString(), anyBoolean())).thenReturn(oldAccountPrivKey.toString());
+        when(inputReader.prompt(
+                "\nAccount to be deleted: " + accountDelete.getOldAccountInString() + "\nFunds from deleted account to be transferred to: "
+                        + accountDelete.getNewAccountInString() + "\n\nIs this correct?" + "\nyes/no")).thenReturn("yes");
+        accountDelete.setSkipPreview(false);
+        accountDelete.run();
+        verify(hederaGrpc, times(1)).executeAccountDelete(any(), any(), any());
+        verify(shellHelper, times(1)).print("Info is correct, let's go!");
     }
 }
