@@ -1,27 +1,31 @@
 package com.hedera.cli.commands;
 
 import com.hedera.cli.defaults.CliDefaults;
+import com.hedera.cli.shell.ShellHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 
 @ShellComponent
-@PropertySource("classpath:application.properties")
 public class HederaVersion extends CliDefaults {
 
+    @Value("${app.version}")
+    private String version;
+
+    @Value("${app.name}")
+    private String name;
+
+    @Value("${app.licenseYear}")
+    private String licenseYear;
+
     @Autowired
-    private Environment env;
+    ShellHelper shellHelper;
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "hedera-cli version")
     public void version() {
-        System.out.println(readProperty());
-    }
-
-    public String readProperty() {
-        return env.getProperty("info.app.version");
+        shellHelper.printInfo(version);
     }
 }

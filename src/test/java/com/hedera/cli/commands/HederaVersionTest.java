@@ -1,11 +1,12 @@
 package com.hedera.cli.commands;
 
+import com.hedera.cli.shell.ShellHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.mockito.Mockito.times;
@@ -18,12 +19,15 @@ public class HederaVersionTest {
     @InjectMocks
     private HederaVersion hederaVersion;
 
+    @Value("${app.version}")
+    private String version;
+
     @Mock
-    private Environment env;
+    ShellHelper shellHelper;
 
     @Test
     public void version() {
         hederaVersion.version();
-        verify(env, times(1)).getProperty("info.app.version");
+        verify(shellHelper, times(1)).printInfo(version);
     }
 }
