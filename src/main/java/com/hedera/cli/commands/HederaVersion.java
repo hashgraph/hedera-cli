@@ -21,7 +21,7 @@ public class HederaVersion extends CliDefaults {
     private String licenseYear;
 
     @Autowired
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @ShellMethodAvailability("isDefaultNetworkAndAccountSet")
     @ShellMethod(value = "hedera-cli version")

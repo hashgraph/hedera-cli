@@ -23,7 +23,7 @@ public class HederaVersionTest {
     private String version;
 
     @Mock
-    ShellHelper shellHelper;
+    private ShellHelper shellHelper;
 
     @Test
     public void version() {
