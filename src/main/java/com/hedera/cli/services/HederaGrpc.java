@@ -190,9 +190,14 @@ public class HederaGrpc {
                 shellHelper.printSuccess("Account updated: " + receipt.getStatus().toString());
                 shellHelper.printInfo("Retrieving account info to verify the current key..");
                 AccountInfo info = client.getAccount(accountId);
-                shellHelper.printInfo("Public key: " + info.getKey());
+                shellHelper.printInfo("\nPublic key in Encoded form: " + info.getKey());
+                shellHelper.printInfo("\nPublic key in HEX: " + info.getKey().toString().substring(24));
                 boolean fileUpdated = updateJsonAccountInDisk(accountId, newKey);
-                shellHelper.printSuccess("File updated in disk " + fileUpdated);
+                if (fileUpdated) {
+                    shellHelper.printSuccess("File updated in disk " + fileUpdated);
+                } else {
+                    shellHelper.printWarning("AccountId does not exist locally, no file was updated. Use `account recovery` to save to local disk.");
+                }
             } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
                 shellHelper.printError("Seems like your current operator's key does not match");
             } else {
