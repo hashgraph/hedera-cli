@@ -36,6 +36,9 @@ public class AccountOperationFactory {
   @Autowired
   private AccountCreate accountCreate;
 
+  @Autowired
+  private AccountDefault accountDefault;
+
   private Map<String, Operation> operationMap = new HashMap<>();
   
   @PostConstruct
@@ -48,6 +51,7 @@ public class AccountOperationFactory {
     operationMap.put("delete", accountDelete);
     operationMap.put("update", accountUpdate);
     operationMap.put("create", accountCreate);
+    operationMap.put("default", accountDefault);
   }
 
   public Optional<Operation> getOperation(String operator) {

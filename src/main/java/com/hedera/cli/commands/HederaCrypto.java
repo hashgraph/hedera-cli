@@ -61,11 +61,12 @@ public class HederaCrypto extends CliDefaults {
                 if (!b.isEmpty()) argsList.add("-b " + b);
                 if (!pk.isEmpty()) argsList.add("-pk " + pk);
                 break;
+            case "use":
+            case "default":
+            case "recovery":
+            case "balance":
             case "update":
             case "info":
-            case "recovery":
-            case "use":
-            case "balance":
                 argsList = addAccountToArgsList(accountId, argsList);
                 if (argsList.isEmpty()) {
                     shellHelper.printError("Please provide an account id");
@@ -77,9 +78,6 @@ public class HederaCrypto extends CliDefaults {
                 if (!n.isEmpty()) argsList.add("-n " + n);
                 break;
             case "ls":
-                break;
-            case "default":
-                shellHelper.printError("To be implemented");
                 break;
             default:
                 break;
