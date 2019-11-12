@@ -52,16 +52,15 @@ public class HederaGrpc {
 
     public AccountId createNewAccount(Ed25519PublicKey publicKey, AccountId operatorId, long initBal) {
         AccountId accountId = null;
-        var client = hedera.createHederaClient();
-        TransactionId transactionId = new TransactionId(operatorId);
-        var tx = new AccountCreateTransaction(client)
-                // The only _required_ property here is `key`
-                .setTransactionId(transactionId).setKey(publicKey).setInitialBalance(initBal)
-                .setAutoRenewPeriod(Duration.ofSeconds(7890000));
+        try (Client client = hedera.createHederaClient()) {
+            TransactionId transactionId = new TransactionId(operatorId);
+            var tx = new AccountCreateTransaction(client)
+                    // The only _required_ property here is `key`
+                    .setTransactionId(transactionId).setKey(publicKey).setInitialBalance(initBal)
+                    .setAutoRenewPeriod(Duration.ofSeconds(7890000));
 
-        // This will wait for the receipt to become available
-        TransactionReceipt receipt;
-        try {
+            // This will wait for the receipt to become available
+            TransactionReceipt receipt;
             receipt = tx.executeForReceipt();
             if (ResponseCodeEnum.SUCCESS.equals(receipt.getStatus())) {
                 accountId = receipt.getAccountId();
@@ -95,9 +94,8 @@ public class HederaGrpc {
     }
 
     public void executeAccountDelete(AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey, AccountId newAccount) {
-        var client = hedera.createHederaClient();
-        TransactionId transactionId = new TransactionId(hedera.getOperatorId());
-        try {
+        try (Client client = hedera.createHederaClient()) {
+            TransactionId transactionId = new TransactionId(hedera.getOperatorId());
             boolean privateKeyDuplicate = checkIfOperatorKeyIsTheSameAsAccountToBeDeleted(hedera, oldAccountPrivKey);
             // account that is to be deleted must sign its own transaction
             if (privateKeyDuplicate) {
@@ -135,12 +133,11 @@ public class HederaGrpc {
     }
 
     public void getBalance(Hedera hedera, AccountId newAccount) {
-        try {
+        try (Client client = hedera.createHederaClient()) {
             // Set a sleep to wait for hedera to come to consensus for the funds of deleted
             // account
             // to be transferred to the new account
             Thread.sleep(4000);
-            Client client = hedera.createHederaClient();
             client.setOperator(hedera.getOperatorId(), hedera.getOperatorKey());
             var newAccountBalance = client.getAccountBalance(newAccount);
             shellHelper.printSuccess("Account " + newAccount + " new balance is " + newAccountBalance);
@@ -182,8 +179,7 @@ public class HederaGrpc {
     }
 
     public void executeAccountUpdate(AccountId accountId, Ed25519PrivateKey newKey, Ed25519PrivateKey originalKey) {
-        Client client = hedera.createHederaClient();
-        try {
+        try (Client client = hedera.createHederaClient()) {
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
             TransactionReceipt receipt = new AccountUpdateTransaction(client).setAccountForUpdate(accountId)
                     .setTransactionId(transactionId).setKey(newKey.getPublicKey())
@@ -207,7 +203,7 @@ public class HederaGrpc {
             } else {
                 shellHelper.printError(receipt.getStatus().toString());
             }
-        } catch (HederaException e) {
+        } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
     }
