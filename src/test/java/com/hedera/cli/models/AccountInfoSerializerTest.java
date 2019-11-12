@@ -26,7 +26,6 @@ import com.google.protobuf.ByteString;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.Claim;
-import com.hedera.hashgraph.sdk.crypto.Key;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
 import org.junit.jupiter.api.Test;
@@ -160,9 +159,8 @@ public class AccountInfoSerializerTest {
     return expirationTime;
   }
 
-  private Key getKey(Map<String, Object> testAccount) {
-    Key key = (Key) Ed25519PublicKey.fromString(testAccount.get("key").toString());
-    return key;
+  private Ed25519PublicKey getKey(Map<String, Object> testAccount) {
+    return Ed25519PublicKey.fromString(testAccount.get("key").toString());
   }
 
   private List<Claim> getClaims(Map<String, Object> testAccount) {

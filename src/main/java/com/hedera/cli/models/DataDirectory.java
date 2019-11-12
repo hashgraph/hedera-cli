@@ -122,8 +122,7 @@ public class DataDirectory {
     }
 
     // attempts to read a file, if file does not exist, write the default value into
-    // it
-    // and return default value
+    // it and return default value
     public String readFile(@NonNull String pathToFile, String defaultValue) {
         String value = readFile(pathToFile);
         if (value.isEmpty()) {
