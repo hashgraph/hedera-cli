@@ -7,6 +7,7 @@ import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountInfoSerializer;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
@@ -52,7 +53,6 @@ public class AccountGetInfo implements Runnable, Operation {
         }
         AccountInfo accountInfo = getAccountInfo(hedera, accountIDInString);
         if (accountInfo != null) {
-
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 SimpleModule module = new SimpleModule();
@@ -68,17 +68,16 @@ public class AccountGetInfo implements Runnable, Operation {
     }
 
     public AccountInfo getAccountInfo(Hedera hedera, String accountIDInString) {
-        AccountInfo accountInfo = null;
+        AccountInfo accountInfo;
         try {
-            var operatorId = hedera.getOperatorId();
-            var client = hedera.createHederaClient()
-                    .setOperator(operatorId, hedera.getOperatorKey());
+            Client client = hedera.createHederaClient();
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)
                     .setAccountId(AccountId.fromString(accountIDInString));
             accountInfo = q.execute();
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
+            return null;
         }
         return accountInfo;
     }
@@ -89,7 +88,6 @@ public class AccountGetInfo implements Runnable, Operation {
             CommandLine.usage(this, System.out);
         } else {
             try {
-                // AccountGetInfo accountInfo = factory.create(AccountGetInfo.class);
                 new CommandLine(this).execute(args);
             } catch (Exception e) {
                 e.printStackTrace();

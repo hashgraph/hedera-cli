@@ -61,7 +61,7 @@ public class Setup implements Runnable {
         if ("bip".equals(method)) {
             keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
         } else {
-            keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList, accountId);
+            keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
         }
 
         boolean accountVerified = accountRecovery.verifyAndSaveAccount(accountId, keyPair);

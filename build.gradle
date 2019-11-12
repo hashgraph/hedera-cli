@@ -35,7 +35,9 @@ dependencies {
     implementation 'com.google.guava:guava:27.1-jre'
 
     // hedera sdk
-    implementation 'com.hedera.hashgraph:sdk:0.7.0'
+    implementation 'com.hedera.hashgraph:sdk:0.8.1'
+    // netty transport (for high throughput applications)
+    implementation 'io.grpc:grpc-netty-shaded:1.24.0'
 
     // dependencies for crypto functions
     // compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
