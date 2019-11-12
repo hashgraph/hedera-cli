@@ -51,7 +51,10 @@ public class AccountGetInfo implements Runnable, Operation {
         if (StringUtil.isNullOrEmpty(accountIDInString)) {
             accountIDInString = hedera.getOperatorId().toString();
         }
-        AccountInfo accountInfo = getAccountInfo(hedera, accountIDInString);
+        getAccountInfo(hedera, accountIDInString);
+    }
+
+    public void printAccountInfo(AccountInfo accountInfo) {
         if (accountInfo != null) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
@@ -64,22 +67,19 @@ public class AccountGetInfo implements Runnable, Operation {
                 shellHelper.printError(e.getMessage());
             }
         }
-        // do nothing
     }
 
-    public AccountInfo getAccountInfo(Hedera hedera, String accountIDInString) {
+    public void getAccountInfo(Hedera hedera, String accountIDInString) {
         AccountInfo accountInfo;
-        try {
-            Client client = hedera.createHederaClient();
+        try (Client client = hedera.createHederaClient()) {
             AccountInfoQuery q;
             q = new AccountInfoQuery(client)
                     .setAccountId(AccountId.fromString(accountIDInString));
             accountInfo = q.execute();
+            printAccountInfo(accountInfo);
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
-            return null;
         }
-        return accountInfo;
     }
 
     @Override

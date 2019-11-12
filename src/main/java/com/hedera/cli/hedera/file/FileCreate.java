@@ -10,8 +10,10 @@ import java.util.Collections;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,9 +101,9 @@ public class FileCreate implements Runnable {
     @Override
     public void run() {
         CommandLine.usage(this, System.out);
-        try {
-            var operatorKey = hedera.getOperatorKey();
-            var client = hedera.createHederaClient().setMaxTransactionFee(maxTransactionFee);
+        try (Client client = hedera.createHederaClient()) {
+            Ed25519PrivateKey operatorKey = hedera.getOperatorKey();
+            client.setMaxTransactionFee(maxTransactionFee);
             shellHelper.print(String.valueOf(maxTransactionFee));
             shellHelper.print(String.valueOf(Arrays.asList(date)));
 
