@@ -130,7 +130,7 @@ public class HederaGrpc {
         } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
             shellHelper.printError("Seems like your current operator's key does not match");
         } else {
-            shellHelper.printError("Error: " + receipt.getStatus().toString());
+            shellHelper.printError(receipt.getStatus().toString());
         }
     }
 
@@ -205,7 +205,7 @@ public class HederaGrpc {
             } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
                 shellHelper.printError("Seems like your current operator's key does not match");
             } else {
-                shellHelper.printError("Error: " + receipt.getStatus().toString());
+                shellHelper.printError(receipt.getStatus().toString());
             }
         } catch (HederaException e) {
             shellHelper.printError(e.getMessage());

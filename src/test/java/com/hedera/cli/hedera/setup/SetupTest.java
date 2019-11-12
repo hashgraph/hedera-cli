@@ -106,7 +106,7 @@ public class SetupTest {
         when(accountManager.verifyMethod(eq("bip"))).thenReturn("bip");
 
         lenient().when(accountRecovery.recoverEDKeypairPostBipMigration(eq(phraseList))).thenReturn(keyPair);
-        lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList), eq(accountId))).thenReturn(keyPair);
+        lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList))).thenReturn(keyPair);
         when(accountRecovery.verifyAndSaveAccount(eq(accountId), eq(keyPair))).thenReturn(true);
 
         // execute function under test
@@ -137,7 +137,7 @@ public class SetupTest {
         when(accountManager.verifyMethod(eq("bip"))).thenReturn("bip");
 
         lenient().when(accountRecovery.recoverEDKeypairPostBipMigration(eq(phraseList))).thenReturn(keyPair);
-        lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList), eq(accountId))).thenReturn(keyPair);
+        lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList))).thenReturn(keyPair);
 
         // when checking against Hedera, we find out that the account id and
         // re-generated keyPair do not match!
@@ -214,7 +214,7 @@ public class SetupTest {
         // execute function under test
         setup.run();
 
-        verify(accountRecovery).recoverEd25519AccountKeypair(eq(phraseList), eq(accountId));
+        verify(accountRecovery).recoverEd25519AccountKeypair(eq(phraseList));
     }
 
     @Test

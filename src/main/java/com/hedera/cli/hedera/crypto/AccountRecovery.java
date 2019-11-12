@@ -73,7 +73,6 @@ public class AccountRecovery implements Runnable, Operation {
             + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account recovery 0.0.1003|@")
     private String accountId;
 
-    private String strMethod = "bip";
     private int index = 0;
     private AccountInfo accountInfo;
     private KeyPair keypair;
@@ -104,7 +103,7 @@ public class AccountRecovery implements Runnable, Operation {
                 shellHelper.printError("Error in recovering account");
             }
         } else {
-            KeyPair keypair = recoverEd25519AccountKeypair(phraseList, accountId);
+            KeyPair keypair = recoverEd25519AccountKeypair(phraseList);
             boolean accountRecovered = verifyAndSaveAccount(accountId, keypair);
             if (accountRecovered) {
                 printKeyPair(keypair, accountId);
@@ -117,11 +116,11 @@ public class AccountRecovery implements Runnable, Operation {
     }
 
     public boolean verifyAndSaveAccount(String accountId, KeyPair keypair) {
-        AccountInfo accountInfo;
         boolean accountRecovered;
         try {
             accountInfo = getAccountInfoWithPrivKey(hedera, accountId,
                     Ed25519PrivateKey.fromString(keypair.getPrivateKeyHex()));
+            if (accountInfo == null) return false;
             boolean accountIdMatches = accountInfo.getAccountId().equals(AccountId.fromString(accountId));
             if (accountIdMatches && !retrieveIndex()) {
                 // Check if account already exists in index.txt
@@ -131,6 +130,7 @@ public class AccountRecovery implements Runnable, Operation {
                 shellHelper.printError("This account already exists!");
                 accountRecovered = false;
             }
+
         } catch (Exception e) {
             shellHelper.printError("Error in verifying accountID and recovery words");
             accountRecovered = false;
@@ -147,6 +147,7 @@ public class AccountRecovery implements Runnable, Operation {
             accountInfo = q.execute();
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
+            return null;
         }
         return accountInfo;
     }
@@ -166,14 +167,13 @@ public class AccountRecovery implements Runnable, Operation {
         return accountExists;
     }
 
-    public KeyPair recoverEd25519AccountKeypair(List<String> phraseList, String accountId) {
+    public KeyPair recoverEd25519AccountKeypair(List<String> phraseList) {
         KeyPair keypair = null;
         Mnemonic mnemonic = new Mnemonic();
         try {
             byte[] entropy = mnemonic.toEntropy(phraseList);
             byte[] seed = CryptoUtils.deriveKey(entropy, index, 32);
             keypair = new EDKeyPair(seed);
-            printKeyPair(keypair, accountId);
         } catch (MnemonicLengthException | MnemonicWordException | MnemonicChecksumException e) {
             shellHelper.printError(e.getMessage());
         }
