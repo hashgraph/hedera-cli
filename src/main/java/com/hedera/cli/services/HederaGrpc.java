@@ -263,8 +263,6 @@ public class HederaGrpc {
             if (AccountId.fromString(accountIdIndex).equals(accountId)) {
                 dataDirectory.writeFile(pathToDefaultAccount, valueIndex + ":" + accountId);
                 return true;
-            } else {
-                return false;
             }
         }
         return false;

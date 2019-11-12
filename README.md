@@ -86,7 +86,11 @@ network use testnet
 # Lists all accounts associated with current network
 account ls
 ```
-
+#### Version (v0.1.3)
+```bash
+# Checks current version
+version
+```
 #### Switch Accounts
 ```bash
 # Switch to use any account that has been recovered and exists in `account ls`
@@ -152,7 +156,7 @@ account info 0.0.xxxx
 Cli will prompt for original key as well as the new key that said account will be updated with.
 ```bash
 # Updated the keypair of account
-account info 0.0.xxxx 
+account update 0.0.xxxx 
 ```
 
 #### Help

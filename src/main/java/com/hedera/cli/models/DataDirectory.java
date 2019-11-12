@@ -218,17 +218,7 @@ public class DataDirectory {
 
         try {
             // file exist
-            Scanner reader = new Scanner(file);
-            while (reader.hasNext()) {
-                // checks the old map
-                String line = reader.nextLine();
-                String[] splitLines = line.split("\n");
-                for (int i = 0; i < splitLines.length; i++) {
-                    String[] keyValuePairs = splitLines[i].split("=");
-                    map.put(keyValuePairs[0], keyValuePairs[1]);
-                }
-            }
-            reader.close();
+            map = readMap(file);
         } catch (Exception e) {
             return null;
         }
