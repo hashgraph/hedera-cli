@@ -41,6 +41,10 @@ public class Hedera {
 
     private HederaNode node;
 
+    enum KeyType {
+        PRIVATE, PUBLIC
+    }
+
     // Our operator account is returned, in order of priority,
     // current account, default account, no account (empty string)
     public String getOperatorAccount() {
@@ -116,12 +120,12 @@ public class Hedera {
         return "";
     }
 
-    public String retrieveIndexAccountKeyInHexString() {
+    public String retrieveIndexAccountKeyInHexString(KeyType keyType) {
         String pathToIndexTxt = accountManager.pathToIndexTxt();
 
         String accountId;
         String value;
-        String privateKey = "";
+        String key = "";
 
         Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
         for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
@@ -131,38 +135,22 @@ public class Hedera {
             if (accountId.equals(currentAccountId)) {
                 String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
                 Map<String, String> currentJsonAccount = dataDirectory.readJsonToHashmap(pathToCurrentJsonAccount);
-                privateKey = currentJsonAccount.get("privateKey").toString();
+                if (keyType == KeyType.PRIVATE) {
+                    key = currentJsonAccount.get("privateKey").toString();
+                } else {
+                    key = currentJsonAccount.get("publicKey").toString();
+                }
+
             }
         }
-        return privateKey;
-    }
-
-    public String retrieveIndexAccountPublicKeyInHexString() {
-        String pathToIndexTxt = accountManager.pathToIndexTxt();
-
-        String publicKey = "";
-        String accountId;
-        String value;
-
-        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
-        for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
-            accountId = entry.getKey(); // key refers to the account id
-            value = entry.getValue(); // value refers to the filename json
-            String currentAccountId = currentAccountId();
-            if (accountId.equals(currentAccountId)) {
-                String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
-                Map<String, String> currentJsonAccount = dataDirectory.readJsonToHashmap(pathToCurrentJsonAccount);
-                publicKey = currentJsonAccount.get("publicKey").toString();
-            }
-        }
-        return publicKey;
+        return key;
     }
 
     public Ed25519PrivateKey getOperatorKey() {
         String privateKeyInHexString;
         boolean currentAccountExist = currentAccountExist();
         if (currentAccountExist) {
-            privateKeyInHexString = retrieveIndexAccountKeyInHexString();
+            privateKeyInHexString = retrieveIndexAccountKeyInHexString(KeyType.PRIVATE);
         } else {
             privateKeyInHexString = accountManager.getDefaultAccountKeyInHexString();
         }
