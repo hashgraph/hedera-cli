@@ -22,13 +22,13 @@ public class CryptoTransferOptions {
     @Getter
     @Setter
     public static class Exclusive {
-        @Option(names = {"-tb", "--recipientAmtTinyBars"}, required = true, description = "Amount to transfer in tinybars"
+        @Option(names = {"-tb", "--recipientAmtTinyBars"}, description = "Amount to transfer in tinybars"
                 + "%n@|bold,underline Usage:|@%n"
                 + "@|fg(yellow) transfer -s 0.0.1001 -r 0.0.1002 -tb 100|@"
                 + "%n@|fg(yellow) transfer -s 0.0.1001 -r 0.0.1002 -hb 0.1|@")
         public String transferListAmtTinyBars;
 
-        @Option(names = {"-hb", "--recipientAmtHBars"}, arity = "1..*", required = true, description = "Amount to transfer in hbars")
+        @Option(names = {"-hb", "--recipientAmtHBars"}, arity = "1..*", description = "Amount to transfer in hbars")
         public String transferListAmtHBars;
     }
 

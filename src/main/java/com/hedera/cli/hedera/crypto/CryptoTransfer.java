@@ -1,6 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 
@@ -120,6 +121,7 @@ public class CryptoTransfer implements Runnable {
         transferList = Arrays.asList(transferListArgs.split(","));
         if (!StringUtil.isNullOrEmpty(tinybarAmtArgs)) {
             // using tinybars
+            isTiny = true;
             amountList = Arrays.asList(tinybarAmtArgs.split(","));
         } else {
             // using hbars
@@ -134,7 +136,7 @@ public class CryptoTransfer implements Runnable {
         // handle preview error gracefully here
         AccountId operatorId = hedera.getOperatorId();
         try {
-            reviewAndExecute(operatorId, senderList, recipientList, transferList, amountList);
+            reviewAndExecute(operatorId, senderList, recipientList, transferList, amountList, isTiny);
         } catch (InvalidProtocolBufferException | TimeoutException | InterruptedException e) {
             shellHelper.printError(e.getMessage());
         }
@@ -155,10 +157,10 @@ public class CryptoTransfer implements Runnable {
     }
 
     public void reviewAndExecute(AccountId operatorId, List<String> senderList, List<String> recipientList,
-                                 List<String> transferList, List<String> amountList) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
+                                 List<String> transferList, List<String> amountList, boolean isTiny) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
         // transfer preview for user
         Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap(senderList, recipientList, transferList,
-                amountList);
+                amountList, isTiny);
 
         if (skipPreview) {
             executeCryptoTransfer(operatorId);
@@ -240,6 +242,8 @@ public class CryptoTransfer implements Runnable {
     }
 
     public CryptoTransferTransaction addTransferList() {
+        System.out.println("final amount list beofre transferring... ");
+        System.out.println(amountList);
         for (int i = 0; i < amountList.size(); ++i) {
             if (isTiny) {
                 amountInTiny = Long.parseLong(amountList.get(i));
@@ -272,11 +276,44 @@ public class CryptoTransfer implements Runnable {
     }
 
     public Map<Integer, PreviewTransferList> transferListToPromptPreviewMap(List<String> senderList,
-                                                                            List<String> recipientList, List<String> transferList, List<String> amountList) {
+                                                                            List<String> recipientList, List<String> transferList, List<String> amountList,
+                                                                            boolean isTiny) {
         ArrayList<String> finalAmountList = new ArrayList<>(amountList);
-        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
-            String amount = "-" + String.valueOf(amountList.get(0));
+//        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
+//            String amount = "-" + amountList.get(0);
+//            finalAmountList.add(0, amount);
+//            System.out.println("came here  ?????");
+//            System.out.println(finalAmountList);
+//            this.amountList = finalAmountList;
+//        }
+        System.out.println("what is this?????");
+        System.out.println(isTiny);
+        if (isOperatorRecipientAmount(senderList) && isTiny) {
+            long sum = 0;
+            for (String s : amountList) {
+                System.out.println("is sssssss ? " + s);
+                sum += convertTinybarToLong(s);
+            }
+            System.out.println("is sum correct  in tiny? " + sum);
+            String amount = "-" + sum;
             finalAmountList.add(0, amount);
+            System.out.println("came here 2222 ?????");
+            System.out.println(finalAmountList);
+            this.amountList = finalAmountList;
+        }
+
+        if (isOperatorRecipientAmount(senderList) && !isTiny) {
+            long sum = 0;
+            for (String s : amountList) {
+                System.out.println("is sssssss in hbar ? " + s);
+                sum += convertHbarToLong(s);
+            }
+            BigDecimal bd = new BigDecimal(sum);
+            String amount = "-" + (bd.divide(new BigDecimal("100000000"), 10, RoundingMode.HALF_DOWN));
+            System.out.println("is sum correct ? " + amount);
+            finalAmountList.add(0, amount);
+            System.out.println("came here 3333  ?????");
+            System.out.println(finalAmountList);
             this.amountList = finalAmountList;
         }
 
@@ -308,10 +345,10 @@ public class CryptoTransfer implements Runnable {
                                    List<String> amountList) {
         // support the declaration `transfer -s 0.0.1001 -r 0.0.1002 -hb 10_000` so user
         // does not have to provide additional negative amount
-        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
-            return true;
-        }
-        if (isOperatorRecipientAmount(senderList, recipientList, amountList)) {
+//        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
+//            return true;
+//        }
+        if (isOperatorRecipientAmount(senderList)) {
             return true;
         }
         if (transferList.size() != amountList.size()) {
@@ -323,6 +360,8 @@ public class CryptoTransfer implements Runnable {
 
     public boolean verifyTransferList(List<String> transferList) {
         String accountId;
+        System.out.println("helllooooooooo");
+        System.out.println(transferList);
         for (int i = 0; i < transferList.size(); i++) {
             accountId = transferList.get(i);
             if (!accountManager.isAccountId(accountId)) {
@@ -334,6 +373,7 @@ public class CryptoTransfer implements Runnable {
     }
 
     private boolean isSumZero(List<String> senderList, List<String> recipientList, List<String> amountList, boolean isTiny) {
+        System.out.println("amount list is " + amountList);
         if (isTiny) {
             return sumOfTinybarsInLong(senderList, recipientList, amountList);
         }
@@ -341,7 +381,11 @@ public class CryptoTransfer implements Runnable {
     }
 
     public boolean sumOfHbarsInLong(List<String> senderList, List<String> recipientList, List<String> amountList) {
-        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
+//        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
+//            return true;
+//        }
+
+        if (isOperatorRecipientAmount(senderList)) {
             return true;
         }
 
@@ -380,7 +424,11 @@ public class CryptoTransfer implements Runnable {
     }
 
     public boolean sumOfTinybarsInLong(List<String> senderList, List<String> recipientList, List<String> amountList) {
-        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
+//        if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
+//            return true;
+//        }
+
+        if (isOperatorRecipientAmount(senderList)) {
             return true;
         }
 
@@ -413,8 +461,13 @@ public class CryptoTransfer implements Runnable {
         return senderList.size() == 1 && recipientList.size() == 1 && amountList.size() == 1;
     }
 
-    private boolean isOperatorRecipientAmount(List<String> senderList, List<String> recipientList, List<String> amountList) {
-        return senderList.size() == 0 && recipientList.size() == 1 && amountList.size() == 1;
+    private boolean isOperatorRecipientAmount(List<String> senderList) {
+        for (String s : senderList) {
+            if (s.contains(hedera.getOperatorId().toString()) && senderList.size() == 1) {
+                return (s.contains(hedera.getOperatorId().toString()) && senderList.size() == 1);
+            }
+        }
+        return false;
     }
 
     public long convertTinybarToLong(String amountInTinybar) {
