@@ -21,6 +21,7 @@ import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
@@ -139,8 +140,7 @@ public class AccountRecovery implements Runnable, Operation {
     }
 
     public AccountInfo getAccountInfoWithPrivKey(Hedera hedera, String accountId, Ed25519PrivateKey accPrivKey) {
-        try {
-            var client = hedera.createHederaClientWithoutSettingOperator();
+        try (Client client = hedera.createHederaClientWithoutSettingOperator()) {
             client.setOperator(AccountId.fromString(accountId), accPrivKey);
             AccountInfoQuery q;
             q = new AccountInfoQuery(client).setAccountId(AccountId.fromString(accountId));

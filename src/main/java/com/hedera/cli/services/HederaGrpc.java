@@ -16,7 +16,6 @@ import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
