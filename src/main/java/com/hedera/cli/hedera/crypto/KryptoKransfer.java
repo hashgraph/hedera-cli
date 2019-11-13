@@ -39,73 +39,70 @@ public class KryptoKransfer implements Runnable {
     @Autowired
     private ShellHelper shellHelper;
 
-    @Autowired
-    private InputReader inputReader;
-
-    @Autowired
-    private AccountManager accountManager;
-
-    @Autowired
-    private TransactionManager transactionManager;
+//    @Autowired
+//    private InputReader inputReader;
+//
+//    @Autowired
+//    private AccountManager accountManager;
+//
+//    @Autowired
+//    private TransactionManager transactionManager;
 
     @Autowired
     private CryptoTransferOptions cryptoTransferOptions;
 
     @Autowired
-    private CryptoTransferValidation cryptoTransferValidation;
+    private CryptoTransferValidateAccounts cryptoTransferValidateAccounts;
 
-    @Spec
-    private CommandSpec spec;
+    @Autowired
+    private CryptoTransferValidateAmount cryptoTransferValidateAmount;
 
-    @ArgGroup(exclusive = false, multiplicity = "1")
-    private List<CryptoTransferOptions> cryptoTransferOptionsList;
+//    @Spec
+//    private CommandSpec spec;
+//
+//    @ArgGroup(exclusive = false, multiplicity = "1")
+//    private List<CryptoTransferOptions> cryptoTransferOptionsList;
 
-    private String tinybarListArgs;
-    private String hbarListArgs;
-    private String senderListArgs;
-    private String recipientListArgs;
-    private String transferListArgs;
-    private boolean skipPreview;
-    private boolean isTiny = true;
-    private String isInfoCorrect;
-    private String memoString = "";
+//    private boolean skipPreview;
+//    private boolean isTiny = true;
+//    private String isInfoCorrect;
+//    private String memoString = "";
 
     private List<String> transferList;
     private List<String> amountList;
     private List<String> senderList;
     private List<String> recipientList;
-    private AccountId account;
-    private long amountInTiny;
-    private Client client;
-    private TransactionId transactionId;
-    private CryptoTransferTransaction cryptoTransferTransaction;
+
+//    private AccountId account;
+//    private long amountInTiny;
+//    private Client client;
+//    private TransactionId transactionId;
+//    private CryptoTransferTransaction cryptoTransferTransaction;
 
 
     @Override
     public void run() {
 
-        transactionAmountNotValid();
+        cryptoTransferValidateAmount.transactionAmountNotValid();
 
-        System.out.println("will it still pass");
+        if (cryptoTransferValidateAccounts.senderList() == null) return;
+        senderList = cryptoTransferValidateAccounts.senderList();
+        if (cryptoTransferValidateAccounts.recipientList() == null) return;
+        recipientList = cryptoTransferValidateAccounts.recipientList();
 
-        if (senderList() == null) return;
-        senderList = senderList();
-        if (recipientList() == null) return;
-        recipientList = recipientList();
+        if (!cryptoTransferValidateAccounts.verifyListHasAccountIdFormat(senderList)) return;
+        if (!cryptoTransferValidateAccounts.verifyListHasAccountIdFormat(recipientList)) return;
 
-        if (!cryptoTransferValidation.verifyListHasAccountIdFormat(senderList)) return;
-        if (!cryptoTransferValidation.verifyListHasAccountIdFormat(recipientList)) return;
-
-        transferList = appendTransferList(senderList, recipientList);
+        transferList = cryptoTransferValidateAccounts.createTransferList(senderList, recipientList);
 
     }
 
-    public boolean createTransferList(List<String> senderList, List<String> recipientList) {
+    public boolean createAmountList(List<String> senderList, List<String> recipientList) {
         boolean hasOperator = false;
         switch (senderList.size()) {
             case 1:
                 System.out.println("case 1");
-                if (cryptoTransferValidation.senderListHasOperator(senderList)) {
+                if (cryptoTransferValidateAccounts.senderListHasOperator(senderList)) {
                     System.out.println("Sender list contains operator");
                 } else {
                     System.out.println("Sender list does not contain operator");
@@ -113,7 +110,7 @@ public class KryptoKransfer implements Runnable {
                 break;
             case 2:
                 System.out.println("case 2");
-                if (cryptoTransferValidation.senderListHasOperator(senderList)) {
+                if (cryptoTransferValidateAccounts.senderListHasOperator(senderList)) {
                     System.out.println("Sender list contains operator");
                 } else {
                     System.out.println("Sender list does not contain operator");
@@ -123,42 +120,5 @@ public class KryptoKransfer implements Runnable {
                 break;
         }
         return hasOperator;
-    }
-
-    public List<String> appendTransferList(List<String> senderList, List<String> recipientList) {
-        return Stream.of(senderList, recipientList)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
-    }
-
-    public List<String> senderList() {
-        senderListArgs = cryptoTransferValidation.senderListArgs();
-        if (!StringUtil.isNullOrEmpty(senderListArgs)) {
-            senderList = Arrays.asList(senderListArgs.split(","));
-        }
-        return senderList;
-    }
-
-    public List<String> recipientList() {
-        recipientListArgs = cryptoTransferValidation.recipientListArgs();
-        if (!StringUtil.isNullOrEmpty(recipientListArgs)) {
-            recipientList = Arrays.asList(recipientListArgs.split(","));
-        }
-        return recipientList;
-    }
-
-    public void transactionAmountNotValid() {
-        tinybarListArgs = cryptoTransferValidation.tinybarListArgs();
-        hbarListArgs = cryptoTransferValidation.hbarListArgs();
-
-        if (StringUtil.isNullOrEmpty(hbarListArgs) && StringUtil.isNullOrEmpty(tinybarListArgs)) {
-            shellHelper.printError("You have to provide transfer amounts either in hbars or tinybars");
-            return;
-        }
-
-        if (!StringUtil.isNullOrEmpty(hbarListArgs) && !StringUtil.isNullOrEmpty(tinybarListArgs)) {
-            shellHelper.printError("Transfer amounts must either be in hbars or tinybars, not both");
-            return;
-        }
     }
 }

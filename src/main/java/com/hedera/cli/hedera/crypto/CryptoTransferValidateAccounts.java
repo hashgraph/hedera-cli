@@ -11,12 +11,16 @@ import org.springframework.stereotype.Component;
 
 import picocli.CommandLine.ArgGroup;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
 @Component
-public class CryptoTransferValidation {
+public class CryptoTransferValidateAccounts {
 
     @Autowired
     private Hedera hedera;
@@ -24,17 +28,15 @@ public class CryptoTransferValidation {
     @Autowired
     private ShellHelper shellHelper;
 
-    @Autowired
-    private CryptoTransferOptions cryptoTransferOptions;
-
-    @Autowired
-    private CryptoTransferValidation cryptoTransferValidation;
-
     @ArgGroup(exclusive = false, multiplicity = "1")
     private List<CryptoTransferOptions> cryptoTransferOptionsList;
 
+    private String senderListArgs;
+    private String recipientListArgs;
+    private List<String> senderList;
+    private List<String> recipientList;
+
     public String senderListArgs() {
-        String senderListArgs = null;
         for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
             if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.senderList)) {
                 senderListArgs = hedera.getOperatorId().toString();
@@ -46,7 +48,6 @@ public class CryptoTransferValidation {
     }
 
     public String recipientListArgs() {
-        String recipientListArgs = null;
         for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
             if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.recipientList)) {
                 shellHelper.printError("Recipient list must not be empty");
@@ -58,30 +59,26 @@ public class CryptoTransferValidation {
         return recipientListArgs;
     }
 
-    public String hbarListArgs() {
-        String hbarListArgs = null;
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtHBars)) {
-                shellHelper.printError("Amount in hbars must not be empty");
-                hbarListArgs = null;
-            } else {
-                hbarListArgs = cryptoTransferOption.exclusive.transferListAmtHBars;
-            }
+    public List<String> senderList() {
+        senderListArgs = senderListArgs();
+        if (!StringUtil.isNullOrEmpty(senderListArgs)) {
+            senderList = Arrays.asList(senderListArgs.split(","));
         }
-        return hbarListArgs;
+        return senderList;
     }
 
-    public String tinybarListArgs() {
-        String tinybarListArgs = null;
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtTinyBars)) {
-                shellHelper.printError("Amount in tinybars must not be empty");
-                tinybarListArgs = null;
-            } else {
-                tinybarListArgs = cryptoTransferOption.exclusive.transferListAmtTinyBars;
-            }
+    public List<String> recipientList() {
+        recipientListArgs = recipientListArgs();
+        if (!StringUtil.isNullOrEmpty(recipientListArgs)) {
+            recipientList = Arrays.asList(recipientListArgs.split(","));
         }
-        return tinybarListArgs;
+        return recipientList;
+    }
+
+    public List<String> createTransferList(List<String> senderList, List<String> recipientList) {
+        return Stream.of(senderList, recipientList)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
     
     public boolean skipPreviewArgs() {
