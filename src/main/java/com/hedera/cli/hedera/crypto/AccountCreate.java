@@ -58,7 +58,7 @@ public class AccountCreate implements Runnable, Operation {
 
     @Option(names = { "-b",
             "--balance" }, required = true, description = "Initial balance of new account created in hbars")
-    private int initBal = 0;
+    private long initBal = 0;
 
     @Option(names = { "-k",
             "--keygen" }, description = "Default generates a brand new key pair associated with account creation"
@@ -108,7 +108,7 @@ public class AccountCreate implements Runnable, Operation {
         }
     }
 
-    private void setMinimum(int min) {
+    private void setMinimum(long min) {
         if (min < 0) {
             throw new ParameterException(spec.commandLine(), "Minimum must be a positive integer");
         }
