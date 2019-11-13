@@ -56,11 +56,11 @@ public class AccountDelete implements Runnable, Operation {
     private boolean skipPreview;
 
     private Ed25519PrivateKey oldAccountPrivKey;
+    private AccountId oldAccount;
+    private AccountId newAccount;
 
     @Override
     public void run() {
-        AccountId oldAccount;
-        AccountId newAccount;
         try {
             oldAccount = AccountId.fromString(oldAccountInString);
             newAccount = AccountId.fromString(newAccountInString);
@@ -68,7 +68,6 @@ public class AccountDelete implements Runnable, Operation {
             shellHelper.printError("Invalid account id provided");
             return;
         }
-
         String oldAccountPrivateKey = inputReader.prompt("Enter the private key of the account to be deleted", "secret",
                 false);
         try {
@@ -77,17 +76,13 @@ public class AccountDelete implements Runnable, Operation {
             shellHelper.printError("Private key is not in the right ED25519 string format");
             return;
         }
-
         if (skipPreview) {
             hederaGrpc.executeAccountDelete(oldAccount, oldAccountPrivKey, newAccount);
             return;
         }
-
-        boolean correctInfo = promptPreview(oldAccount, newAccount);
-        if (correctInfo) {
+        if (promptPreview(oldAccount, newAccount)) {
             shellHelper.print("Info is correct, let's go!");
             hederaGrpc.executeAccountDelete(oldAccount, oldAccountPrivKey, newAccount);
-            return;
         } else {
             shellHelper.printError("Nope, incorrect, let's make some changes");
         }
