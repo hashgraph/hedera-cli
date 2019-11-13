@@ -71,7 +71,12 @@ public class AccountDelete implements Runnable, Operation {
 
         String oldAccountPrivateKey = inputReader.prompt("Enter the private key of the account to be deleted", "secret",
                 false);
-        oldAccountPrivKey = Ed25519PrivateKey.fromString(oldAccountPrivateKey);
+        try {
+            oldAccountPrivKey = Ed25519PrivateKey.fromString(oldAccountPrivateKey);
+        } catch (Exception e) {
+            shellHelper.printError("Private key is not in the right ED25519 string format");
+            return;
+        }
 
         if (skipPreview) {
             hederaGrpc.executeAccountDelete(oldAccount, oldAccountPrivKey, newAccount);
