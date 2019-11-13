@@ -1,11 +1,8 @@
 package com.hedera.cli.hedera.crypto;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -96,12 +93,17 @@ public class CryptoTransfer implements Runnable {
             cryptoTransferOptions = cryptoTransferOptionsList.get(i);
         }
 
+        if (StringUtil.isNullOrEmpty(cryptoTransferOptions.dependent.senderList)) {
+            transferListArgs = hedera.getOperatorAccount() + "," + cryptoTransferOptions.dependent.recipientList;
+            senderList = Arrays.asList(hedera.getOperatorAccount());
+        } else {
+            transferListArgs = cryptoTransferOptions.dependent.senderList + ","
+                    + cryptoTransferOptions.dependent.recipientList;
+            senderList = Arrays.asList((cryptoTransferOptions.dependent.senderList).split(","));
+        }
         hbarAmtArgs = cryptoTransferOptions.exclusive.transferListAmtHBars;
         tinybarAmtArgs = cryptoTransferOptions.exclusive.transferListAmtTinyBars;
-        transferListArgs = cryptoTransferOptions.dependent.senderList + ","
-                + cryptoTransferOptions.dependent.recipientList;
         skipPreview = cryptoTransferOptions.dependent.skipPreview;
-        senderList = Arrays.asList((cryptoTransferOptions.dependent.senderList).split(","));
         recipientList = Arrays.asList((cryptoTransferOptions.dependent.recipientList).split(","));
 
         // additional validation
@@ -115,7 +117,6 @@ public class CryptoTransfer implements Runnable {
             shellHelper.printError("Transfer amounts must either be in hbars or tinybars, not both");
             return;
         }
-
         transferList = Arrays.asList(transferListArgs.split(","));
         if (!StringUtil.isNullOrEmpty(tinybarAmtArgs)) {
             // using tinybars
@@ -134,7 +135,7 @@ public class CryptoTransfer implements Runnable {
         AccountId operatorId = hedera.getOperatorId();
         try {
             reviewAndExecute(operatorId, senderList, recipientList, transferList, amountList);
-        } catch (InvalidProtocolBufferException e) {
+        } catch (InvalidProtocolBufferException | TimeoutException | InterruptedException e) {
             shellHelper.printError(e.getMessage());
         }
     }
@@ -154,7 +155,7 @@ public class CryptoTransfer implements Runnable {
     }
 
     public void reviewAndExecute(AccountId operatorId, List<String> senderList, List<String> recipientList,
-                                 List<String> transferList, List<String> amountList) throws InvalidProtocolBufferException {
+                                 List<String> transferList, List<String> amountList) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
         // transfer preview for user
         Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap(senderList, recipientList, transferList,
                 amountList);
@@ -176,12 +177,10 @@ public class CryptoTransfer implements Runnable {
         }
     }
 
-    private void executeCryptoTransfer(AccountId operatorId) throws InvalidProtocolBufferException {
+    private void executeCryptoTransfer(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
         TransactionReceipt transactionReceipt;
         byte[] signedTxnBytes;
         transactionId = new TransactionId(operatorId);
-        senderList = Arrays.asList((cryptoTransferOptions.dependent.senderList).split(","));
-
         // SDKs does not currently support more than 2 senders.
         // Instantiating Client client = hedera.createHederaClient() sets the operator
         // ie 1 operator, 1 sender, x recipients (supported)
@@ -211,6 +210,8 @@ public class CryptoTransfer implements Runnable {
             }
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
+        } finally {
+            client.close();
         }
     }
 
@@ -310,6 +311,9 @@ public class CryptoTransfer implements Runnable {
         if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
             return true;
         }
+        if (isOperatorRecipientAmount(senderList, recipientList, amountList)) {
+            return true;
+        }
         if (transferList.size() != amountList.size()) {
             shellHelper.printError("Lists aren't the same size");
             return false;
@@ -407,6 +411,10 @@ public class CryptoTransfer implements Runnable {
 
     private boolean isSingleSenderRecipientAmount(List<String> senderList, List<String> recipientList, List<String> amountList) {
         return senderList.size() == 1 && recipientList.size() == 1 && amountList.size() == 1;
+    }
+
+    private boolean isOperatorRecipientAmount(List<String> senderList, List<String> recipientList, List<String> amountList) {
+        return senderList.size() == 0 && recipientList.size() == 1 && amountList.size() == 1;
     }
 
     public long convertTinybarToLong(String amountInTinybar) {
