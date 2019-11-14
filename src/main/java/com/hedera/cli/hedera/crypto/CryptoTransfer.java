@@ -140,7 +140,7 @@ public class CryptoTransfer implements Runnable {
     }
 
     private boolean validateUserInput(List<String> senderList, List<String> recipientList, List<String> transferList,
-            List<String> amountList, boolean isTiny) {
+                                      List<String> amountList, boolean isTiny) {
         // Verify transferlist and amountlist are equal
         if (!verifyEqualList(senderList, recipientList, transferList, amountList)) {
             return false;
@@ -154,7 +154,7 @@ public class CryptoTransfer implements Runnable {
     }
 
     public void reviewAndExecute(AccountId operatorId, List<String> senderList, List<String> recipientList,
-            List<String> transferList, List<String> amountList) throws InvalidProtocolBufferException {
+                                 List<String> transferList, List<String> amountList) throws InvalidProtocolBufferException {
         // transfer preview for user
         Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap(senderList, recipientList, transferList,
                 amountList);
@@ -217,6 +217,7 @@ public class CryptoTransfer implements Runnable {
     private byte[] signAndCreateTxBytesWithOperator() throws InvalidProtocolBufferException {
         byte[] signedTxnBytes = new byte[0];
         String senderPrivKeyInString;
+        Ed25519PrivateKey senderPrivKey;
         for (int i = 0; i < senderList.size(); i++) {
             if (senderList.get(i).equals(hedera.getOperatorId().toString())) {
                 signedTxnBytes = cryptoTransferTransaction.toBytes();
@@ -224,7 +225,12 @@ public class CryptoTransfer implements Runnable {
                 senderPrivKeyInString = inputReader.prompt(
                         "Input private key of sender: " + senderList.get(i) + " to sign transaction", "secret", false);
                 if (!StringUtil.isNullOrEmpty(senderPrivKeyInString)) {
-                    Ed25519PrivateKey senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
+                    try {
+                        senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
+                    } catch (Exception e) {
+                        shellHelper.printError("Private key is not in the right ED25519 string format");
+                        return null;
+                    }
                     signedTxnBytes = senderSignsTransaction(senderPrivKey, cryptoTransferTransaction.toBytes());
                 }
             }
@@ -265,7 +271,7 @@ public class CryptoTransfer implements Runnable {
     }
 
     public Map<Integer, PreviewTransferList> transferListToPromptPreviewMap(List<String> senderList,
-            List<String> recipientList, List<String> transferList, List<String> amountList) {
+                                                                            List<String> recipientList, List<String> transferList, List<String> amountList) {
         ArrayList<String> finalAmountList = new ArrayList<>(amountList);
         if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
             String amount = "-" + String.valueOf(amountList.get(0));
@@ -298,7 +304,7 @@ public class CryptoTransfer implements Runnable {
     }
 
     public boolean verifyEqualList(List<String> senderList, List<String> recipientList, List<String> transferList,
-            List<String> amountList) {
+                                   List<String> amountList) {
         // support the declaration `transfer -s 0.0.1001 -r 0.0.1002 -hb 10_000` so user
         // does not have to provide additional negative amount
         if (isSingleSenderRecipientAmount(senderList, recipientList, amountList)) {
