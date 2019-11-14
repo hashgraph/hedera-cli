@@ -91,27 +91,19 @@ public class KryptoKransfer implements Runnable {
     @Override
     public void run() {
 
-        tinybarListArgs = tinybarListArgs();
-        hbarListArgs = hbarListArgs();
-        senderListArgs = senderListArgs();
-        recipientListArgs = recipientListArgs();
+        validateAmount.setCryptoTransferOptionsList(cryptoTransferOptionsList);
+        if (validateAmount.check() == false) {
+            return;
+        }
 
-        validateAmount.transactionAmountNotValid(tinybarListArgs, hbarListArgs);
-
-        if (validateAccounts.senderList(senderListArgs) == null) return;
-        senderList = validateAccounts.senderList(senderListArgs);
-
-        if (validateAccounts.recipientList(recipientListArgs) == null) return;
-        recipientList = validateAccounts.recipientList(recipientListArgs);
-
-        if (!validateAccounts.verifyListHasAccountIdFormat(senderList)) return;
-        if (!validateAccounts.verifyListHasAccountIdFormat(recipientList)) return;
-
-        transferList = validateAccounts.createTransferList(senderList, recipientList);
-
-        isTiny = validateAmount.isTiny();
-        if (validateAmount.amountList(isTiny) == null) return;
-        amountList = validateAmount.amountList(isTiny);
+        validateAccounts.setCryptoTransferOptionsList(cryptoTransferOptionsList);
+        if (validateAccounts.check() == false) {
+            return;
+        }
+    
+        // now that we have validated our inputs
+        transferList = validateAccounts.getTransferList();
+        amountList = validateAmount.getAmountList();
 
         if (!verifyAmountList(senderList, recipientList, amountList, isTiny)) return;
         transferListToPromptPreviewMap();
@@ -125,51 +117,6 @@ public class KryptoKransfer implements Runnable {
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
-    }
-
-    public String hbarListArgs() {
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtHBars)) {
-                hbarListArgs = null;
-            } else {
-                hbarListArgs = cryptoTransferOption.exclusive.transferListAmtHBars;
-            }
-        }
-        return hbarListArgs;
-    }
-
-    public String tinybarListArgs() {
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtTinyBars)) {
-                tinybarListArgs = null;
-            } else {
-                tinybarListArgs = cryptoTransferOption.exclusive.transferListAmtTinyBars;
-            }
-        }
-        return tinybarListArgs;
-    }
-
-    public String senderListArgs() {
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.senderList)) {
-                senderListArgs = hedera.getOperatorId().toString();
-            } else {
-                senderListArgs = cryptoTransferOption.dependent.senderList;
-            }
-        }
-        return senderListArgs;
-    }
-
-    public String recipientListArgs() {
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.recipientList)) {
-                shellHelper.printError("Recipient list must not be empty");
-                recipientListArgs = null;
-            } else {
-                recipientListArgs = cryptoTransferOption.dependent.recipientList;
-            }
-        }
-        return recipientListArgs;
     }
 
     public boolean skipPreviewArgs() {
@@ -317,7 +264,7 @@ public class KryptoKransfer implements Runnable {
 
         switch (senderList.size()) {
             case 1:
-                if (validateAccounts.senderListHasOperator(senderList)) {
+                if (validateAccounts.senderListHasOperator()) {
                     shellHelper.print("Sender list contains operator");
                     if (amountSize != transferSize) {
                         // add recipients amount and add to amount list
@@ -348,7 +295,7 @@ public class KryptoKransfer implements Runnable {
                 }
                 break;
             case 2:
-                if (validateAccounts.senderListHasOperator(senderList)) {
+                if (validateAccounts.senderListHasOperator()) {
                     shellHelper.print("Sender list contains operator");
                 } else {
                     shellHelper.print("Sender list does not contain operator");

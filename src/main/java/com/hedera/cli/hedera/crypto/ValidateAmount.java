@@ -1,17 +1,18 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.shell.ShellHelper;
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import picocli.CommandLine.ArgGroup;
-
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+
+import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.shell.ShellHelper;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -25,46 +26,51 @@ public class ValidateAmount {
     private ShellHelper shellHelper;
 
     @Autowired
-    private KryptoKransfer kryptoKransfer;
-
-    @Autowired
     private ValidateAccounts validateAccounts;
+
+    private List<CryptoTransferOptions> cryptoTransferOptionsList;
 
     private String tinybarListArgs;
     private String hbarListArgs;
     private String amountListArgs;
     private List<String> amountList;
+    private boolean tiny;
 
-//    public String hbarListArgs() {
-//        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-//            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtHBars)) {
-//                shellHelper.printError("Amount in hbars must not be empty");
-//                hbarListArgs = null;
-//            } else {
-//                hbarListArgs = cryptoTransferOption.exclusive.transferListAmtHBars;
-//            }
-//        }
-//        return hbarListArgs;
-//    }
-//
-//    public String tinybarListArgs() {
-//        System.out.println(cryptoTransferOptionsList);
-//        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-//            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtTinyBars)) {
-//                shellHelper.printError("Amount in tinybars must not be empty");
-//                tinybarListArgs = null;
-//            } else {
-//                tinybarListArgs = cryptoTransferOption.exclusive.transferListAmtTinyBars;
-//            }
-//        }
-//        return tinybarListArgs;
-//    }
+    public void setCryptoTransferOptionsList(List<CryptoTransferOptions> cryptoTransferOptionsList) {
+        this.cryptoTransferOptionsList = cryptoTransferOptionsList;
+        setHbarListArgs();
+        setTinyBarListArgs();
+        setTiny();
+    }
 
-    public List<String> amountList(boolean isTiny) {
-        if (isTiny) {
-            amountListArgs = kryptoKransfer.tinybarListArgs();
+    private void setHbarListArgs() {
+        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
+            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtHBars)) {
+                shellHelper.printError("Amount in hbars must not be empty");
+                hbarListArgs = null;
+            } else {
+                hbarListArgs = cryptoTransferOption.exclusive.transferListAmtHBars;
+            }
+        }
+    }
+
+    private void setTinyBarListArgs() {
+        System.out.println(cryptoTransferOptionsList);
+        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
+            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtTinyBars)) {
+                shellHelper.printError("Amount in tinybars must not be empty");
+                tinybarListArgs = null;
+            } else {
+                tinybarListArgs = cryptoTransferOption.exclusive.transferListAmtTinyBars;
+            }
+        }
+    }
+
+    public List<String> getAmountList() {
+        if (isTiny()) {
+            amountListArgs = getTinybarListArgs();
         } else {
-            amountListArgs = kryptoKransfer.hbarListArgs();
+            amountListArgs = getHbarListArgs();
         }
         if (!StringUtil.isNullOrEmpty(amountListArgs)) {
             amountList = Arrays.asList(amountListArgs.split(","));
@@ -72,22 +78,27 @@ public class ValidateAmount {
         return amountList;
     }
 
-    public void transactionAmountNotValid(String tinybarListArgs, String hbarListArgs) {
+    public boolean transactionAmountNotValid(String tinybarListArgs, String hbarListArgs) {
         if (StringUtil.isNullOrEmpty(hbarListArgs) && StringUtil.isNullOrEmpty(tinybarListArgs)) {
             shellHelper.printError("You have to provide transfer amounts either in hbars or tinybars");
-            return;
+            return true;
         }
 
         if (!StringUtil.isNullOrEmpty(hbarListArgs) && !StringUtil.isNullOrEmpty(tinybarListArgs)) {
             shellHelper.printError("Transfer amounts must either be in hbars or tinybars, not both");
-            return;
+            return true;
         }
+        return false;
     }
 
-    public boolean isTiny() {
-        tinybarListArgs = kryptoKransfer.tinybarListArgs();
-        hbarListArgs = kryptoKransfer.hbarListArgs();
-        return StringUtil.isNullOrEmpty(hbarListArgs) && !StringUtil.isNullOrEmpty(tinybarListArgs);
+    public void setTiny() {
+        tinybarListArgs = getTinybarListArgs();
+        hbarListArgs = getHbarListArgs();
+        if (StringUtil.isNullOrEmpty(hbarListArgs) && !StringUtil.isNullOrEmpty(tinybarListArgs)) {
+            tiny = true;
+        } else {
+            tiny = false;
+        }
     }
 
     public long sumOfTinybarsInLong(List<String> amountList) {
@@ -151,5 +162,15 @@ public class ValidateAmount {
             hbarsToTiny = Long.parseLong(bdConvertTiny.toPlainString().split("\\.")[0]);
         }
         return hbarsToTiny;
+    }
+
+    public boolean check() {
+        if (transactionAmountNotValid(tinybarListArgs, hbarListArgs)) {
+            return false;
+        }
+        if (amountList == null) {
+            return false;
+        }
+        return true;
     }
 }

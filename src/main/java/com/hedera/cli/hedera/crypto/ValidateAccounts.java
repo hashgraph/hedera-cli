@@ -1,24 +1,20 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.account.AccountId;
-import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import picocli.CommandLine.ArgGroup;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Getter
-@Setter
+import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.account.AccountId;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+
 @Component
 public class ValidateAccounts {
 
@@ -28,64 +24,62 @@ public class ValidateAccounts {
     @Autowired
     private ShellHelper shellHelper;
 
+    // setter, when invoked, should set the values for senderListArgs,
+    // recipientListArgs, senderList and recipientList
+    private List<CryptoTransferOptions> cryptoTransferOptionsList;
+
+    // values are populated when setCryptotransferOptionsList is invoked
     private String senderListArgs;
     private String recipientListArgs;
     private List<String> senderList;
     private List<String> recipientList;
 
-//    public String senderListArgs() {
-//        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-//            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.senderList)) {
-//                senderListArgs = hedera.getOperatorId().toString();
-//            } else {
-//                senderListArgs = cryptoTransferOption.dependent.senderList;
-//            }
-//        }
-//        return senderListArgs;
-//    }
-//
-//    public String recipientListArgs() {
-//        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-//            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.recipientList)) {
-//                shellHelper.printError("Recipient list must not be empty");
-//                recipientListArgs = null;
-//            } else {
-//                recipientListArgs = cryptoTransferOption.dependent.recipientList;
-//            }
-//        }
-//        return recipientListArgs;
-//    }
+    public void setCryptoTransferOptionsList(List<CryptoTransferOptions> cryptoTransferOptionsList) {
+        this.cryptoTransferOptionsList = cryptoTransferOptionsList;
+        setSenderListArgs();
+        setRecipientListArgs();
+        setSenderList();
+        setRecipientList();
+    }
 
-    public List<String> senderList(String senderListArgs) {
+    private void setSenderListArgs() {
+        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
+            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.senderList)) {
+                senderListArgs = hedera.getOperatorId().toString();
+            } else {
+                senderListArgs = cryptoTransferOption.dependent.senderList;
+            }
+        }
+    }
+
+    private void setRecipientListArgs() {
+        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
+            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.recipientList)) {
+                shellHelper.printError("Recipient list must not be empty");
+                recipientListArgs = null;
+            } else {
+                recipientListArgs = cryptoTransferOption.dependent.recipientList;
+            }
+        }
+    }
+
+    private void setSenderList() {
         if (!StringUtil.isNullOrEmpty(senderListArgs)) {
             senderList = Arrays.asList(senderListArgs.split(","));
         }
-        return senderList;
     }
 
-    public List<String> recipientList(String recipientListArgs) {
+    private void setRecipientList() {
         if (!StringUtil.isNullOrEmpty(recipientListArgs)) {
             recipientList = Arrays.asList(recipientListArgs.split(","));
         }
-        return recipientList;
     }
 
-    public List<String> createTransferList(List<String> senderList, List<String> recipientList) {
-        return Stream.of(senderList, recipientList)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+    public List<String> getTransferList() {
+        return Stream.of(senderList, recipientList).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    public boolean senderListHasOperator(List<String> senderList) {
-        for (String s : senderList) {
-            if (s.contains(hedera.getOperatorId().toString())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public boolean verifyListHasAccountIdFormat(List<String> list) {
+    private boolean verifyListHasAccountIdFormat(List<String> list) {
         for (String accountIdInString : list) {
             try {
                 AccountId.fromString(accountIdInString);
@@ -95,5 +89,30 @@ public class ValidateAccounts {
             }
         }
         return true;
+    }
+
+    public boolean check() {
+        if (senderList == null) {
+            return false;
+        }
+        if (recipientList == null) {
+            return false;
+        }
+        if (!verifyListHasAccountIdFormat(senderList)) {
+            return false;
+        }
+        if (!verifyListHasAccountIdFormat(recipientList)) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean senderListHasOperator() {
+        for (String s : senderList) {
+            if (s.contains(hedera.getOperatorId().toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

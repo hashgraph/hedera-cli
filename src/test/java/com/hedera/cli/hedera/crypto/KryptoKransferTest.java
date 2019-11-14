@@ -2,28 +2,21 @@ package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 public class KryptoKransferTest {
 
     @InjectMocks
     private KryptoKransfer kryptoKransfer;
+
+    @Mock
+    private CryptoTransferOptions cryptoTransferOptions;
 
     @Mock
     private Hedera hedera;
