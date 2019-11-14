@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 @Getter
 @Setter
 @Component
-public class CryptoTransferValidateAccounts {
+public class ValidateAccounts {
 
     @Autowired
     private Hedera hedera;
@@ -28,47 +28,42 @@ public class CryptoTransferValidateAccounts {
     @Autowired
     private ShellHelper shellHelper;
 
-    @ArgGroup(exclusive = false, multiplicity = "1")
-    private List<CryptoTransferOptions> cryptoTransferOptionsList;
-
     private String senderListArgs;
     private String recipientListArgs;
     private List<String> senderList;
     private List<String> recipientList;
 
-    public String senderListArgs() {
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.senderList)) {
-                senderListArgs = hedera.getOperatorId().toString();
-            } else {
-                senderListArgs = cryptoTransferOption.dependent.senderList;
-            }
-        }
-        return senderListArgs;
-    }
+//    public String senderListArgs() {
+//        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
+//            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.senderList)) {
+//                senderListArgs = hedera.getOperatorId().toString();
+//            } else {
+//                senderListArgs = cryptoTransferOption.dependent.senderList;
+//            }
+//        }
+//        return senderListArgs;
+//    }
+//
+//    public String recipientListArgs() {
+//        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
+//            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.recipientList)) {
+//                shellHelper.printError("Recipient list must not be empty");
+//                recipientListArgs = null;
+//            } else {
+//                recipientListArgs = cryptoTransferOption.dependent.recipientList;
+//            }
+//        }
+//        return recipientListArgs;
+//    }
 
-    public String recipientListArgs() {
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.recipientList)) {
-                shellHelper.printError("Recipient list must not be empty");
-                recipientListArgs = null;
-            } else {
-                recipientListArgs = cryptoTransferOption.dependent.recipientList;
-            }
-        }
-        return recipientListArgs;
-    }
-
-    public List<String> senderList() {
-        senderListArgs = senderListArgs();
+    public List<String> senderList(String senderListArgs) {
         if (!StringUtil.isNullOrEmpty(senderListArgs)) {
             senderList = Arrays.asList(senderListArgs.split(","));
         }
         return senderList;
     }
 
-    public List<String> recipientList() {
-        recipientListArgs = recipientListArgs();
+    public List<String> recipientList(String recipientListArgs) {
         if (!StringUtil.isNullOrEmpty(recipientListArgs)) {
             recipientList = Arrays.asList(recipientListArgs.split(","));
         }
@@ -79,14 +74,6 @@ public class CryptoTransferValidateAccounts {
         return Stream.of(senderList, recipientList)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-    }
-    
-    public boolean skipPreviewArgs() {
-        boolean skipPreview = false;
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            skipPreview = cryptoTransferOption.dependent.skipPreview;
-        }
-        return skipPreview;
     }
 
     public boolean senderListHasOperator(List<String> senderList) {

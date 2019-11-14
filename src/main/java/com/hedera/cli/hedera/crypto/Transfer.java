@@ -15,8 +15,11 @@ public class Transfer implements Runnable {
     @Autowired
     private InputReader inputReader;
 
+//    @Autowired
+//    private CryptoTransfer cryptoTransfer;
+
     @Autowired
-    private CryptoTransfer cryptoTransfer;
+    private KryptoKransfer kryptoKransfer;
 
     @Override
     public void run() {
@@ -24,12 +27,12 @@ public class Transfer implements Runnable {
     }
 
     public void handle(String... args) {
-        cryptoTransfer.setInputReader(inputReader);
+        kryptoKransfer.setInputReader(inputReader);
         if (args.length == 0) {
-            CommandLine.usage(cryptoTransfer, System.out);
+            CommandLine.usage(kryptoKransfer, System.out);
         } else {
             try {
-                new CommandLine(cryptoTransfer).execute(args);
+                new CommandLine(kryptoKransfer).execute(args);
             } catch (Exception e) {
                 e.printStackTrace();
             }

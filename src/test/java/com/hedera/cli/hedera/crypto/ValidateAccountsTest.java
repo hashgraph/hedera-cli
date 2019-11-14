@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
-public class CryptoTransferValidateAccountsTest {
+public class ValidateAccountsTest {
 
     @InjectMocks
-    private CryptoTransferValidateAccounts cryptoTransferValidateAccounts;
+    private ValidateAccounts validateAccounts;
 
     @Mock
     private Hedera hedera;
@@ -29,7 +29,7 @@ public class CryptoTransferValidateAccountsTest {
         List<String> senderList = new ArrayList<>();
         senderList.add("0.0.1002");
         when(hedera.getOperatorId()).thenReturn(AccountId.fromString("0.0.1001"));
-        assertFalse(cryptoTransferValidateAccounts.senderListHasOperator(senderList));
+        assertFalse(validateAccounts.senderListHasOperator(senderList));
     }
 
     @Test
@@ -37,7 +37,7 @@ public class CryptoTransferValidateAccountsTest {
         List<String> senderList = new ArrayList<>();
         senderList.add("0.0.1001");
         when(hedera.getOperatorId()).thenReturn(AccountId.fromString("0.0.1001"));
-        assertTrue(cryptoTransferValidateAccounts.senderListHasOperator(senderList));
+        assertTrue(validateAccounts.senderListHasOperator(senderList));
     }
 
 }

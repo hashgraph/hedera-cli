@@ -29,7 +29,7 @@ public class KryptoKransferTest {
     private Hedera hedera;
 
     @Mock
-    private CryptoTransferValidateAccounts cryptoTransferValidateAccounts;
+    private ValidateAccounts validateAccounts;
 
     @Mock
     private ShellHelper shellHelper;
