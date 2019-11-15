@@ -28,7 +28,7 @@ public class ValidateAmount {
     @Autowired
     private ValidateAccounts validateAccounts;
 
-    private List<CryptoTransferOptions> cryptoTransferOptionsList;
+    private CryptoTransferOptions cryptoTransferOptions;
 
     private String tinybarListArgs;
     private String hbarListArgs;
@@ -36,33 +36,26 @@ public class ValidateAmount {
     private List<String> amountList;
     private boolean tiny;
 
-    public void setCryptoTransferOptionsList(List<CryptoTransferOptions> cryptoTransferOptionsList) {
-        this.cryptoTransferOptionsList = cryptoTransferOptionsList;
-        setHbarListArgs();
-        setTinyBarListArgs();
+    public void cryptoTransferOptions(CryptoTransferOptions cryptoTransferOptions) {
+        this.cryptoTransferOptions = cryptoTransferOptions;
+        hbarListArgs();
+        tinyBarListArgs();
         setTiny();
     }
 
-    private void setHbarListArgs() {
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtHBars)) {
-                shellHelper.printError("Amount in hbars must not be empty");
-                hbarListArgs = null;
-            } else {
-                hbarListArgs = cryptoTransferOption.exclusive.transferListAmtHBars;
-            }
+    private void hbarListArgs() {
+        if (!StringUtil.isNullOrEmpty(cryptoTransferOptions.exclusive.transferListAmtHBars) &&
+                StringUtil.isNullOrEmpty(cryptoTransferOptions.exclusive.transferListAmtTinyBars)) {
+            hbarListArgs = cryptoTransferOptions.exclusive.transferListAmtHBars;
+            System.out.println("setHbarListArgs");
         }
     }
 
-    private void setTinyBarListArgs() {
-        System.out.println(cryptoTransferOptionsList);
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.exclusive.transferListAmtTinyBars)) {
-                shellHelper.printError("Amount in tinybars must not be empty");
-                tinybarListArgs = null;
-            } else {
-                tinybarListArgs = cryptoTransferOption.exclusive.transferListAmtTinyBars;
-            }
+    private void tinyBarListArgs() {
+        if (!StringUtil.isNullOrEmpty(cryptoTransferOptions.exclusive.transferListAmtTinyBars) &&
+                StringUtil.isNullOrEmpty(cryptoTransferOptions.exclusive.transferListAmtHBars)) {
+            tinybarListArgs = cryptoTransferOptions.exclusive.transferListAmtTinyBars;
+            System.out.println("setTinyBarListArgs");
         }
     }
 
@@ -83,7 +76,9 @@ public class ValidateAmount {
             shellHelper.printError("You have to provide transfer amounts either in hbars or tinybars");
             return true;
         }
-
+        System.out.println("ggggg");
+        System.out.println(hbarListArgs);
+        System.out.println(tinybarListArgs);
         if (!StringUtil.isNullOrEmpty(hbarListArgs) && !StringUtil.isNullOrEmpty(tinybarListArgs)) {
             shellHelper.printError("Transfer amounts must either be in hbars or tinybars, not both");
             return true;
@@ -99,6 +94,7 @@ public class ValidateAmount {
         } else {
             tiny = false;
         }
+        System.out.println("tiny " + tiny);
     }
 
     public long sumOfTinybarsInLong(List<String> amountList) {
@@ -168,9 +164,12 @@ public class ValidateAmount {
         if (transactionAmountNotValid(tinybarListArgs, hbarListArgs)) {
             return false;
         }
-        if (amountList == null) {
+        System.out.println("he");
+        if (getAmountList().isEmpty() || getAmountList() == null) {
+            System.out.println("she");
             return false;
         }
+        System.out.println("them");
         return true;
     }
 }

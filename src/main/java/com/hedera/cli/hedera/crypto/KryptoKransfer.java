@@ -59,6 +59,9 @@ public class KryptoKransfer implements Runnable {
     private ValidateAmount validateAmount;
 
     @Autowired
+    private ValidateTransferList validateTransferList;
+
+    @Autowired
     private CryptoTransferOptions cryptoTransferOptions;
 
     private boolean skipPreview;
@@ -91,21 +94,32 @@ public class KryptoKransfer implements Runnable {
     @Override
     public void run() {
 
-        validateAmount.setCryptoTransferOptionsList(cryptoTransferOptionsList);
-        if (validateAmount.check() == false) {
-            return;
+        for (int i = 0; i < cryptoTransferOptionsList.size(); i++) {
+            // get the exclusive arg by user ie tinybars or hbars
+            cryptoTransferOptions = cryptoTransferOptionsList.get(i);
         }
 
-        validateAccounts.setCryptoTransferOptionsList(cryptoTransferOptionsList);
-        if (validateAccounts.check() == false) {
+        validateAmount.cryptoTransferOptions(cryptoTransferOptions);
+        if (!validateAmount.check()) {
+            System.out.println("111a");
             return;
         }
-    
+        System.out.println("111");
+
+        validateAccounts.cryptoTransferOptions(cryptoTransferOptions);
+        if (!validateAccounts.check()) {
+            System.out.println("222a");
+            return;
+        }
+        System.out.println("222");
+
         // now that we have validated our inputs
         transferList = validateAccounts.getTransferList();
+        System.out.println("333a");
         amountList = validateAmount.getAmountList();
+        System.out.println("333");
 
-        if (!verifyAmountList(senderList, recipientList, amountList, isTiny)) return;
+        if (!validateTransferList.verifyAmountList(senderList, recipientList, amountList)) return;
         transferListToPromptPreviewMap();
 
         try {
@@ -255,84 +269,6 @@ public class KryptoKransfer implements Runnable {
             shellHelper.printError("Some error occurred");
             return null;
         }
-    }
-
-    public boolean verifyAmountList(List<String> senderList, List<String> recipientList, List<String> amountList, boolean isTiny) {
-        boolean amountListVerified = false;
-        int amountSize = amountList.size();
-        int transferSize = senderList.size() + recipientList.size();
-
-        switch (senderList.size()) {
-            case 1:
-                if (validateAccounts.senderListHasOperator()) {
-                    shellHelper.print("Sender list contains operator");
-                    if (amountSize != transferSize) {
-                        // add recipients amount and add to amount list
-                        long sumOfRecipientAmount = sumOfAmountList();
-                        updateAmountList(sumOfRecipientAmount);
-                        long sumOfTransferAmount = sumOfAmountList();
-                        if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
-                            amountListVerified = true;
-                        }
-                    } else {
-                        // assume amount already contains sender's amount
-                        long sumOfTransferAmount = sumOfAmountList();
-                        if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
-                            amountListVerified = true;
-                        }
-                    }
-                } else {
-                    shellHelper.print("Sender list does not contain operator");
-                    if (amountSize != transferSize) {
-                        shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
-                    } else {
-                        // assume amount already contains sender's amount
-                        long sumOfTransferAmount = sumOfAmountList();
-                        if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
-                            amountListVerified = true;
-                        }
-                    }
-                }
-                break;
-            case 2:
-                if (validateAccounts.senderListHasOperator()) {
-                    shellHelper.print("Sender list contains operator");
-                } else {
-                    shellHelper.print("Sender list does not contain operator");
-                }
-                break;
-            default:
-                break;
-        }
-        return amountListVerified;
-    }
-
-    public void updateAmountList(long sumOfRecipientAmount) {
-        System.out.println("updateAmountList: " + isTiny);
-        System.out.println("updateAmountList: " + amountList);
-        this.amountList = finalAmountList(amountList, sumOfRecipientAmount);
-        System.out.println("updateAmountList this.amountlist: " + this.amountList);
-    }
-
-    public long sumOfAmountList() {
-        System.out.println("sumOfRecipientAmountList: " + isTiny);
-        System.out.println("sumOfRecipientAmountList: " + amountList);
-        long sumOfAmount;
-        if (isTiny) {
-            sumOfAmount = validateAmount.sumOfTinybarsInLong(amountList);
-        } else {
-            sumOfAmount = validateAmount.sumOfHbarsInLong(amountList);
-        }
-        return sumOfAmount;
-    }
-
-    public List<String> finalAmountList(List<String> amountList, long sumOfRecipientsAmount) {
-        ArrayList<String> finalAmountList = new ArrayList<>(amountList);
-        String amount = "-" + sumOfRecipientsAmount;
-        finalAmountList.add(0, amount);
-        System.out.println("finalAmountList ???");
-        System.out.println(finalAmountList);
-        return finalAmountList;
     }
 
     private void printAndSaveRecords(Client client, TransactionId transactionId, AccountId operatorId)

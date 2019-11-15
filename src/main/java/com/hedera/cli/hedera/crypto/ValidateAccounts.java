@@ -10,11 +10,15 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 
+@Getter
+@Setter
 @Component
 public class ValidateAccounts {
 
@@ -26,7 +30,7 @@ public class ValidateAccounts {
 
     // setter, when invoked, should set the values for senderListArgs,
     // recipientListArgs, senderList and recipientList
-    private List<CryptoTransferOptions> cryptoTransferOptionsList;
+    private CryptoTransferOptions cryptoTransferOptions;
 
     // values are populated when setCryptotransferOptionsList is invoked
     private String senderListArgs;
@@ -34,45 +38,38 @@ public class ValidateAccounts {
     private List<String> senderList;
     private List<String> recipientList;
 
-    public void setCryptoTransferOptionsList(List<CryptoTransferOptions> cryptoTransferOptionsList) {
-        this.cryptoTransferOptionsList = cryptoTransferOptionsList;
-        setSenderListArgs();
-        setRecipientListArgs();
-        setSenderList();
-        setRecipientList();
+    public void cryptoTransferOptions(CryptoTransferOptions cryptoTransferOptions) {
+        this.cryptoTransferOptions = cryptoTransferOptions;
+        senderListArgs();
+        recipientListArgs();
+        senderList();
+        recipientList();
     }
 
-    private void setSenderListArgs() {
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.senderList)) {
-                senderListArgs = hedera.getOperatorId().toString();
-            } else {
-                senderListArgs = cryptoTransferOption.dependent.senderList;
-            }
+    private void senderListArgs() {
+        if (StringUtil.isNullOrEmpty(cryptoTransferOptions.dependent.senderList)) {
+            senderListArgs = hedera.getOperatorId().toString();
+        } else {
+            senderListArgs = cryptoTransferOptions.dependent.senderList;
         }
     }
 
-    private void setRecipientListArgs() {
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            if (StringUtil.isNullOrEmpty(cryptoTransferOption.dependent.recipientList)) {
-                shellHelper.printError("Recipient list must not be empty");
-                recipientListArgs = null;
-            } else {
-                recipientListArgs = cryptoTransferOption.dependent.recipientList;
-            }
-        }
+    private void recipientListArgs() {
+        recipientListArgs = cryptoTransferOptions.dependent.recipientList;
     }
 
-    private void setSenderList() {
+    private void senderList() {
         if (!StringUtil.isNullOrEmpty(senderListArgs)) {
             senderList = Arrays.asList(senderListArgs.split(","));
         }
+        System.out.println("senderList  " + senderList);
     }
 
-    private void setRecipientList() {
+    private void recipientList() {
         if (!StringUtil.isNullOrEmpty(recipientListArgs)) {
             recipientList = Arrays.asList(recipientListArgs.split(","));
         }
+        System.out.println("recipientList " + recipientList);
     }
 
     public List<String> getTransferList() {

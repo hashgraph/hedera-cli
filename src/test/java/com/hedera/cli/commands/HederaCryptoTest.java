@@ -181,7 +181,7 @@ public class HederaCryptoTest {
     String[] hb = {};
     String[] tb = {};
     hederaCrypto.transfer(sender, recipient, y, hb, tb);
-    verify(shellHelper).printError("Recipient cannot be empty");
+    verify(shellHelper).printError("Recipients cannot be empty");
 
     String[] recipient2 = { "0.0.1001" };
     String[] hb2 = { "1" };

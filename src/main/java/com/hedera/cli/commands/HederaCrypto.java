@@ -110,7 +110,7 @@ public class HederaCrypto extends CliDefaults {
         List<String> argsList = new ArrayList<>();
 
         if (isEmptyStringArray(recipient)) {
-            shellHelper.printError("Recipient cannot be empty");
+            shellHelper.printError("Recipients cannot be empty");
             return;
         }
 
