@@ -28,7 +28,14 @@ public class ValidateTransferList {
     private ValidateAmount validateAmount;
 
     private List<String> amountList;
+    private List<String> senderList;
+    private List<String> recipientList;
     private boolean isTiny;
+    private CryptoTransferOptions cryptoTransferOptions;
+
+    public void setCryptoTransferOptions(CryptoTransferOptions cryptoTransferOptions) {
+        this.cryptoTransferOptions = cryptoTransferOptions;
+    }
 
     public void updateAmountList(long sumOfRecipientAmount) {
         this.amountList = finalAmountList(amountList, sumOfRecipientAmount);
@@ -56,17 +63,15 @@ public class ValidateTransferList {
         return finalAmountList;
     }
 
-    public boolean verifyAmountList(List<String> senderList, List<String> recipientList, List<String> amountList) {
-        System.out.println("aaa");
+    public boolean verifyAmountList(CryptoTransferOptions cryptoTransferOptions) {
+        setCryptoTransferOptions(cryptoTransferOptions);
         boolean amountListVerified = false;
+        amountList = validateAmount.getAmountList(cryptoTransferOptions);
         int amountSize = amountList.size();
-        System.out.println("bbb " +senderList);
-        System.out.println("bbb " +recipientList);
+        senderList = validateAccounts.getSenderList(cryptoTransferOptions);
+        recipientList = validateAccounts.getRecipientList(cryptoTransferOptions);
         int transferSize = senderList.size() + recipientList.size();
-        this.amountList = amountList;
-        System.out.println("ccc");
         this.isTiny = validateAmount.isTiny();
-        System.out.println("ddd");
         switch (senderList.size()) {
             case 1:
                 if (validateAccounts.senderListHasOperator()) {

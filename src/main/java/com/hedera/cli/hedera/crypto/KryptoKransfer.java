@@ -47,7 +47,7 @@ import picocli.CommandLine.Spec;
 @Getter
 @Setter
 @Component
-@Scope(value= ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 @Command
 public class KryptoKransfer implements Runnable {
 
@@ -105,61 +105,35 @@ public class KryptoKransfer implements Runnable {
     @Override
     public void run() {
 
-        System.out.println(o);
+        if (!validateAmount.check(o)) {
+            return;
+        }
 
-        System.out.println("Dependent:");
-        System.out.println(o.dependent.senderList);
-        System.out.println(o.dependent.recipientList);
-        System.out.println(o.dependent.skipPreview);
-        System.out.println("=====");
+        if (!validateAccounts.check(o)) {
+            return;
+        }
 
-        System.out.println("Exclusive:");
-        System.out.println(o.exclusive.transferListAmtTinyBars);
-        System.out.println(o.exclusive.transferListAmtHBars);
-        System.out.println("=====");
-       
+        // now that we have validated our inputs
+        transferList = validateAccounts.getTransferList(o);
 
-        // validateAmount.cryptoTransferOptions(o);
-        // if (!validateAmount.check()) {
-        //     System.out.println("111a");
-        //     return;
-        // }
-        // System.out.println("111");
+        if (!validateTransferList.verifyAmountList(o)) return;
+        transferListToPromptPreviewMap();
 
-        // validateAccounts.cryptoTransferOptions(o);
-        // if (!validateAccounts.check()) {
-        //     System.out.println("222a");
-        //     return;
-        // }
-        // System.out.println("222");
-
-        // // now that we have validated our inputs
-        // transferList = validateAccounts.getTransferList();
-        // System.out.println("333a");
-        // amountList = validateAmount.getAmountList();
-        // System.out.println("333");
-
-        // if (!validateTransferList.verifyAmountList(senderList, recipientList, amountList)) return;
-        // transferListToPromptPreviewMap();
-
-        // try {
-        //     reviewAndExecute(hedera.getOperatorId());
-        // } catch (InterruptedException e) {
-        //     Thread.currentThread().interrupt();
-        // } catch (TimeoutException e) {
-        //     // do nothing
-        // } catch (Exception e) {
-        //     shellHelper.printError(e.getMessage());
-        // }
+        try {
+            reviewAndExecute(hedera.getOperatorId());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
+        } catch (Exception e) {
+            shellHelper.printError(e.getMessage());
+        }
     }
 
-    // public boolean skipPreviewArgs() {
-    //     boolean skipPreview = false;
-    //     for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-    //         skipPreview = cryptoTransferOption.dependent.skipPreview;
-    //     }
-    //     return skipPreview;
-    // }
+    public boolean skipPreviewArgs() {
+        skipPreview = o.dependent.skipPreview;
+        return skipPreview;
+    }
 
     public void handle(String... args) {
         new CommandLine(this).execute(args);
