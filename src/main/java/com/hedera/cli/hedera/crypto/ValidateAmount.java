@@ -92,7 +92,6 @@ public class ValidateAmount {
         } else {
             tiny = false;
         }
-        System.out.println("tiny " + tiny);
     }
 
     public long sumOfTinybarsInLong(List<String> amountList) {

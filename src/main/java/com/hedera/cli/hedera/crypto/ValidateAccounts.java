@@ -42,8 +42,8 @@ public class ValidateAccounts {
     private List<String> senderList;
     private List<String> recipientList;
 
-    public void setCryptoTransferOptions(CryptoTransferOptions cryptoTransferOptions) {
-        this.cryptoTransferOptions = cryptoTransferOptions;
+    public void setCryptoTransferOptions(CryptoTransferOptions o) {
+        this.cryptoTransferOptions = o;
         setSenderListArgs();
         setRecipientListArgs();
         setSenderList();
@@ -68,13 +68,13 @@ public class ValidateAccounts {
         }
     }
 
-    public List<String> getSenderList(CryptoTransferOptions cryptoTransferOptions) {
-        setCryptoTransferOptions(cryptoTransferOptions);
+    public List<String> getSenderList(CryptoTransferOptions o) {
+        setCryptoTransferOptions(o);
         return senderList;
     }
 
-    public List<String> getRecipientList(CryptoTransferOptions cryptoTransferOptions) {
-        setCryptoTransferOptions(cryptoTransferOptions);
+    public List<String> getRecipientList(CryptoTransferOptions o) {
+        setCryptoTransferOptions(o);
         return recipientList;
     }
 
@@ -84,8 +84,8 @@ public class ValidateAccounts {
         }
     }
 
-    public List<String> getTransferList(CryptoTransferOptions cryptoTransferOptions) {
-        setCryptoTransferOptions(cryptoTransferOptions);
+    public List<String> getTransferList(CryptoTransferOptions o) {
+        setCryptoTransferOptions(o);
         return Stream.of(senderList, recipientList).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
@@ -101,9 +101,8 @@ public class ValidateAccounts {
         return true;
     }
 
-    public boolean check(CryptoTransferOptions cryptoTransferOptions) {
-        setCryptoTransferOptions(cryptoTransferOptions);
-
+    public boolean check(CryptoTransferOptions o) {
+        setCryptoTransferOptions(o);
         if (senderList == null) {
             return false;
         }
@@ -119,7 +118,8 @@ public class ValidateAccounts {
         return true;
     }
 
-    public boolean senderListHasOperator() {
+    public boolean senderListHasOperator(CryptoTransferOptions o) {
+        setCryptoTransferOptions(o);
         for (String s : senderList) {
             if (s.contains(hedera.getOperatorId().toString())) {
                 return true;

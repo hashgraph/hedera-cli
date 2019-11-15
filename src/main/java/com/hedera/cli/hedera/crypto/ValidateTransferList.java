@@ -63,18 +63,18 @@ public class ValidateTransferList {
         return finalAmountList;
     }
 
-    public boolean verifyAmountList(CryptoTransferOptions cryptoTransferOptions) {
-        setCryptoTransferOptions(cryptoTransferOptions);
+    public boolean verifyAmountList(CryptoTransferOptions o) {
+        setCryptoTransferOptions(o);
         boolean amountListVerified = false;
-        amountList = validateAmount.getAmountList(cryptoTransferOptions);
+        amountList = validateAmount.getAmountList(o);
         int amountSize = amountList.size();
-        senderList = validateAccounts.getSenderList(cryptoTransferOptions);
-        recipientList = validateAccounts.getRecipientList(cryptoTransferOptions);
+        senderList = validateAccounts.getSenderList(o);
+        recipientList = validateAccounts.getRecipientList(o);
         int transferSize = senderList.size() + recipientList.size();
         this.isTiny = validateAmount.isTiny();
         switch (senderList.size()) {
             case 1:
-                if (validateAccounts.senderListHasOperator()) {
+                if (validateAccounts.senderListHasOperator(o)) {
                     shellHelper.print("Sender list contains operator");
                     if (amountSize != transferSize) {
                         // add recipients amount and add to amount list
@@ -105,7 +105,7 @@ public class ValidateTransferList {
                 }
                 break;
             case 2:
-                if (validateAccounts.senderListHasOperator()) {
+                if (validateAccounts.senderListHasOperator(o)) {
                     shellHelper.print("Sender list contains operator");
                 } else {
                     shellHelper.print("Sender list does not contain operator");
@@ -116,6 +116,4 @@ public class ValidateTransferList {
         }
         return amountListVerified;
     }
-
-
 }
