@@ -28,13 +28,18 @@ import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import picocli.CommandLine;
 import picocli.CommandLine.ArgGroup;
+import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
@@ -42,6 +47,8 @@ import picocli.CommandLine.Spec;
 @Getter
 @Setter
 @Component
+@Scope(value= ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Command
 public class KryptoKransfer implements Runnable {
 
     @Autowired
@@ -68,8 +75,8 @@ public class KryptoKransfer implements Runnable {
     @Autowired
     private ValidateTransferList validateTransferList;
 
-    @Autowired
-    private CryptoTransferOptions cryptoTransferOptions;
+    @ArgGroup(exclusive = false, multiplicity = "1")
+    private CryptoTransferOptions o;
 
     private boolean skipPreview;
     private String isInfoCorrect;
@@ -95,59 +102,68 @@ public class KryptoKransfer implements Runnable {
     @Spec
     private CommandSpec spec;
 
-    @ArgGroup(exclusive = false, multiplicity = "1")
-    private List<CryptoTransferOptions> cryptoTransferOptionsList;
-
     @Override
     public void run() {
 
-        System.out.println(cryptoTransferOptionsList);
+        System.out.println(o);
 
-        for (int i = 0; i < cryptoTransferOptionsList.size(); i++) {
-            // get the exclusive arg by user ie tinybars or hbars
-            cryptoTransferOptions = cryptoTransferOptionsList.get(i);
-        }
+        System.out.println("Dependent:");
+        System.out.println(o.dependent.senderList);
+        System.out.println(o.dependent.recipientList);
+        System.out.println(o.dependent.skipPreview);
+        System.out.println("=====");
 
-        validateAmount.cryptoTransferOptions(cryptoTransferOptions);
-        if (!validateAmount.check()) {
-            System.out.println("111a");
-            return;
-        }
-        System.out.println("111");
+        System.out.println("Exclusive:");
+        System.out.println(o.exclusive.transferListAmtTinyBars);
+        System.out.println(o.exclusive.transferListAmtHBars);
+        System.out.println("=====");
+       
 
-        validateAccounts.cryptoTransferOptions(cryptoTransferOptions);
-        if (!validateAccounts.check()) {
-            System.out.println("222a");
-            return;
-        }
-        System.out.println("222");
+        // validateAmount.cryptoTransferOptions(o);
+        // if (!validateAmount.check()) {
+        //     System.out.println("111a");
+        //     return;
+        // }
+        // System.out.println("111");
 
-        // now that we have validated our inputs
-        transferList = validateAccounts.getTransferList();
-        System.out.println("333a");
-        amountList = validateAmount.getAmountList();
-        System.out.println("333");
+        // validateAccounts.cryptoTransferOptions(o);
+        // if (!validateAccounts.check()) {
+        //     System.out.println("222a");
+        //     return;
+        // }
+        // System.out.println("222");
 
-        if (!validateTransferList.verifyAmountList(senderList, recipientList, amountList)) return;
-        transferListToPromptPreviewMap();
+        // // now that we have validated our inputs
+        // transferList = validateAccounts.getTransferList();
+        // System.out.println("333a");
+        // amountList = validateAmount.getAmountList();
+        // System.out.println("333");
 
-        try {
-            reviewAndExecute(hedera.getOperatorId());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (TimeoutException e) {
-            // do nothing
-        } catch (Exception e) {
-            shellHelper.printError(e.getMessage());
-        }
+        // if (!validateTransferList.verifyAmountList(senderList, recipientList, amountList)) return;
+        // transferListToPromptPreviewMap();
+
+        // try {
+        //     reviewAndExecute(hedera.getOperatorId());
+        // } catch (InterruptedException e) {
+        //     Thread.currentThread().interrupt();
+        // } catch (TimeoutException e) {
+        //     // do nothing
+        // } catch (Exception e) {
+        //     shellHelper.printError(e.getMessage());
+        // }
     }
 
-    public boolean skipPreviewArgs() {
-        boolean skipPreview = false;
-        for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
-            skipPreview = cryptoTransferOption.dependent.skipPreview;
-        }
-        return skipPreview;
+    // public boolean skipPreviewArgs() {
+    //     boolean skipPreview = false;
+    //     for (CryptoTransferOptions cryptoTransferOption : cryptoTransferOptionsList) {
+    //         skipPreview = cryptoTransferOption.dependent.skipPreview;
+    //     }
+    //     return skipPreview;
+    // }
+
+    public void handle(String... args) {
+        new CommandLine(this).execute(args);
+        this.run();
     }
 
     public void reviewAndExecute(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
