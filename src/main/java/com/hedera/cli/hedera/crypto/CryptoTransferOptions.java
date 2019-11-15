@@ -1,14 +1,19 @@
 package com.hedera.cli.hedera.crypto;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
-import picocli.CommandLine.Option;
 import picocli.CommandLine.ArgGroup;
+import picocli.CommandLine.Option;
 
 @Getter
 @Setter
 @Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class CryptoTransferOptions {
 
     // Mutually exclusive group, ie, either input tinybars or hbars as arguments

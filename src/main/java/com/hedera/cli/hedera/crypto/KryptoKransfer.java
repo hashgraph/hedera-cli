@@ -1,5 +1,10 @@
 package com.hedera.cli.hedera.crypto;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -11,25 +16,27 @@ import com.hedera.cli.models.PreviewTransferList;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.models.TransactionObj;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.*;
+import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.HederaException;
+import com.hedera.hashgraph.sdk.Transaction;
+import com.hedera.hashgraph.sdk.TransactionId;
+import com.hedera.hashgraph.sdk.TransactionReceipt;
+import com.hedera.hashgraph.sdk.TransactionRecord;
+import com.hedera.hashgraph.sdk.TransactionRecordQuery;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
-
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.concurrent.TimeoutException;
 
 @NoArgsConstructor
 @Getter
@@ -93,6 +100,8 @@ public class KryptoKransfer implements Runnable {
 
     @Override
     public void run() {
+
+        System.out.println(cryptoTransferOptionsList);
 
         for (int i = 0; i < cryptoTransferOptionsList.size(); i++) {
             // get the exclusive arg by user ie tinybars or hbars
