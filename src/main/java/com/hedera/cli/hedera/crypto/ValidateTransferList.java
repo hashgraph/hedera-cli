@@ -30,6 +30,7 @@ public class ValidateTransferList {
     private List<String> amountList;
     private List<String> senderList;
     private List<String> recipientList;
+    private List<String> finalAmountList;
     private boolean isTiny;
     private CryptoTransferOptions cryptoTransferOptions;
 
@@ -39,12 +40,19 @@ public class ValidateTransferList {
 
     public void updateAmountList(long sumOfRecipientAmount) {
         this.amountList = finalAmountList(amountList, sumOfRecipientAmount);
-        System.out.println("updateAmountList this.amountlist: " + this.amountList);
+        setFinalAmountList(this.amountList);
+    }
+
+    public void setFinalAmountList(List<String> finalAmountList) {
+        this.finalAmountList = finalAmountList;
+    }
+
+    public List<String> getFinalAmountList(CryptoTransferOptions cryptoTransferOptions) {
+        setCryptoTransferOptions(cryptoTransferOptions);
+        return this.finalAmountList;
     }
 
     public long sumOfAmountList() {
-        System.out.println("sumOfRecipientAmountList: " + amountList);
-        System.out.println("sumOfRecipientAmountList: " + isTiny);
         long sumOfAmount;
         if (isTiny) {
             sumOfAmount = validateAmount.sumOfTinybarsInLong(amountList);
@@ -55,12 +63,23 @@ public class ValidateTransferList {
     }
 
     public List<String> finalAmountList(List<String> amountList, long sumOfRecipientsAmount) {
-        ArrayList<String> finalAmountList = new ArrayList<>(amountList);
+        if (!isTiny) {
+            amountList = convertAmountListToTinybar(amountList);
+        }
+        finalAmountList = new ArrayList<>(amountList);
         String amount = "-" + sumOfRecipientsAmount;
         finalAmountList.add(0, amount);
-        System.out.println("finalAmountList ???");
-        System.out.println(finalAmountList);
         return finalAmountList;
+    }
+
+    public List<String> convertAmountListToTinybar(List<String> amountList) {
+        List<String> convertedAmountList = new ArrayList<>();
+        long hbarsToTiny = 0;
+        for (int i=0; i< amountList.size(); i++) {
+            hbarsToTiny = validateAmount.convertHbarToLong(amountList.get(i));
+            convertedAmountList.add(String.valueOf(hbarsToTiny));
+        }
+        return convertedAmountList;
     }
 
     public boolean verifyAmountList(CryptoTransferOptions o) {
@@ -71,7 +90,7 @@ public class ValidateTransferList {
         senderList = validateAccounts.getSenderList(o);
         recipientList = validateAccounts.getRecipientList(o);
         int transferSize = senderList.size() + recipientList.size();
-        this.isTiny = validateAmount.isTiny();
+        isTiny = validateAmount.isTiny(o);
         switch (senderList.size()) {
             case 1:
                 if (validateAccounts.senderListHasOperator(o)) {
@@ -79,6 +98,7 @@ public class ValidateTransferList {
                     if (amountSize != transferSize) {
                         // add recipients amount and add to amount list
                         long sumOfRecipientAmount = sumOfAmountList();
+                        if (sumOfRecipientAmount == -1L) return false;
                         updateAmountList(sumOfRecipientAmount);
                         long sumOfTransferAmount = sumOfAmountList();
                         if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
@@ -87,6 +107,7 @@ public class ValidateTransferList {
                     } else {
                         // assume amount already contains sender's amount
                         long sumOfTransferAmount = sumOfAmountList();
+                        if (sumOfTransferAmount == -1L) return false;
                         if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
                             amountListVerified = true;
                         }
@@ -98,6 +119,7 @@ public class ValidateTransferList {
                     } else {
                         // assume amount already contains sender's amount
                         long sumOfTransferAmount = sumOfAmountList();
+                        if (sumOfTransferAmount == -1L) return false;
                         if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
                             amountListVerified = true;
                         }

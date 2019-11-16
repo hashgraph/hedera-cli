@@ -44,7 +44,7 @@ public class Transfer implements Runnable {
         } else {
             try {
                 System.out.println(args);
-                System.out.println(o);
+//                new CommandLine(kryptoKransfer).execute(args);
                 kryptoKransfer.handle(args);
 
                 // System.out.println(o);

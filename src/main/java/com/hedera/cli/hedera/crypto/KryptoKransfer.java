@@ -78,6 +78,8 @@ public class KryptoKransfer implements Runnable {
     @ArgGroup(exclusive = false, multiplicity = "1")
     private CryptoTransferOptions o;
 
+    private List<CryptoTransferOptions> cryptoTransferOptionsList;
+
     private boolean skipPreview;
     private String isInfoCorrect;
     private String memoString = "";
@@ -86,6 +88,7 @@ public class KryptoKransfer implements Runnable {
     private List<String> amountList;
     private List<String> senderList;
     private List<String> recipientList;
+    private List<String> finalAmountList;
     private boolean isTiny;
 
     private AccountId account;
@@ -113,9 +116,6 @@ public class KryptoKransfer implements Runnable {
             return;
         }
 
-        // now that we have validated our inputs
-        transferList = validateAccounts.getTransferList(o);
-
         if (!validateTransferList.verifyAmountList(o)) return;
         transferListToPromptPreviewMap();
 
@@ -130,21 +130,21 @@ public class KryptoKransfer implements Runnable {
         }
     }
 
-    public boolean skipPreviewArgs() {
+    public boolean isSkipPreview() {
         skipPreview = o.dependent.skipPreview;
         return skipPreview;
     }
 
     public void handle(String... args) {
         new CommandLine(this).execute(args);
-        this.run();
+        // this triggers this.run()
     }
 
     public void reviewAndExecute(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
         // transfer preview for user
         Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap();
-
-        if (skipPreview) {
+        if (isSkipPreview()) {
+            System.out.println("skipped preview");
             executeCryptoTransfer(operatorId);
         } else {
             // Prompt memostring input
@@ -161,17 +161,17 @@ public class KryptoKransfer implements Runnable {
         }
     }
 
+    public boolean isTiny() {
+        isTiny = validateAmount.isTiny(o);
+        return isTiny;
+    }
+
     public CryptoTransferTransaction addTransferList() {
-        System.out.println("final amount list beofre transferring... ");
-        System.out.println(amountList);
-        for (int i = 0; i < amountList.size(); ++i) {
-            if (isTiny) {
-                amountInTiny = Long.parseLong(amountList.get(i));
-                account = AccountId.fromString(transferList.get(i));
-            } else {
-                amountInTiny = validateAmount.convertHbarToLong(amountList.get(i));
-                account = AccountId.fromString(transferList.get(i));
-            }
+        finalAmountList = getFinalAmountList();
+        transferList = getTransferList();
+        for (int i = 0; i < finalAmountList.size(); ++i) {
+            amountInTiny = Long.parseLong(finalAmountList.get(i));
+            account = AccountId.fromString(transferList.get(i));
             cryptoTransferTransaction.addTransfer(account, amountInTiny);
         }
         return cryptoTransferTransaction;
@@ -181,6 +181,8 @@ public class KryptoKransfer implements Runnable {
         TransactionReceipt transactionReceipt;
         byte[] signedTxnBytes;
         transactionId = new TransactionId(operatorId);
+        senderList = validateAccounts.getSenderList(o);
+        setSenderList(senderList);
         // SDKs does not currently support more than 2 senders.
         // Instantiating Client client = hedera.createHederaClient() sets the operator
         // ie 1 operator, 1 sender, x recipients (supported)
@@ -224,6 +226,7 @@ public class KryptoKransfer implements Runnable {
         byte[] signedTxnBytes = new byte[0];
         String senderPrivKeyInString;
         Ed25519PrivateKey senderPrivKey;
+        System.out.println("signAndCreateTxBytesWithOperator senderList size " + senderList.size());
         for (int i = 0; i < senderList.size(); i++) {
             if (senderList.get(i).equals(hedera.getOperatorId().toString())) {
                 signedTxnBytes = cryptoTransferTransaction.toBytes();
@@ -244,17 +247,29 @@ public class KryptoKransfer implements Runnable {
         return signedTxnBytes;
     }
 
+    public void setFinalAmountList(List<String> finalAmountList) {
+        this.finalAmountList = finalAmountList;
+    }
+
     public Map<Integer, PreviewTransferList> transferListToPromptPreviewMap() {
         Map<Integer, PreviewTransferList> map = new HashMap<>();
         String acc;
         String amt;
+        finalAmountList = validateTransferList.getFinalAmountList(o);
+        setFinalAmountList(finalAmountList);
+        transferList = validateAccounts.getTransferList(o);
+        setTransferList(transferList);
+        isTiny = isTiny();
         for (int i = 0; i < transferList.size(); ++i) {
             acc = transferList.get(i);
-            amt = amountList.get(i);
+            if (isTiny) {
+                amt = finalAmountList.get(i);
+            } else {
+                amt = validateAmount.convertLongToHbar(finalAmountList.get(i));
+            }
             PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(acc), amt);
             map.put(i, previewTransferList);
         }
-        System.out.println("prompt map");
         return map;
     }
 

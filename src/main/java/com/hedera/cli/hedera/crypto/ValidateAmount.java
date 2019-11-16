@@ -1,6 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 
@@ -94,6 +95,11 @@ public class ValidateAmount {
         }
     }
 
+    public boolean isTiny(CryptoTransferOptions cryptoTransferOptions) {
+        setCryptoTransferOptions(cryptoTransferOptions);
+        return tiny;
+    }
+
     public long sumOfTinybarsInLong(List<String> amountList) {
         long sum = 0;
         long tinyBarsVerified;
@@ -155,6 +161,12 @@ public class ValidateAmount {
             hbarsToTiny = Long.parseLong(bdConvertTiny.toPlainString().split("\\.")[0]);
         }
         return hbarsToTiny;
+    }
+
+    public String convertLongToHbar(String amt) {
+        BigDecimal bd = new BigDecimal(amt);
+        BigDecimal convertedAmt = bd.divide(new BigDecimal("100000000"), 8, RoundingMode.HALF_DOWN);
+        return convertedAmt.toPlainString();
     }
 
     public boolean check(CryptoTransferOptions cryptoTransferOptions) {
