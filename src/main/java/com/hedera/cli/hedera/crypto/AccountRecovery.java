@@ -3,6 +3,7 @@ package com.hedera.cli.hedera.crypto;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -145,6 +146,10 @@ public class AccountRecovery implements Runnable, Operation {
             AccountInfoQuery q;
             q = new AccountInfoQuery(client).setAccountId(AccountId.fromString(accountId));
             accountInfo = q.execute();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
             return null;

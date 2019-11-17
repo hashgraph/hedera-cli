@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.Hedera;
@@ -70,6 +71,10 @@ public class HederaGrpc {
                 shellHelper.printError(receipt.getStatus().toString());
                 return null;
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
@@ -109,6 +114,10 @@ public class HederaGrpc {
                         .executeForReceipt();
                 receiptStatus(receipt, hedera, newAccount, oldAccount);
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
@@ -140,6 +149,10 @@ public class HederaGrpc {
             client.setOperator(hedera.getOperatorId(), hedera.getOperatorKey());
             var newAccountBalance = client.getAccountBalance(newAccount);
             shellHelper.printSuccess("Account " + newAccount + " new balance is " + newAccountBalance);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
@@ -202,6 +215,10 @@ public class HederaGrpc {
             } else {
                 shellHelper.printError(receipt.getStatus().toString());
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }

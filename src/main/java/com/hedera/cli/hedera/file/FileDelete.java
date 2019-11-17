@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.util.concurrent.TimeoutException;
+
 @Component
 @Command(name = "delete",
         description = "@|fg(225) Deletes specified file from the Hedera network|@")
@@ -55,6 +57,10 @@ public class FileDelete implements Runnable {
                     .execute();
           
             shellHelper.printInfo("File info " + fileInfo);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }

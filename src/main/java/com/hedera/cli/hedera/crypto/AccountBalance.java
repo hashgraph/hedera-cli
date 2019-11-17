@@ -16,6 +16,8 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
+import java.util.concurrent.TimeoutException;
+
 @NoArgsConstructor
 @Getter
 @Setter
@@ -49,6 +51,10 @@ public class AccountBalance implements Runnable, Operation {
         try (Client client = hedera.createHederaClient()) {
             balance = client.getAccountBalance(AccountId.fromString(accountIdInString));
             shellHelper.printSuccess("Balance: " + balance);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
