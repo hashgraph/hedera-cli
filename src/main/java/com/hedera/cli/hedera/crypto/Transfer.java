@@ -18,9 +18,6 @@ public class Transfer implements Runnable {
     @Autowired
     private InputReader inputReader;
 
-    // @Autowired
-    // private CryptoTransfer cryptoTransfer;
-
     @ArgGroup(exclusive = false, multiplicity = "1")
     private CryptoTransferOptions o;
 
@@ -33,29 +30,11 @@ public class Transfer implements Runnable {
     }
 
     public void handle(String... args) {
-        System.out.println(this);
-        System.out.println(kryptoKransfer);
-        for (String a : args) {
-            System.out.println(a);
-        }
-
         if (args.length == 0) {
             CommandLine.usage(this, System.out);
         } else {
             try {
-                System.out.println(args);
-//                new CommandLine(kryptoKransfer).execute(args);
                 kryptoKransfer.handle(args);
-
-                // System.out.println(o);
-                // System.out.println("Dependent:");
-                // System.out.println(o.dependent.senderList);
-                // System.out.println(o.dependent.recipientList);
-                // System.out.println(o.dependent.skipPreview);
-        
-                // System.out.println("Exclusive:");
-                // System.out.println(o.exclusive.transferListAmtTinyBars);
-                // System.out.println(o.exclusive.transferListAmtHBars);
             } catch (Exception e) {
                 e.printStackTrace();
             }

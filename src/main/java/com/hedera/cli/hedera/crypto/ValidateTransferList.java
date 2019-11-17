@@ -94,7 +94,6 @@ public class ValidateTransferList {
         switch (senderList.size()) {
             case 1:
                 if (validateAccounts.senderListHasOperator(o)) {
-                    shellHelper.print("Sender list contains operator");
                     if (amountSize != transferSize) {
                         // add recipients amount and add to amount list
                         long sumOfRecipientAmount = sumOfAmountList();
@@ -113,13 +112,13 @@ public class ValidateTransferList {
                         }
                     }
                 } else {
-                    shellHelper.print("Sender list does not contain operator");
                     if (amountSize != transferSize) {
                         shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
                     } else {
                         // assume amount already contains sender's amount
                         long sumOfTransferAmount = sumOfAmountList();
                         if (sumOfTransferAmount == -1L) return false;
+                        setFinalAmountList(amountList);
                         if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
                             amountListVerified = true;
                         }

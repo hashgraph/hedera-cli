@@ -143,12 +143,11 @@ public class KryptoKransfer implements Runnable {
     public void reviewAndExecute(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
         // transfer preview for user
         Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap();
+        memoString = accountManager.promptMemoString(inputReader);
         if (isSkipPreview()) {
-            System.out.println("skipped preview");
             executeCryptoTransfer(operatorId);
         } else {
             // Prompt memostring input
-            memoString = accountManager.promptMemoString(inputReader);
             isInfoCorrect = promptPreview(operatorId, map);
             if ("yes".equals(isInfoCorrect)) {
                 shellHelper.print("Info is correct, senders will need to sign the transaction to release funds");
@@ -226,7 +225,6 @@ public class KryptoKransfer implements Runnable {
         byte[] signedTxnBytes = new byte[0];
         String senderPrivKeyInString;
         Ed25519PrivateKey senderPrivKey;
-        System.out.println("signAndCreateTxBytesWithOperator senderList size " + senderList.size());
         for (int i = 0; i < senderList.size(); i++) {
             if (senderList.get(i).equals(hedera.getOperatorId().toString())) {
                 signedTxnBytes = cryptoTransferTransaction.toBytes();
