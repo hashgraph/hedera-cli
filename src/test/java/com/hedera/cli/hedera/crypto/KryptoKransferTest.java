@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class KryptoKransferTest {
 
     @InjectMocks
-    private KryptoKransfer kryptoKransfer;
+    private CryptoTransfer cryptoTransfer;
 
     @Mock
     private CryptoTransferOptions cryptoTransferOptions;

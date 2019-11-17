@@ -22,7 +22,7 @@ public class Transfer implements Runnable {
     private CryptoTransferOptions o;
 
     @Autowired
-    private KryptoKransfer kryptoKransfer;
+    private CryptoTransfer cryptoTransfer;
 
     @Override
     public void run() {
@@ -34,7 +34,7 @@ public class Transfer implements Runnable {
             CommandLine.usage(this, System.out);
         } else {
             try {
-                kryptoKransfer.handle(args);
+                cryptoTransfer.handle(args);
             } catch (Exception e) {
                 e.printStackTrace();
             }
