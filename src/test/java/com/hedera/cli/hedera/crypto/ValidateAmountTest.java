@@ -36,7 +36,8 @@ public class ValidateAmountTest {
 
     @Test
     public void assertAutowiredDependenciesNotNull() {
-        assertNotNull(shellHelper);
+        validateAmount.setShellHelper(shellHelper);
+        assertNotNull(validateAmount.getShellHelper());
         assertNotNull(validateAmount);
     }
 
@@ -58,9 +59,6 @@ public class ValidateAmountTest {
     @Test
     public void transactionAmountNotValidNoHbarNorTinybar() {
         dependent = new CryptoTransferOptions.Dependent();
-//        dependent.setSkipPreview(false);
-//        dependent.setRecipientList("0.0.114152,0.0.11667");
-//        dependent.setSenderList("0.0.116681,0.0.117813");
 
         exclusive = new CryptoTransferOptions.Exclusive();
         exclusive.setTransferListAmtHBars("");
@@ -92,9 +90,6 @@ public class ValidateAmountTest {
     @Test
     public void transactionAmountNotValidBothHbarAndTinybar() {
         dependent = new CryptoTransferOptions.Dependent();
-//        dependent.setSkipPreview(false);
-//        dependent.setRecipientList("0.0.114152,0.0.11667");
-//        dependent.setSenderList("0.0.116681,0.0.117813");
 
         exclusive = new CryptoTransferOptions.Exclusive();
         exclusive.setTransferListAmtTinyBars("400,1000,10030");
