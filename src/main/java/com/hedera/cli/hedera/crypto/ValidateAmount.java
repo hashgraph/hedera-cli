@@ -84,11 +84,7 @@ public class ValidateAmount {
     }
 
     public void setTiny() {
-        if (StringUtil.isNullOrEmpty(getHbarListArgs()) && !StringUtil.isNullOrEmpty(getTinybarListArgs())) {
-            tiny = true;
-        } else {
-            tiny = false;
-        }
+        tiny = StringUtil.isNullOrEmpty(getHbarListArgs()) && !StringUtil.isNullOrEmpty(getTinybarListArgs());
     }
 
     public boolean isTiny(CryptoTransferOptions cryptoTransferOptions) {
@@ -167,9 +163,6 @@ public class ValidateAmount {
 
     public boolean check(CryptoTransferOptions cryptoTransferOptions) {
         setCryptoTransferOptions(cryptoTransferOptions);
-        if (transactionAmountNotValid()) {
-            return false;
-        }
-        return true;
+        return !transactionAmountNotValid();
     }
 }

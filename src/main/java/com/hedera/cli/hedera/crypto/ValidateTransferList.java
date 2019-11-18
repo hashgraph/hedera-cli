@@ -127,37 +127,6 @@ public class ValidateTransferList {
                 break;
             default:
                 shellHelper.printWarning("More than 2 senders not supported");
-//                if (validateAccounts.senderListHasOperator(o)) {
-//                    if (amountSize != transferSize) {
-//                        // add recipients amount and add to amount list
-//                        long sumOfRecipientAmount = sumOfAmountList();
-//                        if (sumOfRecipientAmount == -1L) return false;
-//                        updateAmountList(sumOfRecipientAmount);
-//                        long sumOfTransferAmount = sumOfAmountList();
-//                        if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
-//                            amountListVerified = true;
-//                        }
-//                    } else {
-//                        // assume amount already contains sender's amount
-//                        long sumOfTransferAmount = sumOfAmountList();
-//                        if (sumOfTransferAmount == -1L) return false;
-//                        if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
-//                            amountListVerified = true;
-//                        }
-//                    }
-//                } else {
-//                    if (amountSize != transferSize) {
-//                        shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
-//                    } else {
-//                        // assume amount already contains sender's amount
-//                        long sumOfTransferAmount = sumOfAmountList();
-//                        if (sumOfTransferAmount == -1L) return false;
-//                        setFinalAmountList(amountList);
-//                        if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
-//                            amountListVerified = true;
-//                        }
-//                    }
-//                }
                 break;
         }
         return amountListVerified;

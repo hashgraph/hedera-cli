@@ -109,13 +109,7 @@ public class ValidateAccounts {
         if (recipientList == null) {
             return false;
         }
-        if (!verifyListHasAccountIdFormat(senderList)) {
-            return false;
-        }
-        if (!verifyListHasAccountIdFormat(recipientList)) {
-            return false;
-        }
-        return true;
+        return (verifyListHasAccountIdFormat(senderList) && verifyListHasAccountIdFormat(recipientList));
     }
 
     public boolean senderListHasOperator(CryptoTransferOptions o) {
