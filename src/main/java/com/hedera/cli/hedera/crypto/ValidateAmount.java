@@ -141,7 +141,7 @@ public class ValidateAmount {
         for (int i = 0; i < amountList.size(); i++) {
             if ("0".equals(amountList.get(i))) {
                 shellHelper.printError("Hbars must be more or less than 0");
-                return 0;
+                return -1;
             }
             hbarsToTiny = convertHbarToLong(amountList.get(i));
             sum += hbarsToTiny;
@@ -172,9 +172,6 @@ public class ValidateAmount {
     public boolean check(CryptoTransferOptions cryptoTransferOptions) {
         setCryptoTransferOptions(cryptoTransferOptions);
         if (transactionAmountNotValid()) {
-            return false;
-        }
-        if (getAmountList(cryptoTransferOptions).isEmpty() || getAmountList(cryptoTransferOptions) == null) {
             return false;
         }
         return true;

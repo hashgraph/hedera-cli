@@ -78,8 +78,6 @@ public class CryptoTransfer implements Runnable {
     @ArgGroup(exclusive = false, multiplicity = "1")
     private CryptoTransferOptions o;
 
-    private List<CryptoTransferOptions> cryptoTransferOptionsList;
-
     private boolean skipPreview;
     private String isInfoCorrect;
     private String memoString = "";

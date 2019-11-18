@@ -9,6 +9,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.when;
+
 @ExtendWith({MockitoExtension.class})
 public class KryptoKransferTest {
 
@@ -27,21 +34,22 @@ public class KryptoKransferTest {
     @Mock
     private ShellHelper shellHelper;
 
-//    @Test
-//    public void senderListReturnsIfEmptyOrNull() {
-//        when(cryptoTransferValidateAccounts.senderListArgs()).thenReturn("");
-//        List<String> senderList = cryptoTransferValidateAccounts.senderList();
-//        assertNull(senderList);
-//    }
-//
-//    @Test
-//    public void senderListSize1() {
+    @Test
+    public void senderListReturnsIfEmptyOrNull() {
+//        when(validateAccounts.getSenderListArgs()).thenReturn("");
+//        List<String> senderList = validateAccounts.getSenderList();
+//        List<String> emptySenderList = new ArrayList<>();
+//        assertEquals(emptySenderList, senderList);
+    }
+
+    @Test
+    public void senderListSize1() {
 //        String accountId = "0.0.1001";
 //        cryptoTransferValidateAccounts.setSenderListArgs(accountId);
 //        when(cryptoTransferValidateAccounts.senderListArgs()).thenReturn(cryptoTransferValidateAccounts.getSenderListArgs());
 //        assertEquals(1, cryptoTransferValidateAccounts.senderList().size());
 //        assertEquals(accountId, cryptoTransferValidateAccounts.senderList().get(0));
-//    }
+    }
 //
 //    @Test
 //    public void recipientListNotValid() {
