@@ -176,18 +176,31 @@ public class CryptoTransfer implements Runnable {
         return cryptoTransferTransaction;
     }
 
+//    public CryptoTransferTransaction addSenderRecipientList() {
+//        finalAmountList = getFinalAmountList();
+//        transferList = getTransferList();
+//        senderList = getSenderList();
+//        recipientList = validateAccounts.getRecipientList(o);
+//        for (int i = 0; i < finalAmountList.size(); ++i) {
+//            amountInTiny = Long.parseLong(finalAmountList.get(i));
+//            account = AccountId.fromString(transferList.get(i));
+//            if (i < senderList.size()) {
+//                cryptoTransferTransaction.addSender(account, amountInTiny * -1);
+//            } else {
+//                cryptoTransferTransaction.addRecipient(account, amountInTiny);
+//            }
+//        }
+//        return cryptoTransferTransaction;
+//    }
+
     private void executeCryptoTransfer(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
         TransactionReceipt transactionReceipt;
         byte[] signedTxnBytes;
         transactionId = new TransactionId(operatorId);
         senderList = validateAccounts.getSenderList(o);
         setSenderList(senderList);
-        // SDKs does not currently support more than 2 senders.
-        // Instantiating Client client = hedera.createHederaClient() sets the operator
-        // ie 1 operator, 1 sender, x recipients (supported)
-        // ie 1 operator, 0 sender, x recipients (supported)
         if (senderList.size() > 1) {
-            shellHelper.printError("Currently does not support more than 2 senders");
+            shellHelper.printInfo("More than 2 senders not supported");
             return;
             // If more than 2 senders are created in list, and client.setsOperator()
             // transactions are not allowed to .sign() more than once, otherwise SDK throws
@@ -196,6 +209,12 @@ public class CryptoTransfer implements Runnable {
             // instantiate a new Client,
             // SDK throws "java.lang.IllegalStateException: transaction builder failed
             // validation: at least one transfer required "
+//            client = hedera.createHederaClient();
+//            cryptoTransferTransaction = new CryptoTransferTransaction(client);
+//            cryptoTransferTransaction.setMemo(memoString);
+//            cryptoTransferTransaction.setTransactionId(transactionId);
+//            cryptoTransferTransaction = addSenderRecipientList();
+//            signedTxnBytes = signAndCreateTxBytesWithOperator();
         } else {
             client = hedera.createHederaClient();
             cryptoTransferTransaction = new CryptoTransferTransaction(client);
