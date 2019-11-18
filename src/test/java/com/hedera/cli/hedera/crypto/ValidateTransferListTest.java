@@ -1,0 +1,137 @@
+package com.hedera.cli.hedera.crypto;
+
+import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.shell.ShellHelper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class ValidateTransferListTest {
+
+    @InjectMocks
+    private ValidateTransferList validateTransferList;
+
+    @Mock
+    private ShellHelper shellHelper;
+
+    @Mock
+    private ValidateAmount validateAmount;
+
+    @Mock
+    private ValidateAccounts validateAccounts;
+
+    private CryptoTransferOptions cryptoTransferOptions;
+    private CryptoTransferOptions.Exclusive exclusive;
+    private CryptoTransferOptions.Dependent dependent;
+
+    @Test
+    public void assertAutowiredDependenciesNotNull() {
+        validateTransferList.setShellHelper(shellHelper);
+        assertNotNull(validateTransferList.getShellHelper());
+
+        validateTransferList.setValidateAccounts(validateAccounts);
+        assertNotNull(validateTransferList.getValidateAccounts());
+
+        validateTransferList.setValidateAmount(validateAmount);
+        assertNotNull(validateTransferList.getValidateAmount());
+
+        assertNotNull(validateTransferList);
+    }
+
+    @Test
+    public void sumOfAmountInTiny() {
+
+        dependent = new CryptoTransferOptions.Dependent();
+
+        exclusive = new CryptoTransferOptions.Exclusive();
+        exclusive.setTransferListAmtTinyBars("400,1000,10030");
+        exclusive.setTransferListAmtHBars("");
+
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        validateTransferList.setCryptoTransferOptions(cryptoTransferOptions);
+        assertEquals(cryptoTransferOptions, validateTransferList.getCryptoTransferOptions());
+        validateTransferList.setTiny(true);
+        List<String> amountList = new ArrayList<>();
+        amountList.add("50");
+        amountList.add("50");
+        validateTransferList.setAmountList(amountList);
+        when(validateAmount.sumOfTinybarsInLong(amountList)).thenReturn(100L);
+        assertEquals(100L, validateTransferList.sumOfAmountList());
+    }
+
+    @Test
+    public void sumOfAmountInHbar() {
+
+        dependent = new CryptoTransferOptions.Dependent();
+
+        exclusive = new CryptoTransferOptions.Exclusive();
+        exclusive.setTransferListAmtTinyBars("");
+        exclusive.setTransferListAmtHBars("0.1,0.2,0.3");
+
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        validateTransferList.setCryptoTransferOptions(cryptoTransferOptions);
+
+        validateTransferList.setTiny(false);
+        List<String> amountList = new ArrayList<>();
+        amountList.add("0.50");
+        amountList.add("0.40");
+        validateTransferList.setAmountList(amountList);
+        when(validateAmount.sumOfHbarsInLong(amountList)).thenReturn(90000000L);
+        assertEquals(90000000L, validateTransferList.sumOfAmountList());
+    }
+
+    @Test
+    public void updateAmountListTinybar() {
+        dependent = new CryptoTransferOptions.Dependent();
+
+        exclusive = new CryptoTransferOptions.Exclusive();
+        exclusive.setTransferListAmtTinyBars("500000,400000");
+        exclusive.setTransferListAmtHBars("");
+
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        validateTransferList.setCryptoTransferOptions(cryptoTransferOptions);
+
+        List<String> amountList = new ArrayList<>();
+        amountList.add("500000");
+        amountList.add("400000");
+        validateTransferList.setAmountList(amountList);
+        validateTransferList.setTiny(true);
+        assertTrue(validateTransferList.isTiny());
+        long sumOfRecipientAmount = 900000L;
+        validateTransferList.updateAmountList(sumOfRecipientAmount);
+        amountList.add(0,"-900000");
+        assertEquals(amountList, validateTransferList.getFinalAmountList(cryptoTransferOptions));
+    }
+
+    @Test
+    public void convertAmountListToTinybar() {
+//        List<String> amountList = new ArrayList<>();
+//        amountList.add("0.006");
+//        amountList.add("0.003");
+//        validateTransferList.setAmountList(amountList);
+//        List<String> actualConvertedAmountList = validateTransferList.convertAmountListToTinybar(amountList);
+//
+//        when(validateAmount.convertHbarToLong(amountList.get(0))).thenReturn(600000L);
+//        when(validateAmount.convertHbarToLong(amountList.get(1))).thenReturn(300000L);
+//        List<String> expectedConvertedAmountList = new ArrayList<>();
+//        expectedConvertedAmountList.add("600000");
+//        expectedConvertedAmountList.add("300000");
+//
+//        assertEquals(expectedConvertedAmountList, actualConvertedAmountList);
+    }
+}

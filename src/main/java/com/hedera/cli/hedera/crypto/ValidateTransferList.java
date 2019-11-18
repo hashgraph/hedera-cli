@@ -1,6 +1,5 @@
 package com.hedera.cli.hedera.crypto;
 
-import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,9 +13,6 @@ import java.util.List;
 @Setter
 @Component
 public class ValidateTransferList {
-
-    @Autowired
-    private Hedera hedera;
 
     @Autowired
     private ShellHelper shellHelper;
