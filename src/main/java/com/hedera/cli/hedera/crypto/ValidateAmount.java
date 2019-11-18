@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 
-import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +22,6 @@ import lombok.Setter;
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ValidateAmount {
-
-    @Autowired
-    private Hedera hedera;
 
     @Autowired
     private ShellHelper shellHelper;
