@@ -107,15 +107,11 @@ public class HederaCrypto extends CliDefaults {
                          @ShellOption(value = {"-hb", "--hbars"}, defaultValue = "") String[] hb,
                          @ShellOption(value = {"-tb", "--tinybars"}, defaultValue = "") String[] tb) {
         // @formatter:on
-        if (isEmptyStringArray(sender) && isEmptyStringArray(recipient) && isEmptyStringArray(hb) && isEmptyStringArray(tb)) {
-            transfer.run();
-            return;
-        }
-
         List<String> argsList = new ArrayList<>();
 
         if (isEmptyStringArray(recipient)) {
             shellHelper.printError("Recipients cannot be empty");
+            transfer.run();
             return;
         }
 
