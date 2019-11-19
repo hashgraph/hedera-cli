@@ -68,6 +68,9 @@ public class CryptoTransferTest {
     @Mock
     private CryptoTransferTransaction cryptoTransferTransaction;
 
+    @Mock
+    private TransactionId transactionId;
+
     private CryptoTransferOptions cryptoTransferOptions;
     private CryptoTransferOptions.Exclusive exclusive;
     private CryptoTransferOptions.Dependent dependent;
@@ -256,8 +259,6 @@ public class CryptoTransferTest {
                 + "\n\nIs this correct?" + "\nyes/no";
         when(inputReader.prompt(prompt)).thenReturn("yes");
 
-        TransactionId txid = mock(TransactionId.class);
-        cryptoTransfer.setTransactionId(txid);
         CryptoTransfer cryptoTransfer1 = Mockito.spy(cryptoTransfer);
         doNothing().when(cryptoTransfer1).executeCryptoTransfer(any());
 
@@ -269,5 +270,96 @@ public class CryptoTransferTest {
         String expected = "Info is correct, senders will need to sign the transaction to release funds";
         assertEquals(expected, actual);
 
+    }
+
+    @Test
+    public void noPreviewExecute() throws InvalidProtocolBufferException, InterruptedException,
+            TimeoutException {
+
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        AccountId operatorId = hedera.getOperatorId();
+
+        when(validateAmount.isTiny(any())).thenReturn(true);
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+        when(accountManager.promptMemoString(inputReader)).thenReturn("some memo");
+
+        CryptoTransfer cryptoTransfer1 = Mockito.spy(cryptoTransfer);
+        doNothing().when(cryptoTransfer1).executeCryptoTransfer(any());
+
+        cryptoTransfer1.reviewAndExecute(operatorId);
+        verify(cryptoTransfer1).reviewAndExecute(any());
+    }
+
+    @Test
+    public void promptPreviewError() throws JsonProcessingException, InvalidProtocolBufferException, InterruptedException, TimeoutException {
+
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        AccountId operatorId = hedera.getOperatorId();
+
+        when(validateAmount.isTiny(any())).thenReturn(true);
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+        when(accountManager.promptMemoString(inputReader)).thenReturn("some memo");
+
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        String jsonStringTransferList = ow.writeValueAsString(expectedMap);
+        String prompt = "\nOperator\n" + operatorId + "\nTransfer List\n" + jsonStringTransferList
+                + "\n\nIs this correct?" + "\nyes/no";
+        when(inputReader.prompt(prompt)).thenReturn("again");
+        cryptoTransfer.reviewAndExecute(operatorId);
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper, times(2)).printError(valueCapture.capture());
+        List<String> actual = valueCapture.getAllValues();
+        String expected = "Some error occurred";
+        assertEquals(expected, actual.get(0));
+        String expected1 = "Input must be either yes or no";
+        assertEquals(expected1, actual.get(1));
+    }
+
+    @Test
+    public void executeCryptoTransferSign() throws InvalidProtocolBufferException, InterruptedException, TimeoutException {
+
+//        dependent = new CryptoTransferOptions.Dependent();
+//        dependent.setSkipPreview(false);
+//        dependent.setRecipientList(Collections.singletonList(recipientList).toString());
+//        dependent.setSenderList(Collections.singletonList(senderList).toString());
+//
+//        cryptoTransferOptions = new CryptoTransferOptions();
+//        cryptoTransferOptions.setDependent(dependent);
+//        cryptoTransfer.setO(cryptoTransferOptions);
+//
+//        AccountId operatorId = hedera.getOperatorId();
+//
+//        when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
+//        when(validateAmount.isTiny(any())).thenReturn(true);
+//        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+//        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+//        when(accountManager.promptMemoString(inputReader)).thenReturn("some memo");
+//
+//        cryptoTransfer.setFinalAmountList(expectedAmountList);
+//        cryptoTransfer.setTransferList(expectedTransferList);
+//        cryptoTransfer.setCryptoTransferTransaction(cryptoTransfer.addTransferList());
+//
+//        TransactionId transactionId1 = spy(transactionId);
+//        when(new TransactionId(hedera.getOperatorId())).thenReturn(transactionId1);
+//
+//        CryptoTransfer cryptoTransfer1 = Mockito.spy(cryptoTransfer);
+//        when(cryptoTransfer1.addTransferList()).thenReturn(cryptoTransferTransaction);
+//
+//        cryptoTransfer1.executeCryptoTransfer(operatorId);
+//        verify(cryptoTransferTransaction, times(1)).setMemo("some memo");
     }
 }

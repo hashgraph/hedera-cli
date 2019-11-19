@@ -174,29 +174,10 @@ public class CryptoTransfer implements Runnable {
         return cryptoTransferTransaction;
     }
 
-//    public CryptoTransferTransaction addSenderRecipientList() {
-//        finalAmountList = getFinalAmountList();
-//        transferList = getTransferList();
-//        senderList = getSenderList();
-//        recipientList = validateAccounts.getRecipientList(o);
-//        for (int i = 0; i < finalAmountList.size(); ++i) {
-//            amountInTiny = Long.parseLong(finalAmountList.get(i));
-//            account = AccountId.fromString(transferList.get(i));
-//            if (i < senderList.size()) {
-//                cryptoTransferTransaction.addSender(account, amountInTiny * -1);
-//            } else {
-//                cryptoTransferTransaction.addRecipient(account, amountInTiny);
-//            }
-//        }
-//        return cryptoTransferTransaction;
-//    }
-
     public void executeCryptoTransfer(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
         TransactionReceipt transactionReceipt;
         byte[] signedTxnBytes;
-        System.out.println("hrello" + operatorId);
         transactionId = new TransactionId(operatorId);
-        System.out.println("hrello" + transactionId);
         senderList = validateAccounts.getSenderList(o);
         setSenderList(senderList);
         if (senderList.size() > 1) {
