@@ -191,10 +191,12 @@ public class CryptoTransfer implements Runnable {
 //        return cryptoTransferTransaction;
 //    }
 
-    private void executeCryptoTransfer(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
+    public void executeCryptoTransfer(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
         TransactionReceipt transactionReceipt;
         byte[] signedTxnBytes;
+        System.out.println("hrello" + operatorId);
         transactionId = new TransactionId(operatorId);
+        System.out.println("hrello" + transactionId);
         senderList = validateAccounts.getSenderList(o);
         setSenderList(senderList);
         if (senderList.size() > 1) {
