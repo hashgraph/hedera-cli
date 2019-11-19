@@ -3,6 +3,7 @@ package com.hedera.cli.hedera.crypto;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -36,12 +37,43 @@ public class ValidateAccountsTest {
     private CryptoTransferOptions.Exclusive exclusive;
     private CryptoTransferOptions.Dependent dependent;
 
+    private String sender1;
+    private String sender2;
+    private String senderListArgs;
+    private List<String> senderList;
+    private String recipient1;
+    private String recipient2;
+    private String recipientListArgs;
+    private List<String> recipientList;
+
+    @BeforeEach
+    public void setUp() {
+        sender1 = "0.0.1001";
+        sender2 = "0.0.1002";
+        senderList = new ArrayList<>();
+        senderList.add(sender1);
+        senderList.add(sender2);
+
+        recipient1 = "0.0.1003";
+        recipient2 = "0.0.1004";
+        recipientList = new ArrayList<>();
+        recipientList.add(recipient1);
+        recipientList.add(recipient2);
+
+        senderListArgs = sender1 + "," + sender2;
+        recipientListArgs = recipient1 + "," + recipient2;
+    }
+
     @Test
     public void assertAutowiredDependenciesNotNull() {
         validateAccounts.setHedera(hedera);
         assertNotNull(validateAccounts.getHedera());
         validateAccounts.setShellHelper(shellHelper);
         assertNotNull(validateAccounts.getShellHelper());
+        validateAccounts.setRecipientList(recipientList);
+        assertEquals(recipientList, validateAccounts.getRecipientList());
+        validateAccounts.setSenderList(senderList);
+        assertEquals(senderList, validateAccounts.getSenderList());
     }
 
 
@@ -50,8 +82,8 @@ public class ValidateAccountsTest {
         dependent = new CryptoTransferOptions.Dependent();
 
         dependent.setSkipPreview(false);
-        dependent.setRecipientList("0.0.1003,0.0.1004");
-        dependent.setSenderList("0.0.1001,0.0.1002");
+        dependent.setRecipientList(recipientListArgs);
+        dependent.setSenderList(senderListArgs);
 
         exclusive = new CryptoTransferOptions.Exclusive();
         exclusive.setTransferListAmtHBars("");
@@ -73,8 +105,8 @@ public class ValidateAccountsTest {
         dependent = new CryptoTransferOptions.Dependent();
 
         dependent.setSkipPreview(false);
-        dependent.setRecipientList("0.0.1003,0.0.1004");
-        dependent.setSenderList("0.0.1001,0.0.1002");
+        dependent.setRecipientList(recipientListArgs);
+        dependent.setSenderList(senderListArgs);
 
         exclusive = new CryptoTransferOptions.Exclusive();
         exclusive.setTransferListAmtHBars("");
@@ -96,8 +128,8 @@ public class ValidateAccountsTest {
         dependent = new CryptoTransferOptions.Dependent();
 
         dependent.setSkipPreview(false);
-        dependent.setRecipientList("0.0.1003,0.0.1004");
-        dependent.setSenderList("0.0.1001,0.0.1002");
+        dependent.setRecipientList(recipientListArgs);
+        dependent.setSenderList(senderListArgs);
 
         exclusive = new CryptoTransferOptions.Exclusive();
         exclusive.setTransferListAmtHBars("");
@@ -121,8 +153,8 @@ public class ValidateAccountsTest {
         dependent = new CryptoTransferOptions.Dependent();
 
         dependent.setSkipPreview(false);
-        dependent.setRecipientList("0.0.1003,0.0.1004");
-        dependent.setSenderList("0.0.1001,0.0.1002");
+        dependent.setRecipientList(recipientListArgs);
+        dependent.setSenderList(senderListArgs);
 
         exclusive = new CryptoTransferOptions.Exclusive();
 
@@ -133,12 +165,6 @@ public class ValidateAccountsTest {
         validateAccounts.setCryptoTransferOptions(cryptoTransferOptions);
         assertTrue(validateAccounts.check(cryptoTransferOptions));
 
-        List<String> recipientList = new ArrayList<>();
-        recipientList.add("0.0.1003");
-        recipientList.add("0.0.1004");
-        List<String> senderList = new ArrayList<>();
-        senderList.add("0.0.1001");
-        senderList.add("0.0.1002");
         List<String> actualSenderList = validateAccounts.getSenderList(cryptoTransferOptions);
         List<String> actualRecipientList = validateAccounts.getRecipientList(cryptoTransferOptions);
         assertEquals(senderList, actualSenderList);
@@ -155,7 +181,7 @@ public class ValidateAccountsTest {
 
         dependent.setSkipPreview(false);
         dependent.setSenderList("0.1001,0.0.1004");
-        dependent.setRecipientList("0.0.1003,0.0.1004");
+        dependent.setRecipientList(recipientListArgs);
 
         exclusive = new CryptoTransferOptions.Exclusive();
 
@@ -164,7 +190,8 @@ public class ValidateAccountsTest {
         cryptoTransferOptions.setExclusive(exclusive);
 
         validateAccounts.setCryptoTransferOptions(cryptoTransferOptions);
-        assertFalse(validateAccounts.check(cryptoTransferOptions));
+        boolean incorrect = validateAccounts.check(cryptoTransferOptions);
+        assertFalse(incorrect);
 
         ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
         verify(shellHelper).printError(valueCapture.capture());
@@ -179,7 +206,7 @@ public class ValidateAccountsTest {
         dependent = new CryptoTransferOptions.Dependent();
 
         dependent.setSkipPreview(false);
-        dependent.setSenderList("0.0.1001,0.0.1004");
+        dependent.setSenderList(senderListArgs);
         dependent.setRecipientList("0.1003,0.0.1004");
 
         exclusive = new CryptoTransferOptions.Exclusive();
@@ -204,7 +231,7 @@ public class ValidateAccountsTest {
         dependent = new CryptoTransferOptions.Dependent();
 
         dependent.setSkipPreview(false);
-        dependent.setRecipientList("0.0.1003,0.0.1004");
+        dependent.setRecipientList(recipientListArgs);
         dependent.setSenderList("");
 
         exclusive = new CryptoTransferOptions.Exclusive();

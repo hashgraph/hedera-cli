@@ -1,6 +1,7 @@
 package com.hedera.cli.hedera.crypto;
 
 import com.hedera.cli.shell.ShellHelper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -12,9 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -38,19 +37,58 @@ public class ValidateTransferListTest {
     private CryptoTransferOptions cryptoTransferOptions;
     private CryptoTransferOptions.Exclusive exclusive;
     private CryptoTransferOptions.Dependent dependent;
+    private String sender;
+    private String senderAmt;
+    private String senderListArgs;
+    private List<String> senderList;
+    private String recipient1;
+    private String recipient2;
+    private String recipient1Amt;
+    private String recipient2Amt;
+    private String recipientListArgs;
+    private List<String> recipientList;
+    private List<String> expectedAmountList;
+
+    @BeforeEach
+    public void setUp() {
+        sender = "0.0.1001";
+        senderList = new ArrayList<>();
+        senderList.add(sender);
+
+        recipient1 = "0.0.1002";
+        recipient2 = "0.0.1003";
+        recipientList = new ArrayList<>();
+        recipientList.add(recipient1);
+        recipientList.add(recipient2);
+
+        senderAmt = "-1400";
+        recipient1Amt = "1000";
+        recipient2Amt = "400";
+
+        senderListArgs = sender;
+        recipientListArgs = recipient1 + "," + recipient2;
+
+        expectedAmountList = new ArrayList<>();
+        expectedAmountList.add(senderAmt);
+        expectedAmountList.add(recipient1Amt);
+        expectedAmountList.add(recipient2Amt);
+    }
 
     @Test
     public void assertAutowiredDependenciesNotNull() {
         validateTransferList.setShellHelper(shellHelper);
         assertNotNull(validateTransferList.getShellHelper());
-
         validateTransferList.setValidateAccounts(validateAccounts);
         assertNotNull(validateTransferList.getValidateAccounts());
-
         validateTransferList.setValidateAmount(validateAmount);
         assertNotNull(validateTransferList.getValidateAmount());
-
         assertNotNull(validateTransferList);
+        validateTransferList.setRecipientList(recipientList);
+        assertEquals(recipientList, validateTransferList.getRecipientList());
+        validateTransferList.setSenderList(senderList);
+        assertEquals(senderList, validateTransferList.getSenderList());
+        validateTransferList.setAmountList(expectedAmountList);
+        assertEquals(expectedAmountList, validateTransferList.getAmountList());
     }
 
     @Test
@@ -120,7 +158,7 @@ public class ValidateTransferListTest {
         assertTrue(validateTransferList.isTiny());
         long sumOfRecipientAmount = 900000L;
         validateTransferList.updateAmountList(sumOfRecipientAmount);
-        amountList.add(0,"-900000");
+        amountList.add(0, "-900000");
         assertEquals(amountList, validateTransferList.getFinalAmountList(cryptoTransferOptions));
     }
 
@@ -152,14 +190,13 @@ public class ValidateTransferListTest {
         cryptoTransferOptions.setExclusive(exclusive);
         validateTransferList.setCryptoTransferOptions(cryptoTransferOptions);
         List<String> amountList = Arrays.asList(exclusive.getTransferListAmtTinyBars().split(","));
-        System.out.println(amountList);
         validateTransferList.setAmountList(amountList);
         validateTransferList.setTiny(false);
 
         validateTransferList.setSenderList(Arrays.asList(dependent.getSenderList().split(",")));
         validateTransferList.verifyAmountList(cryptoTransferOptions);
         verify(validateAmount, times(1)).getAmountList(cryptoTransferOptions);
-        verify(validateAccounts,times(1)).getSenderList(cryptoTransferOptions);
+        verify(validateAccounts, times(1)).getSenderList(cryptoTransferOptions);
         verify(validateAccounts, times(1)).getRecipientList(cryptoTransferOptions);
         verify(validateAmount, times(1)).isTiny(cryptoTransferOptions);
 
@@ -167,6 +204,158 @@ public class ValidateTransferListTest {
         verify(shellHelper).printWarning(valueCapture.capture());
         String actual = valueCapture.getValue();
         String expected = "More than 2 senders not supported";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void verifyAmountListCase1SenderIsOperator() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        dependent.setSenderList(senderListArgs);
+        dependent.setRecipientList(recipientListArgs);
+
+        exclusive = new CryptoTransferOptions.Exclusive();
+        exclusive.setTransferListAmtTinyBars(recipient1Amt + "," + recipient2Amt);
+        exclusive.setTransferListAmtHBars("");
+
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(true);
+        when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
+        when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
+        when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
+        when(validateAmount.verifyZeroSum(0)).thenReturn(true);
+        boolean validated = validateTransferList.verifyAmountList(cryptoTransferOptions);
+        assertTrue(validated);
+    }
+
+    @Test
+    public void verifyAmountListCase1SenderIsOperatorHbar() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        dependent.setSenderList(senderListArgs);
+        dependent.setRecipientList(recipientListArgs);
+
+        exclusive = new CryptoTransferOptions.Exclusive();
+        exclusive.setTransferListAmtTinyBars("");
+        exclusive.setTransferListAmtHBars(recipient1Amt + "," + recipient2Amt);
+
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(false);
+        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(true);
+        when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
+        when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
+        when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
+        when(validateAmount.verifyZeroSum(0)).thenReturn(true);
+        boolean validated = validateTransferList.verifyAmountList(cryptoTransferOptions);
+        assertTrue(validated);
+    }
+
+
+    @Test
+    public void verifyAmountListCase1SenderIsOperatorAmountTransferSizeNotEqual() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        dependent.setSenderList(senderListArgs);
+        dependent.setRecipientList(recipientListArgs);
+
+        exclusive = new CryptoTransferOptions.Exclusive();
+        exclusive.setTransferListAmtTinyBars(recipient1Amt + "," + recipient2Amt);
+        exclusive.setTransferListAmtHBars("");
+
+        List<String> amountList = new ArrayList<>();
+        amountList.add(recipient1Amt);
+        amountList.add(recipient2Amt);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(true);
+        when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(amountList);
+        when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
+        when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
+        when(validateAmount.verifyZeroSum(0)).thenReturn(true);
+        boolean validated = validateTransferList.verifyAmountList(cryptoTransferOptions);
+        assertTrue(validated);
+    }
+
+    @Test
+    public void verifyAmountListCase1SenderDoesNotHaveOperator() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        dependent.setSenderList(senderListArgs);
+        dependent.setRecipientList(recipientListArgs);
+
+        exclusive = new CryptoTransferOptions.Exclusive();
+        exclusive.setTransferListAmtTinyBars(recipient1Amt + "," + recipient2Amt);
+        exclusive.setTransferListAmtHBars("");
+
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(false);
+        when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
+        when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
+        when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
+        when(validateAmount.verifyZeroSum(0)).thenReturn(true);
+        boolean validated = validateTransferList.verifyAmountList(cryptoTransferOptions);
+        assertTrue(validated);
+    }
+
+    @Test
+    public void verifyAmountListCase1SenderDoesNotHaveOperatorHbar() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        dependent.setSenderList(senderListArgs);
+        dependent.setRecipientList(recipientListArgs);
+
+        exclusive = new CryptoTransferOptions.Exclusive();
+        exclusive.setTransferListAmtHBars(recipient1Amt + "," + recipient2Amt);
+        exclusive.setTransferListAmtTinyBars("");
+
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(false);
+        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(false);
+        when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
+        when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
+        when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
+        when(validateAmount.verifyZeroSum(0)).thenReturn(true);
+        boolean validated = validateTransferList.verifyAmountList(cryptoTransferOptions);
+        assertTrue(validated);
+    }
+
+    @Test
+    public void verifyAmountListCase1InvalidList() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        dependent.setSenderList(senderListArgs);
+        dependent.setRecipientList(recipientListArgs);
+
+        exclusive = new CryptoTransferOptions.Exclusive();
+        exclusive.setTransferListAmtTinyBars(recipient1Amt + "," + recipient2Amt);
+        exclusive.setTransferListAmtHBars("");
+
+        List<String> wrongAmtList = new ArrayList<>();
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransferOptions.setExclusive(exclusive);
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(false);
+        when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(wrongAmtList);
+        when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
+        when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
+        validateTransferList.verifyAmountList(cryptoTransferOptions);
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printError(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "Invalid transfer list. Your transfer list must sum up to 0";
         assertEquals(expected, actual);
     }
 }

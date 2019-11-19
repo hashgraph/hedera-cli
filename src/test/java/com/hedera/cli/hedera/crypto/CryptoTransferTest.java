@@ -78,25 +78,48 @@ public class CryptoTransferTest {
     private List<String> expectedTransferList;
     private List<String> senderList;
     private List<String> recipientList;
+    private String sender;
+    private String recipient1;
+    private String recipient2;
+    private String senderAmt;
+    private String recipient1Amt;
+    private String recipient2Amt;
+    private String someMemo;
+    private String senderListArgs;
+    private String recipientListArgs;
+    private String tinybarListArgs;
 
     @BeforeEach
     public void setUp() {
+        sender = "0.0.1001";
+        senderList = new ArrayList<>();
+        senderList.add(sender);
+
+        recipient1 = "0.0.1002";
+        recipient2 = "0.0.1003";
+        recipientList = new ArrayList<>();
+        recipientList.add(recipient1);
+        recipientList.add(recipient2);
+
+        senderAmt = "-1400";
+        recipient1Amt = "1000";
+        recipient2Amt = "400";
+
+        tinybarListArgs = senderAmt + "," + recipient1Amt + "," + recipient2Amt;
+        senderListArgs = sender;
+        recipientListArgs = recipient1 + "," + recipient2;
+
         expectedAmountList = new ArrayList<>();
-        expectedAmountList.add("-1400");
-        expectedAmountList.add("1000");
-        expectedAmountList.add("400");
+        expectedAmountList.add(senderAmt);
+        expectedAmountList.add(recipient1Amt);
+        expectedAmountList.add(recipient2Amt);
 
         expectedTransferList = new ArrayList<>();
-        expectedTransferList.add("0.0.1001");
-        expectedTransferList.add("0.0.1002");
-        expectedTransferList.add("0.0.1003");
+        expectedTransferList.add(sender);
+        expectedTransferList.add(recipient1);
+        expectedTransferList.add(recipient2);
 
-        senderList = new ArrayList<>();
-        senderList.add("0.0.1001");
-
-        recipientList = new ArrayList<>();
-        recipientList.add("0.0.1002");
-        recipientList.add("0.0.1003");
+        someMemo = "some memo";
     }
 
     @Test
@@ -119,6 +142,30 @@ public class CryptoTransferTest {
         assertEquals(validateAmount, cryptoTransfer.getValidateAmount());
         cryptoTransfer.setValidateTransferList(validateTransferList);
         assertEquals(validateTransferList, cryptoTransfer.getValidateTransferList());
+    }
+
+    @Test
+    public void settersAndGetters() {
+        cryptoTransfer.setMemoString("hello");
+        assertEquals("hello", cryptoTransfer.getMemoString());
+        cryptoTransfer.setSenderList(senderList);
+        assertEquals(senderList, cryptoTransfer.getSenderList());
+        cryptoTransfer.setRecipientList(recipientList);
+        assertEquals(recipientList, cryptoTransfer.getRecipientList());
+        cryptoTransfer.setAmountList(expectedAmountList);
+        assertEquals(expectedAmountList, cryptoTransfer.getAmountList());
+        cryptoTransfer.setClient(hedera.createHederaClient());
+        assertEquals(hedera.createHederaClient(), cryptoTransfer.getClient());
+        cryptoTransfer.setIsInfoCorrect("yes");
+        assertEquals("yes", cryptoTransfer.getIsInfoCorrect());
+        cryptoTransfer.setAccount(AccountId.fromString(sender));
+        assertEquals(AccountId.fromString(sender), cryptoTransfer.getAccount());
+        cryptoTransfer.setSenderListArgs(senderListArgs);
+        assertEquals(senderListArgs, cryptoTransfer.getSenderListArgs());
+        cryptoTransfer.setRecipientListArgs(recipientListArgs);
+        assertEquals(recipientListArgs, cryptoTransfer.getRecipientListArgs());
+        cryptoTransfer.setTinybarListArgs(tinybarListArgs);
+        assertEquals(tinybarListArgs, cryptoTransfer.getTinybarListArgs());
     }
 
     @Test
@@ -157,9 +204,9 @@ public class CryptoTransferTest {
         when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
 
         Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
-        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString("0.0.1001"), "-1400");
-        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString("0.0.1002"), "1000");
-        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString("0.0.1003"), "400");
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
         expectedMap.put(0, previewTransferList);
         expectedMap.put(1, previewTransferList1);
         expectedMap.put(2, previewTransferList2);
@@ -177,9 +224,9 @@ public class CryptoTransferTest {
         when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
 
         Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
-        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString("0.0.1001"), "-1400");
-        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString("0.0.1002"), "1000");
-        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString("0.0.1003"), "400");
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
         expectedMap.put(0, previewTransferList);
         expectedMap.put(1, previewTransferList1);
         expectedMap.put(2, previewTransferList2);
@@ -205,13 +252,13 @@ public class CryptoTransferTest {
         when(validateAmount.isTiny(any())).thenReturn(true);
         when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
         when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
-        when(accountManager.promptMemoString(inputReader)).thenReturn("some memo");
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
 
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
-        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString("0.0.1001"), "-1400");
-        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString("0.0.1002"), "1000");
-        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString("0.0.1003"), "400");
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
         expectedMap.put(0, previewTransferList);
         expectedMap.put(1, previewTransferList1);
         expectedMap.put(2, previewTransferList2);
@@ -244,13 +291,13 @@ public class CryptoTransferTest {
         when(validateAmount.isTiny(any())).thenReturn(true);
         when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
         when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
-        when(accountManager.promptMemoString(inputReader)).thenReturn("some memo");
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
 
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
-        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString("0.0.1001"), "-1400");
-        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString("0.0.1002"), "1000");
-        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString("0.0.1003"), "400");
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
         expectedMap.put(0, previewTransferList);
         expectedMap.put(1, previewTransferList1);
         expectedMap.put(2, previewTransferList2);
@@ -287,7 +334,7 @@ public class CryptoTransferTest {
         when(validateAmount.isTiny(any())).thenReturn(true);
         when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
         when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
-        when(accountManager.promptMemoString(inputReader)).thenReturn("some memo");
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
 
         CryptoTransfer cryptoTransfer1 = Mockito.spy(cryptoTransfer);
         doNothing().when(cryptoTransfer1).executeCryptoTransfer(any());
@@ -310,7 +357,7 @@ public class CryptoTransferTest {
         when(validateAmount.isTiny(any())).thenReturn(true);
         when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
         when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
-        when(accountManager.promptMemoString(inputReader)).thenReturn("some memo");
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
 
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
@@ -347,7 +394,7 @@ public class CryptoTransferTest {
 //        when(validateAmount.isTiny(any())).thenReturn(true);
 //        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
 //        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
-//        when(accountManager.promptMemoString(inputReader)).thenReturn("some memo");
+//        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
 //
 //        cryptoTransfer.setFinalAmountList(expectedAmountList);
 //        cryptoTransfer.setTransferList(expectedTransferList);

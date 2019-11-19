@@ -60,6 +60,7 @@ public class ValidateAmount {
 
     public List<String> getAmountList(CryptoTransferOptions cryptoTransferOptions) {
         setCryptoTransferOptions(cryptoTransferOptions);
+        System.out.println("is tiny + 4" + isTiny());
         if (isTiny()) {
             amountListArgs = getTinybarListArgs();
         } else {

@@ -50,11 +50,13 @@ public class ValidateTransferList {
 
     public long sumOfAmountList() {
         long sumOfAmount;
+        System.out.println("isTiny " + isTiny);
         if (isTiny) {
             sumOfAmount = validateAmount.sumOfTinybarsInLong(amountList);
         } else {
             sumOfAmount = validateAmount.sumOfHbarsInLong(amountList);
         }
+        System.out.println("sumOfAmount " + sumOfAmount);
         return sumOfAmount;
     }
 
@@ -103,6 +105,10 @@ public class ValidateTransferList {
                         // assume amount already contains sender's amount
                         long sumOfTransferAmount = sumOfAmountList();
                         if (sumOfTransferAmount == -1L) return false;
+                        if (!isTiny) {
+                            amountList = convertAmountListToTinybar(amountList);
+                        }
+                        setFinalAmountList(amountList);
                         if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
                             amountListVerified = true;
                         }
@@ -114,6 +120,9 @@ public class ValidateTransferList {
                         // assume amount already contains sender's amount
                         long sumOfTransferAmount = sumOfAmountList();
                         if (sumOfTransferAmount == -1L) return false;
+                        if (!isTiny) {
+                            amountList = convertAmountListToTinybar(amountList);
+                        }
                         setFinalAmountList(amountList);
                         if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
                             amountListVerified = true;

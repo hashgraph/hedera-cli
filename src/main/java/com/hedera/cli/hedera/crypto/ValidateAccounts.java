@@ -103,12 +103,6 @@ public class ValidateAccounts {
 
     public boolean check(CryptoTransferOptions o) {
         setCryptoTransferOptions(o);
-        if (senderList == null) {
-            return false;
-        }
-        if (recipientList == null) {
-            return false;
-        }
         return (verifyListHasAccountIdFormat(senderList) && verifyListHasAccountIdFormat(recipientList));
     }
 
