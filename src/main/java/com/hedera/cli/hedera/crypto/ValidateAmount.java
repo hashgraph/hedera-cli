@@ -45,17 +45,22 @@ public class ValidateAmount {
     }
 
     private void setHbarListArgs() {
-        if (!StringUtil.isNullOrEmpty(this.cryptoTransferOptions.exclusive.transferListAmtHBars) &&
-                StringUtil.isNullOrEmpty(this.cryptoTransferOptions.exclusive.transferListAmtTinyBars)) {
-            hbarListArgs = this.cryptoTransferOptions.exclusive.transferListAmtHBars;
-        }
+        hbarListArgs = listArgs(this.cryptoTransferOptions.exclusive.transferListAmtHBars,
+                this.cryptoTransferOptions.exclusive.transferListAmtTinyBars);
     }
 
     private void setTinyBarListArgs() {
-        if (!StringUtil.isNullOrEmpty(this.cryptoTransferOptions.exclusive.transferListAmtTinyBars) &&
-                StringUtil.isNullOrEmpty(this.cryptoTransferOptions.exclusive.transferListAmtHBars)) {
-            tinybarListArgs = this.cryptoTransferOptions.exclusive.transferListAmtTinyBars;
+        tinybarListArgs = listArgs(this.cryptoTransferOptions.exclusive.transferListAmtTinyBars,
+                this.cryptoTransferOptions.exclusive.transferListAmtHBars);
+    }
+
+    public String listArgs(String txListNotEmpty, String txListEmpty) {
+        String txArgs = "";
+        if (!StringUtil.isNullOrEmpty(txListNotEmpty) &&
+                StringUtil.isNullOrEmpty(txListEmpty)) {
+            txArgs = txListNotEmpty;
         }
+        return txArgs;
     }
 
     public List<String> getAmountList(CryptoTransferOptions cryptoTransferOptions) {

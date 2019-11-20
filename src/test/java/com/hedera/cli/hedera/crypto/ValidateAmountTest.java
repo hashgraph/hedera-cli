@@ -347,4 +347,12 @@ public class ValidateAmountTest {
         amt2 = validateAmount.convertTinybarToLong(amountList.get(2));
         assertEquals(10000000000000000L, amt2);
     }
+
+    @Test
+    public void listArgs() {
+        String txListNotEmpty = "1000";
+        String txListEmpty = "";
+        String args = validateAmount.listArgs(txListNotEmpty, txListEmpty);
+        assertEquals(txListNotEmpty, args);
+    }
 }
