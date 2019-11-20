@@ -102,30 +102,14 @@ public class ValidateTransferList {
                         }
                     } else {
                         // assume amount already contains sender's amount
-                        long sumOfTransferAmount = sumOfAmountList();
-                        if (sumOfTransferAmount == -1L) return false;
-                        if (!isTiny) {
-                            amountList = convertAmountListToTinybar(amountList);
-                        }
-                        setFinalAmountList(amountList);
-                        if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
-                            amountListVerified = true;
-                        }
+                        amountListVerified = verifyCleanedAmountList();
                     }
                 } else {
                     if (amountSize != transferSize) {
                         shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
                     } else {
                         // assume amount already contains sender's amount
-                        long sumOfTransferAmount = sumOfAmountList();
-                        if (sumOfTransferAmount == -1L) return false;
-                        if (!isTiny) {
-                            amountList = convertAmountListToTinybar(amountList);
-                        }
-                        setFinalAmountList(amountList);
-                        if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
-                            amountListVerified = true;
-                        }
+                        amountListVerified = verifyCleanedAmountList();
                     }
                 }
                 break;
@@ -134,5 +118,15 @@ public class ValidateTransferList {
                 break;
         }
         return amountListVerified;
+    }
+
+    public boolean verifyCleanedAmountList() {
+        long sumOfTransferAmount = sumOfAmountList();
+        if (sumOfTransferAmount == -1L) return false;
+        if (!isTiny) {
+            amountList = convertAmountListToTinybar(amountList);
+        }
+        setFinalAmountList(amountList);
+        return validateAmount.verifyZeroSum(sumOfTransferAmount);
     }
 }
