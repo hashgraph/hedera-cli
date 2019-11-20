@@ -1,14 +1,19 @@
 package com.hedera.cli.hedera.crypto;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doNothing;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,11 +26,9 @@ import com.hedera.cli.models.PreviewTransferList;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 
-import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
-import org.hamcrest.Matchers;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,11 +71,7 @@ public class CryptoTransferTest {
     @Mock
     private CryptoTransferTransaction cryptoTransferTransaction;
 
-    @Mock
-    private TransactionId transactionId;
-
     private CryptoTransferOptions cryptoTransferOptions;
-    private CryptoTransferOptions.Exclusive exclusive;
     private CryptoTransferOptions.Dependent dependent;
     private List<String> expectedAmountList;
     private List<String> expectedTransferList;
@@ -88,6 +87,7 @@ public class CryptoTransferTest {
     private String senderListArgs;
     private String recipientListArgs;
     private String tinybarListArgs;
+    private AccountId operatorId;
 
     @BeforeEach
     public void setUp() {
@@ -120,6 +120,8 @@ public class CryptoTransferTest {
         expectedTransferList.add(recipient2);
 
         someMemo = "some memo";
+
+        operatorId = hedera.getOperatorId();
     }
 
     @Test
@@ -247,8 +249,6 @@ public class CryptoTransferTest {
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransfer.setO(cryptoTransferOptions);
 
-        AccountId operatorId = hedera.getOperatorId();
-
         when(validateAmount.isTiny(any())).thenReturn(true);
         when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
         when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
@@ -285,8 +285,6 @@ public class CryptoTransferTest {
         cryptoTransferOptions = new CryptoTransferOptions();
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransfer.setO(cryptoTransferOptions);
-
-        AccountId operatorId = hedera.getOperatorId();
 
         when(validateAmount.isTiny(any())).thenReturn(true);
         when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
@@ -329,8 +327,6 @@ public class CryptoTransferTest {
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransfer.setO(cryptoTransferOptions);
 
-        AccountId operatorId = hedera.getOperatorId();
-
         when(validateAmount.isTiny(any())).thenReturn(true);
         when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
         when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
@@ -351,8 +347,6 @@ public class CryptoTransferTest {
         cryptoTransferOptions = new CryptoTransferOptions();
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransfer.setO(cryptoTransferOptions);
-
-        AccountId operatorId = hedera.getOperatorId();
 
         when(validateAmount.isTiny(any())).thenReturn(true);
         when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
@@ -377,36 +371,68 @@ public class CryptoTransferTest {
     }
 
     @Test
-    public void executeCryptoTransferSign() throws InvalidProtocolBufferException, InterruptedException, TimeoutException {
+    public void executeCryptoTransferRun() throws InvalidProtocolBufferException, InterruptedException, TimeoutException {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
 
-//        dependent = new CryptoTransferOptions.Dependent();
-//        dependent.setSkipPreview(false);
-//        dependent.setRecipientList(Collections.singletonList(recipientList).toString());
-//        dependent.setSenderList(Collections.singletonList(senderList).toString());
-//
-//        cryptoTransferOptions = new CryptoTransferOptions();
-//        cryptoTransferOptions.setDependent(dependent);
-//        cryptoTransfer.setO(cryptoTransferOptions);
-//
-//        AccountId operatorId = hedera.getOperatorId();
-//
-//        when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
-//        when(validateAmount.isTiny(any())).thenReturn(true);
-//        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
-//        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
-//        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
-//
-//        cryptoTransfer.setFinalAmountList(expectedAmountList);
-//        cryptoTransfer.setTransferList(expectedTransferList);
-//        cryptoTransfer.setCryptoTransferTransaction(cryptoTransfer.addTransferList());
-//
-//        TransactionId transactionId1 = spy(transactionId);
-//        when(new TransactionId(hedera.getOperatorId())).thenReturn(transactionId1);
-//
-//        CryptoTransfer cryptoTransfer1 = Mockito.spy(cryptoTransfer);
-//        when(cryptoTransfer1.addTransferList()).thenReturn(cryptoTransferTransaction);
-//
-//        cryptoTransfer1.executeCryptoTransfer(operatorId);
-//        verify(cryptoTransferTransaction, times(1)).setMemo("some memo");
+        when(validateAmount.check(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.check(cryptoTransferOptions)).thenReturn(true);
+        when(validateTransferList.verifyAmountList(cryptoTransferOptions)).thenReturn(true);
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
+
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.getTransferList(cryptoTransferOptions)).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
+
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
+        expectedMap.put(0, previewTransferList);
+        expectedMap.put(1, previewTransferList1);
+        expectedMap.put(2, previewTransferList2);
+
+        cryptoTransfer.setFinalAmountList(expectedAmountList);
+        cryptoTransfer.setTransferList(expectedTransferList);
+        cryptoTransfer.setCryptoTransferTransaction(cryptoTransfer.addTransferList());
+
+        CryptoTransfer cryptoTransfer1 = Mockito.spy(cryptoTransfer);
+        doNothing().when(cryptoTransfer1).executeCryptoTransfer(any());
+        cryptoTransfer1.run();
+        verify(cryptoTransfer1).executeCryptoTransfer(any());
+    }
+
+    @Test
+    public void executeCryptoTransferValidateAmountFalse() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        when(validateAmount.check(cryptoTransferOptions)).thenReturn(false);
+        cryptoTransfer.run();
+        verify(validateAmount, times(1)).check(cryptoTransferOptions);
+        verify(validateAccounts, times(0)).check(cryptoTransferOptions);
+    }
+
+    @Test
+    public void executeCryptoTransferValidateAccounttFalse() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        when(validateAmount.check(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.check(cryptoTransferOptions)).thenReturn(false);
+        cryptoTransfer.run();
+        verify(validateAmount, times(1)).check(cryptoTransferOptions);
+        verify(validateAccounts, times(1)).check(cryptoTransferOptions);
+        verify(validateTransferList, times(0)).verifyAmountList(cryptoTransferOptions);
     }
 }
