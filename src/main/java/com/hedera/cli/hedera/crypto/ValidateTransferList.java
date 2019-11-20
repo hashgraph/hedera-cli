@@ -79,43 +79,71 @@ public class ValidateTransferList {
         return convertedAmountList;
     }
 
+    private List<String> getAmountList(CryptoTransferOptions o) {
+        return validateAmount.getAmountList(o);
+    }
+
+    private List<String> getSenderList(CryptoTransferOptions o) {
+        return validateAccounts.getSenderList(o);
+    }
+
+    private List<String> getRecipientList(CryptoTransferOptions o) {
+        return validateAccounts.getRecipientList(o);
+    }
+
+    private boolean isTiny(CryptoTransferOptions o) {
+        return validateAmount.isTiny(o);
+    }
+
+    private boolean senderListHasOperator(CryptoTransferOptions o) {
+        return validateAccounts.senderListHasOperator(o);
+    }
+
+    private boolean verifyZeroSum(long sumOfTransferAmount) {
+        return validateAmount.verifyZeroSum(sumOfTransferAmount);
+    }
+
+    private boolean checkSum(CryptoTransferOptions o, List<String> amountList,
+                          List<String> senderList, List<String> recipientList) {
+        int amountSize = amountList.size();
+        int transferSize = senderList.size() + recipientList.size();
+        boolean amountListVerified = false;
+        if (senderListHasOperator(o)) {
+            if (amountSize != transferSize) {
+                // add recipients amount and add to amount list
+                long sumOfRecipientAmount = sumOfAmountList();
+                if (sumOfRecipientAmount == -1L) return false;
+                updateAmountList(sumOfRecipientAmount);
+                long sumOfTransferAmount = sumOfAmountList();
+                if (verifyZeroSum(sumOfTransferAmount)) {
+                    amountListVerified = true;
+                }
+            } else {
+                // assume amount already contains sender's amount
+                amountListVerified = verifyCleanedAmountList();
+            }
+        } else {
+            if (amountSize != transferSize) {
+                shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
+            } else {
+                // assume amount already contains sender's amount
+                amountListVerified = verifyCleanedAmountList();
+            }
+        }
+        return amountListVerified;
+    }
+
     public boolean verifyAmountList(CryptoTransferOptions o) {
         setCryptoTransferOptions(o);
+        amountList = getAmountList(o);
+        senderList = getSenderList(o);
+        recipientList = getRecipientList(o);
+        isTiny = isTiny(o);
         boolean amountListVerified = false;
-        amountList = validateAmount.getAmountList(o);
-        int amountSize = amountList.size();
-        senderList = validateAccounts.getSenderList(o);
-        recipientList = validateAccounts.getRecipientList(o);
-        int transferSize = senderList.size() + recipientList.size();
-        isTiny = validateAmount.isTiny(o);
-        switch (senderList.size()) {
-            case 1:
-                if (validateAccounts.senderListHasOperator(o)) {
-                    if (amountSize != transferSize) {
-                        // add recipients amount and add to amount list
-                        long sumOfRecipientAmount = sumOfAmountList();
-                        if (sumOfRecipientAmount == -1L) return false;
-                        updateAmountList(sumOfRecipientAmount);
-                        long sumOfTransferAmount = sumOfAmountList();
-                        if (validateAmount.verifyZeroSum(sumOfTransferAmount)) {
-                            amountListVerified = true;
-                        }
-                    } else {
-                        // assume amount already contains sender's amount
-                        amountListVerified = verifyCleanedAmountList();
-                    }
-                } else {
-                    if (amountSize != transferSize) {
-                        shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
-                    } else {
-                        // assume amount already contains sender's amount
-                        amountListVerified = verifyCleanedAmountList();
-                    }
-                }
-                break;
-            default:
-                shellHelper.printWarning("More than 2 senders not supported");
-                break;
+        if (senderList.size() == 1) {
+            amountListVerified = checkSum(o, amountList, senderList, recipientList);
+        } else {
+            shellHelper.printWarning("More than 2 senders not supported");
         }
         return amountListVerified;
     }
