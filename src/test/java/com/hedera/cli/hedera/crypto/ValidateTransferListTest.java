@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -37,12 +39,8 @@ public class ValidateTransferListTest {
     private CryptoTransferOptions cryptoTransferOptions;
     private CryptoTransferOptions.Exclusive exclusive;
     private CryptoTransferOptions.Dependent dependent;
-    private String sender;
-    private String senderAmt;
     private String senderListArgs;
     private List<String> senderList;
-    private String recipient1;
-    private String recipient2;
     private String recipient1Amt;
     private String recipient2Amt;
     private String recipientListArgs;
@@ -51,17 +49,17 @@ public class ValidateTransferListTest {
 
     @BeforeEach
     public void setUp() {
-        sender = "0.0.1001";
+        String sender = "0.0.1001";
         senderList = new ArrayList<>();
         senderList.add(sender);
 
-        recipient1 = "0.0.1002";
-        recipient2 = "0.0.1003";
+        String recipient1 = "0.0.1002";
+        String recipient2 = "0.0.1003";
         recipientList = new ArrayList<>();
         recipientList.add(recipient1);
         recipientList.add(recipient2);
 
-        senderAmt = "-1400";
+        String senderAmt = "-1400";
         recipient1Amt = "1000";
         recipient2Amt = "400";
 

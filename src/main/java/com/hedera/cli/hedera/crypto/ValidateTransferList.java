@@ -50,21 +50,20 @@ public class ValidateTransferList {
 
     public long sumOfAmountList() {
         long sumOfAmount;
-        System.out.println("isTiny " + isTiny);
         if (isTiny) {
             sumOfAmount = validateAmount.sumOfTinybarsInLong(amountList);
         } else {
             sumOfAmount = validateAmount.sumOfHbarsInLong(amountList);
         }
-        System.out.println("sumOfAmount " + sumOfAmount);
         return sumOfAmount;
     }
 
     public List<String> finalAmountList(List<String> amountList, long sumOfRecipientsAmount) {
         if (!isTiny) {
-            amountList = convertAmountListToTinybar(amountList);
+            finalAmountList = new ArrayList<>(convertAmountListToTinybar(amountList));
+        } else {
+            finalAmountList = new ArrayList<>(amountList);
         }
-        finalAmountList = new ArrayList<>(amountList);
         String amount = "-" + sumOfRecipientsAmount;
         finalAmountList.add(0, amount);
         return finalAmountList;

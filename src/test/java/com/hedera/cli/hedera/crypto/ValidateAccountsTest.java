@@ -36,26 +36,21 @@ public class ValidateAccountsTest {
     private CryptoTransferOptions cryptoTransferOptions;
     private CryptoTransferOptions.Exclusive exclusive;
     private CryptoTransferOptions.Dependent dependent;
-
-    private String sender1;
-    private String sender2;
     private String senderListArgs;
     private List<String> senderList;
-    private String recipient1;
-    private String recipient2;
     private String recipientListArgs;
     private List<String> recipientList;
 
     @BeforeEach
     public void setUp() {
-        sender1 = "0.0.1001";
-        sender2 = "0.0.1002";
+        String sender1 = "0.0.1001";
+        String sender2 = "0.0.1002";
         senderList = new ArrayList<>();
         senderList.add(sender1);
         senderList.add(sender2);
 
-        recipient1 = "0.0.1003";
-        recipient2 = "0.0.1004";
+        String recipient1 = "0.0.1003";
+        String recipient2 = "0.0.1004";
         recipientList = new ArrayList<>();
         recipientList.add(recipient1);
         recipientList.add(recipient2);
