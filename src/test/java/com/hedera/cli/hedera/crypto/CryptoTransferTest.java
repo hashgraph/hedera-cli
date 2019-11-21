@@ -1,31 +1,43 @@
 package com.hedera.cli.hedera.crypto;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.anyString;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.validation.ValidateAccounts;
+import com.hedera.cli.hedera.validation.ValidateAmount;
+import com.hedera.cli.hedera.validation.ValidateTransferList;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.PreviewTransferList;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +53,15 @@ public class CryptoTransferTest {
     private AccountManager accountManager;
 
     @Mock
+    private ValidateAmount validateAmount;
+
+    @Mock
+    private ValidateAccounts validateAccounts;
+
+    @Mock
+    private ValidateTransferList validateTransferList;
+
+    @Mock
     private Hedera hedera;
 
     @Mock
@@ -49,333 +70,371 @@ public class CryptoTransferTest {
     @Mock
     private TransactionManager transactionManager;
 
+    @Mock
+    private CryptoTransferTransaction cryptoTransferTransaction;
+
     private CryptoTransferOptions cryptoTransferOptions;
-    private CryptoTransferOptions.Exclusive exclusive;
     private CryptoTransferOptions.Dependent dependent;
+    private List<String> expectedAmountList;
+    private List<String> expectedTransferList;
+    private List<String> senderList;
+    private List<String> recipientList;
+    private String sender;
+    private String recipient1;
+    private String recipient2;
+    private String senderAmt;
+    private String recipient1Amt;
+    private String recipient2Amt;
+    private String someMemo;
+    private String senderListArgs;
+    private String recipientListArgs;
+    private String tinybarListArgs;
+    private AccountId operatorId;
 
     @BeforeEach
     public void setUp() {
-        dependent = new CryptoTransferOptions.Dependent();
-        dependent.setSkipPreview(false);
-        dependent.setRecipientList("0.0.114152,0.0.11667");
-        dependent.setSenderList("0.0.116681,0.0.117813");
-        
-        exclusive = new CryptoTransferOptions.Exclusive();
-        exclusive.setTransferListAmtHBars("0.4,0.01,1.33");
-        exclusive.setTransferListAmtTinyBars("400,1000,10030");
+        sender = "0.0.1001";
+        senderList = new ArrayList<>();
+        senderList.add(sender);
 
-        cryptoTransferOptions = new CryptoTransferOptions();
-        cryptoTransferOptions.setDependent(dependent);
-        cryptoTransferOptions.setExclusive(exclusive);
+        recipient1 = "0.0.1002";
+        recipient2 = "0.0.1003";
+        recipientList = new ArrayList<>();
+        recipientList.add(recipient1);
+        recipientList.add(recipient2);
 
-        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
+        senderAmt = "-1400";
+        recipient1Amt = "1000";
+        recipient2Amt = "400";
+
+        tinybarListArgs = senderAmt + "," + recipient1Amt + "," + recipient2Amt;
+        senderListArgs = sender;
+        recipientListArgs = recipient1 + "," + recipient2;
+
+        expectedAmountList = new ArrayList<>();
+        expectedAmountList.add(senderAmt);
+        expectedAmountList.add(recipient1Amt);
+        expectedAmountList.add(recipient2Amt);
+
+        expectedTransferList = new ArrayList<>();
+        expectedTransferList.add(sender);
+        expectedTransferList.add(recipient1);
+        expectedTransferList.add(recipient2);
+
+        someMemo = "some memo";
+
+        operatorId = hedera.getOperatorId();
     }
 
     @Test
-    public void assertGettersExists() {
+    public void dependenciesExist() {
+        cryptoTransfer.setShellHelper(shellHelper);
         assertEquals(shellHelper, cryptoTransfer.getShellHelper());
+        cryptoTransfer.setAccountManager(accountManager);
         assertEquals(accountManager, cryptoTransfer.getAccountManager());
+        cryptoTransfer.setHedera(hedera);
         assertEquals(hedera, cryptoTransfer.getHedera());
+        cryptoTransfer.setInputReader(inputReader);
         assertEquals(inputReader, cryptoTransfer.getInputReader());
+        cryptoTransfer.setTransactionManager(transactionManager);
         assertEquals(transactionManager, cryptoTransfer.getTransactionManager());
-        assertEquals(cryptoTransferOptions, cryptoTransfer.getCryptoTransferOptions());
-        assertEquals(dependent, cryptoTransfer.getCryptoTransferOptions().getDependent());
-        assertEquals(exclusive, cryptoTransfer.getCryptoTransferOptions().getExclusive());
+        cryptoTransfer.setO(cryptoTransferOptions);
+        assertEquals(cryptoTransferOptions, cryptoTransfer.getO());
+        cryptoTransfer.setValidateAccounts(validateAccounts);
+        assertEquals(validateAccounts, cryptoTransfer.getValidateAccounts());
+        cryptoTransfer.setValidateAmount(validateAmount);
+        assertEquals(validateAmount, cryptoTransfer.getValidateAmount());
+        cryptoTransfer.setValidateTransferList(validateTransferList);
+        assertEquals(validateTransferList, cryptoTransfer.getValidateTransferList());
     }
 
     @Test
-    public void runFailsWithBothHbAndTb() {
-        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
-        cryptoTransfer.setCryptoTransferOptionsList(cList);
-        cryptoTransfer.run();
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        verify(shellHelper).printError(valueCapture.capture());
-        String actual = valueCapture.getValue();
-        String expected = "Transfer amounts must either be in hbars or tinybars, not both";
-        assertEquals(expected, actual);
+    public void settersAndGetters() {
+        cryptoTransfer.setMemoString("hello");
+        assertEquals("hello", cryptoTransfer.getMemoString());
+        cryptoTransfer.setSenderList(senderList);
+        assertEquals(senderList, cryptoTransfer.getSenderList());
+        cryptoTransfer.setRecipientList(recipientList);
+        assertEquals(recipientList, cryptoTransfer.getRecipientList());
+        cryptoTransfer.setAmountList(expectedAmountList);
+        assertEquals(expectedAmountList, cryptoTransfer.getAmountList());
+        cryptoTransfer.setClient(hedera.createHederaClient());
+        assertEquals(hedera.createHederaClient(), cryptoTransfer.getClient());
+        cryptoTransfer.setIsInfoCorrect("yes");
+        assertEquals("yes", cryptoTransfer.getIsInfoCorrect());
+        cryptoTransfer.setAccount(AccountId.fromString(sender));
+        assertEquals(AccountId.fromString(sender), cryptoTransfer.getAccount());
+        cryptoTransfer.setSenderListArgs(senderListArgs);
+        assertEquals(senderListArgs, cryptoTransfer.getSenderListArgs());
+        cryptoTransfer.setRecipientListArgs(recipientListArgs);
+        assertEquals(recipientListArgs, cryptoTransfer.getRecipientListArgs());
+        cryptoTransfer.setTinybarListArgs(tinybarListArgs);
+        assertEquals(tinybarListArgs, cryptoTransfer.getTinybarListArgs());
     }
 
     @Test
-    public void runFailsWithNoHbAndNoTb() {
-        // test data: replace specified hb and specified tb with blank string
-        exclusive.setTransferListAmtHBars("");
-        exclusive.setTransferListAmtTinyBars("");
-        cryptoTransferOptions.setExclusive(exclusive);
-        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
-        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
-        cryptoTransfer.setCryptoTransferOptionsList(cList);
-
-        // execute
-        cryptoTransfer.run();
-
-        // verify
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        verify(shellHelper).printError(valueCapture.capture());
-        String actual = valueCapture.getValue();
-        String expected = "You have to provide transaction amounts in hbars or tinybars";
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void runFailstbarsMismatchedTransferListAmountList() {
-        // test data: replace specified hb and specified tb with blank string
-        exclusive.setTransferListAmtHBars("");
-        cryptoTransferOptions.setExclusive(exclusive);
-        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
-        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
-        cryptoTransfer.setCryptoTransferOptionsList(cList);
-
-        // execute
-        cryptoTransfer.run();
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        verify(shellHelper).printError(valueCapture.capture());
-        String actual = valueCapture.getValue();
-        String expected = "Lists aren't the same size";
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void runFailshbarsMismatchedTransferListAmountList() {
-        // test data: replace specified hb and specified tb with blank string
-        exclusive.setTransferListAmtTinyBars("");
-        cryptoTransferOptions.setExclusive(exclusive);
-        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
-        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
-        cryptoTransfer.setCryptoTransferOptionsList(cList);
-
-        // execute
-        cryptoTransfer.run();
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        verify(shellHelper).printError(valueCapture.capture());
-        String actual = valueCapture.getValue();
-        String expected = "Lists aren't the same size";
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void runFailsMatchedTransferListAmountListButFailsTransferListVerification() {
-        dependent.setSenderList("0.116681");
-        cryptoTransferOptions.setDependent(dependent);
-        exclusive.setTransferListAmtTinyBars("");
-        cryptoTransferOptions.setExclusive(exclusive);
-        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
-        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
-        cryptoTransfer.setCryptoTransferOptionsList(cList);
-
-        // execute
-        cryptoTransfer.run();
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        verify(shellHelper).printError(valueCapture.capture());
-        String actual = valueCapture.getValue();
-        System.out.println("actual: " + actual);
-        String expected = "Please check that accountId is in the right format";
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void runFailsSumOfTransferZero() {
-        dependent.setSenderList("0.0.116681");
-        cryptoTransferOptions.setDependent(dependent);
-        exclusive.setTransferListAmtTinyBars("");
-        cryptoTransferOptions.setExclusive(exclusive);
-        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
-        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
-        cryptoTransfer.setCryptoTransferOptionsList(cList);
-
-        when(accountManager.isAccountId(anyString())).thenReturn(true);
-
-        // execute
-        cryptoTransfer.run();
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        verify(shellHelper).printError(valueCapture.capture());
-        String actual = valueCapture.getValue();
-        String expected = "Invalid transfer list. Your transfer list must sum up to 0";
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void runValidButFailsYesNo() {
-        dependent.setSenderList("0.0.116681");
-        cryptoTransferOptions.setDependent(dependent);
-        exclusive.setTransferListAmtTinyBars("");
-        exclusive.setTransferListAmtHBars("-1000,400,600");
-        cryptoTransferOptions.setExclusive(exclusive);
-        cryptoTransfer.setCryptoTransferOptions(cryptoTransferOptions);
-        List<CryptoTransferOptions> cList = Arrays.asList(cryptoTransferOptions);
-        cryptoTransfer.setCryptoTransferOptionsList(cList);
-
-        when(accountManager.isAccountId(anyString())).thenReturn(true);
-
-        // execute
-        cryptoTransfer.run();
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        verify(shellHelper).printError(valueCapture.capture());
-        String actual = valueCapture.getValue();
-        String expected = "Input must be either yes or no";
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void assertAutowiredDependenciesNotNull() {
-        assertNotNull(shellHelper);
-        assertNotNull(accountManager);
-        assertNotNull(hedera);
-        assertNotNull(inputReader);
-        assertNotNull(transactionManager);
-        assertNotNull(cryptoTransferOptions);
-    }
-
-    @Test
-    public void tinyBarsLoop() {
+    public void isSkipPreviewTrue() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
         cryptoTransferOptions = new CryptoTransferOptions();
-        cryptoTransfer.setHbarAmtArgs("0.4,0.01,1.33");
-        cryptoTransfer.setTinybarAmtArgs("400,1000,10030");
-        cryptoTransfer.setTransferListArgs("0.0.116681,0.0.117813,0.0.114152,0.0.11667");
-        cryptoTransfer.setSkipPreview(false);
-
-        assertEquals(dependent.isSkipPreview(), cryptoTransfer.isSkipPreview());
-        assertEquals(exclusive.transferListAmtTinyBars, cryptoTransfer.getTinybarAmtArgs());
-        assertEquals(exclusive.transferListAmtHBars, cryptoTransfer.getHbarAmtArgs());
-        assertEquals(dependent.senderList + "," + dependent.recipientList, cryptoTransfer.getTransferListArgs());
-        assertNull(null, cryptoTransfer.getHbarAmtArgs());
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+        assertTrue(cryptoTransfer.isSkipPreview());
     }
 
     @Test
-    public void verifyEqualListReturnsTrue() {
-        List<String> senderList = Arrays.asList("0.0.116681,0.0.117813".split(","));
-        List<String> recipientList = Arrays.asList("0.0.114152,0.0.11667".split(","));
-        List<String> transferList = Arrays.asList("0.0.116681,0.0.117813,0.0.114152,0.0.11667".split(","));
-        List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
-        assertTrue(cryptoTransfer.verifyEqualList(senderList, recipientList, transferList, amountList));
+    public void isTinyFalse() {
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(false);
+        assertFalse(cryptoTransfer.isTiny());
     }
 
     @Test
-    public void verifyEqualListReturnsFalse() {
-        List<String> senderList = Arrays.asList("0.0.116681".split(","));
-        List<String> recipientList = Arrays.asList("0.0.114152,0.0.11667".split(","));
-        List<String> transferList = Arrays.asList(("0.0.116681,0.0.114152,0.0.11667").split(","));
-        List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
-        assertFalse(cryptoTransfer.verifyEqualList(senderList, recipientList, transferList, amountList));
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        doNothing().when(shellHelper).printError(valueCapture.capture());
-        cryptoTransfer.verifyEqualList(senderList, recipientList, transferList, amountList);
-        String actual = valueCapture.getValue();
-        String expected = "Lists aren't the same size";
-        assertEquals(expected, actual);
+    public void isTinyTrue() {
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
+        assertTrue(cryptoTransfer.isTiny());
     }
 
     @Test
-    public void verifyTransferListReturnsFalse() {
-        List<String> senderList = Arrays.asList("0.117813".split(","));
-        List<String> recipientList = Arrays.asList("114152,0.0.11667".split(","));
-        List<String> transferList = Arrays.asList(("0.117813,114152,0.0.11667").split(","));
-        List<String> amountList = Arrays.asList("-100,100,100".split(","));
-        when(accountManager.isAccountId("0.117813")).thenReturn(false);
-        assertTrue(cryptoTransfer.verifyEqualList(senderList, recipientList, transferList, amountList));
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        doNothing().when(shellHelper).printError(valueCapture.capture());
-        cryptoTransfer.verifyTransferList(transferList);
-        String actual = valueCapture.getValue();
-        String expected = "Please check that accountId is in the right format";
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void verifyTransferListReturnsTrue() {
-        List<String> transferList = Arrays.asList(("0.0.116681,0.0.117813,0.0.114152,0.0.11667").split(","));
-        when(accountManager.isAccountId("0.0.116681")).thenReturn(true);
-        when(accountManager.isAccountId("0.0.117813")).thenReturn(true);
-        when(accountManager.isAccountId("0.0.114152")).thenReturn(true);
-        when(accountManager.isAccountId("0.0.11667")).thenReturn(true);
-        assertTrue(cryptoTransfer.verifyTransferList(transferList));
-    }
-
-    @Test
-    public void verifyTransferInHbarsNotDeci() {
-        List<String> senderList = Arrays.asList("0.0.117813,0.0.117814".split(","));
-        List<String> recipientList = Arrays.asList("0.0.114152,0.0.11667".split(","));
-        List<String> amountList = Arrays.asList(("-10,-10,10,10").split(","));
-        assertTrue(cryptoTransfer.sumOfHbarsInLong(senderList, recipientList, amountList));
-    }
-
-    @Test
-    public void verifyTransferInHbarsResolveDecimals() {
-        List<String> senderList = Arrays.asList("0.0.117813,0.0.117814".split(","));
-        List<String> recipientList = Arrays.asList("0.0.114152,0.0.11667".split(","));
-        List<String> amountList = Arrays.asList(("-2.1,-0.0005,1.0005,1.1").split(","));
-        assertTrue(cryptoTransfer.sumOfHbarsInLong(senderList, recipientList, amountList));
-    }
-
-    @Test
-    public void verifyTransferInTinybarsNotDeci() {
-        List<String> senderList = Arrays.asList("0.0.117813,0.0.117814".split(","));
-        List<String> recipientList = Arrays.asList("0.0.114152,0.0.11667".split(","));
-        List<String> amountList = Arrays.asList(("-100,-100,100,100").split(","));
-        assertTrue(cryptoTransfer.sumOfTinybarsInLong(senderList, recipientList, amountList));
-    }
-
-    @Test
-    public void verifyTransferInTinybarsResolveDecimals() {
-        List<String> senderList = Arrays.asList("0.0.117813,0.0.117814".split(","));
-        List<String> recipientList = Arrays.asList("0.0.114152".split(","));
-        List<String> amountList = Arrays.asList(("-0.7,-10000.6,10000,0.7").split(","));
-        assertFalse(cryptoTransfer.sumOfTinybarsInLong(senderList, recipientList, amountList));
-    }
-
-    @Test
-    public void convertHbarToLong() {
-        long amt;
-        long amt1;
-        long amt2;
-        long amt3;
-        List<String> amountList = Arrays.asList(("-0.7,-10000.6,10000.6,0.7").split(","));
-
-        amt = cryptoTransfer.convertHbarToLong(amountList.get(0));
-        assertEquals(-70000000L, amt);
-        amt1 = cryptoTransfer.convertHbarToLong(amountList.get(1));
-        assertEquals(-1000060000000L, amt1);
-        amt2 = cryptoTransfer.convertHbarToLong(amountList.get(2));
-        assertEquals(1000060000000L, amt2);
-        amt3 = cryptoTransfer.convertHbarToLong(amountList.get(3));
-        assertEquals(70000000L, amt3);
-    }
-
-    @Test
-    public void convertTinybarToLong() {
-        long amt;
-        long amt1;
-        long amt2;
-        List<String> amountList = Arrays.asList(("-10,-222200,10000000000000000").split(","));
-        amt = cryptoTransfer.convertTinybarToLong(amountList.get(0));
-        assertEquals(-10L, amt);
-        amt1 = cryptoTransfer.convertTinybarToLong(amountList.get(1));
-        assertEquals(-222200L, amt1);
-        amt2 = cryptoTransfer.convertTinybarToLong(amountList.get(2));
-        assertEquals(10000000000000000L, amt2);
+    public void addTransferList() {
+        cryptoTransfer.setFinalAmountList(expectedAmountList);
+        cryptoTransfer.setTransferList(expectedTransferList);
+        cryptoTransfer.setCryptoTransferTransaction(cryptoTransfer.addTransferList());
+        assertEquals(cryptoTransferTransaction, cryptoTransfer.getCryptoTransferTransaction());
     }
 
     @Test
     public void transferListToPromptPreviewMap() {
-        List<String> senderList = Arrays.asList("0.0.116681".split(","));
-        List<String> recipientList = Arrays.asList("0.0.117813".split(","));
-        List<String> transferList = Arrays.asList(("0.0.116681,0.0.117813").split(","));
-        List<String> amountList = Arrays.asList(("-100,100").split(","));
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
 
         Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
-        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString("0.0.116681"), "-100");
-        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString("0.0.117813"), "100");
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
         expectedMap.put(0, previewTransferList);
         expectedMap.put(1, previewTransferList1);
+        expectedMap.put(2, previewTransferList2);
 
-        Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap(senderList, recipientList, transferList, amountList);
+        Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap();
         assertEquals(expectedMap.get(0).getAccountId(), actualMap.get(0).getAccountId());
+        assertEquals(expectedMap.get(1).getAccountId(), actualMap.get(1).getAccountId());
+        assertEquals(expectedMap.get(2).getAccountId(), actualMap.get(2).getAccountId());
+    }
+
+    @Test
+    public void transferListToPromptPreviewMapIsTiny() {
+        when(validateAmount.isTiny(any())).thenReturn(true);
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
+        expectedMap.put(0, previewTransferList);
+        expectedMap.put(1, previewTransferList1);
+        expectedMap.put(2, previewTransferList2);
+
+        Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap();
+        assertEquals(expectedMap.get(0).getAccountId(), actualMap.get(0).getAccountId());
+        assertEquals(expectedMap.get(1).getAccountId(), actualMap.get(1).getAccountId());
+        assertEquals(expectedMap.get(2).getAccountId(), actualMap.get(2).getAccountId());
+    }
+
+    @Test
+    public void promptPreviewIncorrect() throws InvalidProtocolBufferException, InterruptedException,
+            TimeoutException, JsonProcessingException {
+
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        when(validateAmount.isTiny(any())).thenReturn(true);
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
+
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
+        expectedMap.put(0, previewTransferList);
+        expectedMap.put(1, previewTransferList1);
+        expectedMap.put(2, previewTransferList2);
+        String jsonStringTransferList = ow.writeValueAsString(expectedMap);
+        String prompt = "\nOperator\n" + operatorId + "\nTransfer List\n" + jsonStringTransferList
+                + "\n\nIs this correct?" + "\nyes/no";
+        when(inputReader.prompt(prompt)).thenReturn("no");
+
+        cryptoTransfer.reviewAndExecute(operatorId);
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).print(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "Nope, incorrect, let's make some changes";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void promptPreviewCorrectAndExecute() throws InvalidProtocolBufferException, InterruptedException,
+            TimeoutException, JsonProcessingException {
+
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        when(validateAmount.isTiny(any())).thenReturn(true);
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
+
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
+        expectedMap.put(0, previewTransferList);
+        expectedMap.put(1, previewTransferList1);
+        expectedMap.put(2, previewTransferList2);
+        String jsonStringTransferList = ow.writeValueAsString(expectedMap);
+        String prompt = "\nOperator\n" + operatorId + "\nTransfer List\n" + jsonStringTransferList
+                + "\n\nIs this correct?" + "\nyes/no";
+        when(inputReader.prompt(prompt)).thenReturn("yes");
+
+        CryptoTransfer cryptoTransfer1 = Mockito.spy(cryptoTransfer);
+        doNothing().when(cryptoTransfer1).executeCryptoTransfer(any());
+
+        cryptoTransfer1.reviewAndExecute(operatorId);
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).print(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "Info is correct, senders will need to sign the transaction to release funds";
+        assertEquals(expected, actual);
+
+    }
+
+    @Test
+    public void noPreviewExecute() throws InvalidProtocolBufferException, InterruptedException,
+            TimeoutException {
+
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        when(validateAmount.isTiny(any())).thenReturn(true);
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
+
+        CryptoTransfer cryptoTransfer1 = Mockito.spy(cryptoTransfer);
+        doNothing().when(cryptoTransfer1).executeCryptoTransfer(any());
+
+        cryptoTransfer1.reviewAndExecute(operatorId);
+        verify(cryptoTransfer1).reviewAndExecute(any());
+    }
+
+    @Test
+    public void promptPreviewError() throws JsonProcessingException, InvalidProtocolBufferException, InterruptedException, TimeoutException {
+
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(false);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        when(validateAmount.isTiny(any())).thenReturn(true);
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
+
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        String jsonStringTransferList = ow.writeValueAsString(expectedMap);
+        String prompt = "\nOperator\n" + operatorId + "\nTransfer List\n" + jsonStringTransferList
+                + "\n\nIs this correct?" + "\nyes/no";
+        when(inputReader.prompt(prompt)).thenReturn("again");
+        cryptoTransfer.reviewAndExecute(operatorId);
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper, times(2)).printError(valueCapture.capture());
+        List<String> actual = valueCapture.getAllValues();
+        String expected = "Some error occurred";
+        assertEquals(expected, actual.get(0));
+        String expected1 = "Input must be either yes or no";
+        assertEquals(expected1, actual.get(1));
+    }
+
+    @Test
+    public void executeCryptoTransferRun() throws InvalidProtocolBufferException, InterruptedException, TimeoutException {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        when(validateAmount.check(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.check(cryptoTransferOptions)).thenReturn(true);
+        when(validateTransferList.verifyAmountList(cryptoTransferOptions)).thenReturn(true);
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
+
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.getTransferList(cryptoTransferOptions)).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
+        when(accountManager.promptMemoString(inputReader)).thenReturn(someMemo);
+
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
+        expectedMap.put(0, previewTransferList);
+        expectedMap.put(1, previewTransferList1);
+        expectedMap.put(2, previewTransferList2);
+
+        cryptoTransfer.setFinalAmountList(expectedAmountList);
+        cryptoTransfer.setTransferList(expectedTransferList);
+        cryptoTransfer.setCryptoTransferTransaction(cryptoTransfer.addTransferList());
+
+        CryptoTransfer cryptoTransfer1 = Mockito.spy(cryptoTransfer);
+        doNothing().when(cryptoTransfer1).executeCryptoTransfer(any());
+        cryptoTransfer1.run();
+        verify(cryptoTransfer1).executeCryptoTransfer(any());
+    }
+
+    @Test
+    public void executeCryptoTransferValidateAmountFalse() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        when(validateAmount.check(cryptoTransferOptions)).thenReturn(false);
+        cryptoTransfer.run();
+        verify(validateAmount, times(1)).check(cryptoTransferOptions);
+        verify(validateAccounts, times(0)).check(cryptoTransferOptions);
+    }
+
+    @Test
+    public void executeCryptoTransferValidateAccounttFalse() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+
+        when(validateAmount.check(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.check(cryptoTransferOptions)).thenReturn(false);
+        cryptoTransfer.run();
+        verify(validateAmount, times(1)).check(cryptoTransferOptions);
+        verify(validateAccounts, times(1)).check(cryptoTransferOptions);
+        verify(validateTransferList, times(0)).verifyAmountList(cryptoTransferOptions);
     }
 }
