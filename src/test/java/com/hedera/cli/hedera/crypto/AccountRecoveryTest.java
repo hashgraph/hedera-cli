@@ -48,9 +48,6 @@ public class AccountRecoveryTest {
   private InputReader inputReader;
 
   @Mock
-  private Hedera hedera;
-
-  @Mock
   private AccountManager accountManager;
 
   private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet", "fan",

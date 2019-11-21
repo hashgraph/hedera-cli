@@ -54,9 +54,6 @@ public class SetupTest {
     @Mock
     private ShellHelper shellHelper;
 
-    @Mock
-    private TransactionManager transactionManager;
-
     // test data
     private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet",
             "fan", "donkey", "carry", "chuckle", "assault", "leopard", "fee", "kingdom", "cheap", "odor", "okay",
@@ -84,6 +81,11 @@ public class SetupTest {
         String actual = captureLine().trim();
         String expected = "Usage: setup";
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void assertGetters() {
+        assertEquals(shellHelper, setup.getShellHelper());
     }
 
     @Test

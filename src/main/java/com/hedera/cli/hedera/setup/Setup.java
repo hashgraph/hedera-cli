@@ -12,12 +12,14 @@ import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
+@Getter
 @Component
 @Command(name = "setup", description = "")
 public class Setup implements Runnable {
@@ -34,7 +36,6 @@ public class Setup implements Runnable {
     @Autowired
     private Hedera hedera;
 
-    private boolean isWords;
     private List<String> phraseList;
     private Ed25519PrivateKey ed25519PrivateKey;
     private KeyPair keyPair;
@@ -53,7 +54,7 @@ public class Setup implements Runnable {
         if (accountId == null)
             return;
 
-        isWords = accountRecovery.promptPreview(inputReader);
+        boolean isWords = accountRecovery.promptPreview(inputReader);
         if (isWords) {
             String phrase = inputReader.prompt("24 words phrase", "secret", false);
             phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
