@@ -64,7 +64,7 @@ public class Setup implements Runnable {
             keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
         }
 
-        boolean accountVerified = accountRecovery.verifyAndSaveAccount(accountId, keyPair);
+        boolean accountVerified = accountRecovery.verifyAccountExistsInHedera(accountId, keyPair.getPrivateKeyHex());
         if (accountVerified) {
             accountRecovery.printKeyPair(keyPair, accountId);
             accountManager.setDefaultAccountId(AccountId.fromString(accountId), keyPair);

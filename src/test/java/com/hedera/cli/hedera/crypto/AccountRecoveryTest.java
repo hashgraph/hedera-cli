@@ -2,8 +2,10 @@ package com.hedera.cli.hedera.crypto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,12 +13,14 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +37,9 @@ public class AccountRecoveryTest {
 
   @Mock
   private ShellHelper shellHelper;
+
+  @Mock
+  private InputReader inputReader;
 
   @Mock
   private AccountManager accountManager;
@@ -64,6 +71,22 @@ public class AccountRecoveryTest {
   }
 
   @Test
+  public void promptWords() {
+    accountRecovery.setWords(true);
+    when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("words");
+    boolean wordsActual = accountRecovery.promptPreview();
+    assertEquals(accountRecovery.isWords(), wordsActual);
+  }
+
+  @Test
+  public void promptKeys() {
+    accountRecovery.setWords(false);
+    when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("keys");
+    boolean wordsActual = accountRecovery.promptPreview();
+    assertEquals(accountRecovery.isWords(), wordsActual);
+  }
+
+    @Test
   public void printKeyPairInRecoveredAccountModelFormat() throws JsonProcessingException {
     RecoveredAccountModel recoveredAccountModel;
     recoveredAccountModel = new RecoveredAccountModel();
