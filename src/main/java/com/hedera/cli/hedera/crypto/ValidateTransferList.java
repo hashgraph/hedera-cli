@@ -108,28 +108,32 @@ public class ValidateTransferList {
         int amountSize = amountList.size();
         int transferSize = senderList.size() + recipientList.size();
         boolean amountListVerified = false;
-        if (senderListHasOperator(o)) {
-            if (amountSize != transferSize) {
-                // add recipients amount and add to amount list
-                long sumOfRecipientAmount = sumOfAmountList();
-                if (sumOfRecipientAmount == -1L) return false;
-                updateAmountList(sumOfRecipientAmount);
-                long sumOfTransferAmount = sumOfAmountList();
-                if (verifyZeroSum(sumOfTransferAmount)) {
-                    amountListVerified = true;
-                }
-            } else {
-                // assume amount already contains sender's amount
-                amountListVerified = verifyCleanedAmountList();
-            }
-        } else {
-            if (amountSize != transferSize) {
-                shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
-            } else {
-                // assume amount already contains sender's amount
-                amountListVerified = verifyCleanedAmountList();
-            }
+
+        // 3 possible scenarios
+        // (1) amountList.size == transferList.size, then verifyCleanedAmountList will make the determination between true or false
+        // (2) senderList does not contain operator && amounrList.size != transferList.size
+        // (3) senderList contains operator && amountList.size != transferList.size
+
+        if (amountSize == transferSize) {
+            return verifyCleanedAmountList();
         }
+
+        if (!senderListHasOperator(o)) {
+            shellHelper.printError("Invalid transfer list. Your transfer list must sum up to 0");
+            return amountListVerified; // false
+        }
+
+        if (senderListHasOperator(o)) {
+            // add recipients amount and add to amount list
+            long sumOfRecipientAmount = sumOfAmountList();
+            if (sumOfRecipientAmount == -1L) {
+                return false;
+            }
+            // sumOfRecipientAmount is equal to sumOfTransferAmount
+            updateAmountList(sumOfRecipientAmount);
+            return verifyZeroSum(sumOfRecipientAmount);
+        }
+
         return amountListVerified;
     }
 

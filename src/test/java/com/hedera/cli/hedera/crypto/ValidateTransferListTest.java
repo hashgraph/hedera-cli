@@ -220,7 +220,6 @@ public class ValidateTransferListTest {
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransferOptions.setExclusive(exclusive);
         when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
-        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(true);
         when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
         when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
         when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
@@ -244,7 +243,6 @@ public class ValidateTransferListTest {
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransferOptions.setExclusive(exclusive);
         when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(false);
-        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(true);
         when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
         when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
         when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
@@ -296,7 +294,6 @@ public class ValidateTransferListTest {
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransferOptions.setExclusive(exclusive);
         when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
-        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(false);
         when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
         when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
         when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
@@ -320,7 +317,7 @@ public class ValidateTransferListTest {
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransferOptions.setExclusive(exclusive);
         when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(false);
-        when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(false);
+        // when(validateAccounts.senderListHasOperator(cryptoTransferOptions)).thenReturn(false);
         when(validateAmount.getAmountList(cryptoTransferOptions)).thenReturn(expectedAmountList);
         when(validateAccounts.getSenderList(cryptoTransferOptions)).thenReturn(senderList);
         when(validateAccounts.getRecipientList(cryptoTransferOptions)).thenReturn(recipientList);
