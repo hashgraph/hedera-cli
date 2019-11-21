@@ -275,27 +275,8 @@ public class CryptoTransfer implements Runnable {
         // save all transaction record into
         // ~/.hedera/[network_name]/transaction/[file_name].json
         if (record != null) {
-            saveTransactionToJson(record);
+            transactionManager.saveTransactionRecord(record);
         }
-    }
-
-    private void saveTransactionToJson(TransactionRecord record) throws JsonProcessingException {
-        shellHelper.printSuccess("Transfer receipt status: " + record.getReceipt().getStatus());
-        shellHelper.printSuccess("Transfer transaction fee: " + record.getTransactionFee());
-        shellHelper.printSuccess("Transfer consensus timestamp: " + record.getConsensusTimestamp());
-        shellHelper.printSuccess("Transfer memo: " + record.getMemo());
-
-        String txID = printTransactionId(record.getTransactionId());
-
-        TransactionObj txObj = new TransactionObj();
-        txObj.setTxID(txID);
-        txObj.setTxMemo(record.getMemo());
-        txObj.setTxFee(record.getTransactionFee());
-        txObj.setTxConsensusTimestamp(record.getConsensusTimestamp());
-        txObj.setTxValidStart(record.getTransactionId().getValidStart().getEpochSecond() + "-"
-                + record.getTransactionId().getValidStart().getNano());
-
-        transactionManager.saveTransactionsToJson(txID, txObj);
     }
 
     private void printBalance(Client client, AccountId operatorId) {
@@ -309,11 +290,4 @@ public class CryptoTransfer implements Runnable {
         }
     }
 
-    private String printTransactionId(TransactionId transactionId) {
-        String txTimestamp = transactionId.getValidStart().getEpochSecond() + "-"
-                + transactionId.getValidStart().getNano();
-        String txID = transactionId.getAccountId().toString() + "-" + txTimestamp;
-        shellHelper.printSuccess("TransactionID : " + txID);
-        return txID;
-    }
 }
