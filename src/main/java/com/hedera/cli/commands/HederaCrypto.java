@@ -110,7 +110,8 @@ public class HederaCrypto extends CliDefaults {
         List<String> argsList = new ArrayList<>();
 
         if (isEmptyStringArray(recipient)) {
-            shellHelper.printError("Recipient cannot be empty");
+            shellHelper.printError("Recipients cannot be empty");
+            transfer.run();
             return;
         }
 
@@ -129,6 +130,7 @@ public class HederaCrypto extends CliDefaults {
 
         setTransferArgs(argsList);
 
+        // transfer is a picocli command object
         transfer.handle(transferArgs);
     }
 

@@ -166,49 +166,25 @@ account update 0.0.xxxx
 help
 ```
 
-### VERSION 0.1.0
-
+### Cryptotransfer (v0.1.5)
 ```bash
+Valid commands
+## hedera [testnet][0.0.112533] :>
 
-# Transfer in tinybars
+## Sender is not operator
+transfer -s 0.0.119312 -r 0.0.116681,0.0.121290 -tb -500,300,200
+transfer -s 0.0.119312 -r 0.0.116681,0.0.121290 -hb -5,3,2
+transfer -s 0.0.119312 -r 0.0.116681,0.0.121290 -hb -0.005,0.003,0.002
 
-# valid command for single sender and single recipient
-transfer -s 0.0.1001 -r 0.0.1002 -tb 4400 
+## Sender is operator
+transfer -s 0.0.112533 -r 0.0.116681,0.0.121290 -hb -0.005,0.003,0.002
+transfer -s 0.0.112533 -r 0.0.116681,0.0.121290 -hb -5,3,2
+transfer -s 0.0.112533 -r 0.0.116681,0.0.121290 -tb 3000000,2000000
+transfer -s 0.0.112533 -r 0.0.116681,0.0.121290 -tb -5000000,3000000,2000000
+transfer -s 0.0.112533 -r 0.0.116681,0.0.121290 -tb 3000000,2000000
 
-# valid command for single sender and single recipient
-transfer -s 0.0.1001 -r 0.0.1002 -tb -4400,4400 
-transfer --sender 0.0.1001 --recipient 0.0.1002 --recipientAmtTinyBars -4400,4400
-
-transfer -s 0.0.1001,0.0.1002 -r 0.0.1003,0.0.1004,0.0.1005 -tb -440000,-500000,440000,200000,300000 
-
-# Transfer in hbars
-transfer -s 0.0.1001 -r 0.0.1002 -hb 4.4 
-transfer --sender 0.0.1001 --recipient 0.0.1002 --recipientAmtHBars -4.4,4.4
-
-transfer -s 0.0.1001,0.0.1002 -r 0.0.1003,0.0.1004,0.0.1005 -hb -4.4,-50,4.4,20,30 
-```
-
-### VERSION 0.0.4
-
-#### Crypto Transfer
-```bash
-# Transfer in tinybars
-transfer single -a 0.0.1001 -tb 4400 
-transfer single --accountId 0.0.1001 --recipientAmtTinyBars 4400
-
-# Transfer in hbars
-transfer single -a 0.0.1001 -hb 0.00044 
-transfer single --accountId 0.0.1001 --recipientAmtHBars 0.00044
-```
-
-#### Crypto Transfer Multiple
-
-```bash
-# Transfer in tinybars
-transfer multiple -a 0.0.1001,0.0.1002,0.0.1003 -tb 440000,550000,660000 
-transfer multiple --accountId 0.0.1001,0.0.1002,0.0.1003 --recipientAmtTinyBars 44000,55000,66000
-
-# Transfer in hbars
-transfer multiple -a 0.0.1001,0.0.1002,0.0.1003 -hb 0.44,1.55,22.66
-transfer multiple --accountId 0.0.1001,0.0.1002,0.0.1003 --recipientAmtHBars 0.44,1.55,22.66
+transfer -r 0.0.116681,0.0.121290 -tb 3000000,2000000
+transfer -r 0.0.116681,0.0.121290 -tb -5000000,3000000,2000000
+transfer -r 0.0.116681,0.0.121290 -hb -0.5,0.3,0.2
+transfer -r 0.0.116681,0.0.121290 -hb 0.3,0.2
 ```

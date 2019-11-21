@@ -23,6 +23,8 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Parameters;
 
+import java.util.concurrent.TimeoutException;
+
 @NoArgsConstructor
 @Getter
 @Setter
@@ -51,7 +53,7 @@ public class AccountGetInfo implements Runnable, Operation {
         if (StringUtil.isNullOrEmpty(accountIDInString)) {
             accountIDInString = hedera.getOperatorId().toString();
         }
-        getAccountInfo(hedera, accountIDInString);
+        getAccountInfo(accountIDInString);
     }
 
     public void printAccountInfo(AccountInfo accountInfo) {
@@ -69,7 +71,7 @@ public class AccountGetInfo implements Runnable, Operation {
         }
     }
 
-    public void getAccountInfo(Hedera hedera, String accountIDInString) {
+    public void getAccountInfo(String accountIDInString) {
         AccountInfo accountInfo;
         try (Client client = hedera.createHederaClient()) {
             AccountInfoQuery q;
@@ -77,6 +79,10 @@ public class AccountGetInfo implements Runnable, Operation {
                     .setAccountId(AccountId.fromString(accountIDInString));
             accountInfo = q.execute();
             printAccountInfo(accountInfo);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
