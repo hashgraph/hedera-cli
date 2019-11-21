@@ -1,13 +1,11 @@
 package com.hedera.cli.hedera.setup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayOutputStream;
@@ -18,11 +16,9 @@ import java.util.List;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
-import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,9 +40,6 @@ public class SetupTest {
 
     @Mock
     private InputReader inputReader;
-
-    @Mock
-    private AccountRecovery accountRecovery;
 
     @Mock
     private Hedera hedera;
@@ -89,39 +82,6 @@ public class SetupTest {
     }
 
     @Test
-    public void run() {
-//        System.setOut(stdout);
-//        String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
-//        String prompt2 = "24 words phrase";
-//        String prompt3 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`";
-//        String secret = "secret";
-//        boolean echo = false;
-//        String phraseInput = String.join(" ", phraseList).trim();
-//
-//        when(accountRecovery.promptPreview(inputReader)).thenReturn(true);
-//        AccountManager accountManager = mock(AccountManager.class);
-//        when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
-//        when(hedera.getAccountManager()).thenReturn(accountManager);
-//        when(inputReader.prompt(eq(prompt1))).thenReturn(accountId);
-//        System.out.println(phraseInput);
-//        System.out.println(phraseInput.length());
-//        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(phraseInput);
-//        when(inputReader.prompt(eq(prompt3))).thenReturn("bip");
-//        when(accountManager.verifyPhraseList(eq(phraseList))).thenReturn(phraseList);
-//        when(accountManager.verifyMethod(eq("bip"))).thenReturn("bip");
-//
-//        lenient().when(accountRecovery.recoverEDKeypairPostBipMigration(eq(phraseList))).thenReturn(keyPair);
-//        lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList))).thenReturn(keyPair);
-//
-//        // execute function under test
-//        setup.run();
-//
-//        // assertions
-//        verify(accountRecovery, times(1)).recoverEDKeypairPostBipMigration(phraseList);
-//        verify(accountRecovery, times(1)).verifyAndSaveWithKeyPair(keyPair, accountId);
-    }
-
-    @Test
     public void runFailsWithInvalidAccountId() {
         System.setOut(stdout);
         String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
@@ -134,82 +94,6 @@ public class SetupTest {
         setup.run();
 
         verify(inputReader, times(1)).prompt(anyString());
-    }
-
-    @Test
-    public void runFailsWithInvalidPhraseList() {
-//        System.setOut(stdout);
-//        String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
-//        String prompt2 = "24 words phrase";
-//        String secret = "secret";
-//        boolean echo = false;
-//
-//        when(accountRecovery.promptPreview(inputReader)).thenReturn(true);
-//        AccountManager accountManager = mock(AccountManager.class);
-//        when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
-//        when(hedera.getAccountManager()).thenReturn(accountManager);
-//        when(inputReader.prompt(eq(prompt1))).thenReturn(accountId);
-//        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(""); // invalid mnemonic phrase
-//        List<String> phraseList = Arrays.asList("".split(" "));
-//        when(accountManager.verifyPhraseList(eq(phraseList))).thenReturn(phraseList);
-//
-//        // execute function under test
-//        setup.run();
-//
-//        assertNotEquals(24, phraseList.size());
-    }
-
-    @Test
-    public void runSucceedsWithHgc() {
-//        System.setOut(stdout);
-//        String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
-//        String prompt2 = "24 words phrase";
-//        String secret = "secret";
-//        boolean echo = false;
-//        String prompt3 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`";
-//        String phraseInput = String.join(" ", phraseList).trim();
-//
-//        when(accountRecovery.promptPreview(inputReader)).thenReturn(true);
-//        AccountManager accountManager = mock(AccountManager.class);
-//        when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
-//        when(hedera.getAccountManager()).thenReturn(accountManager);
-//        when(inputReader.prompt(eq(prompt1))).thenReturn(accountId);
-//        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(phraseInput);
-//        when(inputReader.prompt(eq(prompt3))).thenReturn("hgc");
-//        when(accountManager.verifyPhraseList(eq(phraseList))).thenReturn(phraseList);
-//        when(accountManager.verifyMethod(eq("hgc"))).thenReturn("hgc");
-//
-//        // execute function under test
-//        setup.run();
-//
-//        verify(accountRecovery).recoverEd25519AccountKeypair(eq(phraseList));
-    }
-
-    @Test
-    public void runFailsWithInvalidMethod() {
-//        System.setOut(stdout);
-//        String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
-//        String prompt2 = "24 words phrase";
-//        String secret = "secret";
-//        boolean echo = false;
-//        String prompt3 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`";
-//        String phraseInput = String.join(" ", phraseList).trim();
-//
-//        when(accountRecovery.promptPreview(inputReader)).thenReturn(true);
-//        AccountManager accountManager = mock(AccountManager.class);
-//        when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
-//        when(hedera.getAccountManager()).thenReturn(accountManager);
-//        when(inputReader.prompt(eq(prompt1))).thenReturn(accountId);
-//        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(phraseInput);
-//        when(inputReader.prompt(eq(prompt3))).thenReturn("");
-//        when(accountManager.verifyPhraseList(eq(phraseList))).thenReturn(phraseList);
-//        when(accountManager.verifyMethod(eq(""))).thenReturn(null);
-//
-//        // execute function under test
-//        setup.run();
-//
-//        // prompt with anyString() was invoked twice
-//        verify(inputReader, times(2)).prompt(anyString());
     }
 
     private String captureLine() {
