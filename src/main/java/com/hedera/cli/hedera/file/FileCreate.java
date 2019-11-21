@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.TimeoutException;
 
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.TransactionManager;
@@ -140,6 +141,10 @@ public class FileCreate implements Runnable {
             TransactionReceipt receipt = tx.executeForReceipt();
             var newFileId = receipt.getFileId();
             shellHelper.print("file: " + newFileId);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }

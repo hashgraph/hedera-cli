@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.hedera.Hedera;
@@ -16,6 +17,7 @@ import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
@@ -61,19 +63,26 @@ public class HederaGrpc {
             // This will wait for the receipt to become available
             TransactionReceipt receipt;
             receipt = tx.executeForReceipt();
-            if (ResponseCodeEnum.SUCCESS.equals(receipt.getStatus())) {
-                accountId = receipt.getAccountId();
-            } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
-                shellHelper.printError("Seems like your current operator's key does not match");
-                return null;
-            } else {
-                shellHelper.printError(receipt.getStatus().toString());
-                return null;
-            }
+            return retrieveAccountIdFromReceipt(receipt);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
         return accountId;
+    }
+
+    private AccountId retrieveAccountIdFromReceipt(TransactionReceipt receipt) {
+        if (ResponseCodeEnum.SUCCESS.equals(receipt.getStatus())) {
+            return receipt.getAccountId();
+        } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
+            shellHelper.printError("Seems like your current operator's key does not match");
+        } else {
+            shellHelper.printError(receipt.getStatus().toString());
+        }
+        return null;
     }
 
     public JsonObject printAccount(String accountId, String privateKey, String publicKey) {
@@ -109,6 +118,10 @@ public class HederaGrpc {
                         .executeForReceipt();
                 receiptStatus(receipt, hedera, newAccount, oldAccount);
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
@@ -140,6 +153,10 @@ public class HederaGrpc {
             client.setOperator(hedera.getOperatorId(), hedera.getOperatorKey());
             var newAccountBalance = client.getAccountBalance(newAccount);
             shellHelper.printSuccess("Account " + newAccount + " new balance is " + newAccountBalance);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
@@ -185,25 +202,42 @@ public class HederaGrpc {
                     // Sign with the previous key and the new key
                     .sign(originalKey).sign(newKey).executeForReceipt();
             // Now we fetch the account information to check if the key was changed
-            if (receipt.getStatus().equals(ResponseCodeEnum.SUCCESS)) {
-                shellHelper.printSuccess("Account updated: " + receipt.getStatus().toString());
-                shellHelper.printInfo("Retrieving account info to verify the current key..");
-                AccountInfo info = client.getAccount(accountId);
-                shellHelper.printInfo("\nPublic key in Encoded form: " + info.getKey());
-                shellHelper.printInfo("\nPublic key in HEX: " + info.getKey().toString().substring(24));
-                boolean fileUpdated = updateJsonAccountInDisk(accountId, newKey);
-                if (fileUpdated) {
-                    shellHelper.printSuccess("File updated in disk " + fileUpdated);
-                } else {
-                    shellHelper.printWarning("AccountId does not exist locally, no file was updated. Use `account recovery` to save to local disk.");
-                }
-            } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
-                shellHelper.printError("Seems like your current operator's key does not match");
-            } else {
-                shellHelper.printError(receipt.getStatus().toString());
-            }
+            retrieveAccountInfoForKeyVerification(accountId, newKey, client, receipt);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
+        }
+    }
+
+    private void retrieveAccountInfoForKeyVerification(AccountId accountId, Ed25519PrivateKey newKey, Client client, TransactionReceipt receipt)
+            throws HederaException {
+        if (receipt.getStatus().equals(ResponseCodeEnum.SUCCESS)) {
+            shellHelper.printSuccess("Account updated: " + receipt.getStatus().toString());
+            shellHelper.printInfo("Retrieving account info to verify the current key..");
+            AccountInfo info = client.getAccount(accountId);
+            shellHelper.printInfo("\nPublic key in Encoded form: " + info.getKey());
+            shellHelper.printInfo("\nPublic key in HEX: " + info.getKey().toString().substring(24));
+            updateFileAndPrintResults(accountId, newKey);
+            return;
+        }
+        
+        if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
+            shellHelper.printError("Seems like your current operator's key does not match");
+            return;
+        }
+        
+        shellHelper.printError(receipt.getStatus().toString());
+    }
+
+    private void updateFileAndPrintResults(AccountId accountId, Ed25519PrivateKey newKey) {
+        boolean fileUpdated = updateJsonAccountInDisk(accountId, newKey);
+        if (fileUpdated) {
+            shellHelper.printSuccess("File updated in disk " + fileUpdated);
+        } else {
+            shellHelper.printWarning("AccountId does not exist locally, no file was updated. Use `account recovery` to save to local disk.");
         }
     }
 
