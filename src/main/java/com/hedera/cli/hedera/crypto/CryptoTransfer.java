@@ -14,7 +14,6 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.PreviewTransferList;
 import com.hedera.cli.models.TransactionManager;
-import com.hedera.cli.models.TransactionObj;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.HederaException;
