@@ -111,7 +111,7 @@ public class ValidateTransferList {
 
         // 3 possible scenarios
         // (1) amountList.size == transferList.size, then verifyCleanedAmountList will make the determination between true or false
-        // (2) senderList does not contain operator && amounrList.size != transferList.size
+        // (2) senderList does not contain operator && amountList.size != transferList.size
         // (3) senderList contains operator && amountList.size != transferList.size
 
         if (amountSize == transferSize) {
@@ -126,12 +126,11 @@ public class ValidateTransferList {
         if (senderListHasOperator(o)) {
             // add recipients amount and add to amount list
             long sumOfRecipientAmount = sumOfAmountList();
-            if (sumOfRecipientAmount == -1L) {
-                return false;
+            if (sumOfRecipientAmount == 0) {
+                // sumOfRecipientAmount is equal to sumOfTransferAmount
+                updateAmountList(sumOfRecipientAmount);
+                return verifyZeroSum(sumOfRecipientAmount);
             }
-            // sumOfRecipientAmount is equal to sumOfTransferAmount
-            updateAmountList(sumOfRecipientAmount);
-            return verifyZeroSum(sumOfRecipientAmount);
         }
 
         return amountListVerified;
