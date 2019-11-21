@@ -20,7 +20,6 @@ import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.RecoveredAccountModel;
-import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.account.AccountId;
@@ -36,9 +35,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Parameters;
-import picocli.CommandLine.Spec;
 
 @NoArgsConstructor
 @Getter
@@ -80,7 +77,7 @@ public class AccountRecovery implements Runnable, Operation {
         if (verifiedAccountId == null)
             return;
 
-        isWords = promptPreview();
+        isWords = promptPreview(inputReader);
         if (isWords()) {
             String phrase = inputReader.prompt("24 words phrase", "secret", false);
             phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
@@ -105,23 +102,23 @@ public class AccountRecovery implements Runnable, Operation {
         if ("bip".equals(method)) {
             if (isWords()) {
                 KeyPair keypair = recoverEDKeypairPostBipMigration(phraseList);
-                verifyAndSaveWithKeyPair(keypair);
+                verifyAndSaveWithKeyPair(keypair, accountId);
             } else {
-                verifyAndSaveWithPrivKey(ed25519PrivateKey);
+                verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
             }
         }
 
         if ("hgc".equals(method)) {
             if (isWords()) {
                 KeyPair keypair = recoverEd25519AccountKeypair(phraseList);
-                verifyAndSaveWithKeyPair(keypair);
+                verifyAndSaveWithKeyPair(keypair, accountId);
             } else {
-                verifyAndSaveWithPrivKey(ed25519PrivateKey);
+                verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
             }
         }
     }
 
-    public void verifyAndSaveWithKeyPair(KeyPair keypair) {
+    public void verifyAndSaveWithKeyPair(KeyPair keypair, String accountId) {
         accountRecovered = verifyAccountExistsInHedera(accountId, keypair.getPrivateKeyHex());
         if (accountRecovered) {
             printKeyPair(keypair, accountId);
@@ -131,7 +128,7 @@ public class AccountRecovery implements Runnable, Operation {
         }
     }
 
-    public void verifyAndSaveWithPrivKey(Ed25519PrivateKey ed25519PrivateKey) {
+    public void verifyAndSaveWithPrivKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {
         accountRecovered = verifyAccountExistsInHedera(accountId, ed25519PrivateKey.toString());
         if (accountRecovered) {
             printKeyPairWithPrivKey(ed25519PrivateKey, accountId);
@@ -141,12 +138,12 @@ public class AccountRecovery implements Runnable, Operation {
         }
     }
 
-    public boolean promptPreview() {
+    public boolean promptPreview(InputReader inputReader) {
         String choice = inputReader.prompt("Recover account using 24 words or keys? Enter words/keys");
         return choice.equalsIgnoreCase("words");
     }
 
-    public boolean verifyAccountExistsLocally(AccountInfo accountInfo) {
+    public boolean verifyAccountExistsLocally(AccountInfo accountInfo, String accountId) {
         boolean accountIdMatches = accountInfo.getAccountId().equals(AccountId.fromString(accountId));
         if (accountIdMatches && !retrieveIndex()) {
             // Check if account already exists in index.txt
@@ -165,7 +162,7 @@ public class AccountRecovery implements Runnable, Operation {
             accountInfo = getAccountInfoWithPrivKey(hedera, accountId,
                     Ed25519PrivateKey.fromString(privateKeyString));
             if (accountInfo == null) return false;
-            accountExistsInHedera = verifyAccountExistsLocally(accountInfo);
+            accountExistsInHedera = verifyAccountExistsLocally(accountInfo, accountId);
         } catch (Exception e) {
             shellHelper.printError("Error in verifying accountID and recovery words");
             accountExistsInHedera = false;

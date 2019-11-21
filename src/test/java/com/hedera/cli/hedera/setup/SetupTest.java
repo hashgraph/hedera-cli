@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -22,14 +22,13 @@ import com.hedera.cli.hedera.crypto.AccountRecovery;
 import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
+import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.account.AccountId;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,9 +43,6 @@ public class SetupTest {
     private Setup setup;
 
     @Mock
-    private ShellHelper shellHelper;
-
-    @Mock
     private InputReader inputReader;
 
     @Mock
@@ -54,6 +50,12 @@ public class SetupTest {
 
     @Mock
     private Hedera hedera;
+
+    @Mock
+    private ShellHelper shellHelper;
+
+    @Mock
+    private TransactionManager transactionManager;
 
     // test data
     private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet",
@@ -94,6 +96,7 @@ public class SetupTest {
         boolean echo = false;
         String phraseInput = String.join(" ", phraseList).trim();
 
+        when(accountRecovery.promptPreview(inputReader)).thenReturn(true);
         AccountManager accountManager = mock(AccountManager.class);
         when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
         when(hedera.getAccountManager()).thenReturn(accountManager);
@@ -107,52 +110,13 @@ public class SetupTest {
 
         lenient().when(accountRecovery.recoverEDKeypairPostBipMigration(eq(phraseList))).thenReturn(keyPair);
         lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList))).thenReturn(keyPair);
-        when(accountRecovery.verifyAccountExistsInHedera(eq(accountId), eq(keyPair.getPrivateKeyHex()))).thenReturn(true);
 
         // execute function under test
         setup.run();
 
         // assertions
-        verify(accountRecovery, times(1)).printKeyPair(keyPair, accountId);
-        verify(accountManager, times(1)).setDefaultAccountId(AccountId.fromString(accountId), keyPair);
-    }
-
-    @Test
-    public void runFails() {
-        System.setOut(stdout);
-        String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
-        String prompt2 = "24 words phrase";
-        String secret = "secret";
-        boolean echo = false;
-        String prompt3 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`";
-        String phraseInput = String.join(" ", phraseList).trim();
-
-        AccountManager accountManager = mock(AccountManager.class);
-        when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
-        when(hedera.getAccountManager()).thenReturn(accountManager);
-        when(inputReader.prompt(eq(prompt1))).thenReturn(accountId);
-        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(phraseInput);
-        when(inputReader.prompt(eq(prompt3))).thenReturn("bip");
-        when(accountManager.verifyPhraseList(eq(phraseList))).thenReturn(phraseList);
-        when(accountManager.verifyMethod(eq("bip"))).thenReturn("bip");
-
-        lenient().when(accountRecovery.recoverEDKeypairPostBipMigration(eq(phraseList))).thenReturn(keyPair);
-        lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList))).thenReturn(keyPair);
-
-        // when checking against Hedera, we find out that the account id and
-        // re-generated keyPair do not match!
-        // mock this failure by returningh false
-        when(accountRecovery.verifyAccountExistsInHedera(eq(accountId), eq(keyPair.getPrivateKeyHex()))).thenReturn(false);
-
-        // execute function under test
-        setup.run();
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        verify(shellHelper).printError(valueCapture.capture());
-        String actual = valueCapture.getValue();
-        String expected = "Error in verifying that accountId and recovery words match";
-
-        assertEquals(expected, actual);
+        verify(accountRecovery, times(1)).recoverEDKeypairPostBipMigration(phraseList);
+        verify(accountRecovery, times(1)).verifyAndSaveWithKeyPair(keyPair, accountId);
     }
 
     @Test
@@ -178,6 +142,7 @@ public class SetupTest {
         String secret = "secret";
         boolean echo = false;
 
+        when(accountRecovery.promptPreview(inputReader)).thenReturn(true);
         AccountManager accountManager = mock(AccountManager.class);
         when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
         when(hedera.getAccountManager()).thenReturn(accountManager);
@@ -202,6 +167,7 @@ public class SetupTest {
 //        String prompt3 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`";
 //        String phraseInput = String.join(" ", phraseList).trim();
 //
+//        when(accountRecovery.promptPreview(inputReader)).thenReturn(true);
 //        AccountManager accountManager = mock(AccountManager.class);
 //        when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
 //        when(hedera.getAccountManager()).thenReturn(accountManager);
@@ -227,6 +193,7 @@ public class SetupTest {
         String prompt3 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`";
         String phraseInput = String.join(" ", phraseList).trim();
 
+        when(accountRecovery.promptPreview(inputReader)).thenReturn(true);
         AccountManager accountManager = mock(AccountManager.class);
         when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
         when(hedera.getAccountManager()).thenReturn(accountManager);
