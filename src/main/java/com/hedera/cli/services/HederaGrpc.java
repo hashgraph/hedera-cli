@@ -62,15 +62,7 @@ public class HederaGrpc {
             // This will wait for the receipt to become available
             TransactionReceipt receipt;
             receipt = tx.executeForReceipt();
-            if (ResponseCodeEnum.SUCCESS.equals(receipt.getStatus())) {
-                accountId = receipt.getAccountId();
-            } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
-                shellHelper.printError("Seems like your current operator's key does not match");
-                return null;
-            } else {
-                shellHelper.printError(receipt.getStatus().toString());
-                return null;
-            }
+            return retrieveAccountIdFromReceipt(receipt);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (TimeoutException e) {
@@ -79,6 +71,17 @@ public class HederaGrpc {
             shellHelper.printError(e.getMessage());
         }
         return accountId;
+    }
+
+    private AccountId retrieveAccountIdFromReceipt(TransactionReceipt receipt) {
+        if (ResponseCodeEnum.SUCCESS.equals(receipt.getStatus())) {
+            return receipt.getAccountId();
+        } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
+            shellHelper.printError("Seems like your current operator's key does not match");
+        } else {
+            shellHelper.printError(receipt.getStatus().toString());
+        }
+        return null;
     }
 
     public JsonObject printAccount(String accountId, String privateKey, String publicKey) {
