@@ -143,17 +143,26 @@ public class CryptoTransfer implements Runnable {
         if (isSkipPreview()) {
             executeCryptoTransfer(operatorId);
         } else {
-            // Prompt memostring input
-            isInfoCorrect = promptPreview(operatorId, map);
-            if ("yes".equals(isInfoCorrect)) {
-                shellHelper.print("Info is correct, senders will need to sign the transaction to release funds");
-                executeCryptoTransfer(operatorId);
-            } else if ("no".equals(isInfoCorrect)) {
-                shellHelper.print("Nope, incorrect, let's make some changes");
-            } else {
-                shellHelper.printError("Input must be either yes or no");
-            }
+            // handle user's input to our preview prompt
+            handlePromptPreview(operatorId, map);
         }
+    }
+
+    private void handlePromptPreview(AccountId operatorId, Map<Integer, PreviewTransferList> map)
+            throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
+        isInfoCorrect = promptPreview(operatorId, map);
+        if ("yes".equals(isInfoCorrect)) {
+            shellHelper.print("Info is correct, senders will need to sign the transaction to release funds");
+            executeCryptoTransfer(operatorId);
+            return;
+        }
+        
+        if ("no".equals(isInfoCorrect)) {
+            shellHelper.print("Nope, incorrect, let's make some changes");
+            return;
+        }
+        
+        shellHelper.printError("Input must be either yes or no");
     }
 
     public boolean isTiny() {
