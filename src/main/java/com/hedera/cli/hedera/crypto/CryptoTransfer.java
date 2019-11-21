@@ -216,26 +216,31 @@ public class CryptoTransfer implements Runnable {
 
     private byte[] signAndCreateTxBytesWithOperator() throws InvalidProtocolBufferException {
         byte[] signedTxnBytes = new byte[0];
-        String senderPrivKeyInString;
-        Ed25519PrivateKey senderPrivKey;
         for (int i = 0; i < senderList.size(); i++) {
-            if (senderList.get(i).equals(hedera.getOperatorId().toString())) {
+            String sender = senderList.get(i);
+            if (sender.equals(hedera.getOperatorId().toString())) {
                 signedTxnBytes = cryptoTransferTransaction.toBytes();
             } else {
-                senderPrivKeyInString = inputReader.prompt(
-                        "Input private key of sender: " + senderList.get(i) + " to sign transaction", "secret", false);
-                if (!StringUtil.isNullOrEmpty(senderPrivKeyInString)) {
-                    try {
-                        senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
-                    } catch (Exception e) {
-                        shellHelper.printError("Private key is not in the right ED25519 string format");
-                        return null;
-                    }
-                    signedTxnBytes = Transaction.fromBytes(cryptoTransferTransaction.toBytes()).sign(senderPrivKey).toBytes();
-                }
+                signedTxnBytes = signAndCreateTxBytesWithPrivateKey(sender);
             }
         }
         return signedTxnBytes;
+    }
+
+    private byte[] signAndCreateTxBytesWithPrivateKey(String sender) {
+        String senderPrivKeyInString = inputReader.prompt(
+            "Input private key of sender: " + sender + " to sign transaction", "secret", false);
+        if (StringUtil.isNullOrEmpty(senderPrivKeyInString)) {
+            return null;
+        }
+        
+        try {
+            Ed25519PrivateKey senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
+            return Transaction.fromBytes(cryptoTransferTransaction.toBytes()).sign(senderPrivKey).toBytes();
+        } catch (Exception e) {
+            shellHelper.printError("Private key is not in the right ED25519 string format");
+            return null;
+        }
     }
 
     public Map<Integer, PreviewTransferList> transferListToPromptPreviewMap() {
