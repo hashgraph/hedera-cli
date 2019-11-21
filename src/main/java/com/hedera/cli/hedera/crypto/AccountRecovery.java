@@ -130,8 +130,8 @@ public class AccountRecovery implements Runnable, Operation {
         if ("bip".equals(method) && !isWords()) {
             accountRecovered = verifyAccountExistsInHedera(accountId, ed25519PrivateKey.toString());
             if (accountRecovered) {
-                printKeyPair(keypair, accountId);
-                hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keypair);
+                printKeyPairWithPrivKey(ed25519PrivateKey, accountId);
+                hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), ed25519PrivateKey);
             } else {
                 shellHelper.printError("Error in recovering account");
             }
@@ -151,8 +151,8 @@ public class AccountRecovery implements Runnable, Operation {
         if ("hgc".equals(method) && !isWords()) {
             accountRecovered = verifyAccountExistsInHedera(accountId, ed25519PrivateKey.toString());
             if (accountRecovered) {
-                printKeyPair(keypair, accountId);
-                hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keypair);
+                printKeyPairWithPrivKey(ed25519PrivateKey, accountId);
+                hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), ed25519PrivateKey);
             } else {
                 shellHelper.printError("Error in recovering account");
             }
@@ -256,6 +256,21 @@ public class AccountRecovery implements Runnable, Operation {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void printKeyPairWithPrivKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {
+        RecoveredAccountModel recoveredAccountModel = new RecoveredAccountModel();
+        recoveredAccountModel.setAccountId(accountId);
+        recoveredAccountModel.setPrivateKey(ed25519PrivateKey.toString().substring(32));
+        recoveredAccountModel.setPublicKey(ed25519PrivateKey.getPublicKey().toString().substring(24));
+        recoveredAccountModel.setPrivateKeyEncoded(ed25519PrivateKey.toString());
+        recoveredAccountModel.setPublicKeyEncoded(ed25519PrivateKey.getPublicKey().toString());
+        try {
+            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+            shellHelper.printSuccess(ow.writeValueAsString(recoveredAccountModel));
+        } catch (Exception e) {
+            shellHelper.printError(e.getMessage());
         }
     }
 
