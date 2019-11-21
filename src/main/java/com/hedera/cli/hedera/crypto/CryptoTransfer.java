@@ -208,11 +208,6 @@ public class CryptoTransfer implements Runnable {
         }
     }
 
-    private byte[] senderSignsTransaction(Ed25519PrivateKey senderPrivKey, byte[] transactionData)
-            throws InvalidProtocolBufferException {
-        return Transaction.fromBytes(transactionData).sign(senderPrivKey).toBytes();
-    }
-
     private byte[] signAndCreateTxBytesWithOperator() throws InvalidProtocolBufferException {
         byte[] signedTxnBytes = new byte[0];
         String senderPrivKeyInString;
@@ -230,15 +225,11 @@ public class CryptoTransfer implements Runnable {
                         shellHelper.printError("Private key is not in the right ED25519 string format");
                         return null;
                     }
-                    signedTxnBytes = senderSignsTransaction(senderPrivKey, cryptoTransferTransaction.toBytes());
+                    signedTxnBytes = Transaction.fromBytes(cryptoTransferTransaction.toBytes()).sign(senderPrivKey).toBytes();
                 }
             }
         }
         return signedTxnBytes;
-    }
-
-    public void setFinalAmountList(List<String> finalAmountList) {
-        this.finalAmountList = finalAmountList;
     }
 
     public Map<Integer, PreviewTransferList> transferListToPromptPreviewMap() {
