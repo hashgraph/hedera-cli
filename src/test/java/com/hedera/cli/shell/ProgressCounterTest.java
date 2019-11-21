@@ -73,8 +73,9 @@ public class ProgressCounterTest {
     String[] allLinesArray = allLinesString.trim().split("\n");
     String lastLine = allLinesArray[allLinesArray.length - 1];
     String[] lastLineArray = lastLine.trim().split(" ");
-    String lastWord = lastLineArray[lastLineArray.length - 1];
-    String secondLastWord = lastLineArray[lastLineArray.length - 2];
+    // ? character gets added in randomly, so we explicitly remove it if it exists
+    String lastWord = lastLineArray[lastLineArray.length - 1].trim().replaceAll("\\p{C}+", "");
+    String secondLastWord = lastLineArray[lastLineArray.length - 2].trim().replaceAll("\\p{C}+", "");
 
     assertEquals("100", lastWord);
     assertEquals("hello:", secondLastWord);
@@ -117,7 +118,8 @@ public class ProgressCounterTest {
   }
 
   private String captureLine() {
-    return new String(output.toByteArray());
+    String capturedString = new String(output.toByteArray());
+    return capturedString.trim().replaceAll("\\p{C}+", ""); // always escape control characters
   }
 
 }

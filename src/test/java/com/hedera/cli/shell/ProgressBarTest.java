@@ -55,7 +55,7 @@ public class ProgressBarTest {
     int length = allLines.size();
     String lastLine = allLines.get(length - 1).trim();
     String[] lastLineArray = lastLine.stripTrailing().split(" ");
-    String last = lastLineArray[lastLineArray.length - 1];
+    String last = lastLineArray[lastLineArray.length - 1].trim().replaceAll("\\p{C}+", "");
 
     assertEquals(100, length);
     assertEquals("100%", last);
@@ -84,14 +84,15 @@ public class ProgressBarTest {
     int length = allLines.size();
     String lastLine = allLines.get(length - 1).trim();
     String[] lastLineArray = lastLine.stripTrailing().split(" ");
-    String last = lastLineArray[lastLineArray.length - 1];
+    String last = lastLineArray[lastLineArray.length - 1].trim().replaceAll("\\p{C}+", "");
 
     assertEquals(100, length);
     assertEquals(testMessage, last);
   }
 
   private String captureLine() {
-    return new String(output.toByteArray());
+    String capturedString = new String(output.toByteArray());
+    return capturedString.trim().replaceAll("\\p{C}+", ""); // always escape control characters
   }
 
 }

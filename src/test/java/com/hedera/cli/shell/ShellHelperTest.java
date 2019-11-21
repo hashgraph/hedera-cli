@@ -122,8 +122,9 @@ public class ShellHelperTest {
 
   @Test
   public void print() throws IOException {
-    shellHelper2.print(testMessage); // print uses default color
-    String line = captureLine().trim();
+    // print uses default color
+    shellHelper2.print(testMessage); 
+    String line = captureLine();
     assertEquals(testMessage, line);
   }
 
@@ -131,17 +132,19 @@ public class ShellHelperTest {
   public void printInfo() {
     shellHelper2.printInfo(testMessage);
     String ansiLine = ANSI.get("CYAN") + testMessage + ANSI.get("RESET");
-    String expected = ansiLine.trim();
-    String actual = captureLine().trim();
+    String expected = ansiLine.trim().replaceAll("\\p{C}+", "");
+    String actual = captureLine();
     assertEquals(expected, actual);
   }
 
   @Test
   public void printSuccess() {
-    shellHelper2.printSuccess(testMessage);
     String ansiLine = ANSI.get("GREEN") + testMessage + ANSI.get("RESET");
-    String expected = ansiLine.trim();
-    String actual = captureLine().trim();
+    String expected = ansiLine.trim().replaceAll("\\p{C}+", "");
+
+    shellHelper2.printSuccess(testMessage);
+    String actual = captureLine();
+
     assertEquals(expected, actual);
   }
 
@@ -149,8 +152,8 @@ public class ShellHelperTest {
   public void printWarning() {
     shellHelper2.printWarning(testMessage);
     String ansiLine = ANSI.get("YELLOW") + testMessage + ANSI.get("RESET");
-    String expected = ansiLine.trim();
-    String actual = captureLine().trim();
+    String expected = ansiLine.trim().trim().replaceAll("\\p{C}+", "");
+    String actual = captureLine();
     assertEquals(expected, actual);
   }
 
@@ -158,13 +161,14 @@ public class ShellHelperTest {
   public void printError() {
     shellHelper2.printError(testMessage);
     String ansiLine = ANSI.get("RED") + testMessage + ANSI.get("RESET");
-    String expected = ansiLine.trim();
+    String expected = ansiLine.trim().trim().replaceAll("\\p{C}+", "");
     String actual = captureLine().trim();
     assertEquals(expected, actual);
   }
 
   private String captureLine() {
-    return new String(output.toByteArray());
+    String capturedString = new String(output.toByteArray());
+    return capturedString.trim().replaceAll("\\p{C}+", ""); // always escape control characters
   }
 
 }
