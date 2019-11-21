@@ -106,17 +106,15 @@ public class CryptoTransfer implements Runnable {
     @Override
     public void run() {
 
-        if (!validateAmount.check(o)) {
+        // validation
+        if (!validateAmount.check(o) || !validateAccounts.check(o) || !validateTransferList.verifyAmountList(o)) {
             return;
         }
 
-        if (!validateAccounts.check(o)) {
-            return;
-        }
-
-        if (!validateTransferList.verifyAmountList(o)) return;
+        // preview
         transferListToPromptPreviewMap();
 
+        // execute
         try {
             reviewAndExecute(hedera.getOperatorId());
         } catch (InterruptedException e) {
