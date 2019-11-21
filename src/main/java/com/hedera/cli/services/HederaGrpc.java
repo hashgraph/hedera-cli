@@ -220,16 +220,24 @@ public class HederaGrpc {
             AccountInfo info = client.getAccount(accountId);
             shellHelper.printInfo("\nPublic key in Encoded form: " + info.getKey());
             shellHelper.printInfo("\nPublic key in HEX: " + info.getKey().toString().substring(24));
-            boolean fileUpdated = updateJsonAccountInDisk(accountId, newKey);
-            if (fileUpdated) {
-                shellHelper.printSuccess("File updated in disk " + fileUpdated);
-            } else {
-                shellHelper.printWarning("AccountId does not exist locally, no file was updated. Use `account recovery` to save to local disk.");
-            }
-        } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
+            updateFileAndPrintResults(accountId, newKey);
+            return;
+        }
+        
+        if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
             shellHelper.printError("Seems like your current operator's key does not match");
+            return;
+        }
+        
+        shellHelper.printError(receipt.getStatus().toString());
+    }
+
+    private void updateFileAndPrintResults(AccountId accountId, Ed25519PrivateKey newKey) {
+        boolean fileUpdated = updateJsonAccountInDisk(accountId, newKey);
+        if (fileUpdated) {
+            shellHelper.printSuccess("File updated in disk " + fileUpdated);
         } else {
-            shellHelper.printError(receipt.getStatus().toString());
+            shellHelper.printWarning("AccountId does not exist locally, no file was updated. Use `account recovery` to save to local disk.");
         }
     }
 
