@@ -1,5 +1,6 @@
-package com.hedera.cli.hedera.crypto;
+package com.hedera.cli.hedera.validation;
 
+import com.hedera.cli.hedera.crypto.CryptoTransferOptions;
 import com.hedera.cli.shell.ShellHelper;
 import lombok.Getter;
 import lombok.Setter;

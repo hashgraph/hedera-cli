@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.crypto;
+package com.hedera.cli.hedera.validation;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.crypto.CryptoTransferOptions;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 

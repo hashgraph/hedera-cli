@@ -1,10 +1,11 @@
-package com.hedera.cli.hedera.crypto;
+package com.hedera.cli.hedera.validation;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
 
+import com.hedera.cli.hedera.crypto.CryptoTransferOptions;
 import com.hedera.cli.shell.ShellHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
