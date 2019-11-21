@@ -27,6 +27,8 @@ import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +70,8 @@ public class AccountRecovery implements Runnable, Operation {
     private boolean accountRecovered;
     private boolean isWords;
     private List<String> phraseList;
+
+    @NonNull
     private Ed25519PrivateKey ed25519PrivateKey;
 
     @Override
@@ -79,26 +83,19 @@ public class AccountRecovery implements Runnable, Operation {
 
         isWords = promptPreview(inputReader);
         if (isWords()) {
-            String phrase = inputReader.prompt("24 words phrase", "secret", false);
-            phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
-            if (phraseList == null)
-                return;
+            phraseList = phraseListFromRecoveryWordsPrompt(inputReader, accountManager);
+            if (phraseList.isEmpty()) return;
         } else {
-            String privateKeyStr = inputReader.prompt("Enter the private key of account " + accountId, "secret", false);
-            try {
-                ed25519PrivateKey = Ed25519PrivateKey.fromString(privateKeyStr);
-            } catch (Exception e) {
-                shellHelper.printError("Private key is not in the right ED25519 string format");
-                return;
-            }
+            ed25519PrivateKey = ed25519PrivateKeyFromKeysPrompt(inputReader, accountId, shellHelper);
         }
 
-        String method = inputReader
-                .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        String strMethod = accountManager.verifyMethod(method);
-        if (strMethod == null)
-            return;
+        String method = methodFromMethodPrompt(inputReader, accountManager);
+        if (StringUtil.isNullOrEmpty(method)) return;
+        isBip(method);
+        isHgc(method);
+    }
 
+    public void isBip(String method) {
         if ("bip".equals(method)) {
             if (isWords()) {
                 KeyPair keypair = recoverEDKeypairPostBipMigration(phraseList);
@@ -107,7 +104,9 @@ public class AccountRecovery implements Runnable, Operation {
                 verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
             }
         }
+    }
 
+    public void isHgc(String method) {
         if ("hgc".equals(method)) {
             if (isWords()) {
                 KeyPair keypair = recoverEd25519AccountKeypair(phraseList);
@@ -116,6 +115,28 @@ public class AccountRecovery implements Runnable, Operation {
                 verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
             }
         }
+    }
+
+    public List<String> phraseListFromRecoveryWordsPrompt(InputReader inputReader, AccountManager accountManager) {
+        String phrase = inputReader.prompt("24 words phrase", "secret", false);
+        phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
+        return phraseList;
+    }
+
+    public Ed25519PrivateKey ed25519PrivateKeyFromKeysPrompt(InputReader inputReader, String accountId, ShellHelper shellHelper) {
+        String privateKeyStr = inputReader.prompt("Enter the private key of account " + accountId, "secret", false);
+        try {
+            ed25519PrivateKey = Ed25519PrivateKey.fromString(privateKeyStr);
+        } catch (Exception e) {
+            shellHelper.printError("Private key is not in the right ED25519 string format");
+        }
+        return ed25519PrivateKey;
+    }
+
+    public String methodFromMethodPrompt(InputReader inputReader, AccountManager accountManager) {
+        String method = inputReader
+                .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
+        return accountManager.verifyMethod(method);
     }
 
     public void verifyAndSaveWithKeyPair(KeyPair keypair, String accountId) {

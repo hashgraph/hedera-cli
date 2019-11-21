@@ -1,18 +1,17 @@
 
 package com.hedera.cli.hedera.setup;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
-import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import lombok.Getter;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,8 +36,9 @@ public class Setup implements Runnable {
     private Hedera hedera;
 
     private List<String> phraseList;
+
+    @NonNull
     private Ed25519PrivateKey ed25519PrivateKey;
-    private KeyPair keyPair;
 
     public void help() {
         CommandLine.usage(this, System.out);
@@ -56,42 +56,13 @@ public class Setup implements Runnable {
 
         boolean isWords = accountRecovery.promptPreview(inputReader);
         if (isWords) {
-            String phrase = inputReader.prompt("24 words phrase", "secret", false);
-            phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
-            if (phraseList == null)
-                return;
+            phraseList = accountRecovery.phraseListFromRecoveryWordsPrompt(inputReader, accountManager);
+            if (phraseList.isEmpty()) return;
         } else {
-            String privateKeyStr = inputReader.prompt("Enter the private key of account " + accountId, "secret", false);
-            try {
-                ed25519PrivateKey = Ed25519PrivateKey.fromString(privateKeyStr);
-            } catch (Exception e) {
-                shellHelper.printError("Private key is not in the right ED25519 string format");
-                return;
-            }
+            ed25519PrivateKey = accountRecovery.ed25519PrivateKeyFromKeysPrompt(inputReader, accountId, shellHelper);
         }
-
-        String method = inputReader
-                .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        String strMethod = accountManager.verifyMethod(method);
-        if (strMethod == null)
-            return;
-
-        if ("bip".equals(method)) {
-            if (isWords) {
-                keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
-                accountRecovery.verifyAndSaveWithKeyPair(keyPair, accountId);
-            } else {
-                accountRecovery.verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
-            }
-        }
-
-        if ("hgc".equals(method)) {
-            if (isWords) {
-                keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
-                accountRecovery.verifyAndSaveWithKeyPair(keyPair, accountId);
-            } else {
-                accountRecovery.verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
-            }
-        }
+        String method = accountRecovery.methodFromMethodPrompt(inputReader, accountManager);
+        accountRecovery.isBip(method);
+        accountRecovery.isHgc(method);
     }
 }
