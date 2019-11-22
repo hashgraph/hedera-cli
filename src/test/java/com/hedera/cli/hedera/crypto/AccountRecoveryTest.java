@@ -2,9 +2,8 @@ package com.hedera.cli.hedera.crypto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -22,6 +21,7 @@ import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -120,4 +120,46 @@ public class AccountRecoveryTest {
     String result = ow.writeValueAsString(recoveredAccountModel);
     verify(shellHelper, times(1)).printSuccess(result);
   }
+
+//  @Test
+//  public void runSucceeds() {
+//    System.setOut(stdout);
+//    String prompt1 = "account ID in the format of 0.0.xxxx that will be used as default operator";
+//    String prompt2 = "Recover account using 24 words or keys? Enter words/keys:";
+//    String prompt3 = "24 words phrase:";
+//    String prompt4 = "Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`:";
+//    String phraseInput = String.join(" ", phraseList).trim();
+//    String secret = "secret";	//        String secret = "secret";
+//    boolean echo = false;
+//    String method = "bip";
+//
+//    accountRecovery.setWords(true);
+//    accountRecovery.setAccountManager(accountManager);
+//    accountRecovery.setAccountId(accountId);
+//    accountRecovery.setWords(true);
+//    accountRecovery.isBip(method);
+//    accountRecovery.setPhraseList(phraseList);
+//    accountRecovery.setEd25519PrivateKey(Ed25519PrivateKey.fromString(keyPair.getPrivateKeyEncodedHex()));
+//    when(inputReader.prompt(eq(prompt1))).thenReturn(accountId);
+//    when(inputReader.prompt(eq(prompt2))).thenReturn("words");
+//    when(inputReader.prompt(eq(prompt3), eq(secret), eq(echo))).thenReturn(phraseInput);
+//    when(inputReader.prompt(eq(prompt4))).thenReturn(method);
+//
+//    accountRecovery.run();
+//
+////  lenient().when(accountRecovery.recoverEDKeypairPostBipMigration(eq(phraseList))).thenReturn(keyPair);
+////  lenient().when(accountRecovery.verifyAccountExistsInHedera(accountId, keyPair.getPrivateKeyEncodedHex())).thenReturn(true);
+////  lenient().when(accountRecovery.recoverEd25519AccountKeypair(eq(phraseList))).thenReturn(keyPair);
+////        doNothing().when(hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keyPair));
+//
+//  assertEquals(accountManager, accountRecovery.getAccountManager());
+//  assertEquals(inputReader, accountRecovery.getInputReader());
+//  assertEquals(phraseList, accountRecovery.getPhraseList());
+//  assertEquals(shellHelper, accountRecovery.getShellHelper());
+//  assertEquals(keyPair.getPrivateKeyEncodedHex(), accountRecovery.getEd25519PrivateKey().toString());
+////  verify(accountRecovery, times(1)).recoverEDKeypairPostBipMigration(phraseList);
+////  verify(accountRecovery, times(1)).verifyAndSaveWithKeyPair(keyPair);
+////  verify(accountRecovery, times(1)).recoverWithBipMethod(phraseList, Ed25519PrivateKey.fromString(keyPair.getPrivateKeyEncodedHex()), accountId, true);
+////
+//  }
 }

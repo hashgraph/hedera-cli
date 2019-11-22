@@ -82,8 +82,11 @@ public class AccountRecovery implements Runnable, Operation {
             return;
 
         isWords = promptPreview(inputReader);
+        System.out.println("is words");
+        System.out.println(isWords);
         if (isWords()) {
             phraseList = phraseListFromRecoveryWordsPrompt(inputReader, accountManager);
+            System.out.println("phrase list");
             if (phraseList.isEmpty()) return;
         } else {
             ed25519PrivateKey = ed25519PrivateKeyFromKeysPrompt(inputReader, accountId, shellHelper);
@@ -91,29 +94,32 @@ public class AccountRecovery implements Runnable, Operation {
 
         String method = methodFromMethodPrompt(inputReader, accountManager);
         if (StringUtil.isNullOrEmpty(method)) return;
-        isBip(method);
-        isHgc(method);
-    }
-
-    public void isBip(String method) {
-        if ("bip".equals(method)) {
-            if (isWords()) {
-                KeyPair keypair = recoverEDKeypairPostBipMigration(phraseList);
-                verifyAndSaveWithKeyPair(keypair, accountId);
-            } else {
-                verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
-            }
+        if (isBip(method)) {
+            recoverWithBipMethod(phraseList, ed25519PrivateKey, accountId, isWords);
+        } else {
+            recoverWithHgcMethod(phraseList, ed25519PrivateKey, accountId, isWords);
         }
     }
 
-    public void isHgc(String method) {
-        if ("hgc".equals(method)) {
-            if (isWords()) {
-                KeyPair keypair = recoverEd25519AccountKeypair(phraseList);
-                verifyAndSaveWithKeyPair(keypair, accountId);
-            } else {
-                verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
-            }
+    public boolean isBip(String method) {
+        return method.equalsIgnoreCase("bip");
+    }
+
+    public void recoverWithBipMethod(List<String> phraseList, Ed25519PrivateKey ed25519PrivateKey, String accountId, boolean isWords) {
+        if (isWords) {
+            KeyPair keypair = recoverEDKeypairPostBipMigration(phraseList);
+            verifyAndSaveWithKeyPair(keypair, accountId);
+        } else {
+            verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
+        }
+    }
+
+    public void recoverWithHgcMethod(List<String> phraseList, Ed25519PrivateKey ed25519PrivateKey, String accountId, boolean isWords) {
+        if (isWords) {
+            KeyPair keypair = recoverEd25519AccountKeypair(phraseList);
+            verifyAndSaveWithKeyPair(keypair, accountId);
+        } else {
+            verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
         }
     }
 
@@ -262,12 +268,7 @@ public class AccountRecovery implements Runnable, Operation {
         recoveredAccountModel.setPublicKey(ed25519PrivateKey.getPublicKey().toString().substring(24));
         recoveredAccountModel.setPrivateKeyEncoded(ed25519PrivateKey.toString());
         recoveredAccountModel.setPublicKeyEncoded(ed25519PrivateKey.getPublicKey().toString());
-        try {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            shellHelper.printSuccess(ow.writeValueAsString(recoveredAccountModel));
-        } catch (Exception e) {
-            shellHelper.printError(e.getMessage());
-        }
+        printRecoveredAccount(recoveredAccountModel);
     }
 
     public void printKeyPair(KeyPair keypair, String accountId) {
@@ -278,6 +279,10 @@ public class AccountRecovery implements Runnable, Operation {
         recoveredAccountModel.setPrivateKeyEncoded(keypair.getPrivateKeyEncodedHex());
         recoveredAccountModel.setPublicKeyEncoded(keypair.getPublicKeyEncodedHex());
         recoveredAccountModel.setPrivateKeyBrowserCompatible(keypair.getSeedAndPublicKeyHex());
+        printRecoveredAccount(recoveredAccountModel);
+    }
+
+    private void printRecoveredAccount(RecoveredAccountModel recoveredAccountModel) {
         try {
             ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
             shellHelper.printSuccess(ow.writeValueAsString(recoveredAccountModel));

@@ -12,6 +12,7 @@ import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 @Getter
+@Setter
 @Component
 @Command(name = "setup", description = "")
 public class Setup implements Runnable {
@@ -62,7 +64,10 @@ public class Setup implements Runnable {
             ed25519PrivateKey = accountRecovery.ed25519PrivateKeyFromKeysPrompt(inputReader, accountId, shellHelper);
         }
         String method = accountRecovery.methodFromMethodPrompt(inputReader, accountManager);
-        accountRecovery.isBip(method);
-        accountRecovery.isHgc(method);
+        if (accountRecovery.isBip(method)) {
+            accountRecovery.recoverWithBipMethod(phraseList, ed25519PrivateKey, accountId, isWords);
+        } else {
+            accountRecovery.recoverWithHgcMethod(phraseList, ed25519PrivateKey, accountId, isWords);
+        }
     }
 }
