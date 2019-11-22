@@ -54,8 +54,6 @@ public class SetupTest {
     private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet",
             "fan", "donkey", "carry", "chuckle", "assault", "leopard", "fee", "kingdom", "cheap", "odor", "okay",
             "crazy", "raven", "goose", "focus", "shrimp", "carbon");
-    private String accountId = "0.0.1234";
-    private KeyPair keyPair;
 
     @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
@@ -63,7 +61,7 @@ public class SetupTest {
         // generate keyPair from phraseList (test data) for tests
         EDBip32KeyChain keyChain = new EDBip32KeyChain();
         int index = 0;
-        keyPair = keyChain.keyPairFromWordList(index, phraseList);
+        KeyPair keyPair = keyChain.keyPairFromWordList(index, phraseList);
     }
 
     @AfterEach
