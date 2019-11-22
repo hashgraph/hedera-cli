@@ -82,11 +82,8 @@ public class AccountRecovery implements Runnable, Operation {
             return;
 
         isWords = promptPreview(inputReader);
-        System.out.println("is words");
-        System.out.println(isWords);
         if (isWords()) {
             phraseList = phraseListFromRecoveryWordsPrompt(inputReader, accountManager);
-            System.out.println("phrase list");
             if (phraseList.isEmpty()) return;
         } else {
             ed25519PrivateKey = ed25519PrivateKeyFromKeysPrompt(inputReader, accountId, shellHelper);
@@ -172,13 +169,15 @@ public class AccountRecovery implements Runnable, Operation {
 
     public boolean verifyAccountExistsLocally(AccountInfo accountInfo, String accountId) {
         boolean accountIdMatches = accountInfo.getAccountId().equals(AccountId.fromString(accountId));
-        if (accountIdMatches && !retrieveIndex()) {
-            // Check if account already exists in index.txt
-            shellHelper.printSuccess("Account recovered and verified with Hedera");
-            accountRecovered = true;
-        } else {
-            shellHelper.printError("This account already exists!");
-            accountRecovered = false;
+        if (accountIdMatches) {
+            if (!retrieveIndex()) {
+                // Check if account already exists in index.txt
+                shellHelper.printSuccess("Account recovered and verified with Hedera");
+                accountRecovered = true;
+            } else {
+                shellHelper.printError("This account already exists!");
+                accountRecovered = false;
+            }
         }
         return accountRecovered;
     }
