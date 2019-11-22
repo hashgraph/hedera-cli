@@ -105,18 +105,30 @@ public class AccountRecovery implements Runnable, Operation {
     public void recoverWithBipMethod(List<String> phraseList, Ed25519PrivateKey ed25519PrivateKey, String accountId, boolean isWords) {
         if (isWords) {
             KeyPair keypair = recoverEDKeypairPostBipMigration(phraseList);
-            verifyAndSaveWithKeyPair(keypair, accountId);
+            recoverUsingKeyPair(keypair, accountId);
         } else {
-            verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
+            recoverUsingPrivKey(ed25519PrivateKey, accountId);
         }
     }
 
     public void recoverWithHgcMethod(List<String> phraseList, Ed25519PrivateKey ed25519PrivateKey, String accountId, boolean isWords) {
         if (isWords) {
             KeyPair keypair = recoverEd25519AccountKeypair(phraseList);
-            verifyAndSaveWithKeyPair(keypair, accountId);
+            recoverUsingKeyPair(keypair, accountId);
         } else {
-            verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
+            recoverUsingPrivKey(ed25519PrivateKey, accountId);
+        }
+    }
+
+    public void recoverUsingKeyPair(KeyPair keyPair, String accountId) {
+        if(verifyAndSaveWithKeyPair(keyPair, accountId)) {
+            printKeyPair(keyPair, accountId);
+        }
+    }
+
+    public void recoverUsingPrivKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {
+        if (verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId)) {
+            printKeyPairWithPrivKey(ed25519PrivateKey, accountId);
         }
     }
 
@@ -142,24 +154,19 @@ public class AccountRecovery implements Runnable, Operation {
         return accountManager.verifyMethod(method);
     }
 
-    public void verifyAndSaveWithKeyPair(KeyPair keypair, String accountId) {
-        accountRecovered = verifyAccountExistsInHedera(accountId, keypair.getPrivateKeyHex());
-        if (accountRecovered) {
-            printKeyPair(keypair, accountId);
-            hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), keypair);
-        } else {
-            shellHelper.printError("Error in recovering account");
-        }
+    public boolean verifyAndSaveWithKeyPair(KeyPair keypair, String accountId) {
+        Ed25519PrivateKey ed25519PrivateKey = Ed25519PrivateKey.fromString(keypair.getPrivateKeyHex());
+        return verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
     }
 
-    public void verifyAndSaveWithPrivKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {
+    public boolean verifyAndSaveWithPrivKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {
         accountRecovered = verifyAccountExistsInHedera(accountId, ed25519PrivateKey.toString());
-        if (accountRecovered) {
-            printKeyPairWithPrivKey(ed25519PrivateKey, accountId);
-            hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), ed25519PrivateKey);
-        } else {
+        if (!accountRecovered) {
             shellHelper.printError("Error in recovering account");
+            return false;
         }
+        hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), ed25519PrivateKey);
+        return true;
     }
 
     public boolean promptPreview(InputReader inputReader) {
