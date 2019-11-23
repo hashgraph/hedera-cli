@@ -13,10 +13,10 @@ import com.hedera.cli.hedera.bip39.Mnemonic;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicChecksumException;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicLengthException;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
-import com.hedera.cli.hedera.keygen.KeyGeneration;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.hedera.keygen.CryptoUtils;
 import com.hedera.cli.hedera.keygen.EDKeyPair;
+import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.RecoveredAccountModel;
@@ -61,9 +61,6 @@ public class AccountRecovery implements Runnable, Operation {
     @Autowired
     private InputReader inputReader;
 
-    @Autowired
-    private KeyGeneration keyGeneration;
-
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account recovery 0.0.1003|@")
     private String accountId;
@@ -95,7 +92,7 @@ public class AccountRecovery implements Runnable, Operation {
         String method = methodFromMethodPrompt(inputReader, accountManager);
         if (StringUtil.isNullOrEmpty(method)) return;
         if (isBip(method)) {
-            keyPair = keyGeneration.keyPairPostBipMigration(phraseList);
+            keyPair = recoverEDKeypairPostBipMigration(phraseList);
         } else {
             keyPair = recoverEd25519AccountKeypair(phraseList);
         }
@@ -241,6 +238,11 @@ public class AccountRecovery implements Runnable, Operation {
             shellHelper.printError(e.getMessage());
         }
         return keypair;
+    }
+
+    public KeyPair recoverEDKeypairPostBipMigration(List<String> phraseList) {
+        EDBip32KeyChain edBip32KeyChain = new EDBip32KeyChain();
+        return edBip32KeyChain.keyPairFromWordList(0, phraseList);
     }
 
     @Override
