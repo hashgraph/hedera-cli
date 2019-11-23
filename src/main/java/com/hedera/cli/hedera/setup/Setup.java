@@ -6,6 +6,8 @@ import java.util.List;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
+import com.hedera.cli.hedera.keygen.KeyGeneration;
+import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 
@@ -35,9 +37,13 @@ public class Setup implements Runnable {
     private AccountRecovery accountRecovery;
 
     @Autowired
+    private KeyGeneration keyGeneration;
+
+    @Autowired
     private Hedera hedera;
 
     private List<String> phraseList;
+    private KeyPair keyPair;
 
     @NonNull
     private Ed25519PrivateKey ed25519PrivateKey;
@@ -65,9 +71,10 @@ public class Setup implements Runnable {
         }
         String method = accountRecovery.methodFromMethodPrompt(inputReader, accountManager);
         if (accountRecovery.isBip(method)) {
-            accountRecovery.recoverWithBipMethod(phraseList, ed25519PrivateKey, accountId, isWords);
+            keyPair = keyGeneration.keyPairPostBipMigration(phraseList);
         } else {
-            accountRecovery.recoverWithHgcMethod(phraseList, ed25519PrivateKey, accountId, isWords);
+            keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
         }
+        accountRecovery.recoverWithMethod(ed25519PrivateKey, accountId, isWords, keyPair);
     }
 }

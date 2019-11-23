@@ -38,6 +38,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +58,7 @@ public class AccountRecoveryTest {
 
     @Mock
     private DataDirectory dataDirectory;
+
     @Mock
     private AccountManager accountManager;
 
@@ -65,6 +67,9 @@ public class AccountRecoveryTest {
             "goose", "focus", "shrimp", "carbon");
     private String accountId = "0.0.1234";
     private KeyPair keyPair;
+    private Ed25519PrivateKey ed25519PrivateKey;
+    private String bip = "bip";
+    private String hgc = "hgc";
 
     @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
@@ -72,6 +77,7 @@ public class AccountRecoveryTest {
         EDBip32KeyChain keyChain = new EDBip32KeyChain();
         int index = 0;
         keyPair = keyChain.keyPairFromWordList(index, phraseList);
+        ed25519PrivateKey = Ed25519PrivateKey.fromString(keyPair.getPrivateKeyEncodedHex());
     }
 
     @AfterEach
@@ -95,47 +101,20 @@ public class AccountRecoveryTest {
 
     @Test
     public void promptWords() {
-        accountRecovery.setWords(true);
         when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("words");
         boolean wordsActual = accountRecovery.promptPreview(inputReader);
-        assertEquals(accountRecovery.isWords(), wordsActual);
+        assertTrue(wordsActual);
     }
 
     @Test
     public void promptKeys() {
-        accountRecovery.setWords(false);
         when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("keys");
         boolean wordsActual = accountRecovery.promptPreview(inputReader);
-        assertEquals(accountRecovery.isWords(), wordsActual);
-    }
-
-    @Test
-    public void printKeyPairInRecoveredAccountModelFormat() throws JsonProcessingException {
-        RecoveredAccountModel recoveredAccountModel;
-        recoveredAccountModel = new RecoveredAccountModel();
-        recoveredAccountModel.setAccountId(accountId);
-        recoveredAccountModel.setPrivateKey(keyPair.getPrivateKeyHex());
-        recoveredAccountModel.setPublicKey(keyPair.getPublicKeyHex());
-        recoveredAccountModel.setPrivateKeyEncoded(keyPair.getPrivateKeyEncodedHex());
-        recoveredAccountModel.setPublicKeyEncoded(keyPair.getPublicKeyEncodedHex());
-        recoveredAccountModel.setPrivateKeyBrowserCompatible(keyPair.getSeedAndPublicKeyHex());
-        accountRecovery.printKeyPair(keyPair, accountId);
-        assertEquals(accountId, recoveredAccountModel.getAccountId());
-        assertEquals(keyPair.getPrivateKeyHex(), recoveredAccountModel.getPrivateKey());
-        assertEquals(keyPair.getPublicKeyHex(), recoveredAccountModel.getPublicKey());
-        assertEquals(keyPair.getPrivateKeyEncodedHex(), recoveredAccountModel.getPrivateKeyEncoded());
-        assertEquals(keyPair.getPublicKeyEncodedHex(), recoveredAccountModel.getPublicKeyEncoded());
-        assertEquals(keyPair.getSeedAndPublicKeyHex(), recoveredAccountModel.getPrivateKeyBrowserCompatible());
-
-        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        String result = ow.writeValueAsString(recoveredAccountModel);
-        verify(shellHelper, times(1)).printSuccess(result);
+        assertFalse(wordsActual);
     }
 
     @Test
     public void isBip() {
-        String bip = "bip";
-        String hgc = "hgc";
         assertTrue(accountRecovery.isBip(bip));
         assertFalse(accountRecovery.isBip(hgc));
     }
@@ -145,9 +124,22 @@ public class AccountRecoveryTest {
         accountRecovery.setInputReader(inputReader);
         when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("words");
         boolean isWords = accountRecovery.promptPreview(inputReader);
-        accountRecovery.setWords(isWords);
         assertEquals(inputReader, accountRecovery.getInputReader());
         assertTrue(isWords);
+    }
+
+    @Test
+    public void methodFromMethodPrompt() {
+        accountRecovery.setInputReader(inputReader);
+        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn(bip);
+        when(accountManager.verifyMethod(bip)).thenReturn(bip);
+        String isBip = accountRecovery.methodFromMethodPrompt(inputReader, accountManager);
+        assertEquals(bip, isBip);
+
+        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn(hgc);
+        when(accountManager.verifyMethod(hgc)).thenReturn(hgc);
+        String isHgc = accountRecovery.methodFromMethodPrompt(inputReader, accountManager);
+        assertEquals(hgc, isHgc);
     }
 
     @Test
@@ -199,5 +191,72 @@ public class AccountRecoveryTest {
         accountRecovery.setEd25519PrivateKey(Ed25519PrivateKey.fromString(keyPair.getPrivateKeyEncodedHex()));
         accountRecovery.ed25519PrivateKeyFromKeysPrompt(inputReader, accountId, shellHelper);
         assertEquals(keyPair.getPrivateKeyEncodedHex(), accountRecovery.getEd25519PrivateKey().toString());
+    }
+
+    @Test
+    public void recoverWithMethodIsWords() {
+        AccountRecovery accountRecovery1 = Mockito.spy(accountRecovery);
+        accountRecovery1.recoverWithMethod(ed25519PrivateKey, accountId, true, keyPair);
+        verify(accountRecovery1).recoverUsingKeyPair(keyPair, accountId);
+    }
+
+    @Test
+    public void recoverWithMethodIsKeys() {
+        AccountRecovery accountRecovery1 = Mockito.spy(accountRecovery);
+        accountRecovery1.recoverWithMethod(ed25519PrivateKey, accountId, false, keyPair);
+        verify(accountRecovery1).recoverUsingPrivKey(ed25519PrivateKey, accountId);
+    }
+
+    @Test
+    public void verifyAndSaveWithPrivKeyFalse() {
+        accountRecovery.setAccountRecovered(false);
+        boolean notVerified = accountRecovery.verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
+
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper, times(2)).printError(valueCapture.capture());
+        List<String> actual = valueCapture.getAllValues();
+        String expected = "Error in recovering account";
+        assertEquals(expected, actual.get(1));
+        assertFalse(notVerified);
+    }
+
+
+    @Test
+    public void printKeyPair() throws JsonProcessingException {
+        RecoveredAccountModel recoveredAccountModel;
+        recoveredAccountModel = new RecoveredAccountModel();
+        recoveredAccountModel.setAccountId(accountId);
+        recoveredAccountModel.setPrivateKey(keyPair.getPrivateKeyHex());
+        recoveredAccountModel.setPublicKey(keyPair.getPublicKeyHex());
+        recoveredAccountModel.setPrivateKeyEncoded(keyPair.getPrivateKeyEncodedHex());
+        recoveredAccountModel.setPublicKeyEncoded(keyPair.getPublicKeyEncodedHex());
+        recoveredAccountModel.setPrivateKeyBrowserCompatible(keyPair.getSeedAndPublicKeyHex());
+        accountRecovery.printKeyPair(keyPair, accountId);
+        assertEquals(accountId, recoveredAccountModel.getAccountId());
+        assertEquals(keyPair.getPrivateKeyHex(), recoveredAccountModel.getPrivateKey());
+        assertEquals(keyPair.getPublicKeyHex(), recoveredAccountModel.getPublicKey());
+        assertEquals(keyPair.getPrivateKeyEncodedHex(), recoveredAccountModel.getPrivateKeyEncoded());
+        assertEquals(keyPair.getPublicKeyEncodedHex(), recoveredAccountModel.getPublicKeyEncoded());
+        assertEquals(keyPair.getSeedAndPublicKeyHex(), recoveredAccountModel.getPrivateKeyBrowserCompatible());
+
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String result = ow.writeValueAsString(recoveredAccountModel);
+        verify(shellHelper, times(1)).printSuccess(result);
+    }
+
+    @Test
+    public void printKeyPairWithPrivKey() throws JsonProcessingException {
+        RecoveredAccountModel recoveredAccountModel;
+        recoveredAccountModel = new RecoveredAccountModel();
+        recoveredAccountModel.setAccountId(accountId);
+        recoveredAccountModel.setPrivateKey(ed25519PrivateKey.toString().substring(32));
+        recoveredAccountModel.setPublicKey(ed25519PrivateKey.getPublicKey().toString().substring(24));
+        recoveredAccountModel.setPrivateKeyEncoded(ed25519PrivateKey.toString());
+        recoveredAccountModel.setPublicKeyEncoded(ed25519PrivateKey.getPublicKey().toString());
+        accountRecovery.printKeyPairWithPrivKey(ed25519PrivateKey, accountId);
+
+        ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        String result = ow.writeValueAsString(recoveredAccountModel);
+        verify(shellHelper, times(1)).printSuccess(result);
     }
 }

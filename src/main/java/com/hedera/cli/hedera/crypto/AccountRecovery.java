@@ -13,10 +13,7 @@ import com.hedera.cli.hedera.bip39.Mnemonic;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicChecksumException;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicLengthException;
 import com.hedera.cli.hedera.bip39.MnemonicException.MnemonicWordException;
-import com.hedera.cli.hedera.keygen.CryptoUtils;
-import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
-import com.hedera.cli.hedera.keygen.EDKeyPair;
-import com.hedera.cli.hedera.keygen.KeyPair;
+import com.hedera.cli.hedera.keygen.*;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.RecoveredAccountModel;
@@ -61,6 +58,9 @@ public class AccountRecovery implements Runnable, Operation {
     @Autowired
     private InputReader inputReader;
 
+    @Autowired
+    private KeyGeneration keyGeneration;
+
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account recovery 0.0.1003|@")
     private String accountId;
@@ -68,8 +68,8 @@ public class AccountRecovery implements Runnable, Operation {
     private int index = 0;
     private AccountInfo accountInfo;
     private boolean accountRecovered;
-    private boolean isWords;
     private List<String> phraseList;
+    private KeyPair keyPair;
 
     @NonNull
     private Ed25519PrivateKey ed25519PrivateKey;
@@ -81,8 +81,8 @@ public class AccountRecovery implements Runnable, Operation {
         if (verifiedAccountId == null)
             return;
 
-        isWords = promptPreview(inputReader);
-        if (isWords()) {
+        boolean isWords = promptPreview(inputReader);
+        if (isWords) {
             phraseList = phraseListFromRecoveryWordsPrompt(inputReader, accountManager);
             if (phraseList.isEmpty()) return;
         } else {
@@ -92,29 +92,21 @@ public class AccountRecovery implements Runnable, Operation {
         String method = methodFromMethodPrompt(inputReader, accountManager);
         if (StringUtil.isNullOrEmpty(method)) return;
         if (isBip(method)) {
-            recoverWithBipMethod(phraseList, ed25519PrivateKey, accountId, isWords);
+            keyPair = keyGeneration.keyPairPostBipMigration(phraseList);
         } else {
-            recoverWithHgcMethod(phraseList, ed25519PrivateKey, accountId, isWords);
+            keyPair = recoverEd25519AccountKeypair(phraseList);
         }
+        recoverWithMethod(ed25519PrivateKey, accountId, isWords, keyPair);
     }
 
     public boolean isBip(String method) {
         return method.equalsIgnoreCase("bip");
     }
 
-    public void recoverWithBipMethod(List<String> phraseList, Ed25519PrivateKey ed25519PrivateKey, String accountId, boolean isWords) {
+    public void recoverWithMethod(Ed25519PrivateKey ed25519PrivateKey, String accountId,
+                                  boolean isWords, KeyPair keyPair) {
         if (isWords) {
-            KeyPair keypair = recoverEDKeypairPostBipMigration(phraseList);
-            recoverUsingKeyPair(keypair, accountId);
-        } else {
-            recoverUsingPrivKey(ed25519PrivateKey, accountId);
-        }
-    }
-
-    public void recoverWithHgcMethod(List<String> phraseList, Ed25519PrivateKey ed25519PrivateKey, String accountId, boolean isWords) {
-        if (isWords) {
-            KeyPair keypair = recoverEd25519AccountKeypair(phraseList);
-            recoverUsingKeyPair(keypair, accountId);
+            recoverUsingKeyPair(keyPair, accountId);
         } else {
             recoverUsingPrivKey(ed25519PrivateKey, accountId);
         }
@@ -246,11 +238,6 @@ public class AccountRecovery implements Runnable, Operation {
             shellHelper.printError(e.getMessage());
         }
         return keypair;
-    }
-
-    public KeyPair recoverEDKeypairPostBipMigration(List<String> phraseList) {
-        EDBip32KeyChain edBip32KeyChain = new EDBip32KeyChain();
-        return edBip32KeyChain.keyPairFromWordList(0, phraseList);
     }
 
     @Override

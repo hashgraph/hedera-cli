@@ -10,13 +10,9 @@ import static org.mockito.Mockito.times;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.List;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.keygen.EDBip32KeyChain;
-import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import org.junit.jupiter.api.AfterEach;
@@ -29,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-//@MockitoSettings(strictness = Strictness.LENIENT)
 public class SetupTest {
 
     private final PrintStream stdout = System.out;
@@ -50,18 +45,9 @@ public class SetupTest {
     @Mock
     private AccountManager accountManager;
 
-    // test data
-    private List<String> phraseList = Arrays.asList("hello", "fine", "demise", "ladder", "glow", "hard", "magnet",
-            "fan", "donkey", "carry", "chuckle", "assault", "leopard", "fee", "kingdom", "cheap", "odor", "okay",
-            "crazy", "raven", "goose", "focus", "shrimp", "carbon");
-
     @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
         System.setOut(new PrintStream(output, true, "UTF-8"));
-        // generate keyPair from phraseList (test data) for tests
-        EDBip32KeyChain keyChain = new EDBip32KeyChain();
-        int index = 0;
-        KeyPair keyPair = keyChain.keyPairFromWordList(index, phraseList);
     }
 
     @AfterEach

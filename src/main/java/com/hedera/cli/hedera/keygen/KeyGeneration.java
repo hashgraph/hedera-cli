@@ -70,9 +70,8 @@ public class KeyGeneration implements Runnable {
   public KeyPair generateKeysAndWords(HGCSeed hgcSeed, List<String> wordList) {
     KeyPair keyPair;
     if (strMethod.contains("bip")) {
-      keyPair = keyPairAfterBipMigration(wordList);
+      keyPair = keyPairPostBipMigration(wordList);
     } else {
-      System.out.println(strMethod);
       keyPair = keyPairPriorToBipMigration(hgcSeed);
     }
     return keyPair;
@@ -84,10 +83,9 @@ public class KeyGeneration implements Runnable {
    * using the Hedera Wallet app
    * @return
    */
-  public KeyPair keyPairAfterBipMigration(List<String> wordList) {
+  public KeyPair keyPairPostBipMigration(List<String> wordList) {
     EDBip32KeyChain keyChain = new EDBip32KeyChain();
-    int index = 0;
-    return keyChain.keyPairFromWordList(index, wordList);
+    return keyChain.keyPairFromWordList(0, wordList);
   }
 
   /**
