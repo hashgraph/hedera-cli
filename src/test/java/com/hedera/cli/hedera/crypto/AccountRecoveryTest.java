@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -100,16 +100,16 @@ public class AccountRecoveryTest {
     }
 
     @Test
-    public void promptWords() {
+    public void passphrasePrompt() {
         when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("words");
-        boolean wordsActual = accountRecovery.promptPreview(inputReader);
+        boolean wordsActual = accountRecovery.keysOrPassphrasePrompt(inputReader);
         assertTrue(wordsActual);
     }
 
     @Test
-    public void promptKeys() {
+    public void keysPrompt() {
         when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("keys");
-        boolean wordsActual = accountRecovery.promptPreview(inputReader);
+        boolean wordsActual = accountRecovery.keysOrPassphrasePrompt(inputReader);
         assertFalse(wordsActual);
     }
 
@@ -123,22 +123,22 @@ public class AccountRecoveryTest {
     public void isWords() {
         accountRecovery.setInputReader(inputReader);
         when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("words");
-        boolean isWords = accountRecovery.promptPreview(inputReader);
+        boolean isWords = accountRecovery.keysOrPassphrasePrompt(inputReader);
         assertEquals(inputReader, accountRecovery.getInputReader());
         assertTrue(isWords);
     }
 
     @Test
-    public void methodFromMethodPrompt() {
+    public void methodPrompt() {
         accountRecovery.setInputReader(inputReader);
         when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn(bip);
         when(accountManager.verifyMethod(bip)).thenReturn(bip);
-        String isBip = accountRecovery.methodFromMethodPrompt(inputReader, accountManager);
+        String isBip = accountRecovery.methodPrompt(inputReader, accountManager);
         assertEquals(bip, isBip);
 
         when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn(hgc);
         when(accountManager.verifyMethod(hgc)).thenReturn(hgc);
-        String isHgc = accountRecovery.methodFromMethodPrompt(inputReader, accountManager);
+        String isHgc = accountRecovery.methodPrompt(inputReader, accountManager);
         assertEquals(hgc, isHgc);
     }
 
@@ -176,7 +176,7 @@ public class AccountRecoveryTest {
         String phraseInput = String.join(" ", phraseList).trim();
         when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(phraseInput);
         when(accountManager.verifyPhraseList(phraseList)).thenReturn(phraseList);
-        List<String> actualPhraseList = accountRecovery.phraseListFromRecoveryWordsPrompt(inputReader, accountManager);
+        List<String> actualPhraseList = accountRecovery.passphrasePrompt(inputReader, accountManager);
         assertEquals(phraseList, actualPhraseList);
     }
 
@@ -189,22 +189,22 @@ public class AccountRecoveryTest {
 
         when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(keyPair.getPrivateKeyEncodedHex());
         accountRecovery.setEd25519PrivateKey(Ed25519PrivateKey.fromString(keyPair.getPrivateKeyEncodedHex()));
-        accountRecovery.ed25519PrivateKeyFromKeysPrompt(inputReader, accountId, shellHelper);
+        accountRecovery.ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
         assertEquals(keyPair.getPrivateKeyEncodedHex(), accountRecovery.getEd25519PrivateKey().toString());
     }
 
     @Test
     public void recoverWithMethodIsWords() {
         AccountRecovery accountRecovery1 = Mockito.spy(accountRecovery);
-        accountRecovery1.recoverWithMethod(ed25519PrivateKey, accountId, true, keyPair);
-        verify(accountRecovery1).recoverUsingKeyPair(keyPair, accountId);
+        accountRecovery1.recoverWithPassphrase(phraseList, bip, accountId);
+        verify(accountRecovery1).recoverEDKeypairPostBipMigration(phraseList);
     }
 
     @Test
     public void recoverWithMethodIsKeys() {
         AccountRecovery accountRecovery1 = Mockito.spy(accountRecovery);
-        accountRecovery1.recoverWithMethod(ed25519PrivateKey, accountId, false, keyPair);
-        verify(accountRecovery1).recoverUsingPrivKey(ed25519PrivateKey, accountId);
+        accountRecovery1.recoverWithPrivateKey(ed25519PrivateKey, accountId);
+        verify(accountRecovery1).verifyWithPrivKey(ed25519PrivateKey, accountId);
     }
 
     @Test

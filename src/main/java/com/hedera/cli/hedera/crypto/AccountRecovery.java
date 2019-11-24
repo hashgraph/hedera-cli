@@ -81,56 +81,46 @@ public class AccountRecovery implements Runnable, Operation {
         if (verifiedAccountId == null)
             return;
 
-        boolean isWords = promptPreview(inputReader);
+        boolean isWords = keysOrPassphrasePrompt(inputReader);
         if (isWords) {
-            phraseList = phraseListFromRecoveryWordsPrompt(inputReader, accountManager);
+            phraseList = passphrasePrompt(inputReader, accountManager);
             if (phraseList.isEmpty()) return;
         } else {
-            ed25519PrivateKey = ed25519PrivateKeyFromKeysPrompt(inputReader, accountId, shellHelper);
+            ed25519PrivateKey = ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
+            recoverWithPrivateKey(ed25519PrivateKey, accountId);
+            return;
         }
 
-        String method = methodFromMethodPrompt(inputReader, accountManager);
+        String method = methodPrompt(inputReader, accountManager);
         if (StringUtil.isNullOrEmpty(method)) return;
+        recoverWithPassphrase(phraseList, method, accountId);
+    }
+
+    public void recoverWithPrivateKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {
+        verifyWithPrivKey(ed25519PrivateKey, accountId);
+    }
+
+    public void recoverWithPassphrase(List<String> phraseList, String method, String accountId) {
         if (isBip(method)) {
             keyPair = recoverEDKeypairPostBipMigration(phraseList);
         } else {
             keyPair = recoverEd25519AccountKeypair(phraseList);
         }
-        recoverWithMethod(ed25519PrivateKey, accountId, isWords, keyPair);
+        verifyWithKeyPair(keyPair, accountId);
     }
 
-    public boolean isBip(String method) {
-        return method.equalsIgnoreCase("bip");
+    public boolean keysOrPassphrasePrompt(InputReader inputReader) {
+        String choice = inputReader.prompt("Recover account using 24 words or keys? Enter words/keys");
+        return choice.equalsIgnoreCase("words");
     }
 
-    public void recoverWithMethod(Ed25519PrivateKey ed25519PrivateKey, String accountId,
-                                  boolean isWords, KeyPair keyPair) {
-        if (isWords) {
-            recoverUsingKeyPair(keyPair, accountId);
-        } else {
-            recoverUsingPrivKey(ed25519PrivateKey, accountId);
-        }
-    }
-
-    public void recoverUsingKeyPair(KeyPair keyPair, String accountId) {
-        if(verifyAndSaveWithKeyPair(keyPair, accountId)) {
-            printKeyPair(keyPair, accountId);
-        }
-    }
-
-    public void recoverUsingPrivKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {
-        if (verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId)) {
-            printKeyPairWithPrivKey(ed25519PrivateKey, accountId);
-        }
-    }
-
-    public List<String> phraseListFromRecoveryWordsPrompt(InputReader inputReader, AccountManager accountManager) {
+    public List<String> passphrasePrompt(InputReader inputReader, AccountManager accountManager) {
         String phrase = inputReader.prompt("24 words phrase", "secret", false);
         phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
         return phraseList;
     }
 
-    public Ed25519PrivateKey ed25519PrivateKeyFromKeysPrompt(InputReader inputReader, String accountId, ShellHelper shellHelper) {
+    public Ed25519PrivateKey ed25519PrivKeysPrompt(InputReader inputReader, String accountId, ShellHelper shellHelper) {
         String privateKeyStr = inputReader.prompt("Enter the private key of account " + accountId, "secret", false);
         try {
             ed25519PrivateKey = Ed25519PrivateKey.fromString(privateKeyStr);
@@ -140,10 +130,26 @@ public class AccountRecovery implements Runnable, Operation {
         return ed25519PrivateKey;
     }
 
-    public String methodFromMethodPrompt(InputReader inputReader, AccountManager accountManager) {
+    public String methodPrompt(InputReader inputReader, AccountManager accountManager) {
         String method = inputReader
                 .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
         return accountManager.verifyMethod(method);
+    }
+
+    public boolean isBip(String method) {
+        return method.equalsIgnoreCase("bip");
+    }
+
+    public void verifyWithKeyPair(KeyPair keyPair, String accountId) {
+        if (verifyAndSaveWithKeyPair(keyPair, accountId)) {
+            printKeyPair(keyPair, accountId);
+        }
+    }
+
+    public void verifyWithPrivKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {
+        if (verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId)) {
+            printKeyPairWithPrivKey(ed25519PrivateKey, accountId);
+        }
     }
 
     public boolean verifyAndSaveWithKeyPair(KeyPair keypair, String accountId) {
@@ -159,11 +165,6 @@ public class AccountRecovery implements Runnable, Operation {
         }
         hedera.accountManager.setDefaultAccountId(AccountId.fromString(accountId), ed25519PrivateKey);
         return true;
-    }
-
-    public boolean promptPreview(InputReader inputReader) {
-        String choice = inputReader.prompt("Recover account using 24 words or keys? Enter words/keys");
-        return choice.equalsIgnoreCase("words");
     }
 
     public boolean verifyAccountExistsLocally(AccountInfo accountInfo, String accountId) {

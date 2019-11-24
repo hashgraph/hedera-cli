@@ -11,6 +11,7 @@ import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -58,19 +59,18 @@ public class Setup implements Runnable {
         if (accountId == null)
             return;
 
-        boolean isWords = accountRecovery.promptPreview(inputReader);
+        boolean isWords = accountRecovery.keysOrPassphrasePrompt(inputReader);
         if (isWords) {
-            phraseList = accountRecovery.phraseListFromRecoveryWordsPrompt(inputReader, accountManager);
+            phraseList = accountRecovery.passphrasePrompt(inputReader, accountManager);
             if (phraseList.isEmpty()) return;
         } else {
-            ed25519PrivateKey = accountRecovery.ed25519PrivateKeyFromKeysPrompt(inputReader, accountId, shellHelper);
+            ed25519PrivateKey = accountRecovery.ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
+            accountRecovery.recoverWithPrivateKey(ed25519PrivateKey, accountId);
+            return;
         }
-        String method = accountRecovery.methodFromMethodPrompt(inputReader, accountManager);
-        if (accountRecovery.isBip(method)) {
-            keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
-        } else {
-            keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
-        }
-        accountRecovery.recoverWithMethod(ed25519PrivateKey, accountId, isWords, keyPair);
+
+        String method = accountRecovery.methodPrompt(inputReader, accountManager);
+        if (StringUtil.isNullOrEmpty(method)) return;
+        accountRecovery.recoverWithPassphrase(phraseList, method, accountId);
     }
 }
