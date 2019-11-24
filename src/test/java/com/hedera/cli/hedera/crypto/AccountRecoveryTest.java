@@ -70,8 +70,6 @@ public class AccountRecoveryTest {
     private String accountId = "0.0.1234";
     private KeyPair keyPair;
     private Ed25519PrivateKey ed25519PrivateKey;
-    private String bip = "bip";
-    private String hgc = "hgc";
 
     @BeforeEach
     public void setUp() throws UnsupportedEncodingException {
@@ -86,7 +84,6 @@ public class AccountRecoveryTest {
     public void tearDown() {
         System.setOut(stdout);
     }
-
 
     @Test
     public void run() {
@@ -128,7 +125,7 @@ public class AccountRecoveryTest {
 
     @Test
     public void runWithPrompt() {
-
+        String bip = "bip";
         accountRecovery.setInputReader(inputReader);
         when(inputPrompts.keysOrPassphrasePrompt(inputReader)).thenReturn(true);
         boolean isWords = inputPrompts.keysOrPassphrasePrompt(inputReader);
