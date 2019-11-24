@@ -6,6 +6,7 @@ import java.util.List;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
+import com.hedera.cli.hedera.crypto.InputPrompts;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
@@ -37,10 +38,10 @@ public class Setup implements Runnable {
     private AccountRecovery accountRecovery;
 
     @Autowired
-    private Hedera hedera;
+    private InputPrompts inputPrompts;
 
-    private List<String> phraseList;
-    private KeyPair keyPair;
+    @Autowired
+    private Hedera hedera;
 
     @NonNull
     private Ed25519PrivateKey ed25519PrivateKey;
@@ -56,21 +57,19 @@ public class Setup implements Runnable {
         String accountIdInString = inputReader
                 .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
         String accountId = accountManager.verifyAccountId(accountIdInString);
-        if (accountId == null)
-            return;
+        if (accountId == null) return;
 
-        boolean isWords = accountRecovery.keysOrPassphrasePrompt(inputReader);
-        if (isWords) {
-            phraseList = accountRecovery.passphrasePrompt(inputReader, accountManager);
-            if (phraseList.isEmpty()) return;
-        } else {
-            ed25519PrivateKey = accountRecovery.ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
-            accountRecovery.recoverWithPrivateKey(ed25519PrivateKey, accountId);
+        boolean isWords = inputPrompts.keysOrPassphrasePrompt(inputReader);
+        if (!isWords) {
+            ed25519PrivateKey = inputPrompts.ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
+            accountRecovery.verifyWithPrivKey(ed25519PrivateKey, accountId);
             return;
         }
-
-        String method = accountRecovery.methodPrompt(inputReader, accountManager);
+        List<String> phraseList = inputPrompts.passphrasePrompt(inputReader, accountManager);
+        if (phraseList.isEmpty()) return;
+        String method = inputPrompts.methodPrompt(inputReader, accountManager);
         if (StringUtil.isNullOrEmpty(method)) return;
-        accountRecovery.recoverWithPassphrase(phraseList, method, accountId);
+        KeyPair keyPairRecovered = accountRecovery.recoverKeypairWithPassphrase(phraseList, method, accountId);
+        accountRecovery.verifyWithKeyPair(keyPairRecovered, accountId);
     }
 }

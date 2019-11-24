@@ -1,6 +1,5 @@
 package com.hedera.cli.hedera.crypto;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -56,6 +55,9 @@ public class AccountRecovery implements Runnable, Operation {
     private AccountManager accountManager;
 
     @Autowired
+    private InputPrompts inputPrompts;
+
+    @Autowired
     private ShellHelper shellHelper;
 
     @Autowired
@@ -68,8 +70,6 @@ public class AccountRecovery implements Runnable, Operation {
     private int index = 0;
     private AccountInfo accountInfo;
     private boolean accountRecovered;
-    private List<String> phraseList;
-    private KeyPair keyPair;
 
     @NonNull
     private Ed25519PrivateKey ed25519PrivateKey;
@@ -78,66 +78,30 @@ public class AccountRecovery implements Runnable, Operation {
     public void run() {
         shellHelper.printInfo("Start the recovery process");
         String verifiedAccountId = accountManager.verifyAccountId(accountId);
-        if (verifiedAccountId == null)
-            return;
+        if (verifiedAccountId == null) return;
 
-        boolean isWords = keysOrPassphrasePrompt(inputReader);
-        if (isWords) {
-            phraseList = passphrasePrompt(inputReader, accountManager);
-            if (phraseList.isEmpty()) return;
-        } else {
-            ed25519PrivateKey = ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
-            recoverWithPrivateKey(ed25519PrivateKey, accountId);
+        boolean isWords = inputPrompts.keysOrPassphrasePrompt(inputReader);
+        if (!isWords) {
+            ed25519PrivateKey = inputPrompts.ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
+            verifyWithPrivKey(ed25519PrivateKey, accountId);
             return;
         }
-
-        String method = methodPrompt(inputReader, accountManager);
+        List<String> phraseList = inputPrompts.passphrasePrompt(inputReader, accountManager);
+        if (phraseList.isEmpty()) return;
+        String method = inputPrompts.methodPrompt(inputReader, accountManager);
         if (StringUtil.isNullOrEmpty(method)) return;
-        recoverWithPassphrase(phraseList, method, accountId);
+        KeyPair keyPairRecovered = recoverKeypairWithPassphrase(phraseList, method, accountId);
+        verifyWithKeyPair(keyPairRecovered, accountId);
     }
 
-    public void recoverWithPrivateKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {
-        verifyWithPrivKey(ed25519PrivateKey, accountId);
-    }
-
-    public void recoverWithPassphrase(List<String> phraseList, String method, String accountId) {
-        if (isBip(method)) {
+    public KeyPair recoverKeypairWithPassphrase(List<String> phraseList, String method, String accountId) {
+        KeyPair keyPair;
+        if (accountManager.isBip(method)) {
             keyPair = recoverEDKeypairPostBipMigration(phraseList);
         } else {
             keyPair = recoverEd25519AccountKeypair(phraseList);
         }
-        verifyWithKeyPair(keyPair, accountId);
-    }
-
-    public boolean keysOrPassphrasePrompt(InputReader inputReader) {
-        String choice = inputReader.prompt("Recover account using 24 words or keys? Enter words/keys");
-        return choice.equalsIgnoreCase("words");
-    }
-
-    public List<String> passphrasePrompt(InputReader inputReader, AccountManager accountManager) {
-        String phrase = inputReader.prompt("24 words phrase", "secret", false);
-        phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
-        return phraseList;
-    }
-
-    public Ed25519PrivateKey ed25519PrivKeysPrompt(InputReader inputReader, String accountId, ShellHelper shellHelper) {
-        String privateKeyStr = inputReader.prompt("Enter the private key of account " + accountId, "secret", false);
-        try {
-            ed25519PrivateKey = Ed25519PrivateKey.fromString(privateKeyStr);
-        } catch (Exception e) {
-            shellHelper.printError("Private key is not in the right ED25519 string format");
-        }
-        return ed25519PrivateKey;
-    }
-
-    public String methodPrompt(InputReader inputReader, AccountManager accountManager) {
-        String method = inputReader
-                .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        return accountManager.verifyMethod(method);
-    }
-
-    public boolean isBip(String method) {
-        return method.equalsIgnoreCase("bip");
+        return keyPair;
     }
 
     public void verifyWithKeyPair(KeyPair keyPair, String accountId) {
@@ -153,8 +117,8 @@ public class AccountRecovery implements Runnable, Operation {
     }
 
     public boolean verifyAndSaveWithKeyPair(KeyPair keypair, String accountId) {
-        Ed25519PrivateKey ed25519PrivateKey = Ed25519PrivateKey.fromString(keypair.getPrivateKeyHex());
-        return verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
+        Ed25519PrivateKey ed25519PrivateKey1 = Ed25519PrivateKey.fromString(keypair.getPrivateKeyHex());
+        return verifyAndSaveWithPrivKey(ed25519PrivateKey1, accountId);
     }
 
     public boolean verifyAndSaveWithPrivKey(Ed25519PrivateKey ed25519PrivateKey, String accountId) {

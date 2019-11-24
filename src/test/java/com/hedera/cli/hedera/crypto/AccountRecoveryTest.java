@@ -4,11 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -57,6 +56,9 @@ public class AccountRecoveryTest {
     private InputReader inputReader;
 
     @Mock
+    private InputPrompts inputPrompts;
+
+    @Mock
     private DataDirectory dataDirectory;
 
     @Mock
@@ -100,49 +102,6 @@ public class AccountRecoveryTest {
     }
 
     @Test
-    public void passphrasePrompt() {
-        when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("words");
-        boolean wordsActual = accountRecovery.keysOrPassphrasePrompt(inputReader);
-        assertTrue(wordsActual);
-    }
-
-    @Test
-    public void keysPrompt() {
-        when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("keys");
-        boolean wordsActual = accountRecovery.keysOrPassphrasePrompt(inputReader);
-        assertFalse(wordsActual);
-    }
-
-    @Test
-    public void isBip() {
-        assertTrue(accountRecovery.isBip(bip));
-        assertFalse(accountRecovery.isBip(hgc));
-    }
-
-    @Test
-    public void isWords() {
-        accountRecovery.setInputReader(inputReader);
-        when(inputReader.prompt("Recover account using 24 words or keys? Enter words/keys")).thenReturn("words");
-        boolean isWords = accountRecovery.keysOrPassphrasePrompt(inputReader);
-        assertEquals(inputReader, accountRecovery.getInputReader());
-        assertTrue(isWords);
-    }
-
-    @Test
-    public void methodPrompt() {
-        accountRecovery.setInputReader(inputReader);
-        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn(bip);
-        when(accountManager.verifyMethod(bip)).thenReturn(bip);
-        String isBip = accountRecovery.methodPrompt(inputReader, accountManager);
-        assertEquals(bip, isBip);
-
-        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn(hgc);
-        when(accountManager.verifyMethod(hgc)).thenReturn(hgc);
-        String isHgc = accountRecovery.methodPrompt(inputReader, accountManager);
-        assertEquals(hgc, isHgc);
-    }
-
-    @Test
     public void verifyAccountExistsLocallyFalse() {
         AccountInfo accountInfo = mock(AccountInfo.class);
         when(accountInfo.getAccountId()).thenReturn(AccountId.fromString(accountId));
@@ -168,48 +127,37 @@ public class AccountRecoveryTest {
     }
 
     @Test
-    public void phraseListFromRecoveryWordsPrompt() {
+    public void runWithPrompt() {
+
         accountRecovery.setInputReader(inputReader);
-        String prompt2 = "24 words phrase";
-        String secret = "secret";
-        boolean echo = false;
-        String phraseInput = String.join(" ", phraseList).trim();
-        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(phraseInput);
-        when(accountManager.verifyPhraseList(phraseList)).thenReturn(phraseList);
-        List<String> actualPhraseList = accountRecovery.passphrasePrompt(inputReader, accountManager);
+        when(inputPrompts.keysOrPassphrasePrompt(inputReader)).thenReturn(true);
+        boolean isWords = inputPrompts.keysOrPassphrasePrompt(inputReader);
+
+        when(inputPrompts.passphrasePrompt(inputReader, accountManager)).thenReturn(phraseList);
+        List<String> actualPhraseList = inputPrompts.passphrasePrompt(inputReader, accountManager);
+
+        when(inputPrompts.ed25519PrivKeysPrompt(inputReader, accountId, shellHelper)).thenReturn(ed25519PrivateKey);
+        Ed25519PrivateKey ed25519PrivateKey1 = inputPrompts.ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
+
+        when(accountManager.isBip(bip)).thenReturn(true);
+        accountRecovery.run();
         assertEquals(phraseList, actualPhraseList);
-    }
+        assertEquals(ed25519PrivateKey, ed25519PrivateKey1);
+        assertEquals(inputReader, accountRecovery.getInputReader());
+        assertTrue(isWords);
 
-    @Test
-    public void ed25519PrivateKeyFromKeysPrompt() {
-        accountRecovery.setInputReader(inputReader);
-        String prompt2 = "Enter the private key of account " + accountId;
-        String secret = "secret";
-        boolean echo = false;
-
-        when(inputReader.prompt(eq(prompt2), eq(secret), eq(echo))).thenReturn(keyPair.getPrivateKeyEncodedHex());
-        accountRecovery.setEd25519PrivateKey(Ed25519PrivateKey.fromString(keyPair.getPrivateKeyEncodedHex()));
-        accountRecovery.ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
-        assertEquals(keyPair.getPrivateKeyEncodedHex(), accountRecovery.getEd25519PrivateKey().toString());
-    }
-
-    @Test
-    public void recoverWithMethodIsWords() {
-        AccountRecovery accountRecovery1 = Mockito.spy(accountRecovery);
-        accountRecovery1.recoverWithPassphrase(phraseList, bip, accountId);
-        verify(accountRecovery1).recoverEDKeypairPostBipMigration(phraseList);
+        assertEquals(keyPair.getPrivateKeyHex(), accountRecovery.recoverKeypairWithPassphrase(phraseList, bip, accountId).getPrivateKeyHex());
     }
 
     @Test
     public void recoverWithMethodIsKeys() {
         AccountRecovery accountRecovery1 = Mockito.spy(accountRecovery);
-        accountRecovery1.recoverWithPrivateKey(ed25519PrivateKey, accountId);
+        accountRecovery1.verifyWithPrivKey(ed25519PrivateKey, accountId);
         verify(accountRecovery1).verifyWithPrivKey(ed25519PrivateKey, accountId);
     }
 
     @Test
     public void verifyAndSaveWithPrivKeyFalse() {
-        accountRecovery.setAccountRecovered(false);
         boolean notVerified = accountRecovery.verifyAndSaveWithPrivKey(ed25519PrivateKey, accountId);
 
         ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
