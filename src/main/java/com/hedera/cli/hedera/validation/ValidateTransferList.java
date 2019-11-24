@@ -127,10 +127,11 @@ public class ValidateTransferList {
         if (senderListHasOperator(o)) {
             // add recipients amount and add to amount list
             long sumOfRecipientAmount = sumOfAmountList();
-            if (sumOfRecipientAmount == 0) {
-                // sumOfRecipientAmount is equal to sumOfTransferAmount
-                updateAmountList(sumOfRecipientAmount);
-                return verifyZeroSum(sumOfRecipientAmount);
+            if (sumOfRecipientAmount == -1L) return false;
+            updateAmountList(sumOfRecipientAmount);
+            long sumOfTransferAmount = sumOfAmountList();
+            if (verifyZeroSum(sumOfTransferAmount)) {
+                amountListVerified = true;
             }
         }
 
