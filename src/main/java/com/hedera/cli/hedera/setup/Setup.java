@@ -1,23 +1,29 @@
 
 package com.hedera.cli.hedera.setup;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.crypto.AccountRecovery;
+import com.hedera.cli.hedera.crypto.InputPrompts;
 import com.hedera.cli.hedera.keygen.KeyPair;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
-import com.hedera.hashgraph.sdk.account.AccountId;
 
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+import io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
+@Getter
+@Setter
 @Component
 @Command(name = "setup", description = "")
 public class Setup implements Runnable {
@@ -32,7 +38,13 @@ public class Setup implements Runnable {
     private AccountRecovery accountRecovery;
 
     @Autowired
+    private InputPrompts inputPrompts;
+
+    @Autowired
     private Hedera hedera;
+
+    @NonNull
+    private Ed25519PrivateKey ed25519PrivateKey;
 
     public void help() {
         CommandLine.usage(this, System.out);
@@ -45,32 +57,19 @@ public class Setup implements Runnable {
         String accountIdInString = inputReader
                 .prompt("account ID in the format of 0.0.xxxx that will be used as default operator");
         String accountId = accountManager.verifyAccountId(accountIdInString);
-        if (accountId == null)
-            return;
-        String phrase = inputReader.prompt("24 words phrase", "secret", false);
-        List<String> phraseList = accountManager.verifyPhraseList(Arrays.asList(phrase.split(" ")));
-        if (phraseList == null)
-            return;
-        String method = inputReader
-                .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`");
-        String strMethod = accountManager.verifyMethod(method);
-        if (strMethod == null)
-            return;
+        if (accountId == null) return;
 
-        KeyPair keyPair;
-        if ("bip".equals(method)) {
-            keyPair = accountRecovery.recoverEDKeypairPostBipMigration(phraseList);
-        } else {
-            keyPair = accountRecovery.recoverEd25519AccountKeypair(phraseList);
+        boolean isWords = inputPrompts.keysOrPassphrasePrompt(inputReader);
+        if (!isWords) {
+            ed25519PrivateKey = inputPrompts.ed25519PrivKeysPrompt(inputReader, accountId, shellHelper);
+            accountRecovery.verifyWithPrivKey(ed25519PrivateKey, accountId);
+            return;
         }
-
-        boolean accountVerified = accountRecovery.verifyAndSaveAccount(accountId, keyPair);
-        if (accountVerified) {
-            accountRecovery.printKeyPair(keyPair, accountId);
-            accountManager.setDefaultAccountId(AccountId.fromString(accountId), keyPair);
-        } else {
-            shellHelper.printError("Error in verifying that accountId and recovery words match");
-        }
+        List<String> phraseList = inputPrompts.passphrasePrompt(inputReader, accountManager);
+        if (phraseList.isEmpty()) return;
+        String method = inputPrompts.methodPrompt(inputReader, accountManager);
+        if (StringUtil.isNullOrEmpty(method)) return;
+        KeyPair keyPairRecovered = accountRecovery.recoverKeypairWithPassphrase(phraseList, method, accountId);
+        accountRecovery.verifyWithKeyPair(keyPairRecovered, accountId);
     }
-
 }

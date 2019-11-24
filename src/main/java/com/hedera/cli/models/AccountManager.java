@@ -178,6 +178,10 @@ public class AccountManager {
         }
     }
 
+    public boolean isBip(String method) {
+        return method.equalsIgnoreCase("bip");
+    }
+
     public String promptMemoString(InputReader inputReader) {
         String memoString = inputReader.prompt("Memo field");
         if (StringUtil.isNullOrEmpty(memoString)) {

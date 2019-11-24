@@ -330,4 +330,10 @@ public class AccountManagerTest {
         String memo = accountManager.promptMemoString(inputReader);
         assertEquals("memo to send", memo);
     }
+
+    @Test
+    public void isBip() {
+        assertTrue(accountManager.isBip("bip"));
+        assertFalse(accountManager.isBip("hgc"));
+    }
 }
