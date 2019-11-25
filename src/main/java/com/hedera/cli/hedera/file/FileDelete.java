@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 import java.util.concurrent.TimeoutException;
 
@@ -28,9 +28,9 @@ public class FileDelete implements Runnable {
     @Autowired
     private ShellHelper shellHelper;
 
-    @Option(names = {"-f", "--fileID"},
-            description = "@|fg(225) Enter the file ID of the file to be deleted,in the format of"
-                    + "%nshardNum.realmNum.fileNum|@")
+    @Parameters(index = "0", description = "@|fg(225) File Id of file for deletion in the format of shardNum.realmNum.fileNum"
+            + "%n@|bold,underline Usage:|@%n"
+            + "@|fg(yellow) file delete 0.0.1003|@")
     private String fileNumInString;
 
     @Override
@@ -39,7 +39,6 @@ public class FileDelete implements Runnable {
             FileId fileId = FileId.fromString(fileNumInString);
             shellHelper.printInfo("file: " + fileId);
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
-
 
             // now to delete the file
             var txDeleteReceipt = new FileDeleteTransaction(client)
@@ -56,7 +55,10 @@ public class FileDelete implements Runnable {
                     .setFileId(fileId)
                     .execute();
           
-            shellHelper.printInfo("File info " + fileInfo);
+            shellHelper.printInfo("File info : " + fileInfo);
+            shellHelper.printInfo("File expiry time : " + fileInfo.getExpirationTime());
+            shellHelper.printInfo("File public key : " + fileInfo.getKeys());
+            shellHelper.printInfo("File size : " + fileInfo.getSize());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (TimeoutException e) {

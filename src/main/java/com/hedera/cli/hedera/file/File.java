@@ -26,6 +26,9 @@ public class File implements Runnable {
     private FileDelete fileDelete;
 
     @Autowired
+    private FileInfo fileInfo;
+
+    @Autowired
     private ShellHelper shellHelper;
 
     @Setter
@@ -34,10 +37,14 @@ public class File implements Runnable {
     @Setter
     private CommandLine fileDeleteCmd;
 
+    @Setter
+    private CommandLine fileInfoCmd;
+
     @PostConstruct
     public void init() {
         this.fileCreateCmd = new CommandLine(fileCreate);
         this.fileDeleteCmd = new CommandLine(fileDelete);
+        this.fileInfoCmd = new CommandLine(fileInfo);
     }
 
     @Override
@@ -59,6 +66,13 @@ public class File implements Runnable {
                 CommandLine.usage(fileDelete, System.out);
             } else {
                 fileDeleteCmd.execute(args);
+            }
+            break;
+        case "info":
+            if(args.length == 0) {
+                CommandLine.usage(fileInfo, System.out);
+            } else {
+                fileInfoCmd.execute(args);
             }
             break;
         case "update":
