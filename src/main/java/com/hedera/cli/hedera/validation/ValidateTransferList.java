@@ -102,12 +102,15 @@ public class ValidateTransferList {
     }
 
     public boolean verifyCleanedAmountList(List<String> amountList) {
+        List<String> cleanedAmountList;
         long sumOfTransferAmount = sumOfAmountList(amountList);
         if (errorInRecipientAmount(sumOfTransferAmount)) return false;
         if (!isTiny) {
-            amountList = convertAmountListToTinybar(amountList);
+            cleanedAmountList = convertAmountListToTinybar(amountList);
+        } else {
+            cleanedAmountList = amountList;
         }
-        setFinalAmountList(amountList);
+        setFinalAmountList(cleanedAmountList);
         return validateAmount.verifyZeroSum(sumOfTransferAmount);
     }
 
