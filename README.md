@@ -52,6 +52,8 @@ hedera
 Once that is running, you should see 
 
 ![Hedera Shell](hedera.png)
+![](setup-cli.gif)
+![](recovery.gif)
 
 ___
 
