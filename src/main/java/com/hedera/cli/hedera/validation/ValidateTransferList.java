@@ -35,11 +35,6 @@ public class ValidateTransferList {
         this.cryptoTransferOptions = cryptoTransferOptions;
     }
 
-    public void updateAmountList(long sumOfRecipientAmount) {
-        this.amountList = finalAmountList(amountList, sumOfRecipientAmount);
-        setFinalAmountList(this.amountList);
-    }
-
     public void setFinalAmountList(List<String> finalAmountList) {
         this.finalAmountList = finalAmountList;
     }
@@ -49,7 +44,7 @@ public class ValidateTransferList {
         return this.finalAmountList;
     }
 
-    public long sumOfAmountList() {
+    public long sumOfAmountList(List<String> amountList) {
         long sumOfAmount;
         if (isTiny) {
             sumOfAmount = validateAmount.sumOfTinybarsInLong(amountList);
@@ -59,14 +54,16 @@ public class ValidateTransferList {
         return sumOfAmount;
     }
 
-    public List<String> finalAmountList(List<String> amountList, long sumOfRecipientsAmount) {
+    public List<String> updateAmountList(List<String> amountList, long sumOfRecipientsAmount) {
         if (!isTiny) {
             finalAmountList = new ArrayList<>(convertAmountListToTinybar(amountList));
         } else {
             finalAmountList = new ArrayList<>(amountList);
         }
+        // adding the sender's amount to list
         String amount = "-" + sumOfRecipientsAmount;
         finalAmountList.add(0, amount);
+        setFinalAmountList(finalAmountList);
         return finalAmountList;
     }
 
@@ -104,8 +101,21 @@ public class ValidateTransferList {
         return validateAmount.verifyZeroSum(sumOfTransferAmount);
     }
 
+    public boolean verifyCleanedAmountList(List<String> amountList) {
+        List<String> cleanedAmountList;
+        long sumOfTransferAmount = sumOfAmountList(amountList);
+        if (errorInRecipientAmount(sumOfTransferAmount)) return false;
+        if (!isTiny) {
+            cleanedAmountList = convertAmountListToTinybar(amountList);
+        } else {
+            cleanedAmountList = amountList;
+        }
+        setFinalAmountList(cleanedAmountList);
+        return validateAmount.verifyZeroSum(sumOfTransferAmount);
+    }
+
     private boolean checkSum(CryptoTransferOptions o, List<String> amountList,
-                          List<String> senderList, List<String> recipientList) {
+                             List<String> senderList, List<String> recipientList) {
         int amountSize = amountList.size();
         int transferSize = senderList.size() + recipientList.size();
         boolean amountListVerified = false;
@@ -116,7 +126,7 @@ public class ValidateTransferList {
         // (3) senderList contains operator && amountList.size != transferList.size
 
         if (amountSize == transferSize) {
-            return verifyCleanedAmountList();
+            return verifyCleanedAmountList(amountList);
         }
 
         if (!senderListHasOperator(o)) {
@@ -125,16 +135,22 @@ public class ValidateTransferList {
         }
 
         if (senderListHasOperator(o)) {
-            // add recipients amount and add to amount list
-            long sumOfRecipientAmount = sumOfAmountList();
-            if (sumOfRecipientAmount == 0) {
-                // sumOfRecipientAmount is equal to sumOfTransferAmount
-                updateAmountList(sumOfRecipientAmount);
-                return verifyZeroSum(sumOfRecipientAmount);
-            }
+            long sumOfRecipientAmount = sumOfAmountList(amountList);
+            if (errorInRecipientAmount(sumOfRecipientAmount)) return false;
+            // sum up recipient's amount and update transfer list
+            long sumOfTransferAmount = updatedTransferListWithSenderAmount(amountList, sumOfRecipientAmount);
+            amountListVerified = verifyZeroSum(sumOfTransferAmount);
         }
-
         return amountListVerified;
+    }
+
+    public long updatedTransferListWithSenderAmount(List<String> amountList, long sumOfRecipientsAmount) {
+        List<String> updatedAmountList = updateAmountList(amountList, sumOfRecipientsAmount);
+        return sumOfAmountList(updatedAmountList);
+    }
+
+    private boolean errorInRecipientAmount(long sumOfRecipientAmount) {
+        return sumOfRecipientAmount == -1L;
     }
 
     public boolean verifyAmountList(CryptoTransferOptions o) {
@@ -150,15 +166,5 @@ public class ValidateTransferList {
             shellHelper.printWarning("More than 2 senders not supported");
         }
         return amountListVerified;
-    }
-
-    public boolean verifyCleanedAmountList() {
-        long sumOfTransferAmount = sumOfAmountList();
-        if (sumOfTransferAmount == -1L) return false;
-        if (!isTiny) {
-            amountList = convertAmountListToTinybar(amountList);
-        }
-        setFinalAmountList(amountList);
-        return validateAmount.verifyZeroSum(sumOfTransferAmount);
     }
 }
