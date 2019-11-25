@@ -90,7 +90,6 @@ dependencies {
     testImplementation("io.github.netmikey.logunit:logunit-core:1.1.0")
     // log4j2 only
     testRuntimeOnly("io.github.netmikey.logunit:logunit-jul:1.1.0")
-
 }
 
 application {
@@ -110,12 +109,14 @@ dokka {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'integration'
+    }
 }
 
-task testDebug(type: Test) {
-    testLogging {
-        showStandardStreams = true
+task integrationTest(type: Test) {
+    useJUnitPlatform {
+        includeTags 'integration'
     }
 }
 
@@ -131,12 +132,27 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(
-                dir: it, 
+                dir: it,
                 exclude: [
                     'com/hedera/cli/Application.class'
                 ]
             )
         }))
+    }
+}
+
+task jacocoIntegrationTestReport(dependsOn: integrationTest, type: JacocoReport) {
+    group = 'Reporting'
+    description = 'Generate Jacoco coverage reports after running integration tests.'
+    executionData.from = file("${buildDir}/jacoco/integrationTest.exec")
+    sourceDirectories.from = files(sourceSets.main.allSource.srcDirs)
+    classDirectories.from = files(sourceSets.main.output)
+    reports {
+        csv.enabled = false
+        xml.enabled = true
+        html.enabled = true
+        html.destination = file("${buildDir}/reports/jacoco/integrationTest/html")
+        xml.destination = file("${buildDir}/reports/jacoco/integrationTest/jacocoIntegrationTestReport.xml")
     }
 }
 
