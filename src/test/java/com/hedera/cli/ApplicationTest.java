@@ -2,7 +2,6 @@ package com.hedera.cli;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,8 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.shell.Shell;
 import org.springframework.test.context.ActiveProfiles;
 
-@Tag("integration")
-@ActiveProfiles("integration")
+@ActiveProfiles("test")
 @SpringBootTest
 @Import(ApplicationTestRunner.class)
 @ComponentScan("com.hedera.cli")
