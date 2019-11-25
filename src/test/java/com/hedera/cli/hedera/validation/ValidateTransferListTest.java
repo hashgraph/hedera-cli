@@ -95,11 +95,7 @@ public class ValidateTransferListTest {
     public void sumOfAmountInTiny() {
 
         dependent = new CryptoTransferOptions.Dependent();
-
         exclusive = new CryptoTransferOptions.Exclusive();
-        exclusive.setTransferListAmtTinyBars("400,1000,10030");
-        exclusive.setTransferListAmtHBars("");
-
         cryptoTransferOptions = new CryptoTransferOptions();
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransferOptions.setExclusive(exclusive);
@@ -111,18 +107,14 @@ public class ValidateTransferListTest {
         amountList.add("50");
         validateTransferList.setAmountList(amountList);
         when(validateAmount.sumOfTinybarsInLong(amountList)).thenReturn(100L);
-        assertEquals(100L, validateTransferList.sumOfAmountList());
+        assertEquals(100L, validateTransferList.sumOfAmountList(amountList));
     }
 
     @Test
     public void sumOfAmountInHbar() {
 
         dependent = new CryptoTransferOptions.Dependent();
-
         exclusive = new CryptoTransferOptions.Exclusive();
-        exclusive.setTransferListAmtTinyBars("");
-        exclusive.setTransferListAmtHBars("0.1,0.2,0.3");
-
         cryptoTransferOptions = new CryptoTransferOptions();
         cryptoTransferOptions.setDependent(dependent);
         cryptoTransferOptions.setExclusive(exclusive);
@@ -134,7 +126,7 @@ public class ValidateTransferListTest {
         amountList.add("0.40");
         validateTransferList.setAmountList(amountList);
         when(validateAmount.sumOfHbarsInLong(amountList)).thenReturn(90000000L);
-        assertEquals(90000000L, validateTransferList.sumOfAmountList());
+        assertEquals(90000000L, validateTransferList.sumOfAmountList(amountList));
     }
 
     @Test
@@ -157,7 +149,7 @@ public class ValidateTransferListTest {
         validateTransferList.setTiny(true);
         assertTrue(validateTransferList.isTiny());
         long sumOfRecipientAmount = 900000L;
-        validateTransferList.updateAmountList(sumOfRecipientAmount);
+        validateTransferList.updateAmountList(amountList, sumOfRecipientAmount);
         amountList.add(0, "-900000");
         assertEquals(amountList, validateTransferList.getFinalAmountList(cryptoTransferOptions));
     }
@@ -170,7 +162,7 @@ public class ValidateTransferListTest {
         validateTransferList.setAmountList(amountList);
         validateTransferList.setTiny(false);
         long sumOfReceipientsAmount = 900000L;
-        validateTransferList.finalAmountList(amountList, sumOfReceipientsAmount);
+        validateTransferList.updateAmountList(amountList, sumOfReceipientsAmount);
         verify(validateAmount, times(2)).convertHbarToLong(any());
     }
 
