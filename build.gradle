@@ -114,10 +114,6 @@ test {
     }
 }
 
-jacoco {
-    toolVersion = "0.8.4"
-}
-
 jacocoTestReport {
     reports {
         xml.enabled = true // coveralls plugin depends on xml format report
