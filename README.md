@@ -52,8 +52,6 @@ hedera
 Once that is running, you should see 
 
 ![Hedera Shell](hedera.png)
-![](setup-cli.gif)
-![](recovery.gif)
 
 ___
 
@@ -63,14 +61,18 @@ ___
 
 There is the concept of an operator account where the operator can pay for the transaction costs, ie network and node fees.
 
-Cli will prompt `setup` on first run to save default operator key into `~/.hedera`. You will need to have an accountID and 24 words ready.
-AccountGetInfo is called during setup to confirm the account exists. This will cost some tinybars.
- 
+Cli will prompt `setup` on first run to save default operator key into `~/.hedera`. 
+Setting up an operator can be done with either passphrase or private key
+1) 24 recovery words, where words are separated by spaces.
+2) Private key either in hexadecimal or ASN1 encoded format.
+
+AccountGetInfo is called during setup to confirm the account exists on Hedera. This will cost some tinybars.
 The default operator can be changed anytime by using `account use 0.0.xxxx`.
 ```bash
 # Sets the default operator
 setup
 ```
+![](setup.gif)
 
 #### Switch to a specific network
 
@@ -88,7 +90,7 @@ network use testnet
 # Lists all accounts associated with current network
 account ls
 ```
-#### Version (v0.1.3)
+#### Version (v0.1.6)
 ```bash
 # Checks current version
 version
@@ -107,9 +109,11 @@ account default 0.0.xxxx
 ```
 
 #### Recover Accounts
-
+Recovering an Hedera account using either 
+1) 24 recovery words, where words are separated by spaces.
+2) Private key either in hexadecimal or ASN1 encoded format.
 ```bash
-# Recovering a Hedera account using 24 recovery words, where words are separated by spaces. This is default.
+# Recovering an Hedera account
 account recovery 0.0.xxxx
 ```
 
@@ -120,7 +124,7 @@ Account creation can be done in multiple ways.
 Simple Key
 1) Creating an account using new recovery words and keypair.
 2) Creating an account using operator's keypair.
-3) Creating an account using any public key.
+3) Creating an account using any public key (not yet supported).
 
 MultiSig account creation (not yet supported)
 
@@ -133,7 +137,7 @@ account create -b 100000000 -k
 ```
 
 #### Delete Account
-Cli will prompt for key of account that is set for deletion. 
+Cli will prompt for key of account(-o) that is set for deletion. 
 Only the account for deletion can sign the transaction.
 ```bash
 # Deletes an account from Hedera, and transfers the remaining funds from the deleted account to the new account
@@ -141,7 +145,7 @@ account delete -o 0.0.1001 -n 0.0.1002
 account delete --oldAccount 0.0.1001 --newAccount 0.0.1002
 ```
 #### Account Balance
-
+Account balance calls are free.
 ```bash
 # Gets the balance of an account
 account balance 0.0.xxxx
@@ -169,6 +173,8 @@ help
 ```
 
 ### Cryptotransfer (v0.1.5)
+Cryptotransfer in tinybars(-tb) or hbars(-hb). Tinybars are integers while hbars can be down to 8 decimals.
+Recipients(-r) are separated by commas
 ```bash
 Valid commands
 ## hedera [testnet][0.0.112533] :>
