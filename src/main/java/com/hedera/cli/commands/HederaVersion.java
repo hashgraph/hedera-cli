@@ -11,7 +11,9 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 @ShellComponent
 public class HederaVersion extends CliDefaults {
 
-    @Value("${app.version}")
+    // if app.version is not specified, default to 0.0.0
+    // required for tests and integration tests
+    @Value("#{systemProperties['app.version'] ?: '0.0.0'}")
     private String version;
 
     @Value("${app.name}")
