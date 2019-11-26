@@ -114,12 +114,6 @@ test {
     }
 }
 
-task integrationTest(type: Test) {
-    useJUnitPlatform {
-        includeTags 'integration'
-    }
-}
-
 jacoco {
     toolVersion = "0.8.4"
 }
@@ -138,21 +132,6 @@ jacocoTestReport {
                 ]
             )
         }))
-    }
-}
-
-task jacocoIntegrationTestReport(dependsOn: integrationTest, type: JacocoReport) {
-    group = 'Reporting'
-    description = 'Generate Jacoco coverage reports after running integration tests.'
-    executionData.from = file("${buildDir}/jacoco/integrationTest.exec")
-    sourceDirectories.from = files(sourceSets.main.allSource.srcDirs)
-    classDirectories.from = files(sourceSets.main.output)
-    reports {
-        csv.enabled = false
-        xml.enabled = true
-        html.enabled = true
-        html.destination = file("${buildDir}/reports/jacoco/integrationTest/html")
-        xml.destination = file("${buildDir}/reports/jacoco/integrationTest/jacocoIntegrationTestReport.xml")
     }
 }
 
@@ -192,3 +171,4 @@ task sendCoverageToCodacy(type: JavaExec, dependsOn: jacocoTestReport) {
 
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java'
+apply from: 'integration-test.gradle'

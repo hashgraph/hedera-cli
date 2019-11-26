@@ -1,0 +1,41 @@
+// in build.gradle, declare
+// apply from: 'integration-test.gradle'
+
+sourceSets {
+    integrationTest {
+        java {
+            srcDirs = [ file('src/integration/java') ]
+            compileClasspath += sourceSets.main.output + sourceSets.test.output + configurations.testRuntime
+            runtimeClasspath += sourceSets.main.output + sourceSets.test.output + configurations.testRuntime
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+task integrationTest(type: Test) {
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+task jacocoIntegrationTestReport(dependsOn: integrationTest, type: JacocoReport) {
+    group = 'Reporting'
+    description = 'Generate Jacoco coverage reports after running integration tests.'
+    executionData.from = file("${buildDir}/jacoco/integrationTest.exec")
+    sourceDirectories.from = files(sourceSets.main.allSource.srcDirs)
+    classDirectories.from = files(sourceSets.main.output)
+    reports {
+        csv.enabled = false
+        xml.enabled = true
+        html.enabled = true
+        html.destination = file("${buildDir}/reports/jacoco/integrationTest/html")
+        xml.destination = file("${buildDir}/reports/jacoco/integrationTest/jacocoIntegrationTestReport.xml")
+    }
+}
