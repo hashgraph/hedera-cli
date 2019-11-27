@@ -5,6 +5,9 @@ import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.springframework.beans.factory.annotation.Value;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class ShellHelper {
 
     @Value("${shell.out.info}")
@@ -121,8 +124,10 @@ public class ShellHelper {
         if (color != null) {
             toPrint = getColored(message, color);
         }
-        terminal.writer().println(toPrint);
-        terminal.flush();
+        if (terminal != null) {
+            terminal.writer().println(toPrint);
+            terminal.flush();
+        }
     }
 
     //--- set / get methods ---------------------------------------------------

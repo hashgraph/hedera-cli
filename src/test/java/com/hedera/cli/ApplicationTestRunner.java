@@ -9,7 +9,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.shell.jline.JLineShellAutoConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles("test")
 @TestConfiguration
 @EnableAutoConfiguration(exclude = { JLineShellAutoConfiguration.class })
 public class ApplicationTestRunner implements ApplicationRunner {
