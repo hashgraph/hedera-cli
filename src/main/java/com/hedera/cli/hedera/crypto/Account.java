@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
+import java.util.Arrays;
+
 @Component
 @Command(name = "account", description = "@|fg(225) Create, update, delete or querying an account by providing the <args>|@"
-        + "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. account create <args>|@", subcommands = {
-                AccountCreate.class, AccountUpdate.class, AccountGetInfo.class, AccountDefault.class,
-                AccountDelete.class, AccountRecovery.class, AccountList.class, AccountUse.class, AccountBalance.class })
+        + "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. account create <args>|@")
 public class Account implements Runnable { 
     
     @Autowired
@@ -33,6 +33,5 @@ public class Account implements Runnable {
         } else {
             this.run();
         }
-
     }
 }

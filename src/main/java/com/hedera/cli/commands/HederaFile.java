@@ -34,40 +34,38 @@ public class HederaFile extends CliDefaults {
             @ShellOption(value = {"-s", "--fileSizeByte"}, defaultValue = "") String s,
             @ShellOption(value = {"-t", "--maxTransactionFee"}, defaultValue = "") String t) {
 
-        String[] args = new String[]{};
+        String[] args;
+        List<String> argsList = new ArrayList<>();
+        Object[] objects;
 
         // @formatter:off
         if ("create".equals(subCommand)) {
-            List<String> argsList = new ArrayList<String>();
-            if (!c.isEmpty()) argsList.add(c);
-            if (!d.isEmpty()) argsList.add(d);
-            if (!s.isEmpty()) argsList.add(s);
-            if (!t.isEmpty()) argsList.add(t);
-            Object[] objs = argsList.toArray();
-            args = Arrays.copyOf(objs, objs.length, String[].class);
+            if (!c.isEmpty()) argsList.add("-c=" + c);
+            if (!s.isEmpty()) argsList.add("-s=" + s);
+            if (!t.isEmpty()) argsList.add("-t=" + t);
+            if (!d.isEmpty()) argsList.add("-d=" + d
+                    .replace("[", "")
+                    .replace("]", "")
+                    .replace(" ", ""));
+            System.out.println(argsList);
         }
 
         if ("delete".equals(subCommand)) {
-            List<String> argsList = new ArrayList<String>();
             argsList = addFileToArgsList(fileId, argsList);
             if (argsList.isEmpty()) {
                 shellHelper.printError("Please provide a file id");
             }
-            Object[] objs = argsList.toArray();
-            args = Arrays.copyOf(objs, objs.length, String[].class);
         }
 
         if ("info".equals(subCommand)) {
-            List<String> argsList = new ArrayList<>();
             argsList = addFileToArgsList(fileId, argsList);
             if (argsList.isEmpty()) {
                 shellHelper.printError("Please provide a file id");
             }
-            Object[] objects = argsList.toArray();
-            args = Arrays.copyOf(objects, objects.length, String[].class);
         }
         // @formatter:on
-
+        objects = argsList.toArray();
+        args = Arrays.copyOf(objects, objects.length, String[].class);
         file.handle(subCommand, args);
     }
 

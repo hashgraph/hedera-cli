@@ -12,6 +12,7 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.Transaction;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -40,23 +41,23 @@ public class FileCreate implements Runnable {
 
     @Option(names = { "-d", "--date" }, arity = "0..2", description = "Enter file expiry date in the format of%n"
             + "dd-MM-yyyy hh:mm:ss%n" + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) file create -d=22-02-2019,21:30:58|@")
-    private String[] date;
+            + "@|fg(yellow) file create -d 22-02-2019,21:30:58|@")
+    private String date;
 
     @Option(names = { "-t", "--maxTransactionFee" }, description = "Enter the maximum fee in tinybars%n"
-            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) file create -f=200000|@")
+            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) file create -t 200000|@")
     private int maxTransactionFee;
 
     @Option(names = {"-c", "--contentsString"}, split = " ", arity = "0..*",
             description = "File contents in string"
                     + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) file create -d=22-11-2019,21:21:21 -t=200000 -c=\"winter is coming!\"|@")
+                    + "@|fg(yellow) file create -d 22-11-2019,21:21:21 -t 200000 -c \"hello future!\"|@")
     private String[] fileContentsInString;
 
     @Option(names = {"-s", "--fileSizeByte"},
             description = "Test file size"
                     + "%n@|bold,underline Usage:|@%n"
-                    + "@|fg(yellow) file create -d=22-11-2019,21:21:21 -t=200000 -s=10000|@")
+                    + "@|fg(yellow) file create -d 22-11-2019,21:21:21 -t 200000 -s 10000|@")
     private int fileSizeByte;
 
     // @ArgGroup(exclusive = false)
@@ -111,6 +112,8 @@ public class FileCreate implements Runnable {
             FileCreateTransaction tx = null;
             // ZonedDateTime zonedDateTime = utils.dateToMilliseconds(date);
             // Instant instant = zonedDateTime.toInstant();
+            System.out.println("Date in run");
+            System.out.println(date);
             Instant instant = txManager.dateToMilliseconds(date);
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
 
@@ -138,9 +141,10 @@ public class FileCreate implements Runnable {
                         .setTransactionFee(maxTransactionFee);
             }
             // This will wait for the receipt to become available
-            TransactionReceipt receipt = tx.executeForReceipt();
-            var newFileId = receipt.getFileId();
-            shellHelper.print("file: " + newFileId);
+            TransactionId txId = tx.execute();
+            System.out.println("Transaction id " + txId);
+//            var newFileId = receipt.getFileId();
+//            shellHelper.print("file: " + newFileId);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (TimeoutException e) {

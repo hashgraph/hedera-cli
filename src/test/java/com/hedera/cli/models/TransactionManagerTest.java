@@ -64,7 +64,7 @@ public class TransactionManagerTest {
     @Test
     public void dateToMilliseconds() throws ParseException {
         // raw test data
-        String[] dateInString = { "22-02-2019", "21:30:58" };
+        String dateInString = "22-02-2019,21:30:58";
 
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Date date = formatter.parse("22-02-2019 21:30:58");

@@ -39,14 +39,8 @@ public class TransactionManager {
     public void init() {
         objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
     }
-    public Instant dateToMilliseconds(String[] dateInString) throws ParseException {
-        System.out.println("The date from cli is: ");
-        StringBuilder sb = new StringBuilder();
-        for (String s : dateInString) {
-            sb.append(s).append(" ");
-        }
-        String dateString = sb.toString().stripTrailing();
-        System.out.println(dateString);
+    public Instant dateToMilliseconds(String dateInString) throws ParseException {
+        String dateString = dateInString.replace(",", " ");
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Date date = formatter.parse(dateString);
         System.out.println("Date of File Expiry is: " + date.toInstant().toString());
