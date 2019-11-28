@@ -49,9 +49,8 @@ To run the hedera shell,
 hedera
 ```
 
-Once that is running, you should see 
-
-![Hedera Shell](hedera.png)
+Once that is running, you should see this
+![](setup.gif)
 
 ___
 
@@ -72,7 +71,6 @@ The default operator can be changed anytime by using `account use 0.0.xxxx`.
 # Sets the default operator
 setup
 ```
-![](setup.gif)
 
 #### Switch to a specific network
 
