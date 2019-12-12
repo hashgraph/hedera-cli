@@ -21,6 +21,7 @@ import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 
+import com.hedera.hashgraph.sdk.file.FileId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -67,20 +68,13 @@ public class FileCreate implements Runnable {
 
     @Override
     public void run() {
-        int maxTransactionFee = 1000000000;
         CommandLine.usage(this, System.out);
         try (Client client = hedera.createHederaClient()) {
             Ed25519PrivateKey operatorKey = hedera.getOperatorKey();
-            client.setMaxTransactionFee(maxTransactionFee);
-            shellHelper.print(String.valueOf(maxTransactionFee));
             shellHelper.print(String.valueOf(Arrays.asList(date)));
 
-            FileCreateTransaction tx = null;
-            System.out.println("Date in run");
-            System.out.println(date);
+            Transaction tx = null;
             Instant instant = txManager.dateToMilliseconds(date);
-            System.out.println("instant");
-            System.out.println(instant);
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
 
             boolean testSize = false;
@@ -93,26 +87,26 @@ public class FileCreate implements Runnable {
                         // Use the same key as the operator to "own" this file
                         .addKey(operatorKey.getPublicKey())
                         .setContents(fileContentsTestSize)
-                        .setTransactionFee(maxTransactionFee)
-                        .setTransactionValidDuration(Duration.ofSeconds(7890000));
+                        .setTransactionValidDuration(Duration.ofSeconds(7890000))
+                        .build();
             } else {
                 // The file is required to be a byte array,
                 // you can easily use the bytes of a file instead.
                 var fileContents = stringArrayToString(fileContentsInString).getBytes();
                 tx = new FileCreateTransaction(client)
-                        .setTransactionId(transactionId)
-                        .setExpirationTime(instant)
+                        .setExpirationTime(
+                                Instant.now()
+                                        .plus(Duration.ofSeconds(2592000)))
                         // Use the same key as the operator to "own" this file
-                        .addKey(operatorKey.getPublicKey())
+                        .addKey(hedera.getOperatorKey().getPublicKey())
                         .setContents(fileContents)
-                        .setTransactionFee(maxTransactionFee)
-                        .setTransactionValidDuration(Duration.ofSeconds(7890000));
+                        .build();
             }
-            // This will wait for the receipt to become available
-            TransactionId txId = tx.execute();
-            System.out.println("Transaction id " + txId);
-//            var newFileId = receipt.getFileId();
-//            shellHelper.print("file: " + newFileId);
+            // send tx to network
+            tx.execute();
+            TransactionReceipt receipt = tx.queryReceipt();
+            FileId newFileId = receipt.getFileId();
+            System.out.println("File ID " + newFileId);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (TimeoutException e) {
