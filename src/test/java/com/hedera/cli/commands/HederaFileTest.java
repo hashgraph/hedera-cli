@@ -32,14 +32,13 @@ public class HederaFileTest {
     private String c = "";
     private String d = "";
     private String s = "";
-    private String t = "";
     private String fileId = "";
 
     @Test
     public void fileCreate() {
         c = "hello";
         d = "22-11-2019,21:21:21";
-        hederaFile.file("create", fileId, c, d, s, t);
+        hederaFile.file("create", fileId, c, d, s);
 
         ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> valueCapture2 = ArgumentCaptor.forClass(String.class);
@@ -59,7 +58,7 @@ public class HederaFileTest {
 
     @Test
     public void fileDelete() {
-        hederaFile.file("delete", fileId, c, d, s, t);
+        hederaFile.file("delete", fileId, c, d, s);
         ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
         verify(shellHelper).printError(valueCapture.capture());
         String actual = valueCapture.getValue();
@@ -69,7 +68,7 @@ public class HederaFileTest {
 
     @Test
     public void fileInfo() {
-        hederaFile.file("info", fileId, c, d, s, t);
+        hederaFile.file("info", fileId, c, d, s);
         ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
         verify(shellHelper).printError(valueCapture.capture());
         String actual = valueCapture.getValue();

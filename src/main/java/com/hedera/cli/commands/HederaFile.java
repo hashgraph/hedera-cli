@@ -31,8 +31,7 @@ public class HederaFile extends CliDefaults {
             // file create
             @ShellOption(value = {"-c", "--contentString"}, defaultValue = "") String c,
             @ShellOption(value = {"-d", "--date"}, defaultValue = "") String d,
-            @ShellOption(value = {"-s", "--fileSizeByte"}, defaultValue = "") String s,
-            @ShellOption(value = {"-t", "--maxTransactionFee"}, defaultValue = "") String t) {
+            @ShellOption(value = {"-s", "--fileSizeByte"}, defaultValue = "") String s) {
 
         String[] args;
         List<String> argsList = new ArrayList<>();
@@ -42,7 +41,6 @@ public class HederaFile extends CliDefaults {
         if ("create".equals(subCommand)) {
             if (!c.isEmpty()) argsList.add("-c=" + c);
             if (!s.isEmpty()) argsList.add("-s=" + s);
-            if (!t.isEmpty()) argsList.add("-t=" + t);
             if (!d.isEmpty()) argsList.add("-d=" + d
                     .replace("[", "")
                     .replace("]", "")

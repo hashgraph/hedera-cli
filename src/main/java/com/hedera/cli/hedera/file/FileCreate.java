@@ -3,9 +3,12 @@ package com.hedera.cli.hedera.file;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.concurrent.TimeoutException;
 
 import com.hedera.cli.hedera.Hedera;
@@ -39,14 +42,10 @@ public class FileCreate implements Runnable {
     @Autowired
     private ShellHelper shellHelper;
 
-    @Option(names = { "-d", "--date" }, arity = "0..2", description = "Enter file expiry date in the format of%n"
+    @Option(names = {"-d", "--date"}, arity = "0..2", description = "Enter file expiry date in the format of%n"
             + "dd-MM-yyyy hh:mm:ss%n" + "%n@|bold,underline Usage:|@%n"
             + "@|fg(yellow) file create -d 22-02-2019,21:30:58|@")
     private String date;
-
-    @Option(names = { "-t", "--maxTransactionFee" }, description = "Enter the maximum fee in tinybars%n"
-            + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) file create -t 200000|@")
-    private int maxTransactionFee;
 
     @Option(names = {"-c", "--contentsString"}, split = " ", arity = "0..*",
             description = "File contents in string"
@@ -60,40 +59,6 @@ public class FileCreate implements Runnable {
                     + "@|fg(yellow) file create -d 22-11-2019,21:21:21 -t 200000 -s 10000|@")
     private int fileSizeByte;
 
-    // @ArgGroup(exclusive = false)
-    // Dependent dependent;
-    //
-    // private class Dependent {
-    // @Option(names = {"-d", "--date"}, required = true, arity = "0..2",
-    // description = "Enter file expiry date in the format of%n"
-    // + "dd-MM-yyyy hh:mm:ss%n"
-    // + "%n@|bold,underline Usage:|@%n"
-    // + "@|fg(yellow) file create -d=22-02-2019,21:30:58|@")
-    // private String[] date;
-    //
-    // @Option(names = {"-t", "--maxTransactionFee"}, required = true,
-    // description = "Enter the maximum fee in tinybars%n"
-    // + "%n@|bold,underline Usage:|@%n"
-    // + "@|fg(yellow) file create -f=200000|@")
-    // private int maxTransactionFee;
-    // }
-    //
-    // @ArgGroup(exclusive = true, multiplicity = "1")
-    // Exclusive exclusive;
-    //
-    // private class Exclusive {
-    // @Option(names = {"-s", "--contentsString"}, required = true, split = " ",
-    // arity = "0..*",
-    // description = "File contents in string"
-    // + "%n@|bold,underline Usage:|@%n"
-    // + "@|fg(yellow) file create -s=\"hello world again\"|@")
-    // private String[] fileContentsInString;
-    //
-    // @Option(names = {"-b", "--fileSizeByte"}, required = true,
-    // description = "Test file size")
-    // private int fileSizeByte;
-    // }
-
     // @Option(names = {"-p", "--contentsPath"}, split = " ", arity = "0..*",
     // description = "Path to file"
     // + "%n@|bold,underline Usage:|@%n"
@@ -102,6 +67,7 @@ public class FileCreate implements Runnable {
 
     @Override
     public void run() {
+        int maxTransactionFee = 1000000000;
         CommandLine.usage(this, System.out);
         try (Client client = hedera.createHederaClient()) {
             Ed25519PrivateKey operatorKey = hedera.getOperatorKey();
@@ -110,11 +76,11 @@ public class FileCreate implements Runnable {
             shellHelper.print(String.valueOf(Arrays.asList(date)));
 
             FileCreateTransaction tx = null;
-            // ZonedDateTime zonedDateTime = utils.dateToMilliseconds(date);
-            // Instant instant = zonedDateTime.toInstant();
             System.out.println("Date in run");
             System.out.println(date);
             Instant instant = txManager.dateToMilliseconds(date);
+            System.out.println("instant");
+            System.out.println(instant);
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
 
             boolean testSize = false;
@@ -127,7 +93,8 @@ public class FileCreate implements Runnable {
                         // Use the same key as the operator to "own" this file
                         .addKey(operatorKey.getPublicKey())
                         .setContents(fileContentsTestSize)
-                        .setTransactionFee(maxTransactionFee);
+                        .setTransactionFee(maxTransactionFee)
+                        .setTransactionValidDuration(Duration.ofSeconds(7890000));
             } else {
                 // The file is required to be a byte array,
                 // you can easily use the bytes of a file instead.
@@ -138,7 +105,8 @@ public class FileCreate implements Runnable {
                         // Use the same key as the operator to "own" this file
                         .addKey(operatorKey.getPublicKey())
                         .setContents(fileContents)
-                        .setTransactionFee(maxTransactionFee);
+                        .setTransactionFee(maxTransactionFee)
+                        .setTransactionValidDuration(Duration.ofSeconds(7890000));
             }
             // This will wait for the receipt to become available
             TransactionId txId = tx.execute();

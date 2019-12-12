@@ -29,9 +29,6 @@ public class FileCreateTest {
             @Option(names = {"-d", "--date"}, arity = "0..1")
             private String[] date;
 
-            @Option(names = {"-t", "--maxTransactionFee"})
-            private int maxTransactionFee;
-
             @Option(names = {"-c", "--contentsString"}, split = " ", arity = "0..*")
             private String[] fileContentsInString;
 
@@ -40,23 +37,22 @@ public class FileCreateTest {
 
         }
 
-        FileCreate fc = CommandLine.populateCommand(new FileCreate(), "-d=22-02-2019,21:30:58","-t=100","-c=\"hello world\"");
+        FileCreate fc = CommandLine.populateCommand(new FileCreate(), "-d=22-02-2019,21:30:58","-c=\"hello world\"");
         List<String> expectedDate = new ArrayList<>();
         expectedDate.add("22-02-2019,21:30:58");
         List<String> expectedContentString = new ArrayList<>();
         expectedContentString.add("\"hello world\"");
         assertEquals(expectedContentString, Arrays.asList(fc.fileContentsInString));
-        assertEquals(100, fc.maxTransactionFee);
         assertEquals(0, fc.fileSizeByte);
         assertEquals(expectedDate, Arrays.asList(fc.date));
 
         CommandLine cmd = new CommandLine(new FileCreate());
-        ParseResult result = cmd.parseArgs("-t=100");
-        assertTrue(result.hasMatchedOption("t"));
-        assertNull(result.subcommand());
-        assertEquals(Integer.valueOf(100), result.matchedOptionValue('t', 100));
-        assertEquals(Collections.singletonList(100), result.matchedOption('t').typedValues());
-        assertEquals(Collections.singletonList("-t=100"), result.originalArgs());
+//        ParseResult result = cmd.parseArgs("-t=100");
+//        assertTrue(result.hasMatchedOption("t"));
+//        assertNull(result.subcommand());
+//        assertEquals(Integer.valueOf(100), result.matchedOptionValue('t', 100));
+//        assertEquals(Collections.singletonList(100), result.matchedOption('t').typedValues());
+//        assertEquals(Collections.singletonList("-t=100"), result.originalArgs());
     }
 
     @Test
