@@ -5,11 +5,7 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.TransactionId;
-import com.hedera.hashgraph.sdk.TransactionReceipt;
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.file.FileContentsQuery;
-import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
 import com.hedera.hashgraph.sdk.file.FileId;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
 import com.hederahashgraph.api.proto.java.FileGetContentsResponse;
@@ -20,9 +16,6 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Command;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
@@ -36,9 +29,6 @@ public class FileInfo implements Runnable {
     @Autowired
     private ShellHelper shellHelper;
 
-    @Autowired
-    private TransactionManager txManager;
-
     @Parameters(index = "0", description = "@|fg(225) File Id in the format of shardNum.realmNum.fileNum"
             + "%n@|bold,underline Usage:|@%n"
             + "@|fg(yellow) file info 0.0.1003|@")
@@ -49,25 +39,8 @@ public class FileInfo implements Runnable {
         try (Client client = hedera.createHederaClient()) {
             FileId fileId = FileId.fromString(fileNumInString);
 
-            Ed25519PrivateKey operatorKey = hedera.getOperatorKey();
-
-            byte[] fileContents = ("Hedera is great!").getBytes();
-
-            // Create the new file and set its properties
-            TransactionId txid = new FileCreateTransaction(client.setMaxTransactionFee(1000000000))
-                    .addKey(operatorKey.getPublicKey()) // The public key of the owner of the file
-                    .setContents(fileContents) // Contents of the file
-                    .setExpirationTime(Instant.now().plus(Duration.ofSeconds(2592000))) // Set file expiration time in seconds
-                    .execute(); // Submits transaction to the network and returns receipt which contains file ID
-
-            //Print the file ID to console
-            System.out.println(txid);
-            System.out.println(txid.getAccountId());
-
-//            System.out.println("The new file ID is " + newFile.getFileId().toString());
-//
-//            com.hedera.hashgraph.sdk.file.FileInfo fileInfo = new FileInfoQuery(client.setMaxTransactionFee(1000000000))
-//                    .setFileId(newFile.getFileId())
+//            com.hedera.hashgraph.sdk.file.FileInfo fileInfo = new FileInfoQuery()
+//                    .setFileId(fileId)
 //                    .execute();
 //
 //            shellHelper.printInfo("File info : " + fileInfo);
@@ -75,10 +48,10 @@ public class FileInfo implements Runnable {
 //            shellHelper.printInfo("File public key : " + fileInfo.getKeys());
 //            shellHelper.printInfo("File size : " + fileInfo.getSize());
 //
-//            FileGetContentsResponse fileGetContentsResponse = new FileContentsQuery(client.setMaxTransactionFee(1000000000))
-//                    .setFileId(newFile.getFileId())
+//            FileGetContentsResponse fileGetContentsResponse = new FileContentsQuery()
+//                    .setFileId(fileId)
 //                    .execute();
-
+//
 //            boolean fileVerified = verifyFileContentAValidUTF8ByteSequence(fileContents.getFileContents().getContents());
 //            String decodedText = decodeText(fileContents.getFileContents().getContents().toStringUtf8(), "UTF-8");
 //            System.out.println("decoded text: " + fileVerified);
