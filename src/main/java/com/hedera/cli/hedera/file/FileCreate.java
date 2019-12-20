@@ -5,13 +5,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.concurrent.TimeoutException;
 
+import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
+import com.hedera.cli.hedera.crypto.Operation;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
@@ -32,7 +32,7 @@ import picocli.CommandLine.Option;
 @Component
 @Command(name = "create", description = "@|fg(225) Creates a new File and returns a FileID in the format of%n"
         + "shardNum.realmNum.fileNum|@")
-public class FileCreate implements Runnable {
+public class FileCreate implements Runnable, Operation {
 
     @Autowired
     private Hedera hedera;
@@ -153,5 +153,18 @@ public class FileCreate implements Runnable {
     public String stringOfNBytes(int fileSizeByte) {
         String result = String.join("", Collections.nCopies(fileSizeByte, "A"));
         return result;
+    }
+
+    @Override
+    public void executeSubCommand(InputReader inputReader, String... args) {
+        if(args.length == 0) {
+            CommandLine.usage(this, System.out);
+        } else {
+            try {
+                new CommandLine(this).execute(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
