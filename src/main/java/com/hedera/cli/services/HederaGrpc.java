@@ -16,6 +16,7 @@ import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.proto.ResponseCodeEnum;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.TransactionId;
@@ -28,7 +29,6 @@ import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 
-import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
 import org.hjson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

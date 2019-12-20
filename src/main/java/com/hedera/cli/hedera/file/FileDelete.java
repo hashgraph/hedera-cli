@@ -2,12 +2,12 @@ package com.hedera.cli.hedera.file;
 
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.proto.ResponseCodeEnum;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
 import com.hedera.hashgraph.sdk.file.FileId;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
-import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

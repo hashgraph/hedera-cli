@@ -35,7 +35,7 @@ dependencies {
     implementation 'com.google.guava:guava:27.1-jre'
 
     // hedera sdk
-    implementation 'com.hedera.hashgraph:sdk:0.8.1'
+    implementation 'com.hedera.hashgraph:sdk:0.9.0-beta-2'
     // netty transport (for high throughput applications)
     implementation 'io.grpc:grpc-netty-shaded:1.24.0'
 
