@@ -7,13 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,8 +25,6 @@ import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.RecoveredAccountModel;
 import com.hedera.cli.shell.ShellHelper;
 
-import com.hedera.hashgraph.sdk.account.AccountId;
-import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,31 +92,6 @@ public class AccountRecoveryTest {
         String actual = valueCapture.getValue();
         String expected = "Start the recovery process";
         assertEquals(expected, actual);
-    }
-
-    @Test
-    public void verifyAccountExistsLocallyFalse() {
-        AccountInfo accountInfo = mock(AccountInfo.class);
-        when(accountInfo.getAccountId()).thenReturn(AccountId.fromString(accountId));
-
-        String pathToIndexTxt = accountManager.pathToIndexTxt();
-        HashMap<String, String> testMap = new HashMap<>();
-        testMap.put("0.0.90304", "aggressive_primerose_3092");
-        testMap.put("0.0.82319", "gloomy_alyssum_270");
-        testMap.put("0.0.1003", "wiry_bryn_3883");
-        testMap.put("0.0.1009", "jaunty_mint_465");
-        testMap.put("0.0.112232", "definitive_forsythia_2853");
-        testMap.put("0.0.8888", "sorrowful_geranium_7578");
-        when(dataDirectory.readIndexToHashmap(pathToIndexTxt)).thenReturn(testMap);
-
-        boolean accountExist = accountRecovery.verifyAccountExistsLocally(accountInfo, accountId);
-
-        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-        verify(shellHelper).printSuccess(valueCapture.capture());
-        String actual = valueCapture.getValue();
-        String expected = "Account recovered and verified with Hedera";
-        assertEquals(expected, actual);
-        assertTrue(accountExist);
     }
 
     @Test
