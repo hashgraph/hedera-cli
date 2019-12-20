@@ -75,9 +75,9 @@ public class AccountGetInfo implements Runnable, Operation {
         AccountInfo accountInfo;
         try (Client client = hedera.createHederaClient()) {
             AccountInfoQuery q;
-            q = new AccountInfoQuery(client)
+            q = new AccountInfoQuery()
                     .setAccountId(AccountId.fromString(accountIDInString));
-            accountInfo = q.execute();
+            accountInfo = q.execute(client);
             printAccountInfo(accountInfo);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
