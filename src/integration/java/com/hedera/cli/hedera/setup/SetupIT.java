@@ -1,3 +1,4 @@
+/*
 package com.hedera.cli.hedera.setup;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -39,4 +40,4 @@ public class SetupIT {
 
   }
 
-}
+}*/

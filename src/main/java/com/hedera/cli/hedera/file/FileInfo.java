@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.concurrent.TimeoutException;
 
 @Component
@@ -60,10 +61,10 @@ public class FileInfo implements Runnable, Operation {
 
             shellHelper.printSuccess("File content : " + fileContents);
             shellHelper.printSuccess("File has file contents : " + fileContents.hasFileContents());
-            shellHelper.printSuccess("File get file contents file contents to string: " + fileContents.getFileContents().getContents());
+            shellHelper.printSuccess("File get file contents to string: " + fileContents.getFileContents().getContents());
             shellHelper.printSuccess("File get file contents utf 8 : " + fileContents.getFileContents().getContents().toStringUtf8());
+            encodeDecode(fileContents.getFileContents().getContents().toByteArray());
             shellHelper.printSuccess("File content hashcode : " + fileContents.hashCode());
-
 //            JsonObject objJsonObject = new JsonObject();
 //            objJsonObject.get(fileContents.getFileContents().getContents().toString());
 //            System.out.println(objJsonObject);
@@ -80,6 +81,23 @@ public class FileInfo implements Runnable, Operation {
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
+    }
+
+    public void encodeDecode(byte[] fileContents) {
+//        Base64.Encoder enc = Base64.getEncoder();
+        Base64.Decoder dec = Base64.getDecoder();
+//        String str = "77+9x6s=";
+
+        // encode data using BASE64
+//        String encoded = enc.encodeToString(fileContents);
+//        System.out.println("encoded value is \t" + encoded);
+//        String decoded = new String(dec.decode(fileContents));
+        // Decode data
+        String toDecode = new String(fileContents);
+        byte[] decoded = dec.decode(toDecode);
+        String decodedStr = new String(decoded);
+        System.out.println("decoded string is \t" + Arrays.toString(decoded));
+        System.out.println("decoded value is \t" + decodedStr);
     }
 
     public String decodeText(String input, String encoding) throws IOException {
