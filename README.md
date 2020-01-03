@@ -41,7 +41,7 @@ brew tap hashgraph/tap
 brew install hedera-cli
 
 # unix / linux
-curl -s https://raw.githubusercontent.com/hashgraph/hedera-cli/master/install.sh | bash
+curl -s https://raw.githubusercontent.com/hashgraph/hedera-cli/master/install.sh | sudo bash
 ```
 
 To run the hedera shell,
