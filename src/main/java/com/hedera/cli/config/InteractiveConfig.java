@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Lazy;
 
 @Configuration
 @Conditional(InteractiveModeCondition.class)
-public class SpringShellConfig {
+public class InteractiveConfig {
 
     @Bean
     public ShellHelper shellHelper(@Lazy Terminal terminal) {
