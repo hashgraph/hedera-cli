@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.hedera.cli.shell.ShellHelper;
 
 import org.jline.reader.LineReader;
+import org.jline.terminal.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeExceptionMapper;
@@ -33,7 +34,6 @@ public class NonInteractiveConfig {
 
     @Bean
     public CommandLineRunner exampleCommandLineRunner(ConfigurableEnvironment environment) {
-        System.out.println("NonInteractiveConfig is loaded");
         return new ExampleCommandLineRunner(shell, environment);
     }
 
@@ -50,8 +50,8 @@ public class NonInteractiveConfig {
     
     // dummy ShellHelper for non-interactive mode
     @Bean
-    public ShellHelper shellhelper() {
-        return new ShellHelper();
+    public ShellHelper shellhelper(@Lazy Terminal terminal) {
+        return new ShellHelper(terminal);
     }
 
     // dummy InputReader for non-interactive mode
