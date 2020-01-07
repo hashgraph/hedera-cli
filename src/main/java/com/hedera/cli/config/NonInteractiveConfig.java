@@ -47,14 +47,12 @@ public class NonInteractiveConfig {
 			return e == null ? 1 : ((ExitRequest) e).status();
 		};
     }
-    
-    // dummy ShellHelper for non-interactive mode
+
     @Bean
     public ShellHelper shellhelper(@Lazy Terminal terminal) {
         return new ShellHelper(terminal);
     }
 
-    // dummy InputReader for non-interactive mode
     @Bean
     public InputReader inputReader(@Lazy LineReader lineReader) {
         return new InputReader(lineReader);
