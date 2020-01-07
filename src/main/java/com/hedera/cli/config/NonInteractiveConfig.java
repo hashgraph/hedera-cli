@@ -1,15 +1,20 @@
 package com.hedera.cli.config;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.hedera.cli.shell.ShellHelper;
+
+import org.jline.reader.LineReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeExceptionMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.shell.ExitRequest;
@@ -41,7 +46,19 @@ public class NonInteractiveConfig {
 			}
 			return e == null ? 1 : ((ExitRequest) e).status();
 		};
-	}
+    }
+    
+    // dummy ShellHelper for non-interactive mode
+    @Bean
+    public ShellHelper shellhelper() {
+        return new ShellHelper();
+    }
+
+    // dummy InputReader for non-interactive mode
+    @Bean
+    public InputReader inputReader(@Lazy LineReader lineReader) {
+        return new InputReader(lineReader);
+    }
 }
 
 @Order(InteractiveShellApplicationRunner.PRECEDENCE - 2)
@@ -58,7 +75,11 @@ class ExampleCommandLineRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        List<String> commandsToRun = Arrays.stream(args).filter(w -> !w.startsWith("@")).collect(Collectors.toList());
+        // remove the first element ("-X")
+        List<String> allArgs = new LinkedList<String>(Arrays.asList(args));
+        allArgs.remove(0);
+        String[] commands = allArgs.toArray(new String[0]);
+        List<String> commandsToRun = Arrays.stream(commands).filter(w -> !w.startsWith("@")).collect(Collectors.toList());
         if (!commandsToRun.isEmpty()) {
             InteractiveShellApplicationRunner.disable(environment);
             shell.run(new StringInputProvider(commandsToRun));
