@@ -17,7 +17,7 @@ public class InteractiveConfig {
 
     @Bean
     public ShellHelper shellHelper(@Lazy Terminal terminal) {
-        System.out.println("SpringShellConfig is loaded");
+        System.out.println("InteractiveConfig is loaded");
         return new ShellHelper(terminal);
     }
 

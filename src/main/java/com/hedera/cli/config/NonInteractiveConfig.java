@@ -28,6 +28,7 @@ public class NonInteractiveConfig {
 
     @Bean
     public CommandLineRunner exampleCommandLineRunner(ConfigurableEnvironment environment) {
+        System.out.println("NonInteractiveConfig is loaded");
         return new ExampleCommandLineRunner(shell, environment);
     }
 
