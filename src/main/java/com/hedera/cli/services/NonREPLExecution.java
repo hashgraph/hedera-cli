@@ -3,7 +3,7 @@ package com.hedera.cli.services;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ExecutionService {
+public class NonREPLExecution {
     public static Map<String, String> cache = new HashMap<>();
 
     public static Map<String, String> getCache() {
@@ -19,11 +19,9 @@ public class ExecutionService {
     // if user provides -X, cli executes in non-interactive mode (mode = false)
     public static boolean getInteractiveMode() {
         boolean mode = true;
-        for (Map.Entry<String, String> entry: cache.entrySet()) {
-            if (entry.getKey().equals("X")) {
-                if (entry.getValue().equals("false")) {
-                    mode = false;
-                }
+        for (Map.Entry<String, String> entry : cache.entrySet()) {
+            if (entry.getKey().equals("X") && entry.getValue().equals("false")) {
+                mode = false;
             }
         }
         return mode;

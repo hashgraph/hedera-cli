@@ -1,6 +1,6 @@
 package com.hedera.cli;
 
-import com.hedera.cli.services.ExecutionService;
+import com.hedera.cli.services.NonREPLExecution;
 
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
@@ -16,11 +16,11 @@ public class Application {
     public static void main(String[] args) {
         // by default, cli executes in interactive mode (mode = true)
         boolean bannerMode = true;
-        ExecutionService.putCache("X", "true");
+        NonREPLExecution.putCache("X", "true");
         for (String arg: args) {
             // if user specifies -X, we will set cli execution to non-interactive mode (mode = false)
-            if (arg.equals("-X")) {
-                ExecutionService.putCache("X", "false");
+            if ("-X".equals(arg)) {
+                NonREPLExecution.putCache("X", "false");
                 bannerMode = false;
             }
         }
