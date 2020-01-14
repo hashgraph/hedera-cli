@@ -1,6 +1,6 @@
 package com.hedera.cli.config;
 
-import com.hedera.cli.services.NonREPLExecution;;
+import com.hedera.cli.services.NonREPLHelper;
 
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
@@ -10,7 +10,7 @@ public class InteractiveModeCondition implements Condition {
 
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        return NonREPLExecution.getInteractiveMode();
+        return NonREPLHelper.getInteractiveMode();
     }
 
 }

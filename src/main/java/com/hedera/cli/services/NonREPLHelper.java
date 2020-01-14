@@ -3,7 +3,7 @@ package com.hedera.cli.services;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NonREPLExecution {
+public class NonREPLHelper {
     public static Map<String, String> cache = new HashMap<>();
 
     public static Map<String, String> getCache() {
