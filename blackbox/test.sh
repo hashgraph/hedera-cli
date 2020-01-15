@@ -6,11 +6,11 @@
 
 expect <<EOF
 set timeout -1
-spawn ./hedera -X network ls
+spawn ./build/libs/hedera-cli-0.1.6.jar -X network ls
 expect "  mainnet"
 expect "* testnet"
 
-spawn ./hedera -X setup
+spawn ./build/libs/hedera-cli-0.1.6.jar -X setup
 expect "default account does not exist"
 expect "Start the setup process"
 expect "account ID in the format of 0.0.xxxx that will be used as default operator: "
