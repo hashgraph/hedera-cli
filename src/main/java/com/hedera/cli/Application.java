@@ -4,6 +4,7 @@ import com.hedera.cli.services.NonREPLHelper;
 
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -16,12 +17,16 @@ public class Application {
     public static void main(String[] args) {
         // by default, cli executes in interactive mode (mode = true)
         boolean bannerMode = true;
+        WebApplicationType webEnvironment = WebApplicationType.NONE;
         NonREPLHelper.putCache("X", "true");
         for (String arg: args) {
-            // if user specifies -X, we will set cli execution to non-interactive mode (mode = false)
-            if ("-X".equals(arg)) {
+            // if user specifies -X or -S, we will set cli execution to non-interactive mode (mode = false)
+            if ("-X".equals(arg) || "-S".equals(arg)) {
                 NonREPLHelper.putCache("X", "false");
                 bannerMode = false;
+            }
+            if ("-S".equals(arg)) {
+                webEnvironment = WebApplicationType.SERVLET;
             }
         }
  
@@ -30,6 +35,7 @@ public class Application {
         if (!bannerMode) {
             app.setBannerMode(Banner.Mode.OFF);
         }
+        app.setWebApplicationType(webEnvironment);
         app.run(args);
     }
 }

@@ -23,6 +23,9 @@ public class NonREPLHelper {
             if (entry.getKey().equals("X") && entry.getValue().equals("false")) {
                 mode = false;
             }
+            if (entry.getKey().equals("S")) {
+                mode = false;
+            }
         }
         return mode;
     }

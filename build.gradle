@@ -34,6 +34,8 @@ dependencies {
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:27.1-jre'
 
+    implementation "org.springframework.boot:spring-boot-starter-web"
+
     // hedera sdk
     implementation 'com.hedera.hashgraph:sdk:0.8.1'
     // netty transport (for high throughput applications)

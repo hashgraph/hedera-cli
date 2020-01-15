@@ -11,7 +11,10 @@ public class NonInteractiveModeCondition implements Condition {
 
     @Override
     public boolean matches(final ConditionContext context, final AnnotatedTypeMetadata metadata) {
+        System.out.println("NonInteractiveModeConfition");
+        System.out.println(!NonREPLHelper.getInteractiveMode());
         return !NonREPLHelper.getInteractiveMode();
+        // return true;
     }
 
 }

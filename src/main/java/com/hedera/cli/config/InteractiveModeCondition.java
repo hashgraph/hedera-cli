@@ -10,7 +10,10 @@ public class InteractiveModeCondition implements Condition {
 
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        System.out.println("InteractiveModeCondition");
+        System.out.println(NonREPLHelper.getInteractiveMode());
         return NonREPLHelper.getInteractiveMode();
+        // return false;
     }
 
 }
