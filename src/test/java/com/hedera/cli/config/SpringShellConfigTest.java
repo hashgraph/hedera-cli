@@ -18,7 +18,7 @@ public class SpringShellConfigTest {
 
   @Test
   public void config() throws IOException {
-    SpringShellConfig config = new SpringShellConfig();
+    InteractiveConfig config = new InteractiveConfig();
 
     InputStream mockIn = mock(InputStream.class);
     TerminalBuilder t = TerminalBuilder.builder();

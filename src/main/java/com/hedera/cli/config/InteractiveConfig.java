@@ -7,11 +7,13 @@ import com.hedera.cli.shell.ShellHelper;
 import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
 @Configuration
-public class SpringShellConfig {
+@Conditional(InteractiveModeCondition.class)
+public class InteractiveConfig {
 
     @Bean
     public ShellHelper shellHelper(@Lazy Terminal terminal) {
