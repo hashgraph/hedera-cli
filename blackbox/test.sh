@@ -4,13 +4,14 @@
 
 # rm -irf $HOME/.hedera
 
+source ./blackbox/read_var.sh
 expect <<EOF
 set timeout -1
-spawn ./build/libs/hedera-cli-0.1.6.jar -X network ls
+spawn $(read_var EXEC_JAR) -X network ls
 expect "  mainnet"
 expect "* testnet"
 
-spawn ./build/libs/hedera-cli-0.1.6.jar -X setup
+spawn $(read_var EXEC_JAR) -X setup
 expect "default account does not exist"
 expect "Start the setup process"
 expect "account ID in the format of 0.0.xxxx that will be used as default operator: "
