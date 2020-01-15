@@ -11,7 +11,7 @@ read_var() {
     ENV_FILE="$2"
   fi
 
-  local VAR=$(grep $1 "$ENV_FILE" | xargs)
+  local VAR="${grep $1 "$ENV_FILE" | xargs}"
   IFS="=" read -ra VAR <<< "$VAR"
-  echo ${VAR[1]}
+  echo "${VAR[1]}"
 }
