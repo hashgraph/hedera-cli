@@ -5,7 +5,7 @@ source ./blackbox/read_var.sh
 expect << EOF
 set timeout -1
 
-spawn $(read_var EXEC_JAR) -X account info $(read_var TEST_ACCOUNT_ID)
+spawn $EXEC_JAR -X account info $TEST_ACCOUNT_ID
 
 expect "{
   \"key\" :*,

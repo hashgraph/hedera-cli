@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-source ./blackbox/read_var.sh
 expect <<EOF
 set timeout -1
 
-spawn $(read_var EXEC_JAR) -X setup
+spawn $EXEC_JAR -X setup
 
 if {[file exists [file join ~/.hedera/testnet/accounts/default.txt]]} {
     expect "You have already setup a default Hedera account."
