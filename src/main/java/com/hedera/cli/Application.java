@@ -20,12 +20,14 @@ public class Application {
         WebApplicationType webEnvironment = WebApplicationType.NONE;
         NonREPLHelper.putCache("X", "true");
         for (String arg: args) {
+            boolean S = "-S".equals(arg);
+            boolean X = "-X".equals(arg);
             // if user specifies -X or -S, we will set cli execution to non-interactive mode (mode = false)
-            if ("-X".equals(arg) || "-S".equals(arg)) {
+            if (X || S) {
                 NonREPLHelper.putCache("X", "false");
                 bannerMode = false;
             }
-            if ("-S".equals(arg)) {
+            if (S) {
                 webEnvironment = WebApplicationType.SERVLET;
             }
         }
