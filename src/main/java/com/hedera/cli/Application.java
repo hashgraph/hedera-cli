@@ -15,29 +15,40 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan("com.hedera.cli")
 public class Application {
     public static void main(String[] args) {
-        // by default, cli executes in interactive mode (mode = true)
-        boolean bannerMode = true;
-        WebApplicationType webEnvironment = WebApplicationType.NONE;
+        // using args, determine banner mode (LOG or OFF) and web application type (NONE or SERVLET)
+        Banner.Mode bannerMode = determineBannerMode(args);
+        WebApplicationType webApplicationType = determineWebApplicationType(args);       
+        
+        // Set the banner mode and application type types to our app
+        SpringApplication app = new SpringApplicationBuilder(Application.class)
+            .bannerMode(bannerMode)
+            .web(webApplicationType)
+            .build();
+        app.run(args);
+    }
+
+    private static Banner.Mode determineBannerMode(String[] args) {
         NonREPLHelper.putCache("X", "true");
+        Banner.Mode bannerMode = Banner.Mode.CONSOLE;
         for (String arg: args) {
             boolean S = "-S".equals(arg);
             boolean X = "-X".equals(arg);
-            // if user specifies -X or -S, we will set cli execution to non-interactive mode (mode = false)
             if (X || S) {
                 NonREPLHelper.putCache("X", "false");
-                bannerMode = false;
+                bannerMode = Banner.Mode.OFF;
             }
+        }
+        return bannerMode;
+    }
+
+    private static WebApplicationType determineWebApplicationType(String[] args) {
+        WebApplicationType webEnvironment = WebApplicationType.NONE;    
+        for (String arg: args) {
+            boolean S = "-S".equals(arg);
             if (S) {
                 webEnvironment = WebApplicationType.SERVLET;
             }
         }
- 
-        SpringApplicationBuilder appBuilder = new SpringApplicationBuilder(Application.class);
-        SpringApplication app = appBuilder.build();
-        if (!bannerMode) {
-            app.setBannerMode(Banner.Mode.OFF);
-        }
-        app.setWebApplicationType(webEnvironment);
-        app.run(args);
+        return webEnvironment;
     }
 }
