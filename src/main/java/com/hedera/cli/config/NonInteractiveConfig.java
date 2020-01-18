@@ -73,7 +73,6 @@ class LocalServer implements ApplicationRunner {
         List<String> nonOptionArgs = args.getNonOptionArgs();
         if (nonOptionArgs.get(0).equals("-X")) {
             // when -X option is provided, do not run local server
-            System.exit(0);
             return;
         }
     }
@@ -98,7 +97,7 @@ class ExampleCommandLineRunner implements CommandLineRunner {
         List<String> commandsToRun = Arrays.asList("quit");
 
         // flag can be -S or -X
-        if (flag.equals("-X")) {
+        if ("-X".equals(flag)) {
             allArgs.remove(0);
             String[] commands = allArgs.toArray(new String[0]);
             commandsToRun = Arrays.stream(commands).filter(w -> !w.startsWith("@")).collect(Collectors.toList());            

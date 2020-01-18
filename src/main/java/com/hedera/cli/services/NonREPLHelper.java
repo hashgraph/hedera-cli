@@ -22,7 +22,7 @@ public class NonREPLHelper {
         for (Map.Entry<String, String> entry : cache.entrySet()) {
             String k = entry.getKey();
             String v = entry.getValue();
-            if ((k.equals("X") && v.equals("false")) || k.equals("S")) {
+            if (("X".equals(k) && "false".equals(v)) || "S".equals(k)) {
                 mode = false;
             }
         }
