@@ -3,6 +3,7 @@ package com.hedera.cli.config;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.hedera.cli.shell.ShellHelper;
 
@@ -35,7 +36,6 @@ public class NonInteractiveConfig {
 
     @Bean
     public CommandLineRunner exampleCommandLineRunner(ConfigurableEnvironment environment) {
-        System.out.println(1);
         return new ExampleCommandLineRunner(shell, environment);
     }
 
@@ -70,8 +70,12 @@ public class NonInteractiveConfig {
 class LocalServer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        System.out.println(args.getNonOptionArgs());
-        System.out.println("Running local server");
+        List<String> nonOptionArgs = args.getNonOptionArgs();
+        if (nonOptionArgs.get(0).equals("-X")) {
+            // when -X option is provided, do not run local server
+            System.exit(0);
+            return;
+        }
     }
 }
 
@@ -89,23 +93,20 @@ class ExampleCommandLineRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // remove the first element ("-X")
-        // System.exit(0);
         List<String> allArgs = new LinkedList<String>(Arrays.asList(args));
-        if (allArgs.get(0).equals("-S")) {
-            List<String> commandsToRun = Arrays.asList("quit");
-            // if (!commandsToRun.isEmpty()) {
-                InteractiveShellApplicationRunner.disable(environment);
-                shell.run(new StringInputProvider(commandsToRun));
-        }
-        // allArgs.remove(0);
-        // String[] commands = allArgs.toArray(new String[0]);
-        // List<String> commandsToRun = Arrays.stream(commands).filter(w -> !w.startsWith("@")).collect(Collectors.toList());
-        // if (!commandsToRun.isEmpty()) {
-            // InteractiveShellApplicationRunner.disable(environment);
-            // shell.run(new StringInputProvider(commandsToRun));
-        // }
-        System.out.println("moving on to run local server");
+        String flag = allArgs.get(0);
+        List<String> commandsToRun = Arrays.asList("quit");
+
+        // flag can be -S or -X
+        if (flag.equals("-X")) {
+            allArgs.remove(0);
+            String[] commands = allArgs.toArray(new String[0]);
+            commandsToRun = Arrays.stream(commands).filter(w -> !w.startsWith("@")).collect(Collectors.toList());            
+        } 
+
+        // either run quit (-S) or actually execute the commands (-X)
+        InteractiveShellApplicationRunner.disable(environment);
+        shell.run(new StringInputProvider(commandsToRun));
     }
 
 }
