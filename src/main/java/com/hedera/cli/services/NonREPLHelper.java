@@ -20,10 +20,9 @@ public class NonREPLHelper {
     public static boolean getInteractiveMode() {
         boolean mode = true;
         for (Map.Entry<String, String> entry : cache.entrySet()) {
-            if (entry.getKey().equals("X") && entry.getValue().equals("false")) {
-                mode = false;
-            }
-            if (entry.getKey().equals("S")) {
+            String k = entry.getKey();
+            String v = entry.getValue();
+            if ((k.equals("X") && v.equals("false")) || k.equals("S")) {
                 mode = false;
             }
         }
