@@ -16,6 +16,7 @@ import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.file.FileCreateTransaction;
+import com.hedera.hashgraph.sdk.file.FileId;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -117,29 +118,30 @@ public class FileCreate implements Runnable {
             boolean testSize = false;
             if (testSize) {
                 // This is to test the file size, by parsing in -b=100, it creates file contents on 100bytes
-                var fileContentsTestSize = stringOfNBytes(fileSizeByte).getBytes();
-                tx = new FileCreateTransaction(client)
+                byte[] fileContentsTestSize = stringOfNBytes(fileSizeByte).getBytes();
+                tx = new FileCreateTransaction()
                         .setTransactionId(transactionId)
                         .setExpirationTime(instant)
                         // Use the same key as the operator to "own" this file
-                        .addKey(operatorKey.getPublicKey())
+                        .addKey(operatorKey.publicKey)
                         .setContents(fileContentsTestSize)
-                        .setTransactionFee(maxTransactionFee);
+                        .setMaxTransactionFee(maxTransactionFee);
             } else {
                 // The file is required to be a byte array,
                 // you can easily use the bytes of a file instead.
-                var fileContents = stringArrayToString(fileContentsInString).getBytes();
-                tx = new FileCreateTransaction(client)
+                byte[] fileContents = stringArrayToString(fileContentsInString).getBytes();
+                tx = new FileCreateTransaction()
                         .setTransactionId(transactionId)
                         .setExpirationTime(instant)
                         // Use the same key as the operator to "own" this file
-                        .addKey(operatorKey.getPublicKey())
+                        .addKey(operatorKey.publicKey)
                         .setContents(fileContents)
-                        .setTransactionFee(maxTransactionFee);
+                        .setMaxTransactionFee(maxTransactionFee);
             }
             // This will wait for the receipt to become available
-            TransactionReceipt receipt = tx.executeForReceipt();
-            var newFileId = receipt.getFileId();
+            TransactionId txId = tx.execute(client);
+            TransactionReceipt receipt = txId.getReceipt(client);
+            FileId newFileId = receipt.getFileId();
             shellHelper.print("file: " + newFileId);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

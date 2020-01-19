@@ -8,7 +8,6 @@ import java.util.concurrent.TimeoutException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.validation.ValidateAccounts;
@@ -18,13 +17,16 @@ import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.PreviewTransferList;
 import com.hedera.cli.models.TransactionManager;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.proto.ResponseCodeEnum;
 import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.HederaException;
+import com.hedera.hashgraph.sdk.Hbar;
+import com.hedera.hashgraph.sdk.HederaStatusException;
 import com.hedera.hashgraph.sdk.Transaction;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.TransactionRecord;
 import com.hedera.hashgraph.sdk.TransactionRecordQuery;
+import com.hedera.hashgraph.sdk.account.AccountBalanceQuery;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -138,7 +140,7 @@ public class CryptoTransfer implements Runnable {
         // this triggers this.run()
     }
 
-    public void reviewAndExecute(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
+    public void reviewAndExecute(AccountId operatorId) throws HederaStatusException, TimeoutException, InterruptedException {
         // transfer preview for user
         Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap();
         memoString = accountManager.promptMemoString(inputReader);
@@ -151,7 +153,7 @@ public class CryptoTransfer implements Runnable {
     }
 
     private void handlePromptPreview(AccountId operatorId, Map<Integer, PreviewTransferList> map)
-            throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
+            throws HederaStatusException, TimeoutException, InterruptedException {
         isInfoCorrect = promptPreview(operatorId, map);
         if ("yes".equals(isInfoCorrect)) {
             shellHelper.print("Info is correct, senders will need to sign the transaction to release funds");
@@ -183,7 +185,7 @@ public class CryptoTransfer implements Runnable {
         return cryptoTransferTransaction;
     }
 
-    public void executeCryptoTransfer(AccountId operatorId) throws InvalidProtocolBufferException, TimeoutException, InterruptedException {
+    public void executeCryptoTransfer(AccountId operatorId) throws HederaStatusException, TimeoutException, InterruptedException {
         transactionId = new TransactionId(operatorId);
         senderList = validateAccounts.getSenderList(o);
         setSenderList(senderList);
@@ -199,30 +201,31 @@ public class CryptoTransfer implements Runnable {
         // SDK throws "java.lang.IllegalStateException: transaction builder failed
         // validation: at least one transfer required "
         client = hedera.createHederaClient();
-        cryptoTransferTransaction = new CryptoTransferTransaction(client);
-        cryptoTransferTransaction.setMemo(memoString);
+
+        cryptoTransferTransaction = new CryptoTransferTransaction();
+        cryptoTransferTransaction.setTransactionMemo(memoString);
         cryptoTransferTransaction.setTransactionId(transactionId);
         cryptoTransferTransaction = addTransferList();
         byte[] signedTxnBytes = signAndCreateTxBytesWithOperator();
+        cryptoTransferTransaction.execute(client);
         
         try {
-            TransactionReceipt transactionReceipt = Transaction.fromBytes(client, signedTxnBytes).executeForReceipt();
-            if (transactionReceipt.getStatus().toString().equals("SUCCESS")) {
+            TransactionReceipt receipt = transactionId.getReceipt(client);
+            if (receipt.status.code == ResponseCodeEnum.SUCCESS_VALUE) {
                 printAndSaveRecords(client, transactionId, operatorId);
             }
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
-        } finally {
-            client.close();
         }
+
     }
 
-    private byte[] signAndCreateTxBytesWithOperator() throws InvalidProtocolBufferException {
+    private byte[] signAndCreateTxBytesWithOperator() {
         byte[] signedTxnBytes = new byte[0];
         for (int i = 0; i < senderList.size(); i++) {
             String sender = senderList.get(i);
             if (sender.equals(hedera.getOperatorId().toString())) {
-                signedTxnBytes = cryptoTransferTransaction.toBytes();
+                signedTxnBytes = cryptoTransferTransaction.toString().getBytes();
             } else {
                 signedTxnBytes = signAndCreateTxBytesWithPrivateKey(sender);
             }
@@ -239,7 +242,11 @@ public class CryptoTransfer implements Runnable {
         
         try {
             Ed25519PrivateKey senderPrivKey = Ed25519PrivateKey.fromString(senderPrivKeyInString);
-            return Transaction.fromBytes(cryptoTransferTransaction.toBytes()).sign(senderPrivKey).toBytes();
+            byte[] signedBytes = cryptoTransferTransaction.build(client).sign(senderPrivKey).toBytes();
+            // byte[] cryptoTransferTxBytes = cryptoTransferTransaction.toString().getBytes();
+            // Transaction cryptoTransferTx = Transaction.fromBytes(cryptoTransferTxBytes);
+            // byte[] cryptoTransferTxBytesSigned = cryptoTransferTx.sign(senderPrivKey).toBytes();
+            return signedBytes;
         } catch (Exception e) {
             shellHelper.printError("Private key is not in the right ED25519 string format");
             return null;
@@ -281,10 +288,12 @@ public class CryptoTransfer implements Runnable {
     }
 
     private void printAndSaveRecords(Client client, TransactionId transactionId, AccountId operatorId)
-            throws HederaException, JsonProcessingException {
+            throws HederaStatusException, JsonProcessingException {
         TransactionRecord record;
-        record = new TransactionRecordQuery(client).setTransactionId(transactionId).setPaymentDefault(5000000)
-                .execute();
+        record = new TransactionRecordQuery()
+            .setTransactionId(transactionId)
+            .setMaxQueryPayment(5000000)
+            .execute(client);
         printBalance(client, operatorId);
         // save all transaction record into
         // ~/.hedera/[network_name]/transaction/[file_name].json
@@ -296,7 +305,10 @@ public class CryptoTransfer implements Runnable {
     private void printBalance(Client client, AccountId operatorId) {
         try {
             shellHelper.printInfo("transferring...");
-            long operatorBalanceAfter = client.getAccountBalance(operatorId);
+            Hbar balance = new AccountBalanceQuery()
+                .setAccountId(operatorId)
+                .execute(client);
+            long operatorBalanceAfter = balance.asTinybar();
             // Get balance is always free, does not require any keys
             shellHelper.print(operatorId + " operator balance AFTER = " + operatorBalanceAfter);
         } catch (Exception e) {

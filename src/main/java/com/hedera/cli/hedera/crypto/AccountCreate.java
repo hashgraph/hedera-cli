@@ -84,7 +84,7 @@ public class AccountCreate implements Runnable, Operation {
             HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
             List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
             KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
-            var newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
+            Ed25519PublicKey newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
             accountId = hederaGrpc.createNewAccount(newPublicKey, hedera.getOperatorId(), initBal);
             if (accountId != null && keypair != null) {
                 account = hederaGrpc.printAccount(accountId.toString(), keypair.getPrivateKeyHex(),
@@ -95,8 +95,8 @@ public class AccountCreate implements Runnable, Operation {
         } else {
             // Else keyGen always set to false and read from default.txt which contains
             // operator keys
-            var operatorPrivateKey = hedera.getOperatorKey();
-            var operatorPublicKey = operatorPrivateKey.getPublicKey();
+            Ed25519PrivateKey operatorPrivateKey = hedera.getOperatorKey();
+            Ed25519PublicKey operatorPublicKey = operatorPrivateKey.publicKey;
             accountId = hederaGrpc.createNewAccount(operatorPublicKey, hedera.getOperatorId(), initBal);
             if (operatorPrivateKey != null && operatorPublicKey != null && accountId != null) {
                 // save to local disk

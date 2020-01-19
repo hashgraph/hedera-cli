@@ -45,7 +45,7 @@ public class TransactionManager {
         for (String s : dateInString) {
             sb.append(s).append(" ");
         }
-        String dateString = sb.toString().stripTrailing();
+        String dateString = sb.toString().trim();
         System.out.println(dateString);
         SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Date date = formatter.parse(dateString);
@@ -54,28 +54,28 @@ public class TransactionManager {
     }
 
     public void saveTransactionRecord(TransactionRecord record) throws JsonProcessingException {
-        shellHelper.printSuccess("Transfer receipt status: " + record.getReceipt().getStatus());
-        shellHelper.printSuccess("Transfer transaction fee: " + record.getTransactionFee());
-        shellHelper.printSuccess("Transfer consensus timestamp: " + record.getConsensusTimestamp());
-        shellHelper.printSuccess("Transfer memo: " + record.getMemo());
+        shellHelper.printSuccess("Transfer receipt status: " + record.receipt.status.toString());
+        shellHelper.printSuccess("Transfer transaction fee: " + record.transactionFee);
+        shellHelper.printSuccess("Transfer consensus timestamp: " + record.consensusTimestamp.toString());
+        shellHelper.printSuccess("Transfer memo: " + record.transactionMemo);
 
-        String txID = this.printTransactionId(record.getTransactionId());
+        String txID = this.printTransactionId(record.transactionId);
 
         TransactionObj txObj = new TransactionObj();
         txObj.setTxID(txID);
-        txObj.setTxMemo(record.getMemo());
-        txObj.setTxFee(record.getTransactionFee());
-        txObj.setTxConsensusTimestamp(record.getConsensusTimestamp());
-        txObj.setTxValidStart(record.getTransactionId().getValidStart().getEpochSecond() + "-"
-                + record.getTransactionId().getValidStart().getNano());
+        txObj.setTxMemo(record.transactionMemo);
+        txObj.setTxFee(record.transactionFee);
+        txObj.setTxConsensusTimestamp(record.consensusTimestamp);
+        txObj.setTxValidStart(record.transactionId.validStart.getEpochSecond() + "-"
+                + record.transactionId.validStart.getNano());
 
         this.saveTransactionsToJson(txID, txObj);
     }
 
     private String printTransactionId(TransactionId transactionId) {
-        String txTimestamp = transactionId.getValidStart().getEpochSecond() + "-"
-                + transactionId.getValidStart().getNano();
-        String txID = transactionId.getAccountId().toString() + "-" + txTimestamp;
+        String txTimestamp = transactionId.validStart.getEpochSecond() + "-"
+                + transactionId.validStart.getNano();
+        String txID = transactionId.accountId.toString() + "-" + txTimestamp;
         shellHelper.printSuccess("TransactionID : " + txID);
         return txID;
     }

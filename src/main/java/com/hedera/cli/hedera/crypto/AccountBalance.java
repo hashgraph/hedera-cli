@@ -5,6 +5,8 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.Hbar;
+import com.hedera.hashgraph.sdk.account.AccountBalanceQuery;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,7 +51,10 @@ public class AccountBalance implements Runnable, Operation {
     public long getBalance() {
         long balance = 0;
         try (Client client = hedera.createHederaClient()) {
-            balance = client.getAccountBalance(AccountId.fromString(accountIdInString));
+            Hbar balanceHbar = new AccountBalanceQuery()
+                .setAccountId(AccountId.fromString(accountIdInString))
+                .execute(client);
+            balance = balanceHbar.asTinybar();
             shellHelper.printSuccess("Balance: " + balance);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

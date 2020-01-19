@@ -64,7 +64,7 @@ public class AccountManager {
         JsonObject account = new JsonObject();
         account.add("accountId", accountId);
         account.add("privateKey", privateKey.toString());
-        account.add("publicKey", privateKey.getPublicKey().toString());
+        account.add("publicKey", privateKey.publicKey.toString());
         return account;
     }
 
