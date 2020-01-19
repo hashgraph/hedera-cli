@@ -201,44 +201,44 @@ public class CryptoTransferTest {
     //     assertEquals(cryptoTransferTransaction, cryptoTransfer.getCryptoTransferTransaction());
     // }
 
-    // @Test
-    // public void transferListToPromptPreviewMap() {
-    //     when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
-    //     when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+    @Test
+    public void transferListToPromptPreviewMap() {
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
 
-    //     Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
-    //     PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
-    //     PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
-    //     PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
-    //     expectedMap.put(0, previewTransferList);
-    //     expectedMap.put(1, previewTransferList1);
-    //     expectedMap.put(2, previewTransferList2);
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
+        expectedMap.put(0, previewTransferList);
+        expectedMap.put(1, previewTransferList1);
+        expectedMap.put(2, previewTransferList2);
 
-    //     Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap();
-    //     assertEquals(expectedMap.get(0).getAccountId(), actualMap.get(0).getAccountId());
-    //     assertEquals(expectedMap.get(1).getAccountId(), actualMap.get(1).getAccountId());
-    //     assertEquals(expectedMap.get(2).getAccountId(), actualMap.get(2).getAccountId());
-    // }
+        Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap();
+        assertEquals(expectedMap.get(0).getAccountId(), actualMap.get(0).getAccountId());
+        assertEquals(expectedMap.get(1).getAccountId(), actualMap.get(1).getAccountId());
+        assertEquals(expectedMap.get(2).getAccountId(), actualMap.get(2).getAccountId());
+    }
 
-    // @Test
-    // public void transferListToPromptPreviewMapIsTiny() {
-    //     when(validateAmount.isTiny(any())).thenReturn(true);
-    //     when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
-    //     when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
+    @Test
+    public void transferListToPromptPreviewMapIsTiny() {
+        when(validateAmount.isTiny(any())).thenReturn(true);
+        when(validateAccounts.getTransferList(any())).thenReturn(expectedTransferList);
+        when(validateTransferList.getFinalAmountList(any())).thenReturn(expectedAmountList);
 
-    //     Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
-    //     PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
-    //     PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
-    //     PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
-    //     expectedMap.put(0, previewTransferList);
-    //     expectedMap.put(1, previewTransferList1);
-    //     expectedMap.put(2, previewTransferList2);
+        Map<Integer, PreviewTransferList> expectedMap = new HashMap<>();
+        PreviewTransferList previewTransferList = new PreviewTransferList(AccountId.fromString(sender), senderAmt);
+        PreviewTransferList previewTransferList1 = new PreviewTransferList(AccountId.fromString(recipient1), recipient1Amt);
+        PreviewTransferList previewTransferList2 = new PreviewTransferList(AccountId.fromString(recipient2), recipient2Amt);
+        expectedMap.put(0, previewTransferList);
+        expectedMap.put(1, previewTransferList1);
+        expectedMap.put(2, previewTransferList2);
 
-    //     Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap();
-    //     assertEquals(expectedMap.get(0).getAccountId(), actualMap.get(0).getAccountId());
-    //     assertEquals(expectedMap.get(1).getAccountId(), actualMap.get(1).getAccountId());
-    //     assertEquals(expectedMap.get(2).getAccountId(), actualMap.get(2).getAccountId());
-    // }
+        Map<Integer, PreviewTransferList> actualMap = cryptoTransfer.transferListToPromptPreviewMap();
+        assertEquals(expectedMap.get(0).getAccountId(), actualMap.get(0).getAccountId());
+        assertEquals(expectedMap.get(1).getAccountId(), actualMap.get(1).getAccountId());
+        assertEquals(expectedMap.get(2).getAccountId(), actualMap.get(2).getAccountId());
+    }
 
     // @Test
     // public void promptPreviewIncorrect() throws InterruptedException,
@@ -412,33 +412,33 @@ public class CryptoTransferTest {
     //     // verify(cryptoTransfer1).executeCryptoTransfer(any());
     // }
 
-    // @Test
-    // public void executeCryptoTransferValidateAmountFalse() {
-    //     dependent = new CryptoTransferOptions.Dependent();
-    //     dependent.setSkipPreview(true);
-    //     cryptoTransferOptions = new CryptoTransferOptions();
-    //     cryptoTransferOptions.setDependent(dependent);
-    //     cryptoTransfer.setO(cryptoTransferOptions);
+    @Test
+    public void executeCryptoTransferValidateAmountFalse() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
 
-    //     when(validateAmount.check(cryptoTransferOptions)).thenReturn(false);
-    //     cryptoTransfer.run();
-    //     verify(validateAmount, times(1)).check(cryptoTransferOptions);
-    //     verify(validateAccounts, times(0)).check(cryptoTransferOptions);
-    // }
+        when(validateAmount.check(cryptoTransferOptions)).thenReturn(false);
+        cryptoTransfer.run();
+        verify(validateAmount, times(1)).check(cryptoTransferOptions);
+        verify(validateAccounts, times(0)).check(cryptoTransferOptions);
+    }
 
-    // @Test
-    // public void executeCryptoTransferValidateAccounttFalse() {
-    //     dependent = new CryptoTransferOptions.Dependent();
-    //     dependent.setSkipPreview(true);
-    //     cryptoTransferOptions = new CryptoTransferOptions();
-    //     cryptoTransferOptions.setDependent(dependent);
-    //     cryptoTransfer.setO(cryptoTransferOptions);
+    @Test
+    public void executeCryptoTransferValidateAccounttFalse() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
 
-    //     when(validateAmount.check(cryptoTransferOptions)).thenReturn(true);
-    //     when(validateAccounts.check(cryptoTransferOptions)).thenReturn(false);
-    //     cryptoTransfer.run();
-    //     verify(validateAmount, times(1)).check(cryptoTransferOptions);
-    //     verify(validateAccounts, times(1)).check(cryptoTransferOptions);
-    //     verify(validateTransferList, times(0)).verifyAmountList(cryptoTransferOptions);
-    // }
+        when(validateAmount.check(cryptoTransferOptions)).thenReturn(true);
+        when(validateAccounts.check(cryptoTransferOptions)).thenReturn(false);
+        cryptoTransfer.run();
+        verify(validateAmount, times(1)).check(cryptoTransferOptions);
+        verify(validateAccounts, times(1)).check(cryptoTransferOptions);
+        verify(validateTransferList, times(0)).verifyAmountList(cryptoTransferOptions);
+    }
 }
