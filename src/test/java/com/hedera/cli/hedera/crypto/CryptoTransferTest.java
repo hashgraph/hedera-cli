@@ -40,8 +40,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 // @ExtendWith(MockitoExtension.class)
 public class CryptoTransferTest {
 
-    // @InjectMocks
-    // private CryptoTransfer cryptoTransfer;
+    @InjectMocks
+    private CryptoTransfer cryptoTransfer;
 
     // @Mock
     // private ShellHelper shellHelper;
