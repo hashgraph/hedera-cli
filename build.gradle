@@ -41,8 +41,7 @@ dependencies {
     implementation 'io.grpc:grpc-netty-shaded:1.24.0'
 
     // dependencies for crypto functions
-    // compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.60'
-    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.60'
+    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.64'
     compile group: 'net.i2p.crypto', name: 'eddsa', version: '0.3.0'
 
     // dotenv

@@ -90,22 +90,22 @@ public class AccountManagerTest {
         assertEquals("0.0.1234", accountId.toString());
     }
 
-    // @Test
-    // public void createAccountJsonWithPrivateKey() throws NoSuchMethodException, SecurityException,
-    //         IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    @Test
+    public void createAccountJsonWithPrivateKey() throws NoSuchMethodException, SecurityException,
+            IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-    //     KeyPair keypair = prepareKeyPair();
-    //     String privateKeyString = keypair.getPrivateKeyEncodedHex();
-    //     Ed25519PrivateKey privateKey = Ed25519PrivateKey.fromString(privateKeyString);
+        KeyPair keypair = prepareKeyPair();
+        String privateKeyString = keypair.getPrivateKeyEncodedHex();
+        Ed25519PrivateKey privateKey = Ed25519PrivateKey.fromString(privateKeyString);
 
-    //     Method method = accountManager.getClass().getDeclaredMethod("createAccountJsonWithPrivateKey", String.class, Ed25519PrivateKey.class);
-    //     method.setAccessible(true);
-    //     JsonObject account = (JsonObject) method.invoke(accountManager, "0.0.1001", privateKey);
-    //     method.setAccessible(false);
+        Method method = accountManager.getClass().getDeclaredMethod("createAccountJsonWithPrivateKey", String.class, Ed25519PrivateKey.class);
+        method.setAccessible(true);
+        JsonObject account = (JsonObject) method.invoke(accountManager, "0.0.1001", privateKey);
+        method.setAccessible(false);
 
-    //     assertEquals("0.0.1001", account.get("accountId").asString());
-    //     assertEquals(privateKeyString, account.get("privateKey").asString());
-    // }
+        assertEquals("0.0.1001", account.get("accountId").asString());
+        assertEquals(privateKeyString, account.get("privateKey").asString());
+    }
 
     @Test
     public void createAccountJsonWithKeyPair() throws NoSuchMethodException, SecurityException, IllegalAccessException,
@@ -174,19 +174,20 @@ public class AccountManagerTest {
         assertEquals(expected, actual);
     }
 
-    // @Test
-    // public void setDefaultAccountIdWithPrivateKey() {
-    //     KeyPair keypair = prepareKeyPair();
-    //     String privateKeyString = keypair.getPrivateKeyEncodedHex();
-    //     Ed25519PrivateKey privateKey = Ed25519PrivateKey.fromString(privateKeyString);
+    @Test
+    public void setDefaultAccountIdWithPrivateKey() {
+        assertNotNull(1);
+        KeyPair keypair = prepareKeyPair();
+        String privateKeyString = keypair.getPrivateKeyEncodedHex();
+        Ed25519PrivateKey privateKey = Ed25519PrivateKey.fromString(privateKeyString);
 
-    //     accountManager.setDefaultAccountId(AccountId.fromString("0.0.1001"), privateKey);
-    //     ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-    //     verify(shellHelper).printInfo(valueCapture.capture());
-    //     String actual = valueCapture.getValue();
-    //     String expected = "0.0.1001 saved";
-    //     assertEquals(expected, actual);
-    // }
+        accountManager.setDefaultAccountId(AccountId.fromString("0.0.1001"), privateKey);
+        ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        verify(shellHelper).printInfo(valueCapture.capture());
+        String actual = valueCapture.getValue();
+        String expected = "0.0.1001 saved";
+        assertEquals(expected, actual);
+    }
 
     private KeyPair prepareKeyPair() {
         KeyGeneration keyGeneration = new KeyGeneration("bip");
