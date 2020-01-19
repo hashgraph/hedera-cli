@@ -37,36 +37,37 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-// @ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class CryptoTransferTest {
 
     @InjectMocks
     private CryptoTransfer cryptoTransfer;
 
-    // @Mock
-    // private ShellHelper shellHelper;
+    @Mock
+    private ShellHelper shellHelper;
 
-    // @Mock
-    // private AccountManager accountManager;
+    @Mock
+    private AccountManager accountManager;
 
-    // @Mock
-    // private ValidateAmount validateAmount;
+    @Mock
+    private ValidateAmount validateAmount;
 
-    // @Mock
-    // private ValidateAccounts validateAccounts;
+    @Mock
+    private ValidateAccounts validateAccounts;
 
-    // @Mock
-    // private ValidateTransferList validateTransferList;
+    @Mock
+    private ValidateTransferList validateTransferList;
 
-    // @Mock
-    // private Hedera hedera;
+    @Mock
+    private Hedera hedera;
 
-    // @Mock
-    // private InputReader inputReader;
+    @Mock
+    private InputReader inputReader;
 
-    // @Mock
-    // private TransactionManager transactionManager;
+    @Mock
+    private TransactionManager transactionManager;
 
+    // cannot mock this
     // @Mock
     // private CryptoTransferTransaction cryptoTransferTransaction;
 
@@ -88,114 +89,110 @@ public class CryptoTransferTest {
     private String tinybarListArgs;
     private AccountId operatorId;
 
-    @Test
-    public void randomTest() {
-        assertNotNull(1);
+    @BeforeEach
+    public void setUp() {
+        sender = "0.0.1001";
+        senderList = new ArrayList<>();
+        senderList.add(sender);
+
+        recipient1 = "0.0.1002";
+        recipient2 = "0.0.1003";
+        recipientList = new ArrayList<>();
+        recipientList.add(recipient1);
+        recipientList.add(recipient2);
+
+        senderAmt = "-1400";
+        recipient1Amt = "1000";
+        recipient2Amt = "400";
+
+        tinybarListArgs = senderAmt + "," + recipient1Amt + "," + recipient2Amt;
+        senderListArgs = sender;
+        recipientListArgs = recipient1 + "," + recipient2;
+
+        expectedAmountList = new ArrayList<>();
+        expectedAmountList.add(senderAmt);
+        expectedAmountList.add(recipient1Amt);
+        expectedAmountList.add(recipient2Amt);
+
+        expectedTransferList = new ArrayList<>();
+        expectedTransferList.add(sender);
+        expectedTransferList.add(recipient1);
+        expectedTransferList.add(recipient2);
+
+        someMemo = "some memo";
+
+        operatorId = hedera.getOperatorId();
     }
 
-    // @BeforeEach
-    // public void setUp() {
-    //     sender = "0.0.1001";
-    //     senderList = new ArrayList<>();
-    //     senderList.add(sender);
+    @Test
+    public void dependenciesExist() {
+        cryptoTransfer.setShellHelper(shellHelper);
+        assertEquals(shellHelper, cryptoTransfer.getShellHelper());
+        cryptoTransfer.setAccountManager(accountManager);
+        assertEquals(accountManager, cryptoTransfer.getAccountManager());
+        cryptoTransfer.setHedera(hedera);
+        assertEquals(hedera, cryptoTransfer.getHedera());
+        cryptoTransfer.setInputReader(inputReader);
+        assertEquals(inputReader, cryptoTransfer.getInputReader());
+        cryptoTransfer.setTransactionManager(transactionManager);
+        assertEquals(transactionManager, cryptoTransfer.getTransactionManager());
+        cryptoTransfer.setO(cryptoTransferOptions);
+        assertEquals(cryptoTransferOptions, cryptoTransfer.getO());
+        cryptoTransfer.setValidateAccounts(validateAccounts);
+        assertEquals(validateAccounts, cryptoTransfer.getValidateAccounts());
+        cryptoTransfer.setValidateAmount(validateAmount);
+        assertEquals(validateAmount, cryptoTransfer.getValidateAmount());
+        cryptoTransfer.setValidateTransferList(validateTransferList);
+        assertEquals(validateTransferList, cryptoTransfer.getValidateTransferList());
+    }
 
-    //     recipient1 = "0.0.1002";
-    //     recipient2 = "0.0.1003";
-    //     recipientList = new ArrayList<>();
-    //     recipientList.add(recipient1);
-    //     recipientList.add(recipient2);
+    @Test
+    public void settersAndGetters() {
+        cryptoTransfer.setMemoString("hello");
+        assertEquals("hello", cryptoTransfer.getMemoString());
+        cryptoTransfer.setSenderList(senderList);
+        assertEquals(senderList, cryptoTransfer.getSenderList());
+        cryptoTransfer.setRecipientList(recipientList);
+        assertEquals(recipientList, cryptoTransfer.getRecipientList());
+        cryptoTransfer.setAmountList(expectedAmountList);
+        assertEquals(expectedAmountList, cryptoTransfer.getAmountList());
+        cryptoTransfer.setClient(hedera.createHederaClient());
+        assertEquals(hedera.createHederaClient(), cryptoTransfer.getClient());
+        cryptoTransfer.setIsInfoCorrect("yes");
+        assertEquals("yes", cryptoTransfer.getIsInfoCorrect());
+        cryptoTransfer.setAccount(AccountId.fromString(sender));
+        assertEquals(AccountId.fromString(sender), cryptoTransfer.getAccount());
+        cryptoTransfer.setSenderListArgs(senderListArgs);
+        assertEquals(senderListArgs, cryptoTransfer.getSenderListArgs());
+        cryptoTransfer.setRecipientListArgs(recipientListArgs);
+        assertEquals(recipientListArgs, cryptoTransfer.getRecipientListArgs());
+        cryptoTransfer.setTinybarListArgs(tinybarListArgs);
+        assertEquals(tinybarListArgs, cryptoTransfer.getTinybarListArgs());
+    }
 
-    //     senderAmt = "-1400";
-    //     recipient1Amt = "1000";
-    //     recipient2Amt = "400";
+    @Test
+    public void isSkipPreviewTrue() {
+        dependent = new CryptoTransferOptions.Dependent();
+        dependent.setSkipPreview(true);
+        cryptoTransferOptions = new CryptoTransferOptions();
+        cryptoTransferOptions.setDependent(dependent);
+        cryptoTransfer.setO(cryptoTransferOptions);
+        assertTrue(cryptoTransfer.isSkipPreview());
+    }
 
-    //     tinybarListArgs = senderAmt + "," + recipient1Amt + "," + recipient2Amt;
-    //     senderListArgs = sender;
-    //     recipientListArgs = recipient1 + "," + recipient2;
+    @Test
+    public void isTinyFalse() {
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(false);
+        assertFalse(cryptoTransfer.isTiny());
+    }
 
-    //     expectedAmountList = new ArrayList<>();
-    //     expectedAmountList.add(senderAmt);
-    //     expectedAmountList.add(recipient1Amt);
-    //     expectedAmountList.add(recipient2Amt);
+    @Test
+    public void isTinyTrue() {
+        when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
+        assertTrue(cryptoTransfer.isTiny());
+    }
 
-    //     expectedTransferList = new ArrayList<>();
-    //     expectedTransferList.add(sender);
-    //     expectedTransferList.add(recipient1);
-    //     expectedTransferList.add(recipient2);
-
-    //     someMemo = "some memo";
-
-    //     operatorId = hedera.getOperatorId();
-    // }
-
-    // @Test
-    // public void dependenciesExist() {
-    //     cryptoTransfer.setShellHelper(shellHelper);
-    //     assertEquals(shellHelper, cryptoTransfer.getShellHelper());
-    //     cryptoTransfer.setAccountManager(accountManager);
-    //     assertEquals(accountManager, cryptoTransfer.getAccountManager());
-    //     cryptoTransfer.setHedera(hedera);
-    //     assertEquals(hedera, cryptoTransfer.getHedera());
-    //     cryptoTransfer.setInputReader(inputReader);
-    //     assertEquals(inputReader, cryptoTransfer.getInputReader());
-    //     cryptoTransfer.setTransactionManager(transactionManager);
-    //     assertEquals(transactionManager, cryptoTransfer.getTransactionManager());
-    //     cryptoTransfer.setO(cryptoTransferOptions);
-    //     assertEquals(cryptoTransferOptions, cryptoTransfer.getO());
-    //     cryptoTransfer.setValidateAccounts(validateAccounts);
-    //     assertEquals(validateAccounts, cryptoTransfer.getValidateAccounts());
-    //     cryptoTransfer.setValidateAmount(validateAmount);
-    //     assertEquals(validateAmount, cryptoTransfer.getValidateAmount());
-    //     cryptoTransfer.setValidateTransferList(validateTransferList);
-    //     assertEquals(validateTransferList, cryptoTransfer.getValidateTransferList());
-    // }
-
-    // @Test
-    // public void settersAndGetters() {
-    //     cryptoTransfer.setMemoString("hello");
-    //     assertEquals("hello", cryptoTransfer.getMemoString());
-    //     cryptoTransfer.setSenderList(senderList);
-    //     assertEquals(senderList, cryptoTransfer.getSenderList());
-    //     cryptoTransfer.setRecipientList(recipientList);
-    //     assertEquals(recipientList, cryptoTransfer.getRecipientList());
-    //     cryptoTransfer.setAmountList(expectedAmountList);
-    //     assertEquals(expectedAmountList, cryptoTransfer.getAmountList());
-    //     cryptoTransfer.setClient(hedera.createHederaClient());
-    //     assertEquals(hedera.createHederaClient(), cryptoTransfer.getClient());
-    //     cryptoTransfer.setIsInfoCorrect("yes");
-    //     assertEquals("yes", cryptoTransfer.getIsInfoCorrect());
-    //     cryptoTransfer.setAccount(AccountId.fromString(sender));
-    //     assertEquals(AccountId.fromString(sender), cryptoTransfer.getAccount());
-    //     cryptoTransfer.setSenderListArgs(senderListArgs);
-    //     assertEquals(senderListArgs, cryptoTransfer.getSenderListArgs());
-    //     cryptoTransfer.setRecipientListArgs(recipientListArgs);
-    //     assertEquals(recipientListArgs, cryptoTransfer.getRecipientListArgs());
-    //     cryptoTransfer.setTinybarListArgs(tinybarListArgs);
-    //     assertEquals(tinybarListArgs, cryptoTransfer.getTinybarListArgs());
-    // }
-
-    // @Test
-    // public void isSkipPreviewTrue() {
-    //     dependent = new CryptoTransferOptions.Dependent();
-    //     dependent.setSkipPreview(true);
-    //     cryptoTransferOptions = new CryptoTransferOptions();
-    //     cryptoTransferOptions.setDependent(dependent);
-    //     cryptoTransfer.setO(cryptoTransferOptions);
-    //     assertTrue(cryptoTransfer.isSkipPreview());
-    // }
-
-    // @Test
-    // public void isTinyFalse() {
-    //     when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(false);
-    //     assertFalse(cryptoTransfer.isTiny());
-    // }
-
-    // @Test
-    // public void isTinyTrue() {
-    //     when(validateAmount.isTiny(cryptoTransferOptions)).thenReturn(true);
-    //     assertTrue(cryptoTransfer.isTiny());
-    // }
-
+    // FIX THIS
     // @Test
     // public void addTransferList() {
     //     cryptoTransfer.setFinalAmountList(expectedAmountList);
