@@ -1,18 +1,6 @@
 #!/usr/bin/expect
 
 set timeout -1
-set val "blah"
-puts $val
-
-# x=$(expect -c 'send \"hello\"; exit 5;')
-# echo $?; 
-# echo "heee"
-# echo $x
-
-# y=$(expect -c 'expect <<
-# puts \"world\"
-# ')
-# echo $y
 
 # create a new account for it to be deleted afterwards
 set EXEC_JAR "$env(EXEC_JAR)"
@@ -24,13 +12,14 @@ set responseList [split $accounts "\n"]
 
 set i 0
 foreach j $responseList {
-    if {$i == 2} {
-        # puts "We found our accountId $j"
+    # accountId exists
+    if {$i == 2 && [regexp "accountId" $j]} {
         set accountIdList [split $j "\"*\""]
         set accountId [lindex $accountIdList 3]
         puts $accountId
     } 
-    if {$i == 3} {
+    # privateKey exists
+    if {$i == 3 && [regexp "privateKey" $j]} {
         set privateKeyList [split $j "\"*\""]
         set privateKey [lindex $privateKeyList 3]
         puts $privateKey
@@ -38,32 +27,20 @@ foreach j $responseList {
     incr i
 }
 
-# set testRegMatch "will any of these match? \n or will it exist here?"
-# if {[regexp "match" $testRegMatch]} {
-#     puts "hello"
-# } else {
-#     puts "nope, not matched"
-# }
+# delete the account
+set TEST_ACCOUNT_ID "$env(TEST_ACCOUNT_ID)"
+spawn $EXEC_JAR -X account delete -o $accountId -n $TEST_ACCOUNT_ID
+expect "Enter the private key of the account to be deleted: "
+send "$privateKey\r"
 
-# set val $expect_out(0,string)
-## prints whether or not this is a command
-# puts $accounts
-# prints another time when there are 2 $val puts command not sure why 
-# puts $val
+expect "Account to be deleted: $accountId\n
+Funds from deleted account to be transferred to: $TEST_ACCOUNT_ID\n
+\n
+Is this correct?\n
+yes/no: "
+send "yes\r"
 
-# set acc | grep -P (?<="\"accountId\" : ")
-# puts $acc
-
-# foreach item $parameters {
-#   if {[regexp "var1\\s*=\\s*(\\w+);" $item wholeMatch myVal]} {
-#        break
-#   }
-# }
-# puts "value is '$myVal'"
-
-
-# # # delete the account
-# # spawn $EXEC_JAR -X account delete -o thevariablehere -n $TEST_ACCOUNT_ID
-# EOF
-
-# grep "\"accountId\" : ?"
+expect "Info is correct, let's go! \n
+SUCCESS\n
+Account $TEST_ACCOUNT_ID new balance is *\n
+File deleted from disk true"
