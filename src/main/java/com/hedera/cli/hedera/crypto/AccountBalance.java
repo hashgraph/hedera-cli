@@ -8,6 +8,8 @@ import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.Hbar;
 import com.hedera.hashgraph.sdk.account.AccountBalanceQuery;
 import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.account.CryptoTransferTransaction;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,6 +38,8 @@ public class AccountBalance implements Runnable, Operation {
     @Autowired
     private ShellHelper shellHelper;
 
+    private AccountBalanceQuery accountBalanceQuery = new AccountBalanceQuery();
+
     @Parameters(index = "0", description = "Hedera account in the format shardNum.realmNum.accountNum"
             + "%n@|bold,underline Usage:|@%n" + "@|fg(yellow) account balance 0.0.1003|@")
     private String accountIdInString;
@@ -51,7 +55,7 @@ public class AccountBalance implements Runnable, Operation {
     public long getBalance() {
         long balance = 0;
         try (Client client = hedera.createHederaClient()) {
-            Hbar balanceHbar = new AccountBalanceQuery()
+            Hbar balanceHbar = accountBalanceQuery
                 .setAccountId(AccountId.fromString(accountIdInString))
                 .execute(client);
             balance = balanceHbar.asTinybar();
