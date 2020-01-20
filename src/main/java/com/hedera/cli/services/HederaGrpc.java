@@ -1,8 +1,6 @@
 package com.hedera.cli.services;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,13 +16,10 @@ import com.hedera.cli.models.HederaAccount;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.proto.ResponseCodeEnum;
 import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.Hbar;
 import com.hedera.hashgraph.sdk.HederaStatusException;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
-import com.hedera.hashgraph.sdk.account.AccountBalanceQuery;
 import com.hedera.hashgraph.sdk.account.AccountCreateTransaction;
-import com.hedera.hashgraph.sdk.account.AccountDeleteTransaction;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.account.AccountInfo;
 import com.hedera.hashgraph.sdk.account.AccountInfoQuery;
@@ -58,14 +53,11 @@ public class HederaGrpc {
         AccountId accountId = null;
         try (Client client = hedera.createHederaClient()) {
             TransactionId transactionId = new TransactionId(operatorId);
-            
+
             TransactionId txId = new AccountCreateTransaction()
                     // The only _required_ property here is `key`
-                    .setTransactionId(transactionId)
-                    .setKey(publicKey)
-                    .setInitialBalance(initBal)
-                    .setAutoRenewPeriod(Duration.ofSeconds(7890000))
-                    .execute(client);
+                    .setTransactionId(transactionId).setKey(publicKey).setInitialBalance(initBal)
+                    .setAutoRenewPeriod(Duration.ofSeconds(7890000)).execute(client);
 
             // This will wait for the receipt to become available
             TransactionReceipt receipt = txId.getReceipt(client);
@@ -79,20 +71,6 @@ public class HederaGrpc {
         }
         return accountId;
     }
-
-    // private AccountId retrieveAccountIdFromReceipt(TransactionReceipt receipt) {
-    //     AccountId accountId;
-    //     if (ResponseCodeEnum.SUCCESS.equals(receipt.getStatus())) {
-    //         accountId = receipt.getAccountId();
-    //     } else if (receipt.getStatus().toString().contains("INVALID_SIGNATURE")) {
-    //         shellHelper.printError("Seems like your current operator's key does not match");
-    //         accountId = null;
-    //     } else {
-    //         shellHelper.printError(receipt.getStatus().toString());
-    //         accountId = null;
-    //     }
-    //     return accountId;
-    // }
 
     public JsonObject printAccount(String accountId, String privateKey, String publicKey) {
         JsonObject account1 = new JsonObject();
@@ -110,122 +88,13 @@ public class HederaGrpc {
         return account1;
     }
 
-    public void executeAccountDelete(AccountId oldAccount, Ed25519PrivateKey oldAccountPrivKey, AccountId newAccount) {
-        try (Client client = hedera.createHederaClient()) {
-            TransactionId transactionId = new TransactionId(hedera.getOperatorId());
-            boolean privateKeyDuplicate = checkIfOperatorKeyIsTheSameAsAccountToBeDeleted(hedera, oldAccountPrivKey);
-            // account that is to be deleted must sign its own transaction
-            if (privateKeyDuplicate) {
-                // operator already sign transaction
-                TransactionReceipt receipt = new AccountDeleteTransaction()
-                    .setTransactionId(transactionId)
-                    .setDeleteAccountId(oldAccount)
-                    .setTransferAccountId(newAccount)
-                    .build(client)
-                    .execute(client)
-                    .getReceipt(client);
-                receiptStatus(receipt, hedera, newAccount, oldAccount);
-            } else {
-                // sign the transaction
-                TransactionReceipt receipt = new AccountDeleteTransaction()
-                    .setTransactionId(transactionId)
-                    .setDeleteAccountId(oldAccount)
-                    .setTransferAccountId(newAccount)
-                    .build(client)
-                    .sign(oldAccountPrivKey)
-                    .execute(client)
-                    .getReceipt(client);
-                receiptStatus(receipt, hedera, newAccount, oldAccount);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (TimeoutException e) {
-            // do nothing
-        } catch (Exception e) {
-            shellHelper.printError(e.getMessage());
-        }
-    }
-
-    private boolean checkIfOperatorKeyIsTheSameAsAccountToBeDeleted(Hedera hedera, Ed25519PrivateKey oldAccountPrivKey) {
-        return hedera.getOperatorKey().toString().equals(oldAccountPrivKey.toString());
-    }
-
-    private void receiptStatus(TransactionReceipt receipt, Hedera hedera, AccountId newAccount, AccountId oldAccount) {
-        if (receipt.status.code == ResponseCodeEnum.SUCCESS_VALUE) {
-            shellHelper.printSuccess(receipt.status.toString());
-            getBalance(hedera, newAccount);
-            boolean fileDeleted = deleteJsonAccountFromDisk(oldAccount);
-            shellHelper.printSuccess("File deleted from disk " + fileDeleted);
-        } else if (receipt.status.toString().contains("INVALID_SIGNATURE")) {
-            shellHelper.printError("Seems like your current operator's key does not match");
-        } else {
-            shellHelper.printError(receipt.status.toString());
-        }
-    }
-
-    public void getBalance(Hedera hedera, AccountId newAccount) {
-        try (Client client = hedera.createHederaClient()) {
-            // Set a sleep to wait for hedera to come to consensus for the funds of deleted
-            // account
-            // to be transferred to the new account
-            Thread.sleep(4000);
-            client.setOperator(hedera.getOperatorId(), hedera.getOperatorKey());
-            Hbar newAccountBalance = new AccountBalanceQuery()
-                .setAccountId(hedera.getOperatorId())
-                .execute(client);
-            shellHelper.printSuccess("Account " + newAccount + " new balance is " + newAccountBalance);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (TimeoutException e) {
-            // do nothing
-        } catch (Exception e) {
-            shellHelper.printError(e.getMessage());
-        }
-    }
-
-    public boolean deleteJsonAccountFromDisk(AccountId oldAccount) {
-        String pathToIndexTxt = accountManager.pathToIndexTxt();
-        boolean fileDeleted = false;
-
-        String pathToCurrentJsonAccount;
-        Map<String, String> updatedMap;
-
-        Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
-
-        Set<Map.Entry<String, String>> setOfEntries = readingIndexAccount.entrySet();
-        Iterator<Map.Entry<String, String>> iterator = setOfEntries.iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            String accountId = entry.getKey(); // key refers to the account id
-            String value = entry.getValue(); // value refers to the filename json
-
-            if (accountId.equals(oldAccount.toString())) {
-                // delete the associated json file in disk
-                pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
-                Path filePathToJson = Paths.get(dataDirectory.getDataDir().toString(), pathToCurrentJsonAccount);
-                File file = new File(filePathToJson.toString());
-                fileDeleted = file.delete();
-                iterator.remove();
-            }
-        }
-        // write to file
-        updatedMap = readingIndexAccount;
-        dataDirectory.writeFile(pathToIndexTxt, dataDirectory.formatMapToIndex(updatedMap));
-        return fileDeleted;
-    }
-
     public void executeAccountUpdate(AccountId accountId, Ed25519PrivateKey newKey, Ed25519PrivateKey originalKey) {
         try (Client client = hedera.createHederaClient()) {
-            TransactionId transactionId = new AccountUpdateTransaction()
-                .setAccountId(accountId)
-                .setKey(newKey.publicKey)
-                .build(client)
-                // Sign with the previous key and the new key
-                .sign(originalKey)
-                .sign(newKey)
-                .execute(client);
-            
+            TransactionId transactionId = new AccountUpdateTransaction().setAccountId(accountId)
+                    .setKey(newKey.publicKey).build(client)
+                    // Sign with the previous key and the new key
+                    .sign(originalKey).sign(newKey).execute(client);
+
             TransactionReceipt receipt = transactionId.getReceipt(client);
             // Now we fetch the account information to check if the key was changed
             retrieveAccountInfoForKeyVerification(accountId, newKey, client, receipt);
@@ -238,26 +107,24 @@ public class HederaGrpc {
         }
     }
 
-    private void retrieveAccountInfoForKeyVerification(AccountId accountId, Ed25519PrivateKey newKey, Client client, TransactionReceipt receipt)
-            throws HederaStatusException {
+    private void retrieveAccountInfoForKeyVerification(AccountId accountId, Ed25519PrivateKey newKey, Client client,
+            TransactionReceipt receipt) throws HederaStatusException {
 
         if (receipt.status.code == ResponseCodeEnum.SUCCESS_VALUE) {
             shellHelper.printSuccess("Account updated: " + receipt.status.toString());
             shellHelper.printInfo("Retrieving account info to verify the current key..");
-            AccountInfo info = new AccountInfoQuery()
-                .setAccountId(accountId)
-                .execute(client);
+            AccountInfo info = new AccountInfoQuery().setAccountId(accountId).execute(client);
             shellHelper.printInfo("\nPublic key in Encoded form: " + info.key.toString());
             shellHelper.printInfo("\nPublic key in HEX: " + info.key.toString().substring(24));
             updateFileAndPrintResults(accountId, newKey);
             return;
         }
-        
+
         if (receipt.status.toString().contains("INVALID_SIGNATURE")) {
             shellHelper.printError("Seems like your current operator's key does not match");
             return;
         }
-        
+
         shellHelper.printError(receipt.status.toString());
     }
 
@@ -266,7 +133,8 @@ public class HederaGrpc {
         if (fileUpdated) {
             shellHelper.printSuccess("File updated in disk " + fileUpdated);
         } else {
-            shellHelper.printWarning("AccountId does not exist locally, no file was updated. Use `account recovery` to save to local disk.");
+            shellHelper.printWarning(
+                    "AccountId does not exist locally, no file was updated. Use `account recovery` to save to local disk.");
         }
     }
 
@@ -287,7 +155,8 @@ public class HederaGrpc {
                 if (accountIdIndex.equals(accountId.toString())) {
                     // update the associated json file in disk
                     pathToAccountFile = accountManager.pathToAccountsFolder() + valueIndex + ".json";
-                    JsonObject account = hedera.getAccountManager().createAccountJsonWithPrivateKey(accountId.toString(), newKey);
+                    JsonObject account = hedera.getAccountManager()
+                            .createAccountJsonWithPrivateKey(accountId.toString(), newKey);
                     ObjectMapper mapper = new ObjectMapper();
                     Object jsonObject = mapper.readValue(account.toString(), HederaAccount.class);
                     String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
