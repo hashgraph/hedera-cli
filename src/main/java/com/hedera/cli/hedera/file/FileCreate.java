@@ -116,28 +116,23 @@ public class FileCreate implements Runnable {
             TransactionId transactionId = new TransactionId(hedera.getOperatorId());
 
             boolean testSize = false;
+            byte[] fileContents;
             if (testSize) {
                 // This is to test the file size, by parsing in -b=100, it creates file contents on 100bytes
-                byte[] fileContentsTestSize = stringOfNBytes(fileSizeByte).getBytes();
-                tx = new FileCreateTransaction()
-                        .setTransactionId(transactionId)
-                        .setExpirationTime(instant)
-                        // Use the same key as the operator to "own" this file
-                        .addKey(operatorKey.publicKey)
-                        .setContents(fileContentsTestSize)
-                        .setMaxTransactionFee(maxTransactionFee);
+                fileContents = stringOfNBytes(fileSizeByte).getBytes();
+
             } else {
                 // The file is required to be a byte array,
                 // you can easily use the bytes of a file instead.
-                byte[] fileContents = stringArrayToString(fileContentsInString).getBytes();
-                tx = new FileCreateTransaction()
-                        .setTransactionId(transactionId)
-                        .setExpirationTime(instant)
-                        // Use the same key as the operator to "own" this file
-                        .addKey(operatorKey.publicKey)
-                        .setContents(fileContents)
-                        .setMaxTransactionFee(maxTransactionFee);
+                fileContents = stringArrayToString(fileContentsInString).getBytes();
             }
+            tx = new FileCreateTransaction()
+                .setTransactionId(transactionId)
+                .setExpirationTime(instant)
+                // Use the same key as the operator to "own" this file
+                .addKey(operatorKey.publicKey)
+                .setContents(fileContents)
+                .setMaxTransactionFee(maxTransactionFee);
             // This will wait for the receipt to become available
             TransactionId txId = tx.execute(client);
             TransactionReceipt receipt = txId.getReceipt(client);
