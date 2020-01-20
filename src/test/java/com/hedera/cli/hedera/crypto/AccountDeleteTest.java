@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 
 import com.hedera.cli.config.InputReader;
-import com.hedera.cli.services.HederaGrpc;
 import com.hedera.cli.services.HederaGrpcAccountDelete;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
