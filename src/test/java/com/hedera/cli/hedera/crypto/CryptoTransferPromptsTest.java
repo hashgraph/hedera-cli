@@ -1,12 +1,18 @@
 package com.hedera.cli.hedera.crypto;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import com.hedera.cli.config.InputReader;
+import com.hedera.cli.models.PreviewTransferList;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
-import com.hedera.cli.models.PreviewTransferList;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,10 +36,17 @@ public class CryptoTransferPromptsTest {
     public void testPromptPreview() {
         AccountId operatorId = AccountId.fromString("0.0.1001");
         Map<Integer, PreviewTransferList> map = new HashMap<>();
-        cryptoTransferPrompts.promptPreview(operatorId, map);
+        String result = cryptoTransferPrompts.promptPreview(operatorId, map);
+        assertEquals(result, null);
+        verify(shellHelper, times(0)).printError(any());
 
-        // check with some assertions
+        // ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
+        // String actual = valueCapture.getValue();
+        // String expected = "Balance: " + Long.toString(balance, 10);
+        // assertEquals(expected, actual);
+        // System.out.println(actual);
+        assertNotNull(shellHelper);
+        assertNotNull(inputReader);
     }
-
 
 }
