@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.validation.ValidateAccounts;
@@ -21,7 +19,6 @@ import com.hedera.hashgraph.proto.ResponseCodeEnum;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.Hbar;
 import com.hedera.hashgraph.sdk.HederaStatusException;
-import com.hedera.hashgraph.sdk.Transaction;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.TransactionRecord;
@@ -65,6 +62,9 @@ public class CryptoTransfer implements Runnable {
     private InputReader inputReader;
 
     @Autowired
+    private CryptoTransferPrompts cryptoTransferPrompts;
+
+    @Autowired
     private AccountManager accountManager;
 
     @Autowired
@@ -83,7 +83,6 @@ public class CryptoTransfer implements Runnable {
     private CryptoTransferOptions o;
 
     private boolean skipPreview;
-    private String isInfoCorrect;
     private String memoString = "";
 
     private List<String> transferList;
@@ -144,30 +143,12 @@ public class CryptoTransfer implements Runnable {
         // transfer preview for user
         Map<Integer, PreviewTransferList> map = transferListToPromptPreviewMap();
         memoString = accountManager.promptMemoString(inputReader);
-        if (isSkipPreview()) {
+        if (isSkipPreview() || cryptoTransferPrompts.handlePromptPreview(operatorId, map)) {
             executeCryptoTransfer(operatorId);
-        } else {
-            // handle user's input to our preview prompt
-            handlePromptPreview(operatorId, map);
         }
     }
 
-    private void handlePromptPreview(AccountId operatorId, Map<Integer, PreviewTransferList> map)
-            throws HederaStatusException, TimeoutException, InterruptedException {
-        isInfoCorrect = promptPreview(operatorId, map);
-        if ("yes".equals(isInfoCorrect)) {
-            shellHelper.print("Info is correct, senders will need to sign the transaction to release funds");
-            executeCryptoTransfer(operatorId);
-            return;
-        }
-        
-        if ("no".equals(isInfoCorrect)) {
-            shellHelper.print("Nope, incorrect, let's make some changes");
-            return;
-        }
-        
-        shellHelper.printError("Input must be either yes or no");
-    }
+
 
     public boolean isTiny() {
         isTiny = validateAmount.isTiny(o);
@@ -206,7 +187,7 @@ public class CryptoTransfer implements Runnable {
         cryptoTransferTransaction.setTransactionMemo(memoString);
         cryptoTransferTransaction.setTransactionId(transactionId);
         cryptoTransferTransaction = addTransferList();
-        byte[] signedTxnBytes = signAndCreateTxBytesWithOperator();
+        // byte[] signedTxnBytes = signAndCreateTxBytesWithOperator();
         cryptoTransferTransaction.execute(client);
         
         try {
@@ -220,18 +201,18 @@ public class CryptoTransfer implements Runnable {
 
     }
 
-    private byte[] signAndCreateTxBytesWithOperator() {
-        byte[] signedTxnBytes = new byte[0];
-        for (int i = 0; i < senderList.size(); i++) {
-            String sender = senderList.get(i);
-            if (sender.equals(hedera.getOperatorId().toString())) {
-                signedTxnBytes = cryptoTransferTransaction.toString().getBytes();
-            } else {
-                signedTxnBytes = signAndCreateTxBytesWithPrivateKey(sender);
-            }
-        }
-        return signedTxnBytes;
-    }
+    // private byte[] signAndCreateTxBytesWithOperator() {
+    //     byte[] signedTxnBytes = new byte[0];
+    //     for (int i = 0; i < senderList.size(); i++) {
+    //         String sender = senderList.get(i);
+    //         if (sender.equals(hedera.getOperatorId().toString())) {
+    //             signedTxnBytes = cryptoTransferTransaction.toString().getBytes();
+    //         } else {
+    //             signedTxnBytes = signAndCreateTxBytesWithPrivateKey(sender);
+    //         }
+    //     }
+    //     return signedTxnBytes;
+    // }
 
     private byte[] signAndCreateTxBytesWithPrivateKey(String sender) {
         String senderPrivKeyInString = inputReader.prompt(
@@ -275,17 +256,7 @@ public class CryptoTransfer implements Runnable {
         return map;
     }
 
-    private String promptPreview(AccountId operatorId, Map<Integer, PreviewTransferList> previewTransferListMap) {
-        try {
-            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-            String jsonStringTransferList = ow.writeValueAsString(previewTransferListMap);
-            return inputReader.prompt("\nOperator\n" + operatorId + "\nTransfer List\n" + jsonStringTransferList
-                    + "\n\nIs this correct?" + "\nyes/no");
-        } catch (Exception e) {
-            shellHelper.printError("Some error occurred");
-            return null;
-        }
-    }
+
 
     private void printAndSaveRecords(Client client, TransactionId transactionId, AccountId operatorId)
             throws HederaStatusException, JsonProcessingException {

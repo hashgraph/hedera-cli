@@ -152,8 +152,6 @@ public class CryptoTransferTest {
         assertEquals(expectedAmountList, cryptoTransfer.getAmountList());
         cryptoTransfer.setClient(hedera.createHederaClient());
         assertEquals(hedera.createHederaClient(), cryptoTransfer.getClient());
-        cryptoTransfer.setIsInfoCorrect("yes");
-        assertEquals("yes", cryptoTransfer.getIsInfoCorrect());
         cryptoTransfer.setAccount(AccountId.fromString(sender));
         assertEquals(AccountId.fromString(sender), cryptoTransfer.getAccount());
         cryptoTransfer.setSenderListArgs(senderListArgs);
