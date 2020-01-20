@@ -141,7 +141,6 @@ public class HederaGrpc {
     public boolean updateJsonAccountInDisk(AccountId accountId, Ed25519PrivateKey newKey) {
         boolean fileUpdated = false;
         String pathToIndexTxt = accountManager.pathToIndexTxt();
-        String pathToAccountFile;
         Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
 
         Set<Map.Entry<String, String>> setOfEntries = readingIndexAccount.entrySet();
@@ -154,7 +153,7 @@ public class HederaGrpc {
             try {
                 if (accountIdIndex.equals(accountId.toString())) {
                     // update the associated json file in disk
-                    pathToAccountFile = accountManager.pathToAccountsFolder() + valueIndex + ".json";
+                    String pathToAccountFile = accountManager.pathToAccountsFolder() + valueIndex + ".json";
                     JsonObject account = hedera.getAccountManager()
                             .createAccountJsonWithPrivateKey(accountId.toString(), newKey);
                     ObjectMapper mapper = new ObjectMapper();
