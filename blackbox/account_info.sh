@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-source ./blackbox/read_var.sh
-
 expect << EOF
 set timeout -1
 
