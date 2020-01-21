@@ -10,6 +10,8 @@ import com.hedera.cli.shell.ShellHelper;
 import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeExceptionMapper;
 import org.springframework.context.annotation.Bean;
@@ -38,14 +40,20 @@ public class NonInteractiveConfig {
     }
 
     @Bean
-	public ExitCodeExceptionMapper exitCodeExceptionMapper() {
-		return exception -> {
-			Throwable e = exception;
-			while (e != null && !(e instanceof ExitRequest)) {
-				e = e.getCause();
-			}
-			return e == null ? 1 : ((ExitRequest) e).status();
-		};
+    @Conditional(NonInteractiveModeCondition.class)
+    public ApplicationRunner applicationRunner() {
+        return new LocalServer();
+    }
+
+    @Bean
+    public ExitCodeExceptionMapper exitCodeExceptionMapper() {
+        return exception -> {
+            Throwable e = exception;
+            while (e != null && !(e instanceof ExitRequest)) {
+                e = e.getCause();
+            }
+            return e == null ? 1 : ((ExitRequest) e).status();
+        };
     }
 
     @Bean
@@ -56,6 +64,17 @@ public class NonInteractiveConfig {
     @Bean
     public InputReader inputReader(@Lazy LineReader lineReader) {
         return new InputReader(lineReader);
+    }
+}
+
+class LocalServer implements ApplicationRunner {
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        List<String> nonOptionArgs = args.getNonOptionArgs();
+        if (nonOptionArgs.get(0).equals("-X")) {
+            // when -X option is provided, do not run local server
+            return;
+        }
     }
 }
 
@@ -73,15 +92,20 @@ class ExampleCommandLineRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // remove the first element ("-X")
         List<String> allArgs = new LinkedList<String>(Arrays.asList(args));
-        allArgs.remove(0);
-        String[] commands = allArgs.toArray(new String[0]);
-        List<String> commandsToRun = Arrays.stream(commands).filter(w -> !w.startsWith("@")).collect(Collectors.toList());
-        if (!commandsToRun.isEmpty()) {
-            InteractiveShellApplicationRunner.disable(environment);
-            shell.run(new StringInputProvider(commandsToRun));
-        }
+        String flag = allArgs.get(0);
+        List<String> commandsToRun = Arrays.asList("quit");
+
+        // flag can be -S or -X
+        if ("-X".equals(flag)) {
+            allArgs.remove(0);
+            String[] commands = allArgs.toArray(new String[0]);
+            commandsToRun = Arrays.stream(commands).filter(w -> !w.startsWith("@")).collect(Collectors.toList());            
+        } 
+
+        // either run quit (-S) or actually execute the commands (-X)
+        InteractiveShellApplicationRunner.disable(environment);
+        shell.run(new StringInputProvider(commandsToRun));
     }
 
 }
