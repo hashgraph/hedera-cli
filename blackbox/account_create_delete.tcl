@@ -33,11 +33,11 @@ spawn $EXEC_JAR -X account delete -o $accountId -n $TEST_ACCOUNT_ID
 expect "Enter the private key of the account to be deleted: "
 send "$privateKey\r"
 
-expect "Account to be deleted: $accountId\n
-Funds from deleted account to be transferred to: $TEST_ACCOUNT_ID\n
-\n
-Is this correct?\n
-yes/no: "
+expect "Account to be deleted: $accountId"
+expect "Funds from deleted account to be transferred to: $TEST_ACCOUNT_ID"
+expect "\n"
+expect "Is this correct?"
+expect "yes/no: "
 send "yes\r"
 
 expect "Info is correct, let's go! \n
