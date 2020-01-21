@@ -14,20 +14,20 @@ set i 0
 foreach j $responseList {
     # accountId exists
     if {$i == 2 && [regexp "accountId" $j]} {
-        set accountIdList [split $j] "\"*\""]
+        set accountIdList [split $j "\"*\""]
         set accountId [lindex $accountIdList 3]
         puts $accountId
     }
     # private key exists
     if {$i == 3 && [regexp "privateKey" $j]} {
-        set privateKeyList [split $j] "\"*\""]
+        set privateKeyList [split $j "\"*\""]
         set privateKey [lindex $privateKeyList 3]
         puts $privateKey
     }
     # public key exists
     if {$i == 4 && [regexp "publicKey" $j]} {
         puts $j
-        set publicKeyList [split $j] "\"*\""]
+        set publicKeyList [split $j "\"*\""]
         set publicKey [lindex $publicKeyList 3]
         puts $publicKey
         puts "hello"
@@ -47,19 +47,19 @@ set i2 0
 foreach j2 $responseList2 {
     # accountId exists
     if {$i2 == 2 && [regexp "accountId" $j2]} {
-        set accountIdList2 [split $j2] "\"*\""]
+        set accountIdList2 [split $j2 "\"*\""]
         set accountId2 [lindex $accountIdList2 3]
         puts $accountId2
     }
     # private key exists
     if {$i2 == 3 && [regexp "privateKey" $j2]} {
-        set privateKeyList2 [split $j2] "\"*\""]
+        set privateKeyList2 [split $j2 "\"*\""]
         set privateKey2 [lindex $privateKeyList2 3]
         puts $privateKey2
     }
     # public key exists
     if {$i2 == 4 && [regexp "publicKey" $j2]} {
-        set publicKeyList2 [split $j2] "\"*\""]
+        set publicKeyList2 [split $j2 "\"*\""]
         set publicKey2 [lindex $publicKeyList2 3]
         puts $publicKey2
     }
