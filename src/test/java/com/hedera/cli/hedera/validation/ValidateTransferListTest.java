@@ -245,7 +245,6 @@ public class ValidateTransferListTest {
         assertTrue(validated);
     }
 
-
     @Test
     public void verifyAmountListCase1SenderIsOperatorAmountTransferSizeNotEqual() {
         dependent = new CryptoTransferOptions.Dependent();

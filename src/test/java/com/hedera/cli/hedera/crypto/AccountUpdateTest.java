@@ -32,15 +32,16 @@ public class AccountUpdateTest {
 
     @Test
     public void runWithoutPreview() {
-
         String accountId = "0.0.1001";
         accountUpdate.setAccountIdInString(accountId);
         Ed25519PrivateKey originalKey = Ed25519PrivateKey.generate();
         Ed25519PrivateKey newKey = Ed25519PrivateKey.generate();
         accountUpdate.setNewKey(newKey);
         accountUpdate.setOriginalKey(originalKey);
-        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false)).thenReturn(accountUpdate.getNewKey().toString());
-        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret", false)).thenReturn(accountUpdate.getOriginalKey().toString());
+        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false))
+                .thenReturn(accountUpdate.getNewKey().toString());
+        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret",
+                false)).thenReturn(accountUpdate.getOriginalKey().toString());
         accountUpdate.setSkipPreview(true);
         accountUpdate.run();
         verify(hederaGrpc, times(1)).executeAccountUpdate(any(), any(), any());
@@ -55,17 +56,16 @@ public class AccountUpdateTest {
         Ed25519PrivateKey newKey = Ed25519PrivateKey.generate();
         accountUpdate.setNewKey(newKey);
         accountUpdate.setOriginalKey(originalKey);
-        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false)).thenReturn(accountUpdate.getNewKey().toString());
-        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret", false)).thenReturn(accountUpdate.getOriginalKey().toString());
+        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false))
+                .thenReturn(accountUpdate.getNewKey().toString());
+        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret",
+                false)).thenReturn(accountUpdate.getOriginalKey().toString());
 
-        String prompt = "\nAccount to be updated: " + accountId
-                + "\n\nPublic key of account will be updated from: "
-                + "\nPublic key in Encoded form: " + originalKey.getPublicKey()
-                + "\nPublic key in HEX: " + originalKey.getPublicKey().toString().substring(24)
-                + "\n\nTo new public key: "
-                + "\nNEW Public key in Encoded form: " + newKey.getPublicKey()
-                + "\nNEW Public key in HEX: " + newKey.getPublicKey().toString().substring(24)
-                + "\n\nIs this correct?" + "\nyes/no";
+        String prompt = "\nAccount to be updated: " + accountId + "\n\nPublic key of account will be updated from: "
+                + "\nPublic key in Encoded form: " + originalKey.publicKey + "\nPublic key in HEX: "
+                + originalKey.publicKey.toString().substring(24) + "\n\nTo new public key: "
+                + "\nNEW Public key in Encoded form: " + newKey.publicKey + "\nNEW Public key in HEX: "
+                + newKey.publicKey.toString().substring(24) + "\n\nIs this correct?" + "\nyes/no";
         when(inputReader.prompt(prompt)).thenReturn("yes");
         accountUpdate.setSkipPreview(false);
         accountUpdate.run();
@@ -82,17 +82,16 @@ public class AccountUpdateTest {
         Ed25519PrivateKey newKey = Ed25519PrivateKey.generate();
         accountUpdate.setNewKey(newKey);
         accountUpdate.setOriginalKey(originalKey);
-        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false)).thenReturn(accountUpdate.getNewKey().toString());
-        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret", false)).thenReturn(accountUpdate.getOriginalKey().toString());
+        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false))
+                .thenReturn(accountUpdate.getNewKey().toString());
+        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret",
+                false)).thenReturn(accountUpdate.getOriginalKey().toString());
 
-        String prompt = "\nAccount to be updated: " + accountId
-                + "\n\nPublic key of account will be updated from: "
-                + "\nPublic key in Encoded form: " + originalKey.getPublicKey()
-                + "\nPublic key in HEX: " + originalKey.getPublicKey().toString().substring(24)
-                + "\n\nTo new public key: "
-                + "\nNEW Public key in Encoded form: " + newKey.getPublicKey()
-                + "\nNEW Public key in HEX: " + newKey.getPublicKey().toString().substring(24)
-                + "\n\nIs this correct?" + "\nyes/no";
+        String prompt = "\nAccount to be updated: " + accountId + "\n\nPublic key of account will be updated from: "
+                + "\nPublic key in Encoded form: " + originalKey.publicKey + "\nPublic key in HEX: "
+                + originalKey.publicKey.toString().substring(24) + "\n\nTo new public key: "
+                + "\nNEW Public key in Encoded form: " + newKey.publicKey + "\nNEW Public key in HEX: "
+                + newKey.publicKey.toString().substring(24) + "\n\nIs this correct?" + "\nyes/no";
         when(inputReader.prompt(prompt)).thenReturn("no");
         accountUpdate.setSkipPreview(false);
         accountUpdate.run();
@@ -112,7 +111,8 @@ public class AccountUpdateTest {
         accountUpdate.setAccountIdInString(accountId);
         Ed25519PrivateKey newKey = Ed25519PrivateKey.generate();
         accountUpdate.setNewKey(newKey);
-        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false)).thenReturn("");
+        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false))
+                .thenReturn("");
         accountUpdate.run();
         verify(shellHelper, times(1)).printError("Enter the new public key to update the current account keys");
     }
@@ -123,7 +123,8 @@ public class AccountUpdateTest {
         accountUpdate.setAccountIdInString(accountId);
         Ed25519PrivateKey newKey = Ed25519PrivateKey.generate();
         accountUpdate.setNewKey(newKey);
-        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false)).thenReturn("hello");
+        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false))
+                .thenReturn("hello");
         accountUpdate.run();
         verify(shellHelper, times(1)).printError("Private key is not in the right ED25519 string format");
     }
@@ -134,8 +135,10 @@ public class AccountUpdateTest {
         accountUpdate.setAccountIdInString(accountId);
         Ed25519PrivateKey newKey = Ed25519PrivateKey.generate();
         accountUpdate.setNewKey(newKey);
-        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false)).thenReturn(accountUpdate.getNewKey().toString());
-        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret", false)).thenReturn("");
+        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false))
+                .thenReturn(accountUpdate.getNewKey().toString());
+        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret",
+                false)).thenReturn("");
 
         accountUpdate.run();
         verify(shellHelper, times(1)).printError("Enter the original public key to update the current account keys");
@@ -147,8 +150,10 @@ public class AccountUpdateTest {
         accountUpdate.setAccountIdInString(accountId);
         Ed25519PrivateKey newKey = Ed25519PrivateKey.generate();
         accountUpdate.setNewKey(newKey);
-        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false)).thenReturn(accountUpdate.getNewKey().toString());
-        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret", false)).thenReturn("whatever");
+        when(inputReader.prompt("Enter the NEW private key that will be used to update " + accountId, "secret", false))
+                .thenReturn(accountUpdate.getNewKey().toString());
+        when(inputReader.prompt("Enter the ORIGINAL private key of " + accountId + " that will be changed", "secret",
+                false)).thenReturn("whatever");
 
         accountUpdate.run();
         verify(shellHelper, times(1)).printError("Private key is not in the right ED25519 string format");

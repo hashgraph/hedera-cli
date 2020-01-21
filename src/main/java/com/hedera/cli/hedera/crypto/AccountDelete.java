@@ -4,7 +4,7 @@ import com.hedera.cli.config.InputReader;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.DataDirectory;
-import com.hedera.cli.services.HederaGrpc;
+import com.hedera.cli.services.HederaGrpcAccountDelete;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.account.AccountId;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
@@ -40,7 +40,7 @@ public class AccountDelete implements Runnable, Operation {
     private ShellHelper shellHelper;
 
     @Autowired
-    private HederaGrpc hederaGrpc;
+    private HederaGrpcAccountDelete hederaGrpcAccountDelete;
 
     @Option(names = { "-o",
             "--oldAccount" }, required = true, description = "Old account ID in %nshardNum.realmNum.accountNum format to be deleted."
@@ -77,12 +77,12 @@ public class AccountDelete implements Runnable, Operation {
             return;
         }
         if (skipPreview) {
-            hederaGrpc.executeAccountDelete(oldAccount, oldAccountPrivKey, newAccount);
+            hederaGrpcAccountDelete.executeAccountDelete(oldAccount, oldAccountPrivKey, newAccount);
             return;
         }
         if (promptPreview(oldAccount, newAccount)) {
             shellHelper.print("Info is correct, let's go!");
-            hederaGrpc.executeAccountDelete(oldAccount, oldAccountPrivKey, newAccount);
+            hederaGrpcAccountDelete.executeAccountDelete(oldAccount, oldAccountPrivKey, newAccount);
         } else {
             shellHelper.printError("Nope, incorrect, let's make some changes");
         }

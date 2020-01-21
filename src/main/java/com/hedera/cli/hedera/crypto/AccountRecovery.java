@@ -132,7 +132,7 @@ public class AccountRecovery implements Runnable, Operation {
     }
 
     public boolean verifyAccountExistsLocally(AccountInfo accountInfo, String accountId) {
-        boolean accountIdMatches = accountInfo.getAccountId().equals(AccountId.fromString(accountId));
+        boolean accountIdMatches = accountInfo.accountId.equals(AccountId.fromString(accountId));
         if (accountIdMatches) {
             if (!retrieveIndex()) {
                 // Check if account already exists in index.txt
@@ -164,8 +164,9 @@ public class AccountRecovery implements Runnable, Operation {
         try (Client client = hedera.createHederaClientWithoutSettingOperator()) {
             client.setOperator(AccountId.fromString(accountId), accPrivKey);
             AccountInfoQuery q;
-            q = new AccountInfoQuery(client).setAccountId(AccountId.fromString(accountId));
-            accountInfo = q.execute();
+            q = new AccountInfoQuery()
+                .setAccountId(AccountId.fromString(accountId));
+            accountInfo = q.execute(client);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (TimeoutException e) {
@@ -228,9 +229,9 @@ public class AccountRecovery implements Runnable, Operation {
         RecoveredAccountModel recoveredAccountModel = new RecoveredAccountModel();
         recoveredAccountModel.setAccountId(accountId);
         recoveredAccountModel.setPrivateKey(ed25519PrivateKey.toString().substring(32));
-        recoveredAccountModel.setPublicKey(ed25519PrivateKey.getPublicKey().toString().substring(24));
+        recoveredAccountModel.setPublicKey(ed25519PrivateKey.publicKey.toString().substring(24));
         recoveredAccountModel.setPrivateKeyEncoded(ed25519PrivateKey.toString());
-        recoveredAccountModel.setPublicKeyEncoded(ed25519PrivateKey.getPublicKey().toString());
+        recoveredAccountModel.setPublicKeyEncoded(ed25519PrivateKey.publicKey.toString());
         printRecoveredAccount(recoveredAccountModel);
     }
 

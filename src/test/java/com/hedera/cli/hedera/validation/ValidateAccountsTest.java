@@ -23,7 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith({MockitoExtension.class})
+@ExtendWith({ MockitoExtension.class })
 public class ValidateAccountsTest {
 
     @InjectMocks
@@ -72,7 +72,6 @@ public class ValidateAccountsTest {
         validateAccounts.setSenderList(senderList);
         assertEquals(senderList, validateAccounts.getSenderList());
     }
-
 
     @Test
     public void senderListHasOperatorTrue() {

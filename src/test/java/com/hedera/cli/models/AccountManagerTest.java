@@ -176,6 +176,7 @@ public class AccountManagerTest {
 
     @Test
     public void setDefaultAccountIdWithPrivateKey() {
+        assertNotNull(1);
         KeyPair keypair = prepareKeyPair();
         String privateKeyString = keypair.getPrivateKeyEncodedHex();
         Ed25519PrivateKey privateKey = Ed25519PrivateKey.fromString(privateKeyString);
