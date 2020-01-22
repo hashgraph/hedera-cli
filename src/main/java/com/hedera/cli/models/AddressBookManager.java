@@ -58,8 +58,8 @@ public class AddressBookManager {
     ObjectMapper mapper = new ObjectMapper();
     InputStream input = getClass().getResourceAsStream(mirrorNodesJsonPath);
     try {
-      AddressBookMirror addressBookMirror = mapper.readValue(input, AddressBookMirror.class);
-      mirrorNodes = addressBookMirror.getMirrorNodes();
+      NetworkMirror networkMirror = mapper.readValue(input, NetworkMirror.class);
+      mirrorNodes = networkMirror.getMirrorNodes();
     } catch (Exception e) {
       shellHelper.printError(e.getMessage());
     }

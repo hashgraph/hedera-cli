@@ -1,5 +1,5 @@
 {
-    "networks": [
+    "mirrorNodes": [
         {
             "name": "mainnet-mirror",
             "description": "Hedera mainnet mirror node",
