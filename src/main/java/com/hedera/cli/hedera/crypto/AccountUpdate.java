@@ -94,11 +94,11 @@ public class AccountUpdate implements Runnable, Operation {
         String choice = inputReader.prompt(
                 "\nAccount to be updated: " + accountId
                         + "\n\nPublic key of account will be updated from: "
-                        + "\nPublic key in Encoded form: " + originalKey.getPublicKey()
-                        + "\nPublic key in HEX: " + originalKey.getPublicKey().toString().substring(24)
+                        + "\nPublic key in Encoded form: " + originalKey.publicKey
+                        + "\nPublic key in HEX: " + originalKey.publicKey.toString().substring(24)
                         + "\n\nTo new public key: "
-                        + "\nNEW Public key in Encoded form: " + newKey.getPublicKey()
-                        + "\nNEW Public key in HEX: " + newKey.getPublicKey().toString().substring(24)
+                        + "\nNEW Public key in Encoded form: " + newKey.publicKey
+                        + "\nNEW Public key in HEX: " + newKey.publicKey.toString().substring(24)
                         + "\n\nIs this correct?" + "\nyes/no");
         return choice.equalsIgnoreCase("yes") || choice.equalsIgnoreCase("y");
     }

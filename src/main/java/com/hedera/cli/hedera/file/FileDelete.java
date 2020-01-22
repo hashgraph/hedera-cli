@@ -4,10 +4,12 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.TransactionId;
+import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.file.FileDeleteTransaction;
 import com.hedera.hashgraph.sdk.file.FileId;
+import com.hedera.hashgraph.sdk.file.FileInfo;
 import com.hedera.hashgraph.sdk.file.FileInfoQuery;
-import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
+import com.hedera.hashgraph.proto.ResponseCodeEnum;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,23 +40,22 @@ public class FileDelete implements Runnable {
         try (Client client = hedera.createHederaClient()) {
             FileId fileId = FileId.fromString(fileNumInString);
             shellHelper.printInfo("file: " + fileId);
-            TransactionId transactionId = new TransactionId(hedera.getOperatorId());
-
 
             // now to delete the file
-            var txDeleteReceipt = new FileDeleteTransaction(client)
-                    .setTransactionId(transactionId)
+            TransactionId txId = new FileDeleteTransaction()
                     .setFileId(fileId)
-                    .executeForReceipt();
+                    .execute(client);
 
-            if(txDeleteReceipt.getStatus() != ResponseCodeEnum.SUCCESS) {
+            TransactionReceipt receipt = txId.getReceipt(client);
+
+            if(receipt.status.code != ResponseCodeEnum.SUCCESS_VALUE) {
                 shellHelper.printError("Error while deleting file");
             }
 
             shellHelper.printInfo("File deleted successfully");
-            var fileInfo = new FileInfoQuery(client)
+            FileInfo fileInfo = new FileInfoQuery()
                     .setFileId(fileId)
-                    .execute();
+                    .execute(client);
           
             shellHelper.printInfo("File info " + fileInfo);
         } catch (InterruptedException e) {

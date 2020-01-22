@@ -13,13 +13,16 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.HederaException;
+import com.hedera.hashgraph.sdk.Hbar;
 import com.hedera.hashgraph.sdk.HederaNetworkException;
+import com.hedera.hashgraph.sdk.HederaStatusException;
+import com.hedera.hashgraph.sdk.account.AccountBalanceQuery;
 import com.hedera.hashgraph.sdk.account.AccountId;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -43,14 +46,11 @@ public class AccountBalanceTest {
     // test data
     private Client client;
     private String accountId;
-    private long balance;
-
 
     @BeforeEach
     public void setUp() {
         client = mock(Client.class);
         accountId = "0.0.1121";
-        balance = 99 * 100000000L;   // 99 hbars
     }
 
     @Test
@@ -67,11 +67,14 @@ public class AccountBalanceTest {
     }
 
     @Test
-    public void run() throws HederaNetworkException, IllegalArgumentException, HederaException {
+    public void run() throws HederaNetworkException, IllegalArgumentException, HederaStatusException {
         accountBalance.setAccountIdInString(accountId);
         when(accountManager.verifyAccountId(eq(accountId))).thenReturn(accountId);
+
+        AccountBalanceQuery accountBalanceQuery = mock(AccountBalanceQuery.class, Answers.RETURNS_DEEP_STUBS);
         when(hedera.createHederaClient()).thenReturn(client);
-        when(client.getAccountBalance(AccountId.fromString(accountId))).thenReturn(balance);
+        when(accountBalanceQuery.setAccountId(AccountId.fromString(accountId)).execute(client)).thenReturn(new Hbar(1));
+        accountBalance.setAccountBalanceQuery(accountBalanceQuery);
 
         accountBalance.run();
 
@@ -80,7 +83,7 @@ public class AccountBalanceTest {
         ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
         verify(shellHelper).printSuccess(valueCapture.capture());
         String actual = valueCapture.getValue();
-        String expected = "Balance: " + Long.toString(balance, 10);
+        String expected = "Balance: " + new Hbar(1).asTinybar();
         assertEquals(expected, actual);
     }
 

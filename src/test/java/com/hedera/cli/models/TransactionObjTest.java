@@ -25,7 +25,7 @@ public class TransactionObjTest {
     txObj.setTxMemo("hello");
     txObj.setTxTimestamp("sometransactiontimestamp");
     txObj.setTxValidStart("somevalidstarttimestamp");
-    
+
     assertEquals("sometransactionidgoeshere", txObj.getTxID());
     assertEquals(10000L, txObj.getTxFee());
     assertEquals("OK", txObj.getReceiptStatus());

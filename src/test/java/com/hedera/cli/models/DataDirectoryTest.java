@@ -218,11 +218,13 @@ public class DataDirectoryTest {
     HashMap<String, String> resultMap2 = dataDirectory.readWriteToIndex(testIndexFile, newMap);
     assertEquals(4, resultMap2.size());
 
-    // add in the same newMap and the number of entries in our  map will remain unchanged
+    // add in the same newMap and the number of entries in our map will remain
+    // unchanged
     HashMap<String, String> resultMap3 = dataDirectory.readWriteToIndex(testIndexFile, newMap);
     assertEquals(4, resultMap3.size());
 
-    // provide an empty newMap and the number of entries in our map will remain unchanged
+    // provide an empty newMap and the number of entries in our map will remain
+    // unchanged
     HashMap<String, String> resultMap4 = dataDirectory.readWriteToIndex(testIndexFile, new HashMap<String, String>());
     assertEquals(4, resultMap4.size());
 
@@ -239,13 +241,13 @@ public class DataDirectoryTest {
     testDefaultMap.put("0.0.1002", "some_random_name_b");
     testDefaultMap.put("0.0.1003", "some_random_name_c");
     HashMap<String, String> resultMap = dataDirectory.readWriteToIndex(testIndexFile, testDefaultMap);
-    
+
     dataDirectory.listIndex(testIndexFile);
     List<String> outputResultArray = captureSystemOut();
     System.setOut(stdout);
 
     HashMap<String, String> outputMap = new HashMap<String, String>();
-    for (String line: outputResultArray) {
+    for (String line : outputResultArray) {
       String[] kv = line.split("=");
       outputMap.put(kv[0], kv[1]);
     }
@@ -298,11 +300,11 @@ public class DataDirectoryTest {
     accountManager.setDataDirectory(dataDirectory);
     accountManager.setRandomNameGenerator(new RandomNameGenerator());
     accountManager.setShellHelper(shellHelper); // shellHelper is a mock from above
-    
+
     // test data
     KeyPair keypair = prepareKeyPair();
     String testAccountId = "0.0.1001";
-    AccountId accountId = AccountId.fromString(testAccountId); 
+    AccountId accountId = AccountId.fromString(testAccountId);
     accountManager.setDefaultAccountId(accountId, keypair); // writes into dataDir (i.e. tmpDir)
 
     // This can be simplified by implementing an actual function in AccountManager
@@ -310,18 +312,19 @@ public class DataDirectoryTest {
     String pathToIndexTxt = accountManager.pathToIndexTxt();
     Map<String, String> readingIndexAccount = dataDirectory.readIndexToHashmap(pathToIndexTxt);
     for (Map.Entry<String, String> entry : readingIndexAccount.entrySet()) {
-        String key = entry.getKey(); // key refers to the account id
-        String value = entry.getValue(); // value refers to the filename json
-        if (testAccountId.equals(key)) {
-            String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
-            defaultAccountJson = dataDirectory.readJsonToHashmap(pathToCurrentJsonAccount);
-        }
+      String key = entry.getKey(); // key refers to the account id
+      String value = entry.getValue(); // value refers to the filename json
+      if (testAccountId.equals(key)) {
+        String pathToCurrentJsonAccount = accountManager.pathToAccountsFolder() + value + ".json";
+        defaultAccountJson = dataDirectory.readJsonToHashmap(pathToCurrentJsonAccount);
+      }
     }
 
-    // the defaultAccountJson that is read out via readJsonToHashmap must match our expected test data
+    // the defaultAccountJson that is read out via readJsonToHashmap must match our
+    // expected test data
     assertEquals(testAccountId, defaultAccountJson.get("accountId"));
     assertEquals(keypair.getPrivateKeyHex(), defaultAccountJson.get("privateKey"));
-    assertEquals(keypair.getPublicKeyHex(), defaultAccountJson.get("publicKey"));    
+    assertEquals(keypair.getPublicKeyHex(), defaultAccountJson.get("publicKey"));
   }
 
   @Test
@@ -336,6 +339,6 @@ public class DataDirectoryTest {
     List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
     KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
     return keypair;
-}
+  }
 
 }

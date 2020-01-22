@@ -1,17 +1,18 @@
 package com.hedera.cli.hedera.crypto;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
 import com.hedera.cli.config.InputReader;
 import com.hedera.cli.models.AccountManager;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class InputPromptsTest {
@@ -42,7 +43,9 @@ public class InputPromptsTest {
     @Test
     public void methodPromptBip() {
         String bip = "bip";
-        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn(bip);
+        when(inputReader
+                .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`"))
+                        .thenReturn(bip);
         when(accountManager.verifyMethod(bip)).thenReturn(bip);
         String isBip = inputPrompts.methodPrompt(inputReader, accountManager);
         assertEquals(bip, isBip);
@@ -51,7 +54,9 @@ public class InputPromptsTest {
     @Test
     public void methodPromptHgc() {
         String hgc = "hgc";
-        when(inputReader.prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`")).thenReturn(hgc);
+        when(inputReader
+                .prompt("Have you migrated your account on Hedera wallet? If migrated, enter `bip`, else enter `hgc`"))
+                        .thenReturn(hgc);
         when(accountManager.verifyMethod(hgc)).thenReturn(hgc);
         String isHgc = inputPrompts.methodPrompt(inputReader, accountManager);
         assertEquals(hgc, isHgc);
