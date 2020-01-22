@@ -1,0 +1,18 @@
+{
+    "networks": [
+        {
+            "name": "mainnet",
+            "description": "Hedera mainnet mirror node",
+            "nodes": [
+                "https://mainnet.mirrornode.hedera.com"
+            ]
+        },
+        {
+            "name": "testnet",
+            "description": "Hedera testnet mirror node",
+            "nodes": [
+                "https://testnet.mirrornode.hedera.com"
+            ]
+        }
+    ]
+}
