@@ -26,12 +26,15 @@ public class AddressBookManager {
 
   private List<Network> networks;
 
+  private List<MirrorNode> mirrorNodes;
+
   @Autowired
   private DataDirectory dataDirectory;
 
   @Autowired
   private ShellHelper shellHelper;
 
+  static private String MIRRORNODE_DEFAULT = "mirrornode.json";
   static private String ADDRESSBOOK_DEFAULT = "addressbook.json";
   static private final String NETWORK_DEFAULT = "testnet";
   static private final String NETWORK_FILE = "network.txt";
@@ -39,6 +42,30 @@ public class AddressBookManager {
 
   @PostConstruct
   public void init() {
+    prepareNetworks();
+    prepareMirrorNodes();
+
+    // ensure that all sub-directories are created
+    List<String> networkList = getNetworksAsStrings();
+    for (String network : networkList) {
+      String accountsDirForNetwork = network + File.separator + "accounts";
+      dataDirectory.mkHederaSubDir(accountsDirForNetwork);
+    }
+  }
+
+  private void prepareMirrorNodes() {
+    String mirrorNodesJsonPath = File.separator + MIRRORNODE_DEFAULT;
+    ObjectMapper mapper = new ObjectMapper();
+    InputStream input = getClass().getResourceAsStream(mirrorNodesJsonPath);
+    try {
+      AddressBookMirror addressBookMirror = mapper.readValue(input, AddressBookMirror.class);
+      mirrorNodes = addressBookMirror.getMirrorNodes();
+    } catch (Exception e) {
+      shellHelper.printError(e.getMessage());
+    }
+  }
+
+  private void prepareNetworks() {
     // read in addressbook.json
     String addressBookJsonPath = File.separator + ADDRESSBOOK_DEFAULT;
     ObjectMapper mapper = new ObjectMapper();
@@ -60,13 +87,6 @@ public class AddressBookManager {
       setNetworks(addressBook.getNetworks());
     } catch (Exception e) {
       shellHelper.printError(e.getMessage());
-    }
-
-    // ensure that all sub-directories are created
-    List<String> networkList = getNetworksAsStrings();
-    for (String network : networkList) {
-      String accountsDirForNetwork = network + File.separator + "accounts";
-      dataDirectory.mkHederaSubDir(accountsDirForNetwork);
     }
   }
 
@@ -104,7 +124,18 @@ public class AddressBookManager {
       } else {
         System.out.println("  " + network.getName());
       }
+    }
+  }
 
+  public void listMirrorNodes() {
+    String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
+    for (MirrorNode m : mirrorNodes) {
+      String currentMirror = currentNetwork + "-mirror";
+      if (currentMirror.equals(m.getName())) {
+        System.out.println("* " + m.getName());
+      } else {
+        System.out.println("  " + m.getName());
+      }
     }
   }
 
