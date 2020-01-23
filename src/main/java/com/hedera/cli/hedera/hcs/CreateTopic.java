@@ -48,7 +48,9 @@ public class CreateTopic implements Runnable {
                     .setMaxTransactionFee(1_000_000_000)
                     .execute(client);
 
+            shellHelper.printSuccess("Hello it came here");
             shellHelper.printSuccess(transactionId.toString());
+            shellHelper.printSuccess("Hello it came here too");
             final ConsensusTopicId topicId = transactionId.getReceipt(client).getConsensusTopicId();
             shellHelper.printSuccess(topicId.toString());
         } catch (HederaNetworkException | HederaStatusException e) {
