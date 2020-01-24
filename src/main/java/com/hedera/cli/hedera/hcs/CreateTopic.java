@@ -30,15 +30,8 @@ public class CreateTopic implements Runnable {
     @Autowired
     private ShellHelper shellHelper;
 
-    // there's no concept in HCS for "topic name". There's only memo.
-    // so this has to be removed and replaced with a --memo option
-    @Parameters(index = "0", description = "topic name" + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) hcs create helloworld|@")
-    private String topic;
-
     @Override
     public void run() {
-        System.out.println("The topic is " + topic);
         System.out.println("running hcs create");
         Client client = hedera.createHederaClient();
         // write our HCS gRPC call here, which can be abstracted into a different
