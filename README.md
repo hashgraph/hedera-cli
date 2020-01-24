@@ -99,7 +99,7 @@ version
 account use 0.0.xxxx
 ```
 
-#### Default Accounts (v0.1.3)
+#### Default Accounts
 The account must have been recovered and exists in `account ls`
 ```bash
 # Sets the account as default operator. 
@@ -156,7 +156,7 @@ Gets the information of an account, such as the public keys, and stateproofs (up
 account info 0.0.xxxx
 ```
 
-#### Account Update (v0.1.3)
+#### Account Update
 Cli will prompt for original key as well as the new key that said account will be updated with.
 ```bash
 # Updated the keypair of account
@@ -170,7 +170,7 @@ account update 0.0.xxxx
 help
 ```
 
-### Cryptotransfer (v0.1.5)
+### Cryptotransfer
 Cryptotransfer in tinybars(-tb) or hbars(-hb). Tinybars are integers while hbars can be down to 8 decimals.
 Recipients(-r) are separated by commas
 ```bash
@@ -193,4 +193,23 @@ transfer -r 0.0.116681,0.0.121290 -tb 3000000,2000000
 transfer -r 0.0.116681,0.0.121290 -tb -5000000,3000000,2000000
 transfer -r 0.0.116681,0.0.121290 -hb -0.5,0.3,0.2
 transfer -r 0.0.116681,0.0.121290 -hb 0.3,0.2
+```
+
+### HEDERA CONSENSUS SERVICE AND MIRROR NODE
+In resources you will notice 2 json files. One belongs to the hedera network, the other belongs to the mirror network.
+For customised network address book, you will need to add 
+`addressbook.json` and/or `mirrornode.json` in `~/.hedera`.
+The application will automatically search for all custom addressbook in the same json format and populate them into cli,
+where `network ls` and `mirror ls` will show the list of networks available
+
+### Hedera Consensus Service Create
+```bash
+[command][subcommand][args]
+hcs create topic
+```
+
+### Hedera Consensus Service Read
+```bash
+[command][subcommand][args]
+hcs read topic
 ```
