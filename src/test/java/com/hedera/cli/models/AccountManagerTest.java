@@ -272,6 +272,9 @@ public class AccountManagerTest {
 
         String str13 = null;
         assertFalse(accountManager.isAccountId(str13));
+
+        String str14 = "0.0.2";
+        assertTrue(accountManager.isAccountId(str14));
     }
 
     @Test

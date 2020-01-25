@@ -11,7 +11,6 @@ import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicCreateTransaction;
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
 
-import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -22,12 +22,12 @@ public class HederaConsensus extends CliDefaults {
   @Autowired
   private ShellHelper shellHelper;
 
-  @ShellMethod(value = "manage Hedera consensus service")
+  @ShellMethod(value = "manage Hedera consensus service") // @formatter:off
   public void hcs(@ShellOption(defaultValue = "") String subCommand, 
                   @ShellOption(defaultValue = "") String topic,
                   // Specifying -y flag will set y to be true (which will require submit key)
-                  @ShellOption(value = {"-y", "--yes"}, arity = 0, defaultValue = "false") boolean y) {
-                        
+                  @ShellOption(value = {"-y", "--yes"}, arity = 0, defaultValue = "false") boolean y) { // @formatter:on
+
     String[] args;
     List<String> argsList = new ArrayList<>();
     Object[] objs;
