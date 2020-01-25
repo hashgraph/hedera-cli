@@ -4,6 +4,7 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.hashgraph.sdk.Client;
 import com.hedera.hashgraph.sdk.HederaNetworkException;
 import com.hedera.hashgraph.sdk.HederaStatusException;
+import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.consensus.ConsensusMessageSubmitTransaction;
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
@@ -23,7 +24,7 @@ public class SubmitMessage implements Runnable {
   private Hedera hedera;
 
   @Parameters(index = "0", description = "topic name" + "%n@|bold,underline Usage:|@%n"
-      + "@|fg(yellow) hcs create|@")
+      + "@|fg(yellow) hcs submit|@")
   private String topicIdString;
 
   // needs options 
@@ -32,17 +33,20 @@ public class SubmitMessage implements Runnable {
 
   @Override
   public void run() {
-    System.out.println("Example: hcs submit " + topicIdString);
+    System.out.println("hcs submit " + topicIdString);
 
     Client client = hedera.createHederaClient();
 
     ConsensusTopicId topicId = ConsensusTopicId.fromString(topicIdString);
 
     try {
-      TransactionReceipt receipt = new ConsensusMessageSubmitTransaction().setTopicId(topicId).setMessage("hello, HCS!")
-          .execute(client).getReceipt(client);
-
-      System.out.println(receipt.getConsensusTopicId().toString());
+      TransactionId transactionId = new ConsensusMessageSubmitTransaction()
+        .setTopicId(topicId)
+        .setMessage("hello, HCS!")
+        .execute(client);
+        
+      TransactionReceipt receipt = transactionId.getReceipt(client);
+      
       System.out.println(receipt.getConsensusTopicSequenceNumber());
     } catch (HederaNetworkException | HederaStatusException e) {
       e.printStackTrace();

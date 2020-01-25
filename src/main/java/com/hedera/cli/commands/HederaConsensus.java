@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.hcs.Consensus;
-import com.hedera.cli.shell.ShellHelper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
@@ -18,9 +17,6 @@ public class HederaConsensus extends CliDefaults {
 
   @Autowired
   private Consensus consensus;
-
-  @Autowired
-  private ShellHelper shellHelper;
 
   @ShellMethod(value = "manage Hedera consensus service") // @formatter:off
   public void hcs(@ShellOption(defaultValue = "") String subCommand,
@@ -37,6 +33,7 @@ public class HederaConsensus extends CliDefaults {
       // argsList.add("-y " + y);
       break;
     case "submit":
+      argsList = addToArgsList(topicIdString, argsList);
       break;
     case "read":
       argsList = addToArgsList(topicIdString, argsList);
