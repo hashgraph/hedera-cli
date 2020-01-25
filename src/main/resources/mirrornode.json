@@ -3,12 +3,12 @@
         {
             "name": "mainnet-mirror",
             "description": "Hedera mainnet mirror node",
-            "address": "https://mainnet.mirrornode.hedera.com"
+            "address": "mainnet.mirrornode.hedera.com:6552"
         },
         {
             "name": "testnet-mirror",
             "description": "Hedera testnet mirror node",
-            "address": "https://testnet.mirrornode.hedera.com"
+            "address": "testnet.mirrornode.hedera.com:6552"
         }
     ]
 }
