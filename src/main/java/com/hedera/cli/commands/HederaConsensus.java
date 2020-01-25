@@ -23,18 +23,23 @@ public class HederaConsensus extends CliDefaults {
   private ShellHelper shellHelper;
 
   @ShellMethod(value = "manage Hedera consensus service")
-  public void hcs(@ShellOption(defaultValue = "") String subCommand, @ShellOption(defaultValue = "") String topic) {
-
+  public void hcs(@ShellOption(defaultValue = "") String subCommand, 
+                  @ShellOption(defaultValue = "") String topic,
+                  // Specifying -y flag will set y to be true (which will require submit key)
+                  @ShellOption(value = {"-y", "--yes"}, arity = 0, defaultValue = "false") boolean y) {
+                        
     String[] args;
     List<String> argsList = new ArrayList<>();
     Object[] objs;
 
     switch (subCommand) {
     case "create":
-      argsList = addToArgsList(topic, argsList);
-      if (argsList.isEmpty()) {
+      if (!topic.isEmpty()) {
+        argsList.add(topic);
+      } else {
         shellHelper.printError("Please provide a topic name");
       }
+      argsList.add("-y " + y);
       break;
     case "submit":
       break;
@@ -56,5 +61,4 @@ public class HederaConsensus extends CliDefaults {
       return argsList;
     }
   }
-
 }
