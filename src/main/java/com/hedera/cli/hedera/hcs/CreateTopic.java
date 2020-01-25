@@ -5,8 +5,8 @@ import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.shell.ShellHelper;
 import com.hedera.hashgraph.sdk.Client;
-import com.hedera.hashgraph.sdk.HederaException;
 import com.hedera.hashgraph.sdk.HederaNetworkException;
+import com.hedera.hashgraph.sdk.HederaStatusException;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicCreateTransaction;
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
@@ -80,7 +80,7 @@ public class CreateTopic implements Runnable {
                 shellHelper.printSuccess("TransactionId: " + transactionId.toString());
                 final ConsensusTopicId topicId = transactionId.getReceipt(client).getConsensusTopicId();
                 shellHelper.printSuccess("TopicId: " + topicId.toString());
-            } catch (HederaNetworkException | HederaException e) {
+            } catch (HederaNetworkException | HederaStatusException e) {
                 shellHelper.printError(e.getMessage());
             }
         }
@@ -95,7 +95,7 @@ public class CreateTopic implements Runnable {
             shellHelper.printSuccess("TransactionId: " + transactionId.toString());
             final ConsensusTopicId topicId = transactionId.getReceipt(client).getConsensusTopicId();
             shellHelper.printSuccess("TopicId: " + topicId.toString());
-        } catch (HederaNetworkException | HederaException e) {
+        } catch (HederaNetworkException | HederaStatusException e) {
             shellHelper.printError(e.getMessage());
         }
     }

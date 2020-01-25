@@ -130,7 +130,7 @@ public class FileCreate implements Runnable {
                 .setTransactionId(transactionId)
                 .setExpirationTime(instant)
                 // Use the same key as the operator to "own" this file
-                .addKey(operatorKey.getPublicKey())
+                .addKey(operatorKey.publicKey)
                 .setContents(fileContents)
                 .setMaxTransactionFee(maxTransactionFee);
             // This will wait for the receipt to become available
