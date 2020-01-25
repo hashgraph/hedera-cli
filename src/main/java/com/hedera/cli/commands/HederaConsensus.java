@@ -19,11 +19,9 @@ public class HederaConsensus extends CliDefaults {
   @Autowired
   private Consensus consensus;
 
-  @Autowired
-  private ShellHelper shellHelper;
-
-  @ShellMethod(value = "manage Hedera consensus service")
-  public void hcs(@ShellOption(defaultValue = "") String subCommand, @ShellOption(defaultValue = "") String topic) {
+  @ShellMethod(value = "manage Hedera consensus service") // @formatter:off
+  public void hcs(@ShellOption(defaultValue = "") String subCommand, 
+    @ShellOption(defaultValue = "") String topic) { // @formatter:on
 
     String[] args;
     List<String> argsList = new ArrayList<>();
@@ -32,9 +30,6 @@ public class HederaConsensus extends CliDefaults {
     switch (subCommand) {
     case "create":
       argsList = addToArgsList(topic, argsList);
-      if (argsList.isEmpty()) {
-        shellHelper.printError("Please provide a topic name");
-      }
       break;
     case "submit":
       break;

@@ -7,10 +7,9 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 @Component
-@Command(name = "hcs", description = "@|fg(225) Create, update, delete or querying an account by providing the <args>|@"
-+ "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. account create <args>|@", subcommands = {
-    CreateTopic.class
-})
+@Command(name = "hcs", description = "@|fg(225) Create a topic, submit a message or read a message in a topic|@"
+        + "%n@|fg(yellow) <command> <subcommand> <args>"
+        + "%neg. hcs create|@", subcommands = { CreateTopic.class })
 public class Consensus implements Runnable {
 
     @Autowired
@@ -20,16 +19,21 @@ public class Consensus implements Runnable {
     public void run() {
         CommandLine.usage(this, System.out);
     }
- 
+
     public void handle(String subCommand, String... args) {
-        if (args.length == 0) {
-            CommandLine.usage(this, System.out);
-        } else {
+        switch (subCommand) {
+        case "create":
             try {
                 createTopic.handle(subCommand, args);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            break;
+        case "submit":
+            break;
+        default:
+            this.run();
+            break;
         }
     }
 }
