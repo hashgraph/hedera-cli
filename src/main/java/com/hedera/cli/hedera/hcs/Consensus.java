@@ -8,12 +8,17 @@ import picocli.CommandLine.Command;
 
 @Component
 @Command(name = "hcs", description = "@|fg(225) Create a topic, submit a message or read a message in a topic|@"
-        + "%n@|fg(yellow) <command> <subcommand> <args>"
-        + "%neg. hcs create|@", subcommands = { CreateTopic.class })
+        + "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. hcs create|@", subcommands = { CreateTopic.class })
 public class Consensus implements Runnable {
 
     @Autowired
     private CreateTopic createTopic;
+
+    @Autowired
+    private SubmitMessage submitMessage;
+
+    @Autowired
+    private ReadMessage readMessage;
 
     @Override
     public void run() {
@@ -30,7 +35,18 @@ public class Consensus implements Runnable {
             }
             break;
         case "submit":
+            try {
+                submitMessage.handle(subCommand, args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             break;
+        case "read":
+            try {
+                readMessage.handle(subCommand, args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         default:
             this.run();
             break;
