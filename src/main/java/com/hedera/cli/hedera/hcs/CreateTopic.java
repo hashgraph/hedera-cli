@@ -10,8 +10,8 @@ import com.hedera.hashgraph.sdk.HederaStatusException;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicCreateTransaction;
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
-
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,6 @@ import lombok.Setter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 
 @Getter
 @Setter
@@ -41,16 +40,12 @@ public class CreateTopic implements Runnable {
     @Autowired
     private AccountManager accountManager;
 
-    // there's no concept in HCS for "topic name". There's only memo.
-    // so this has to be removed and replaced with a --memo option
-    @Parameters(index = "0", description = "Creates a topic and returns a Transaction ID and Topic ID" + "%n@|bold,underline Usage:|@%n"
-            + "@|fg(yellow) hcs create helloworld|@")
-    private String topic;
-
     @Option(names = {"-y", "--yes"}, description = "Yes, use submit key, a submitKey limits who can submit messages on the topic")
     private boolean useSubmitKey;
 
     private Ed25519PublicKey submitKey;
+
+    // @enerestar this should be an option with name -m / --memo
     private String topicMemoString = "";
 
     @Override
