@@ -1,11 +1,16 @@
 package com.hedera.cli.config;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
+import com.hedera.hashgraph.sdk.mirror.MirrorClient;
+import com.hedera.hashgraph.sdk.mirror.MirrorConsensusTopicQuery;
 
 import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
@@ -35,8 +40,8 @@ public class NonInteractiveConfig {
     private Shell shell;
 
     @Bean
-    public CommandLineRunner exampleCommandLineRunner(ConfigurableEnvironment environment) {
-        return new ExampleCommandLineRunner(shell, environment);
+    public CommandLineRunner nonREPLCommandLineRunner(ConfigurableEnvironment environment) {
+        return new NonREPLCommandLineRunner(shell, environment);
     }
 
     @Bean
@@ -68,6 +73,10 @@ public class NonInteractiveConfig {
 }
 
 class LocalServer implements ApplicationRunner {
+
+    @Autowired
+    private AddressBookManager am;
+    
     @Override
     public void run(ApplicationArguments args) throws Exception {
         List<String> nonOptionArgs = args.getNonOptionArgs();
@@ -75,17 +84,31 @@ class LocalServer implements ApplicationRunner {
             // when -X option is provided, do not run local server
             return;
         }
+
+        final MirrorClient mirrorClient = new MirrorClient(am.getCurrentMirrorNetwork());
+
+        String topicIdString = nonOptionArgs.get(1);    // handle it if get(1) fails
+        final ConsensusTopicId topicId = ConsensusTopicId.fromString(topicIdString);
+        System.out.println("Subscribing to topic id " + topicIdString);
+        // local server mode
+        new MirrorConsensusTopicQuery()
+            .setTopicId(topicId)
+            .subscribe(mirrorClient, resp -> {
+                String messageAsString = new String(resp.message, StandardCharsets.UTF_8);
+                System.out.println(resp.consensusTimestamp + " received topic message: " + messageAsString);
+            },Throwable::printStackTrace);
+              
     }
 }
 
 @Order(InteractiveShellApplicationRunner.PRECEDENCE - 2)
-class ExampleCommandLineRunner implements CommandLineRunner {
+class NonREPLCommandLineRunner implements CommandLineRunner {
 
     private Shell shell;
 
     private ConfigurableEnvironment environment;
 
-    public ExampleCommandLineRunner(Shell shell, ConfigurableEnvironment environment) {
+    public NonREPLCommandLineRunner(Shell shell, ConfigurableEnvironment environment) {
         this.shell = shell;
         this.environment = environment;
     }
