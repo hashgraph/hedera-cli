@@ -26,10 +26,13 @@ public class SubmitMessage implements Runnable {
       + "@|fg(yellow) hcs create|@")
   private String topicIdString;
 
+  // needs options 
+  // declaring message
+  // declaring public key etc
+
   @Override
   public void run() {
-    System.out.println("Example: hcs read 0.0.1001");
-    System.out.println("Topic id is " + topicIdString);
+    System.out.println("Example: hcs submit " + topicIdString);
 
     Client client = hedera.createHederaClient();
 

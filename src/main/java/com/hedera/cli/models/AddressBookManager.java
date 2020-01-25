@@ -116,6 +116,18 @@ public class AddressBookManager {
     return null;
   }
 
+  public String getCurrentMirrorNetwork() {
+    String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
+    String mirrorNodeAddress = null;
+    for (MirrorNode m : mirrorNodes) {
+      String currentMirror = currentNetwork + "-mirror";
+      if (currentMirror.equals(m.getName())) {
+        mirrorNodeAddress = m.getAddress();
+      }
+    }
+    return mirrorNodeAddress;
+  }
+
   public void listNetworks() {
     String currentNetwork = dataDirectory.readFile(NETWORK_FILE, NETWORK_DEFAULT);
     for (Network network : networks) {

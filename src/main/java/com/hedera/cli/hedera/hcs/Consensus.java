@@ -8,7 +8,8 @@ import picocli.CommandLine.Command;
 
 @Component
 @Command(name = "hcs", description = "@|fg(225) Create a topic, submit a message or read a message in a topic|@"
-        + "%n@|fg(yellow) <command> <subcommand> <args>" + "%neg. hcs create|@", subcommands = { CreateTopic.class })
+        + "%n@|fg(yellow) <command> <subcommand> <args>"
+        + "%neg. hcs create|@", subcommands = { CreateTopic.class, SubmitMessage.class, ReadMessage.class })
 public class Consensus implements Runnable {
 
     @Autowired
