@@ -96,7 +96,7 @@ public class AccountCreate implements Runnable, Operation {
             // Else keyGen always set to false and read from default.txt which contains
             // operator keys
             Ed25519PrivateKey operatorPrivateKey = hedera.getOperatorKey();
-            Ed25519PublicKey operatorPublicKey = operatorPrivateKey.publicKey;
+            Ed25519PublicKey operatorPublicKey = operatorPrivateKey.getPublicKey();
             accountId = hederaGrpc.createNewAccount(operatorPublicKey, hedera.getOperatorId(), initBal);
             if (operatorPrivateKey != null && operatorPublicKey != null && accountId != null) {
                 // save to local disk
