@@ -20,11 +20,11 @@ public class HederaConsensus extends CliDefaults {
 
   @ShellMethod(value = "manage Hedera consensus service") // @formatter:off
   public void hcs(@ShellOption(defaultValue = "") String subCommand,
-                  @ShellOption(defaultValue = "") String topicIdString,
                   @ShellOption(value = {"-m", "--memo"}, defaultValue = "") String m,
-                  @ShellOption(value = {"k", "submitKey"}, defaultValue = "") String k,
+                  @ShellOption(value = {"-k", "--submitKey"}, defaultValue = "") String k,
                   // Specifying -y flag will set y to be true (which will require submit key)
-                  @ShellOption(value = {"-y", "--yes"}, arity = 0, defaultValue = "false") boolean y) { // @formatter:on
+                  @ShellOption(value = {"-y", "--yes"}, arity = 0, defaultValue = "false") boolean y
+  ) { // @formatter:on
 
     String[] args;
     List<String> argsList = new ArrayList<>();
@@ -33,14 +33,16 @@ public class HederaConsensus extends CliDefaults {
     switch (subCommand) {
     case "create":
       if (!m.isEmpty()) argsList.add("-m " + m);
-      if (!k.isEmpty()) argsList.add("-k" + k);
-      argsList.add("-y" + y);
+      if (!k.isEmpty()) argsList.add("-k " + k);
+      argsList.add("-y=" + y);
+      System.out.println("arglist " + Arrays.asList(argsList));
       break;
     case "submit":
-      argsList = addToArgsList(topicIdString, argsList);
+      if (!m.isEmpty()) argsList.add("-m " + m);
+      if (!k.isEmpty()) argsList.add("-k " + k);
       break;
     case "read":
-      argsList = addToArgsList(topicIdString, argsList);
+      System.out.println("to be impl");
       break;
     default:
       break;

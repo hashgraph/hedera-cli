@@ -22,6 +22,8 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+import java.util.Arrays;
+
 @Getter
 @Setter
 @Component
@@ -40,29 +42,31 @@ public class CreateTopic implements Runnable {
     @Autowired
     private AccountManager accountManager;
 
-    @Option(names = {"-m", "--memo"}, description = "Topic memo 100 bytes")
-    private String topicMemo;
+    @Option(names = {"-m", "--memo"}, description = "Topic memo")
+    private String topicMemoString = "";
 
-    @Option(names = {"-k", "-submitKey"}, description = "a submit key (public key) to limits who can submit messages on the topic")
+    @Option(names = {"-k", "--submitKey"}, description = "a submit key (public key) to limits who can submit messages on the topic")
     private String submitKeyString;
 
-    @Option(names = {"-y", "--yes"}, description = "Generate a submit key")
+    @Option(names = {"-y", "--yes"}, arity = "0..*", description = "Generate a submit key")
     private boolean generateSubmitKey;
 
     private Ed25519PublicKey submitKey;
-
-    // @enerestar this should be an option with name -m / --memo
-    private String topicMemoString = "";
 
     private ConsensusTopicCreateTransaction consensusTopicCreateTransaction;
 
     @Override
     public void run() {
+//        System.out.println("topic memo" + topicMemo);
+//        System.out.println("submit key string" + submitKeyString);
+        System.out.println("generate submit key boolean" + generateSubmitKey);
         Client client = hedera.createHederaClient();
 
+        System.out.println("topic memo " + topicMemoString);
+        System.out.println("topic memo " + submitKeyString);
         // pseudocode
-        if (!topicMemo.isEmpty()) {
-            consensusTopicCreateTransaction.setTopicMemo(topicMemo);
+        if (!topicMemoString.isEmpty()) {
+            consensusTopicCreateTransaction.setTopicMemo(topicMemoString);
         }
         if (!generateSubmitKey && verifySubmitKey(submitKeyString)) {
             submitKey = Ed25519PublicKey.fromString(submitKeyString);
@@ -88,7 +92,9 @@ public class CreateTopic implements Runnable {
         }
     }
 
-    public void handle(String subCommand, String... args) {
+    public void handle(String... args) {
+        System.out.println("args here in create topic " + Arrays.asList(args));
+        System.out.println(this);
         new CommandLine(this).execute(args);
     }
 

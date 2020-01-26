@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
+import java.util.Arrays;
+
 @Component
 @Command(name = "hcs", description = "@|fg(225) Create a topic, submit a message or read a message in a topic|@"
         + "%n@|fg(yellow) <command> <subcommand> <args>"
@@ -30,7 +32,10 @@ public class Consensus implements Runnable {
         switch (subCommand) {
         case "create":
             try {
-                createTopic.handle(subCommand, args);
+                System.out.println("subcommand " + subCommand);
+                System.out.println("args " + Arrays.asList(args));
+                createTopic.handle(args);
+                System.out.println("came here ");
             } catch (Exception e) {
                 e.printStackTrace();
             }

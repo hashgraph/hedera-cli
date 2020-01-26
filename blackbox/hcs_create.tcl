@@ -23,7 +23,7 @@ expect {
                 }
             
             "" {
-                spawn $EXEC_JAR -X hcs create hello
+                spawn $EXEC_JAR -X hcs create
                 expect "TransactionId: *"
                 expect "TopicId: *"
             }
