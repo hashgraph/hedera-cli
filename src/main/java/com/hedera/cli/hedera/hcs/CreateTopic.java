@@ -46,7 +46,7 @@ public class CreateTopic implements Runnable {
     private String topicMemoString = "";
 
     @Option(names = {"-k", "--submitKey"}, description = "a submit key (public key) to limits who can submit messages on the topic")
-    private String submitKeyString;
+    private String submitKeyString = "";
 
     @Option(names = {"-y", "--yes"}, arity = "0..*", description = "Generate a submit key")
     private boolean generateSubmitKey;
@@ -54,35 +54,38 @@ public class CreateTopic implements Runnable {
     private Ed25519PublicKey submitKey;
 
     private ConsensusTopicCreateTransaction consensusTopicCreateTransaction;
+    private TransactionId transactionId;
 
     @Override
     public void run() {
-//        System.out.println("topic memo" + topicMemo);
-//        System.out.println("submit key string" + submitKeyString);
-        System.out.println("generate submit key boolean" + generateSubmitKey);
-        Client client = hedera.createHederaClient();
-
-        System.out.println("topic memo " + topicMemoString);
-        System.out.println("topic memo " + submitKeyString);
-        // pseudocode
-        if (!topicMemoString.isEmpty()) {
-            consensusTopicCreateTransaction.setTopicMemo(topicMemoString);
-        }
-        if (!generateSubmitKey && verifySubmitKey(submitKeyString)) {
-            submitKey = Ed25519PublicKey.fromString(submitKeyString);
-            // right now assume a public key given and code from there
-            consensusTopicCreateTransaction.setSubmitKey(submitKey);
-        }
-        if (generateSubmitKey && verifySubmitKey(submitKeyString)) {
-            // Ed25519PublicKey newPublicKey = generatePublicKey();
-            // consensusTopicCreateTransaction.setSubmitKey(newPublicKey);
-        }
-        // write our HCS gRPC call here, which can be abstracted into a different
-        // class/function
         try {
-            final TransactionId transactionId = consensusTopicCreateTransaction
-                    .setMaxTransactionFee(1_000_000_000)
-                    .execute(client);
+            System.out.println("generate submit key boolean" + generateSubmitKey);
+            Client client = hedera.createHederaClient();
+            consensusTopicCreateTransaction = new ConsensusTopicCreateTransaction();
+            System.out.println("topicMemoString " + topicMemoString);
+            System.out.println("submitKeyString " + submitKeyString);
+            if (topicMemoString.isEmpty()) {
+                if (submitKeyString.isEmpty()) {
+                    //execute with no args
+                    transactionId = executeTopicCreateTransaction(client, consensusTopicCreateTransaction);
+                } else {
+                    // submitKey is not empty so
+                    if (verifySubmitKey(submitKeyString)) {
+                        submitKey = Ed25519PublicKey.fromString(submitKeyString);
+                        consensusTopicCreateTransaction.setSubmitKey(submitKey);
+                        transactionId = executeTopicCreateTransaction(client, consensusTopicCreateTransaction);
+                    }
+                }
+            } else {
+                // topicMemo is not empty so
+                consensusTopicCreateTransaction.setTopicMemo(topicMemoString);
+                transactionId = executeTopicCreateTransaction(client, consensusTopicCreateTransaction);
+            }
+
+            if (generateSubmitKey && verifySubmitKey(submitKeyString)) {
+                // Ed25519PublicKey newPublicKey = generatePublicKey();
+                // consensusTopicCreateTransaction.setSubmitKey(newPublicKey);
+            }
 
             shellHelper.printSuccess("TransactionId: " + transactionId.toString());
             final ConsensusTopicId topicId = transactionId.getReceipt(client).getConsensusTopicId();
@@ -93,8 +96,6 @@ public class CreateTopic implements Runnable {
     }
 
     public void handle(String... args) {
-        System.out.println("args here in create topic " + Arrays.asList(args));
-        System.out.println(this);
         new CommandLine(this).execute(args);
     }
 
@@ -112,13 +113,20 @@ public class CreateTopic implements Runnable {
         return true;
     }
 
+    private TransactionId executeTopicCreateTransaction(Client client, ConsensusTopicCreateTransaction consensusTopicCreateTransaction) throws HederaStatusException {
+        transactionId = consensusTopicCreateTransaction
+                .setMaxTransactionFee(1_000_000_000)
+                .execute(client);
+        return transactionId;
+    }
+
     private String generatePublicKey() {
         // KeyGeneration keyGeneration = new KeyGeneration(strMethod);
         // HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
         // List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
         // KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
         // Ed25519PublicKey newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
-        
+
         // TODO
         // We should save the newly generated keys somewhere but 
         // 1) can a hcs submit key be associate with a keypair that does not have an Hedera Account?

@@ -32,10 +32,7 @@ public class Consensus implements Runnable {
         switch (subCommand) {
         case "create":
             try {
-                System.out.println("subcommand " + subCommand);
-                System.out.println("args " + Arrays.asList(args));
                 createTopic.handle(args);
-                System.out.println("came here ");
             } catch (Exception e) {
                 e.printStackTrace();
             }

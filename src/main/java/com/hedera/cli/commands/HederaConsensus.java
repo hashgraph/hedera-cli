@@ -35,7 +35,6 @@ public class HederaConsensus extends CliDefaults {
       if (!m.isEmpty()) argsList.add("-m " + m);
       if (!k.isEmpty()) argsList.add("-k " + k);
       argsList.add("-y=" + y);
-      System.out.println("arglist " + Arrays.asList(argsList));
       break;
     case "submit":
       if (!m.isEmpty()) argsList.add("-m " + m);
@@ -50,14 +49,5 @@ public class HederaConsensus extends CliDefaults {
     objs = argsList.toArray();
     args = Arrays.copyOf(objs, objs.length, String[].class);
     consensus.handle(subCommand, args);
-  }
-
-  public List<String> addToArgsList(String topicIdString, List<String> argsList) {
-    if (!topicIdString.isEmpty()) {
-      argsList.add(topicIdString);
-      return argsList;
-    } else {
-      return argsList;
-    }
   }
 }
