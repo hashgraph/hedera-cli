@@ -40,50 +40,43 @@ public class CreateTopic implements Runnable {
     @Autowired
     private AccountManager accountManager;
 
-    @Option(names = {"-y", "--yes"}, description = "Yes, use submit key, a submitKey limits who can submit messages on the topic")
-    private boolean useSubmitKey;
+    @Option(names = {"-m", "--memo"}, description = "Topic memo 100 bytes")
+    private String topicMemo;
+
+    @Option(names = {"-k", "-submitKey"}, description = "a submit key (public key) to limits who can submit messages on the topic")
+    private String submitKeyString;
+
+    @Option(names = {"-y", "--yes"}, description = "Generate a submit key")
+    private boolean generateSubmitKey;
 
     private Ed25519PublicKey submitKey;
 
     // @enerestar this should be an option with name -m / --memo
     private String topicMemoString = "";
 
+    private ConsensusTopicCreateTransaction consensusTopicCreateTransaction;
+
     @Override
     public void run() {
         Client client = hedera.createHederaClient();
-        topicMemoString = accountManager.promptMemoString(inputReader);
 
-        if (useSubmitKey) {
-             String submitKeyString = inputReader.prompt("Enter the submit key (public key)");
-            if (StringUtil.isNullOrEmpty(submitKeyString)) {
-                shellHelper.printError("Enter a submit key (public key) to limit who can submit messages on the topic");
-                return;
-            }
-            try {
-                submitKey = Ed25519PublicKey.fromString(submitKeyString);
-            } catch (Exception e) {
-                shellHelper.printError("Private key is not in the right ED25519 string format");
-                return;
-            }
-            try {
-                final TransactionId transactionId = new ConsensusTopicCreateTransaction()
-                        .setMaxTransactionFee(1_000_000_000)
-                        .setSubmitKey(submitKey)
-                        .setTopicMemo(topicMemoString)
-                        .execute(client);
-
-                shellHelper.printSuccess("TransactionId: " + transactionId.toString());
-                final ConsensusTopicId topicId = transactionId.getReceipt(client).getConsensusTopicId();
-                shellHelper.printSuccess("TopicId: " + topicId.toString());
-            } catch (HederaNetworkException | HederaStatusException e) {
-                shellHelper.printError(e.getMessage());
-            }
+        // pseudocode
+        if (!topicMemo.isEmpty()) {
+            consensusTopicCreateTransaction.setTopicMemo(topicMemo);
         }
-
+        if (!generateSubmitKey && verifySubmitKey(submitKeyString)) {
+            submitKey = Ed25519PublicKey.fromString(submitKeyString);
+            // right now assume a public key given and code from there
+            consensusTopicCreateTransaction.setSubmitKey(submitKey);
+        }
+        if (generateSubmitKey && verifySubmitKey(submitKeyString)) {
+            // Ed25519PublicKey newPublicKey = generatePublicKey();
+            // consensusTopicCreateTransaction.setSubmitKey(newPublicKey);
+        }
         // write our HCS gRPC call here, which can be abstracted into a different
         // class/function
         try {
-            final TransactionId transactionId = new ConsensusTopicCreateTransaction()
+            final TransactionId transactionId = consensusTopicCreateTransaction
                     .setMaxTransactionFee(1_000_000_000)
                     .execute(client);
 
@@ -99,4 +92,32 @@ public class CreateTopic implements Runnable {
         new CommandLine(this).execute(args);
     }
 
+    private boolean verifySubmitKey(String submitKeyString) {
+        if (StringUtil.isNullOrEmpty(submitKeyString)) {
+            shellHelper.printError("Enter a submit key (public key) to limit who can submit messages on the topic");
+            return false;
+        }
+        try {
+            Ed25519PublicKey.fromString(submitKeyString);
+        } catch (Exception e) {
+            shellHelper.printError("Private key is not in the right ED25519 string format");
+            return false;
+        }
+        return true;
+    }
+
+    private String generatePublicKey() {
+        // KeyGeneration keyGeneration = new KeyGeneration(strMethod);
+        // HGCSeed hgcSeed = new HGCSeed((CryptoUtils.getSecureRandomData(32)));
+        // List<String> mnemonic = keyGeneration.generateMnemonic(hgcSeed);
+        // KeyPair keypair = keyGeneration.generateKeysAndWords(hgcSeed, mnemonic);
+        // Ed25519PublicKey newPublicKey = Ed25519PublicKey.fromString(keypair.getPublicKeyEncodedHex());
+        
+        // TODO
+        // We should save the newly generated keys somewhere but 
+        // 1) can a hcs submit key be associate with a keypair that does not have an Hedera Account?
+        // 2) we will need to save the keys in a [network][hcs][submitKeys] folder
+        // 3) while topics created to be save in [network][hcs][topics? id generated] folder
+        return "newPublicKey";
+    }
 }
