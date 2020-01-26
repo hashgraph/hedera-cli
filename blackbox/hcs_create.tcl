@@ -31,5 +31,33 @@ expect {
     }
 }
 
+# run the memo
+# todo is topic memo retrieved from records? and named as transaction memo?
+spawn $EXEC_JAR -X network use previewnet
+expect {
+    "Setting network to previewnet" {
+        expect {
+        "" {
+            spawn $EXEC_JAR -X hcs create -m "topic memo"
+            expect "TransactionId: *"
+            expect "TopicId: *"
+            }
+        }
+    }
+}
 
+# run the submit key command
+# todo where to verify the submitKey?
+spawn $EXEC_JAR -X network use previewnet
+expect {
+    "Setting network to previewnet" {
+        expect {
+        "" {
+            spawn $EXEC_JAR -X hcs create -k "$TEST_PUB"
+            expect "TransactionId: *"
+            expect "TopicId: *"
+            }
+        }
+    }
+}
 

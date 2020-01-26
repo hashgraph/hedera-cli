@@ -59,11 +59,8 @@ public class CreateTopic implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("generate submit key boolean" + generateSubmitKey);
             Client client = hedera.createHederaClient();
             consensusTopicCreateTransaction = new ConsensusTopicCreateTransaction();
-            System.out.println("topicMemoString " + topicMemoString);
-            System.out.println("submitKeyString " + submitKeyString);
             if (topicMemoString.isEmpty()) {
                 if (submitKeyString.isEmpty()) {
                     //execute with no args
