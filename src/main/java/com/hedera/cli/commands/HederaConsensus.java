@@ -42,9 +42,6 @@ public class HederaConsensus extends CliDefaults {
       if (!m.isEmpty()) argsList.add("-m " + m);
       if (!k.isEmpty()) argsList.add("-k " + k);
       break;
-    case "read":
-      System.out.println("to be impl");
-      break;
     default:
       break;
     }
