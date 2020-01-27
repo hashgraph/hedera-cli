@@ -42,6 +42,11 @@ public class HederaConsensus extends CliDefaults {
       if (!m.isEmpty()) argsList.add("-m " + m);
       if (!k.isEmpty()) argsList.add("-k " + k);
       break;
+    case "read":
+      System.out.println("To subscribe to hcs messages, run");
+      System.out.println("hedera -S [topic id]");
+      System.out.println("in a separate terminal pane and not in our hedera REPL environment");
+      return;
     default:
       break;
     }
