@@ -11,8 +11,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@EnableAutoConfiguration
-@ComponentScan("com.hedera.cli")
 public class Application {
     public static void main(String[] args) {
         // using args, determine banner mode (LOG or OFF) and web application type (NONE or SERVLET)

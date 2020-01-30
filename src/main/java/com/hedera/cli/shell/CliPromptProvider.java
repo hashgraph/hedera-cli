@@ -20,21 +20,17 @@ public class CliPromptProvider implements PromptProvider {
         String currentNetwork = hedera.getAddressBookManager().getCurrentNetworkAsString();
         String operatorAccount = hedera.getOperatorAccount();
 
-        // red
         AttributedString noDefaultAccountAttr = new AttributedString(
                 "To see available networks, enter `network ls`" +
                 "\nYou do not have a default operator account for this network. Please run `setup`\n",
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
 
-        // blue
         AttributedString hederaAttr = new AttributedString("hedera ",
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.BLUE));
 
-        // green
         AttributedString currentNetworkAttr = new AttributedString("[" + currentNetwork + "]",
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));
 
-        // blue
         AttributedString promptAttr = new AttributedString(" :> ",
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.BLUE));
 
@@ -51,7 +47,6 @@ public class CliPromptProvider implements PromptProvider {
                 .toAttributedString();
         } 
         
-        // yellow
         AttributedString currentAccountAttr = new AttributedString("[" + operatorAccount + "]",
                 AttributedStyle.DEFAULT.foreground(AttributedStyle.YELLOW));
 

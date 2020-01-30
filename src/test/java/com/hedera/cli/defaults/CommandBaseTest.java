@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.hedera.cli.commands.CommandBase;
 import com.hedera.cli.models.DataDirectory;
 
 import org.junit.jupiter.api.Test;
@@ -14,10 +15,10 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellMethodAvailability;
 
 @ExtendWith(MockitoExtension.class)
-public class CliDefaultsTest {
+public class CommandBaseTest {
 
     // Example Cli Test Class that extends CliDefaults abstract class
-    private static class ExampleCli extends CliDefaults {
+    private static class ExampleCli extends CommandBase {
         @ShellMethodAvailability("isNotCompleted")
         @ShellMethod(value = "example command")
         public void exampleCommmand() {
