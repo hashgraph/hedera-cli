@@ -1,4 +1,4 @@
-package com.hedera.cli.defaults;
+package com.hedera.cli.commands;
 
 import java.io.File;
 
@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.Availability;
 
-public abstract class CliDefaults {
+public abstract class CommandBase {
 
   private String defaultNetworkName = "testnet";
 

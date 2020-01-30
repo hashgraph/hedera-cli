@@ -241,7 +241,7 @@ public class AccountManagerTest {
         assertFalse(accountManager.isAccountId(str2));
 
         String str3 = "0.0.0";
-        assertFalse(accountManager.isAccountId(str3));
+        assertTrue(accountManager.isAccountId(str3));
 
         String str4 = "-";
         assertFalse(accountManager.isAccountId(str4));
@@ -260,9 +260,6 @@ public class AccountManagerTest {
 
         String str9 = ".0.0.a.";
         assertFalse(accountManager.isAccountId(str9));
-
-        String str10 = "0.0.010";
-        assertFalse(accountManager.isAccountId(str10));
 
         String str11 = "0.a.1001";
         assertFalse(accountManager.isAccountId(str11));

@@ -49,14 +49,14 @@ public class HederaGrpc {
     @Autowired
     private AddressBookManager addressBookManager;
 
-    public AccountId createNewAccount(Ed25519PublicKey publicKey, AccountId operatorId, long initBal) {
+    public AccountId createNewAccount(Ed25519PublicKey publicKey, AccountId operatorId, long initialBalance) {
         AccountId accountId = null;
         try (Client client = hedera.createHederaClient()) {
             TransactionId transactionId = new TransactionId(operatorId);
 
             TransactionId txId = new AccountCreateTransaction()
                     // The only _required_ property here is `key`
-                    .setTransactionId(transactionId).setKey(publicKey).setInitialBalance(initBal)
+                    .setTransactionId(transactionId).setKey(publicKey).setInitialBalance(initialBalance)
                     .setAutoRenewPeriod(Duration.ofSeconds(7890000)).execute(client);
 
             // This will wait for the receipt to become available
@@ -73,19 +73,19 @@ public class HederaGrpc {
     }
 
     public JsonObject printAccount(String accountId, String privateKey, String publicKey) {
-        JsonObject account1 = new JsonObject();
-        account1.add("accountId", accountId);
-        account1.add("privateKey", privateKey);
-        account1.add("publicKey", publicKey);
+        JsonObject account = new JsonObject();
+        account.add("accountId", accountId);
+        account.add("privateKey", privateKey);
+        account.add("publicKey", publicKey);
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Object jsonObject = mapper.readValue(account1.toString(), HederaAccount.class);
+            Object jsonObject = mapper.readValue(account.toString(), HederaAccount.class);
             String accountValue = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
             shellHelper.printSuccess(accountValue);
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
-        return account1;
+        return account;
     }
 
     public void executeAccountUpdate(AccountId accountId, Ed25519PrivateKey newKey, Ed25519PrivateKey originalKey) {

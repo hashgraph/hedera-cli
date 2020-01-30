@@ -136,17 +136,7 @@ public class AccountManager {
 
 
     public boolean isAccountId(String str) {
-        // checks null or empty
-        if (str == null || str.isEmpty()) {
-            return false;
-        }
-        String[] strSplit = str.split("\\.");
-        if (strSplit.length != 3) {
-            return false;
-        }
-        return strSplit[0].matches("^[0-9*]+$")
-                && strSplit[1].matches("^[0-9*]+$")
-                && (strSplit[2].matches("^[1-9][0-9*]+$"));
+        return str != null && str.matches("\\d+\\.\\d+\\.\\d+");
     }
 
 

@@ -3,7 +3,6 @@ package com.hedera.cli.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.file.File;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,7 @@ import org.springframework.shell.standard.ShellMethodAvailability;
 import org.springframework.shell.standard.ShellOption;
 
 @ShellComponent
-public class HederaFile extends CliDefaults {
+public class HederaFile extends CommandBase {
 
     @Autowired
     private File file;
