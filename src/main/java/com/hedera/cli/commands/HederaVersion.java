@@ -1,6 +1,7 @@
 package com.hedera.cli.commands;
 
 import com.hedera.cli.shell.ShellHelper;
+import org.jline.terminal.Terminal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.shell.standard.ShellComponent;
@@ -28,5 +29,8 @@ public class HederaVersion extends CommandBase {
     @ShellMethod(value = "hedera-cli version")
     public void version() {
         shellHelper.printInfo(version);
+        Terminal terminal = shellHelper.getTerminal();
+        shellHelper.print(terminal.getType());
+        shellHelper.print(terminal.getName());
     }
 }

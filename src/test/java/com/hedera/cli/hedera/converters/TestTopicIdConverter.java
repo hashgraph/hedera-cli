@@ -1,6 +1,5 @@
 package com.hedera.cli.hedera.converters;
 
-import com.hedera.cli.hedera.convertors.TopicIdConverter;
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
 import org.junit.jupiter.api.Test;
 

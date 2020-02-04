@@ -1,6 +1,5 @@
 package com.hedera.cli.hedera.converters;
 
-import com.hedera.cli.hedera.convertors.Ed25519PublicKeyConverter;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 import org.junit.jupiter.api.Test;
 

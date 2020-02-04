@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.convertors;
+package com.hedera.cli.hedera.converters;
 
 import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
 import org.jetbrains.annotations.NotNull;

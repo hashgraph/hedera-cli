@@ -1,4 +1,4 @@
-package com.hedera.cli.hedera.convertors;
+package com.hedera.cli.hedera.converters;
 
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import org.jetbrains.annotations.NotNull;

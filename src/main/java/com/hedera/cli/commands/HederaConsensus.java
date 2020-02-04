@@ -2,11 +2,9 @@ package com.hedera.cli.commands;
 
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.consensus.CreateTopic;
+import com.hedera.cli.hedera.converters.InstantConverter;
 import com.hedera.cli.shell.ShellHelper;
 
-import com.hedera.hashgraph.proto.ConsensusCreateTopic;
-import com.hedera.hashgraph.proto.ConsensusSubmitMessage;
-import com.hedera.hashgraph.proto.ResponseCodeEnum;
 import com.hedera.hashgraph.sdk.Status;
 import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.consensus.ConsensusMessageSubmitTransaction;
@@ -24,6 +22,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,16 +102,40 @@ public class HederaConsensus extends CommandBase {
           @ShellOption(
                   value = {"--start-time"},
                   help = "Include messages which reached consensus on or after this time (in epoch seconds)",
-                  defaultValue = "now") long consensusStartTime,
+                  defaultValue = InstantConverter.NOW) Instant consensusStartTime,
           @ShellOption(
                   value = {"--end-time"},
-                  help = "Include messages which reached consensus before this time (in epoch seconds)",
-                  defaultValue = "not set, receive indefinitely") long consensusEndTime
+                  help = "Include messages which reached consensus before this time (in epoch seconds). " +
+                          "If unspecified, messages will be received indefinitely",
+                  defaultValue = ShellOption.NULL) Instant consensusEndTime
           // No param for limit
   ) {
-    shellHelper.printInfo("Topic subscribed");
+      String mirrorEndpoint = "34.66.178.155"; // todo: remove hardcoded value
+      try(MirrorClient mirrorClient = new MirrorClient(mirrorEndpoint)) {
+          MirrorConsensusTopicQuery query = new MirrorConsensusTopicQuery()
+                  .setTopicId(topic)
+                  .setStartTime(consensusStartTime);
+          if (consensusEndTime != null) {
+              query.setEndTime(consensusEndTime);
+          }
+          shellHelper.print(String.format("%15s %5s %s", "consensusTime", "SeqNo", "Message"));
+          query.subscribe(
+                  mirrorClient,
+                  resp -> {
+                      String messageAsString = new String(resp.message, StandardCharsets.UTF_8);
+                      shellHelper.print(String.format(
+                              "%15s %5s %s", resp.consensusTimestamp.toString(), resp.sequenceNumber, messageAsString));
+                  },
+                  throwable -> {
+                      shellHelper.printError(throwable.getMessage());
+                  });
+          // TODO: doesn't work yet. Need custom signal handler to support long running commands and Ctrl+C to terminate them.
+      } catch (Exception e) {
+          shellHelper.printError(e.getMessage());
+      }
   }
 
+  // TODO: add tests
   // TODO: add support to alternatively specify known account id in place of private/public keys
   // TODO: add delete, update and topicInfo.
   // TODO: add autoRenewAccount and autoRenewDuration params when that feature is complete.
