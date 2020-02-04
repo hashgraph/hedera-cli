@@ -62,6 +62,7 @@ public class AccountGetInfo implements Runnable, Operation {
                 // module.addSerializer(AccountInfo.class, accountInfoSerializer);
                 // mapper.registerModule(module);
                 ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
+                // TODO: print public key here rather than just "ED25519".
                 shellHelper.printSuccess(ow.writeValueAsString(accountInfo));
             } catch (Exception e) {
                 shellHelper.printError(e.getMessage());
