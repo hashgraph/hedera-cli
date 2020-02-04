@@ -3,15 +3,24 @@ package com.hedera.cli.hedera;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
+import com.google.protobuf.ByteString;
 import com.hedera.cli.models.AccountManager;
 import com.hedera.cli.models.AddressBookManager;
 import com.hedera.cli.models.DataDirectory;
 import com.hedera.cli.models.HederaNode;
 import com.hedera.cli.models.Network;
 import com.hedera.cli.services.CurrentAccountService;
+import com.hedera.cli.shell.ShellHelper;
+import com.hedera.hashgraph.proto.ResponseCodeEnum;
 import com.hedera.hashgraph.sdk.Client;
+import com.hedera.hashgraph.sdk.Transaction;
+import com.hedera.hashgraph.sdk.TransactionBuilder;
+import com.hedera.hashgraph.sdk.TransactionReceipt;
 import com.hedera.hashgraph.sdk.account.AccountId;
+import com.hedera.hashgraph.sdk.crypto.PrivateKey;
+import com.hedera.hashgraph.sdk.crypto.PublicKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +47,9 @@ public class Hedera {
 
     @Autowired
     public AccountManager accountManager;
+
+    @Autowired
+    public ShellHelper shellHelper;
 
     private HederaNode node;
 
@@ -204,5 +216,29 @@ public class Hedera {
 
         return data;
     }
-    
+
+    public TransactionReceipt executeTransaction(TransactionBuilder transactionBuilder, List<PrivateKey> signingKeys) {
+        TransactionReceipt receipt = null;
+        try (Client client = createHederaClient()) {
+            Transaction transaction = transactionBuilder.build(client);
+            ByteString operatorKey = ByteString.copyFrom(getOperatorKey().publicKey.toBytes());
+            for (PrivateKey privateKey : signingKeys) {
+                if (!privateKey.publicKey.hasPrefix(operatorKey)) {  // double signing with same key is not allowed
+                    transaction.sign(privateKey);
+                }
+            }
+            receipt = transaction
+                    .execute(client)
+                    .getReceipt(client);
+            shellHelper.print(receipt.status.toString());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (TimeoutException e) {
+            // do nothing
+        } catch (Exception e) {
+            shellHelper.printError(e.getMessage());
+        }
+        shellHelper.print("Transaction failed");
+        return receipt;
+    }
 }
