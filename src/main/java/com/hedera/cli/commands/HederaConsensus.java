@@ -2,8 +2,10 @@ package com.hedera.cli.commands;
 
 import com.hedera.cli.shell.ShellHelper;
 
+import com.hedera.hashgraph.sdk.consensus.ConsensusTopicId;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
+import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -22,13 +24,13 @@ public class HederaConsensus extends CommandBase {
                   defaultValue = "") String memo,
           @ShellOption(
                   value = { "-ak", "--admin-key" },
-                  help = "Hex-encoded public key which will have admin rights to the topic",
-                  defaultValue = "no admin key") String adminKey,
+                  help = "Hex-encoded private key which will have admin rights to the topic. If unspecified, no admin key is set.",
+                  defaultValue = ShellOption.NULL) Ed25519PrivateKey adminKey,
           @ShellOption(
                   value = { "-sk", "--submit-key" },
                   help = "Hex-encoded public key which will be allowed to submit messages to the topic. " +
-                          "If none is specified, anyone can submit messages to the topic",
-                  defaultValue = "no submit key") String submitKey
+                          "If unspecified, no submit is specified and anyone can submit messages to the topic",
+                  defaultValue =  ShellOption.NULL) Ed25519PublicKey submitKey
   ) {
     shellHelper.printInfo("Topic Created");
   }
@@ -37,11 +39,11 @@ public class HederaConsensus extends CommandBase {
   public void submitMessage(
           @ShellOption(
                   value = { "-t", "--topic"},
-                  help = "Topic id to which message will be submitted") String topic,
+                  help = "Topic id to which message will be submitted") ConsensusTopicId topic,
           @ShellOption(
                   value = { "-sk", "--submit-key"},
-                  help = "If topic is protected by a submit key, then the hex-encoded private key corresponding to that submit key",
-                  defaultValue = "no submit key") String submitKey
+                  help = "If topic is protected by a submit key, then the hex-encoded private key corresponding to that submit key.",
+                  defaultValue = ShellOption.NULL) Ed25519PrivateKey submitKey
   ) {
     shellHelper.printInfo("Submitted message");
   }
@@ -50,7 +52,7 @@ public class HederaConsensus extends CommandBase {
   public void subscribeTopic(
           @ShellOption(
                   value = {"-t", "--topic"},
-                  help = "Topic id to subscribe") String topic,
+                  help = "Topic id to subscribe") ConsensusTopicId topic,
           @ShellOption(
                   value = {"--start-time"},
                   help = "Include messages which reached consensus on or after this time (in epoch seconds)",

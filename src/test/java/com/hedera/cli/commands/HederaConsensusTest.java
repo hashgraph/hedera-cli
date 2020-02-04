@@ -21,10 +21,6 @@ public class HederaConsensusTest {
 
   @Test
   public void consensus() {
-    hederaConsensus.consensus();
-
     verify(shellHelper).printInfo("Stub function.");
   }
-
-
 }
