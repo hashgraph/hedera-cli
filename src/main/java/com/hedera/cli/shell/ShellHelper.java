@@ -1,13 +1,16 @@
 package com.hedera.cli.shell;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.springframework.beans.factory.annotation.Value;
 
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
+import java.util.concurrent.atomic.AtomicBoolean;
+
+@RequiredArgsConstructor
 public class ShellHelper {
 
     @Value("${shell.out.info}")
@@ -22,11 +25,8 @@ public class ShellHelper {
     @Value("${shell.out.error}")
     public String errorColor = "RED";
 
-    private Terminal terminal;
-
-    public ShellHelper(Terminal terminal) {
-        this.terminal = terminal;
-    }
+    @Getter
+    private final Terminal terminal;
 
     /**
      * Construct colored message in the given color.
@@ -130,13 +130,46 @@ public class ShellHelper {
         }
     }
 
-    //--- set / get methods ---------------------------------------------------
+    /**
+     * Helper method for long running commands like subscribe-topic.
+     * Current thread blocks to wait for user interrupt (Ctrl+C). So this function
+     * should be called directly from the thread which invokes @ShellMethod
+     * annotated function. That would prevent the control from getting back to the
+     * Spring Shell (until user interrupts manually) and the long-running command
+     * can continue to write to the terminal.
+     * This is NOT same as interactive command since all user inputs (except Ctrl+C)
+     * will be ignored.
+     * @param beforeWait is run before waiting for user interrupt
+     * @param afterInterrupt is run after user interrupts. Resources that are setup in
+     *                       beforeWait MUST be cleaned up here.
+     */
+    public void waitForUserInterrupt(Runnable beforeWait, Runnable afterInterrupt) {
+        AtomicBoolean userInterrupted = new AtomicBoolean(false);
+        Object monitor = new Object();
 
-    public Terminal getTerminal() {
-        return terminal;
-    }
+        // Register handler for Ctrl+C from user
+        this.terminal.handle(Terminal.Signal.INT, signal -> {
+            synchronized (monitor) {
+                userInterrupted.set(true);
+                monitor.notify();
+            }
+        });
 
-    public void setTerminal(Terminal terminal) {
-        this.terminal = terminal;
+        // Command setup
+        beforeWait.run();
+
+        // Let the command run until interrupted by user
+        synchronized (monitor) {
+            while(!userInterrupted.get()) {
+                try {
+                    monitor.wait();
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        }
+
+        // Command tear down
+        afterInterrupt.run();
     }
 }

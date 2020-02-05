@@ -238,7 +238,6 @@ public class Hedera {
         } catch (Exception e) {
             shellHelper.printError(e.getMessage());
         }
-        shellHelper.print("Transaction failed");
         return receipt;
     }
 }

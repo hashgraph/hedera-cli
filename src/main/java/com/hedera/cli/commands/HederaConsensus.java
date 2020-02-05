@@ -1,7 +1,6 @@
 package com.hedera.cli.commands;
 
 import com.hedera.cli.hedera.Hedera;
-import com.hedera.cli.hedera.consensus.CreateTopic;
 import com.hedera.cli.hedera.converters.InstantConverter;
 import com.hedera.cli.shell.ShellHelper;
 
@@ -15,6 +14,7 @@ import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PrivateKey;
 import com.hedera.hashgraph.sdk.crypto.ed25519.Ed25519PublicKey;
 import com.hedera.hashgraph.sdk.mirror.MirrorClient;
 import com.hedera.hashgraph.sdk.mirror.MirrorConsensusTopicQuery;
+import com.hedera.hashgraph.sdk.mirror.MirrorSubscriptionHandle;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.buf.HexUtils;
 import org.springframework.shell.standard.ShellComponent;
@@ -25,13 +25,13 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @ShellComponent
 @RequiredArgsConstructor
 public class HederaConsensus extends CommandBase {
 
   private final ShellHelper shellHelper;
-  private final CreateTopic createTopic;
   private final Hedera hedera;
 
   @ShellMethod(value = "Create new topic")
@@ -53,11 +53,11 @@ public class HederaConsensus extends CommandBase {
       ConsensusTopicCreateTransaction createTopicTransaction = new ConsensusTopicCreateTransaction();
       List<PrivateKey> signingKeys = new ArrayList<>();
       if (adminKey != null) {
-        createTopicTransaction.setAdminKey(adminKey.publicKey);
-        signingKeys.add(adminKey);
+          createTopicTransaction.setAdminKey(adminKey.publicKey);
+          signingKeys.add(adminKey);
       }
       if (submitKey != null) {
-        createTopicTransaction.setSubmitKey(submitKey);
+          createTopicTransaction.setSubmitKey(submitKey);
       }
       if (memo != null) {
           createTopicTransaction.setTopicMemo(memo);
@@ -90,7 +90,7 @@ public class HederaConsensus extends CommandBase {
       TransactionReceipt receipt = hedera.executeTransaction(submitMessageTransaction, signingKeys);
       if (receipt != null && receipt.status == Status.Success) {
           shellHelper.printSuccess("Message submitted\nNext sequence number : " + receipt.getConsensusTopicSequenceNumber()
-                + " Running hash: " + HexUtils.toHexString(receipt.getConsensusTopicRunningHash()));
+                  + " Running hash: " + HexUtils.toHexString(receipt.getConsensusTopicRunningHash()));
       }
   }
 
@@ -108,10 +108,12 @@ public class HederaConsensus extends CommandBase {
                   help = "Include messages which reached consensus before this time (in epoch seconds). " +
                           "If unspecified, messages will be received indefinitely",
                   defaultValue = ShellOption.NULL) Instant consensusEndTime
-          // No param for limit
   ) {
-      String mirrorEndpoint = "34.66.178.155"; // todo: remove hardcoded value
-      try(MirrorClient mirrorClient = new MirrorClient(mirrorEndpoint)) {
+      AtomicReference<MirrorClient> mirrorClient = new AtomicReference<>();
+      AtomicReference<MirrorSubscriptionHandle> subscription = new AtomicReference<>();
+      String mirrorGrpcEndpoint = "34.66.178.155:5600"; // todo: remove hardcoded value
+      shellHelper.waitForUserInterrupt(() -> {
+          mirrorClient.set(new MirrorClient(mirrorGrpcEndpoint));
           MirrorConsensusTopicQuery query = new MirrorConsensusTopicQuery()
                   .setTopicId(topic)
                   .setStartTime(consensusStartTime);
@@ -119,20 +121,24 @@ public class HederaConsensus extends CommandBase {
               query.setEndTime(consensusEndTime);
           }
           shellHelper.print(String.format("%15s %5s %s", "consensusTime", "SeqNo", "Message"));
-          query.subscribe(
-                  mirrorClient,
+          subscription.set(query.subscribe(
+                  mirrorClient.get(),
                   resp -> {
                       String messageAsString = new String(resp.message, StandardCharsets.UTF_8);
                       shellHelper.print(String.format(
-                              "%15s %5s %s", resp.consensusTimestamp.toString(), resp.sequenceNumber, messageAsString));
+                              "%15s %5s %s", resp.consensusTimestamp.getEpochSecond(), resp.sequenceNumber, messageAsString));
                   },
                   throwable -> {
-                      shellHelper.printError(throwable.getMessage());
-                  });
-          // TODO: doesn't work yet. Need custom signal handler to support long running commands and Ctrl+C to terminate them.
-      } catch (Exception e) {
-          shellHelper.printError(e.getMessage());
-      }
+                  }
+          ));
+      }, () -> {
+          try {
+              subscription.get().unsubscribe();
+              mirrorClient.get().close();
+          } catch (Exception e) {
+              shellHelper.printError(e.getMessage());
+          }
+      });
   }
 
   // TODO: add tests

@@ -67,16 +67,6 @@ public class ShellHelperTest {
     assertEquals("GREEN", shellHelper.successColor);
     assertEquals("YELLOW", shellHelper.warningColor);
     assertEquals("RED", shellHelper.errorColor);
-
-    TerminalBuilder t = TerminalBuilder.builder();
-    Terminal anotherTerminal = t
-      .name("another terminal")
-      .jna(false)
-      .streams(System.in, System.out)
-      .build();
-    shellHelper.setTerminal(anotherTerminal);
-    // verify that we are able to retrieve the same terminal instance
-    assertEquals("another terminal", shellHelper.getTerminal().getName());
   } // @formatter:on
 
   @Test
