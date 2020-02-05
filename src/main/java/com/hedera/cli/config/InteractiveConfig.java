@@ -4,16 +4,12 @@ import com.hedera.cli.shell.ProgressBar;
 import com.hedera.cli.shell.ProgressCounter;
 import com.hedera.cli.shell.ShellHelper;
 
-import com.hedera.cli.shell.SignalHandler;
 import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-
-import java.io.IOException;
 
 @Configuration
 @Conditional(InteractiveModeCondition.class)

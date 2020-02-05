@@ -217,6 +217,9 @@ public class Hedera {
         return data;
     }
 
+    /**
+     * Executes the given transaction after signing it using the given keys and current operator account.
+     */
     public TransactionReceipt executeTransaction(TransactionBuilder transactionBuilder, List<PrivateKey> signingKeys) {
         TransactionReceipt receipt = null;
         try (Client client = createHederaClient()) {
