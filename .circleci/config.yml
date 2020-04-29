@@ -15,17 +15,15 @@ workflows:
   version: 2
   main:
     jobs:
-      - build:
-          filters:
-            branches:
-              only: /.*/
-      - release:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - master
+      - build
+# Disabled
+#      - release:
+#          requires:
+#            - build
+#          filters:
+#            branches:
+#              only:
+#                - master
 
 jobs:
   build:
@@ -36,7 +34,7 @@ jobs:
       - run:
           name: Build and Test
           command: ./scripts/build.sh
-      
+
       - run:
           name: Test Coverage
           command: |
