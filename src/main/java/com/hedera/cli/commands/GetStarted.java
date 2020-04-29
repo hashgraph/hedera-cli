@@ -1,6 +1,5 @@
 package com.hedera.cli.commands;
 
-import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.Hedera;
 import com.hedera.cli.hedera.setup.Setup;
 import com.hedera.cli.shell.ShellHelper;
@@ -10,7 +9,7 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 
 @ShellComponent(value = "Get Started")
-public class GetStarted extends CliDefaults {
+public class GetStarted extends CommandBase {
 
   @Autowired
   private ShellHelper shellHelper;

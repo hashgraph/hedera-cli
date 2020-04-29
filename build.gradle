@@ -36,7 +36,7 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-web"
 
     // hedera sdk
-    implementation 'com.hedera.hashgraph:sdk:1.0.0-hcs-2'
+    implementation 'com.hedera.hashgraph:sdk:1.1.1'
     // netty transport (for high throughput applications)
     implementation 'io.grpc:grpc-netty-shaded:1.24.0'
 

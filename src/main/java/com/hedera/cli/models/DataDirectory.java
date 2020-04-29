@@ -21,15 +21,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedera.cli.shell.ShellHelper;
 
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 @Component
 public class DataDirectory {
 

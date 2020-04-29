@@ -10,8 +10,8 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 @Component
-@Command(name = "network", description = "List and set the network in use", subcommands = { NetworkList.class,
-        NetworkUse.class })
+@Command(name = "network", description = "List and set the network in use",
+        subcommands = { NetworkList.class, NetworkUse.class })
 public class Network implements Runnable {
 
     @Autowired

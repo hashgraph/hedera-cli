@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.hedera.cli.defaults.CliDefaults;
 import com.hedera.cli.hedera.crypto.Account;
 import com.hedera.cli.hedera.crypto.Transfer;
 import com.hedera.cli.shell.ShellHelper;
@@ -20,7 +19,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @ShellComponent
-public class HederaCrypto extends CliDefaults {
+public class HederaCrypto extends CommandBase {
 
     @Autowired
     private ShellHelper shellHelper;
