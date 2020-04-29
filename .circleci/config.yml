@@ -30,17 +30,12 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-
       - run:
           name: Build and Test
           command: ./scripts/build.sh
-
       - run:
-          name: Test Coverage
-          command: |
-            export CODACY_PROJECT_TOKEN=${CODACY_PROJECT_TOKEN}
-            ./gradlew sendCoverageToCodacy
-
+          name: Upload Code Coverage
+          command: bash <(curl -s https://codecov.io/bash)
       - persist_to_workspace:
           root: *workspace_root
           paths:
