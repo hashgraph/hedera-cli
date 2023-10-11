@@ -1,0 +1,43 @@
+{
+  "operatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+  "operatorId": "0.0.458179",
+  "network": "testnet",
+  "recording": 0,
+  "recordingScriptName": "",
+  "scripts": {
+    "script-test": {
+      "name": "test",
+      "creation": 1696951001600,
+      "commands": [
+        "network use testnet",
+        "account create -a addressbook[0] -b 1000",
+        "load script main"
+      ]
+    },
+    "script-main": {
+      "name": "main",
+      "creation": 1696951001500,
+      "commands": [
+        "network use mainnet"
+      ]
+    },
+    "script-michiel": {
+      "name": "michiel",
+      "creation": 1696951001602,
+      "commands": [
+        "network use testnet",
+        "account create -a random -t ECDSA"
+      ]
+    },
+    "script-mich": {
+      "name": "mich",
+      "creation": 1697014426988,
+      "commands": [
+        "account ls"
+      ]
+    }
+  },
+  "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
+  "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
+  "accounts": {}
+}
