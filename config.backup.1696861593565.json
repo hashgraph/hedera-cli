@@ -1,0 +1,34 @@
+{
+  "operatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+  "operatorId": "0.0.458179",
+  "network": "testnet",
+  "recording": 0,
+  "recordingScriptName": "",
+  "script-test": [
+    "network use testnet",
+    "account create -b 1000"
+  ],
+  "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
+  "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
+  "script-bram": [],
+  "accounts": {
+    "ben": {
+      "accountId": "0.0.4521326",
+      "type": "ECDSA",
+      "publickey": "302d300706052b8104000a03220003042679fbb4555e198f49d52fac8fd7f8a15baa0a146c491cf205d32b8ab1f802",
+      "evmAddress": "17523ad226694146542f438eae14fe5198343d18",
+      "solidityAddress": "17523ad226694146542f438eae14fe5198343d18",
+      "solidityAddressFull": "0x000000000000000000000000000000000044fd6e",
+      "privatekey": "3030020100300706052b8104000a04220420fad0e2871c85ce738ad86c016ee75356aa3eb3c00e3f8cd4d626bbf8368f3aec"
+    },
+    "benED25": {
+      "accountId": "0.0.4521326",
+      "type": "ED25519",
+      "publickey": "302a300506032b6570032100c8c472bf79c5e4d90cf8e05fda1e4d884a52007426e7fc0e485e4249619a13f5",
+      "evmAddress": "",
+      "solidityAddress": "",
+      "solidityAddressFull": "0x000000000000000000000000000000000044fd6e",
+      "privatekey": "302e020100300506032b6570042204200235ab30b10eb19fc5f49ef95983cff13f5c39c695d07de483e91951dcb01db0"
+    }
+  }
+}
