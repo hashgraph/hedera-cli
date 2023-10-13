@@ -1,5 +1,5 @@
 const { program } = require("commander");
-const { saveConfig, getConfig } = require("../utils/configManager");
+const { saveState, saveStateAttribute, getAllState } = require("../state/stateController");
 
 module.exports = () => {
   program
@@ -27,20 +27,18 @@ module.exports = () => {
 };
 
 function startRecording(scriptName) {
-  const config = getConfig();
-  config.recording = 1;
-  config.recordingScriptName = `script-${scriptName}`;
-  config.scripts[config.recordingScriptName] = {
+  const state = getAllState();
+  state.recording = 1;
+  state.recordingScriptName = `script-${scriptName}`;
+  state.scripts[state.recordingScriptName] = {
     name: scriptName,
     creation:  Date.now(),
     commands: []
   };
-  saveConfig(config);
+  saveState(state);
 }
 
 function stopRecording() {
-  const config = getConfig();
-  config.recording = 0;
-  config.recordingScriptName = "";
-  saveConfig(config);
+  saveStateAttribute('recording', 0);
+  saveStateAttribute('recordingScriptName', "");
 }

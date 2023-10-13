@@ -5,6 +5,7 @@ const accountCommands = require('./commands/account');
 const recordCommands = require('./commands/record');
 const loadScriptCommands = require('./commands/loadScript');
 const backupCommands = require('./commands/backup');
+const tokenCommands = require('./commands/token');
 
 program
   .version('1.0.0')
@@ -17,5 +18,6 @@ accountCommands(program);
 recordCommands(program);
 loadScriptCommands(program);
 backupCommands(program);
+tokenCommands(program);
 
 program.parseAsync(process.argv);
