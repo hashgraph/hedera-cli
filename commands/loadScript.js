@@ -1,5 +1,5 @@
 const { program } = require('commander');
-const { getConfig } = require('../utils/configManager');
+const { getState } = require('../state/stateController');
 const { execSync } = require('child_process');
 
 module.exports = () => {
@@ -12,9 +12,9 @@ module.exports = () => {
 };
 
 function loadScript(name) {
-  const config = getConfig();
+  const scripts = getState('scripts');
   const scriptName = `script-${name}`;
-  const script = config.scripts[scriptName];
+  const script = scripts[scriptName];
 
   if (!script) {
     console.error(`No script found with name: ${scriptName}`);

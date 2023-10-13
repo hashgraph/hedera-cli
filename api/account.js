@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { getMirrorNodeURL } = require('../utils/configManager');
+const { getMirrorNodeURL } = require('../state/stateService');
 
 /**
  * API functions:

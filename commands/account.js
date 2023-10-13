@@ -1,5 +1,4 @@
 const { program } = require("commander");
-const axios = require("axios");
 const {
   PrivateKey,
   AccountCreateTransaction,
@@ -7,10 +6,12 @@ const {
   AccountId,
 } = require("@hashgraph/sdk");
 
-const { getConfig, saveConfig, getHederaClient, getMirrorNodeURL } = require("../utils/configManager");
+const { getState, saveStateAttribute } = require("../state/stateController");
+const { getHederaClient } = require("../state/stateService");
 const { myParseInt } = require("../utils/verification");
-const { recordCommand } = require("../utils/configManager");
-const { displayBalances } = require("../utils/balances");
+const { recordCommand } = require("../state/stateService");
+const { displayBalances } = require("../utils/balance");
+const api = require("../api");
 
 module.exports = () => {
   const account = program.command("account");
@@ -18,7 +19,10 @@ module.exports = () => {
   account
     .command("create")
     .hook("preAction", (thisCommand) => {
-      const command = [thisCommand.parent.action().name(), ...thisCommand.parent.args]
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
       recordCommand(command);
     })
     .description(
@@ -47,7 +51,10 @@ module.exports = () => {
   account
     .command("balance <accountIdOrAlias>")
     .hook("preAction", (thisCommand) => {
-      const command = [thisCommand.parent.action().name(), ...thisCommand.parent.args]
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
       recordCommand(command);
     })
     .description("Retrieve the balance for an account ID or alias")
@@ -71,7 +78,10 @@ module.exports = () => {
   account
     .command("ls")
     .hook("preAction", (thisCommand) => {
-      const command = [thisCommand.parent.action().name(), ...thisCommand.parent.args]
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
       recordCommand(command);
     })
     .description("List all accounts in the address book")
@@ -83,7 +93,10 @@ module.exports = () => {
   account
     .command("import")
     .hook("preAction", (thisCommand) => {
-      const command = [thisCommand.parent.action().name(), ...thisCommand.parent.args]
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
       recordCommand(command);
     })
     .description(
@@ -99,14 +112,15 @@ module.exports = () => {
   account
     .command("clear")
     .hook("preAction", (thisCommand) => {
-      const command = [thisCommand.parent.action().name(), ...thisCommand.parent.args]
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
       recordCommand(command);
     })
     .description("Clear all accounts from the address book")
     .action(() => {
-      const config = getConfig();
-      config.accounts = {};
-      saveConfig(config);
+      saveStateAttribute("accounts", {});
     });
 };
 
@@ -124,7 +138,7 @@ async function createAccount(balance, type, alias) {
   }
 
   // Get client from config
-  const config = getConfig();
+  const accounts = getState("accounts");
   const client = getHederaClient();
 
   // Generate random alias if "random" is provided
@@ -151,14 +165,20 @@ async function createAccount(balance, type, alias) {
     newAccountPublicKey = newAccountPrivateKey.publicKey;
   }
 
-  const newAccount = await new AccountCreateTransaction()
-    .setKey(newAccountPublicKey)
-    .setInitialBalance(Hbar.fromTinybars(balance))
-    .execute(client);
+  let newAccountId;
+  try {
+    const newAccount = await new AccountCreateTransaction()
+      .setKey(newAccountPublicKey)
+      .setInitialBalance(Hbar.fromTinybars(balance))
+      .execute(client);
 
-  // Get the new account ID
-  const getReceipt = await newAccount.getReceipt(client);
-  const newAccountId = getReceipt.accountId;
+    // Get the new account ID
+    const getReceipt = await newAccount.getReceipt(client);
+    newAccountId = getReceipt.accountId;
+  } catch (error) {
+    console.log("Error creating new account", error);
+    client.close();
+  }
 
   // Store the new account in the config
   const newAccountDetails = {
@@ -179,12 +199,8 @@ async function createAccount(balance, type, alias) {
   };
 
   // Add the new account to the accounts object in the config
-  config.accounts = {
-    ...config.accounts,
-    [alias]: newAccountDetails,
-  };
-
-  saveConfig(config);
+  const updatedAccounts = { ...accounts, [alias]: newAccountDetails };
+  saveStateAttribute("accounts", updatedAccounts);
 
   // Log the account ID
   console.log("The new account ID is: " + newAccountId);
@@ -193,17 +209,17 @@ async function createAccount(balance, type, alias) {
 }
 
 function listAccounts(showPrivateKeys = false) {
-  const config = getConfig();
+  const accounts = getState("accounts");
 
   // Check if there are any accounts in the config
-  if (!config.accounts || Object.keys(config.accounts).length === 0) {
+  if (!accounts || Object.keys(accounts).length === 0) {
     console.log("No accounts found.");
     return;
   }
 
   // Log details for each account
   console.log("Accounts:");
-  for (const [alias, account] of Object.entries(config.accounts)) {
+  for (const [alias, account] of Object.entries(accounts)) {
     console.log(`- Alias: ${alias}`);
     console.log(`  Account ID: ${account.accountId}`);
     console.log(`  Type: ${account.type}`);
@@ -215,10 +231,10 @@ function listAccounts(showPrivateKeys = false) {
 
 // Write the importAccount function here
 function importAccount(id, key, alias) {
-  const config = getConfig();
+  const accounts = getState("accounts");
 
   // Check if name is unique
-  if (config.accounts && config.accounts[alias]) {
+  if (accounts && accounts[alias]) {
     console.error("An account with this alias already exists.");
     return;
   }
@@ -242,7 +258,8 @@ function importAccount(id, key, alias) {
   }
 
   // No Solidity and EVM address for ED25519 keys
-  config.accounts[alias] = {
+  const updatedAccounts = { ...accounts };
+  updatedAccounts[alias] = {
     accountId: id,
     type,
     publickey: privateKey.publicKey.toString(),
@@ -258,14 +275,13 @@ function importAccount(id, key, alias) {
     privatekey: key,
   };
 
-  saveConfig(config);
+  saveStateAttribute("accounts", updatedAccounts);
 }
 
 async function getAccountBalance(accountIdOrAlias, options) {
-  const { accounts } = getConfig();
-  const mirrorNodeURL = getMirrorNodeURL();
+  const accounts = getState("accounts");
   const client = getHederaClient();
-  
+
   let accountId;
 
   // Check if input is an alias or an account ID
@@ -280,7 +296,7 @@ async function getAccountBalance(accountIdOrAlias, options) {
   }
 
   try {
-    const response = await axios.get(`${mirrorNodeURL}/accounts/${accountId}`);
+    const response = await api.account.getAccountBalance(accountId);
     displayBalances(response, options);
   } catch (error) {
     console.error("Error fetching account balance:", error.message);
@@ -309,8 +325,9 @@ function getKeyType(keyString) {
 
 function generateRandomAlias() {
   const length = 20; // Define the length of the random string
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
