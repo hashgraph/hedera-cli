@@ -1,5 +1,4 @@
-const { recordCommand } = require("../utils/configManager");
-const switchNetworkUtils = require("../utils/switchNetwork");
+const { recordCommand, switchNetwork } = require("../state/stateService");
 
 module.exports = (program) => {
   const network = program.command("network");
@@ -12,7 +11,7 @@ module.exports = (program) => {
     })
     .description("Switch to a specific network")
     .action((name) => {
-      switchNetworkUtils.switchNetwork(name);
+      switchNetwork(name);
     });
 
   network

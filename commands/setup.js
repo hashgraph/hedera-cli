@@ -1,7 +1,8 @@
 const path = require("path");
 const dotenv = require("dotenv");
 
-const { saveConfig } = require("../utils/configManager");
+const { saveState } = require("../state/stateController");
+const config = require("../state/config.json");
 
 module.exports = (program) => {
   program
@@ -36,18 +37,11 @@ function setup() {
     return;
   }
 
-  // Create/update config.json with operator key and ID
-  const config = {
-    operatorKey: OPERATOR_KEY,
-    operatorId: OPERATOR_ID,
-    network: "testnet",
-    mirrorNodeTestnet: "https://testnet.mirrornode.hedera.com/api/v1",
-    mirrorNodeMainnet: "https://mainnet.mirrornode.hedera.com/api/v1",
-    recording: 0,
-    recordingScriptName: "",
-    accounts: {},
-    scripts: {},
+  // Update state.json with operator key and ID
+  const setupState = {
+    ...config,
   };
-
-  saveConfig(config);
+  setupState.operatorKey = OPERATOR_KEY;
+  setupState.operatorId = OPERATOR_ID;
+  saveState(setupState);
 }

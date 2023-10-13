@@ -6,7 +6,7 @@ function displayHbarBalance(accountId, hbars) {
 function displayTokenBalance(accountId, tokens, tokenId) {
   const tokenBalance = tokens.find((token) => token.token_id === tokenId);
   if (tokenBalance) {
-    console.log(`Token Balance for account ${accountId}:`);
+    console.log(`Token balance(s) for account ${accountId}:\n`);
     console.log(`Token ID ${tokenId}: ${tokenBalance.balance}`);
   } else {
     console.log(
