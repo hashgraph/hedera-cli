@@ -1,11 +1,12 @@
 {
   "name": "hedera-cli",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "CLI tool to manage and setup developer environments for Hedera Hashgraph.",
+  "main": "hedera-cli.js",
   "scripts": {
-    "build": "tsc",
-    "test": "jest"
+    "build": "rm -rf dist/ && tsc && npm run copy-state",
+    "test": "jest",
+    "copy-state": "copyfiles -u 2 src/state/*.json dist/state"
   },
   "keywords": [
     "CLI",
@@ -22,6 +23,8 @@
     "dotenv": "^16.3.1"
   },
   "devDependencies": {
+    "@types/node": "^20.8.6",
+    "copyfiles": "^2.4.1",
     "jest": "^29.7.0",
     "typescript": "^5.2.2"
   }
