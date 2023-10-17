@@ -10,9 +10,12 @@ import { getHederaClient } from "../state/stateService";
 import { myParseInt } from "../utils/verification";
 import { recordCommand }  from "../state/stateService";
 import { display } from "../utils/display";
+import { Logger } from "../utils/logger";
 import api from "../api";
 
 import type { Account, Command } from "../../types";
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   const account = program.command("account");
@@ -45,7 +48,7 @@ export default (program: any) => {
       try {
         await createAccount(options.balance, options.type, options.alias);
       } catch (error) {
-        console.log(error);
+        logger.error(error as object);
       }
     });
 
@@ -63,7 +66,7 @@ export default (program: any) => {
     .option("-t, --token-id <tokenId>", "Show balance for a specific token ID")
     .action(async (accountIdOrAlias: string, options: GetAccountBalanceOptions) => {
       if (options.onlyHbar && options.tokenId) {
-        console.error(
+        logger.error(
           "Error: You cannot use both --only-hbar and --token-id options at the same time."
         );
         return;
@@ -72,7 +75,7 @@ export default (program: any) => {
       try {
         await getAccountBalance(accountIdOrAlias, options);
       } catch (error) {
-        console.log(error);
+        logger.error(error as object);
       }
     });
 
@@ -128,13 +131,13 @@ export default (program: any) => {
 async function createAccount(balance: number, type: string, alias: string) {
   // Validate balance
   if (isNaN(balance) || balance <= 0) {
-    console.error("Invalid balance. Balance must be a positive number.");
+    logger.error("Invalid balance. Balance must be a positive number.");
     return;
   }
 
   // Validate type
   if (!["ecdsa", "ed25519"].includes(type.toLowerCase())) {
-    console.error('Invalid type. Type must be either "ecdsa" or "ed25519".');
+    logger.error('Invalid type. Type must be either "ecdsa" or "ed25519".');
     return;
   }
 
@@ -152,7 +155,7 @@ async function createAccount(balance: number, type: string, alias: string) {
 
   // Check if name is unique
   if (!isRandomAlias && accounts && accounts[alias]) {
-    console.error("An account with this alias already exists.");
+    logger.error("An account with this alias already exists.");
     client.close();
     return;
   }
@@ -178,12 +181,12 @@ async function createAccount(balance: number, type: string, alias: string) {
     const getReceipt = await newAccount.getReceipt(client);
     newAccountId = getReceipt.accountId;
   } catch (error) {
-    console.log("Error creating new account", error);
+    logger.error("Error creating new account:", error as object);
     client.close();
   }
 
   if (newAccountId == null) {
-    console.error("Account was not created");
+    logger.error("Account was not created");
     client.close();
     return;
   }
@@ -211,7 +214,7 @@ async function createAccount(balance: number, type: string, alias: string) {
   saveStateAttribute("accounts", updatedAccounts);
 
   // Log the account ID
-  console.log("The new account ID is: " + newAccountId);
+  logger.log("The new account ID is: " + newAccountId);
 
   client.close();
 }
@@ -221,18 +224,18 @@ function listAccounts(showPrivateKeys: boolean = false): void {
 
   // Check if there are any accounts in the config
   if (!accounts || Object.keys(accounts).length === 0) {
-    console.log("No accounts found.");
+    logger.log("No accounts found.");
     return;
   }
 
   // Log details for each account
-  console.log("Accounts:");
+  logger.log("Accounts:");
   for (const [alias, account] of Object.entries(accounts)) {
-    console.log(`- Alias: ${alias}`);
-    console.log(`  Account ID: ${account.accountId}`);
-    console.log(`  Type: ${account.type}`);
+    logger.log(`- Alias: ${alias}`);
+    logger.log(`  Account ID: ${account.accountId}`);
+    logger.log(`  Type: ${account.type}`);
     if (showPrivateKeys) {
-      console.log(`  Private Key: ${account.privatekey}`);
+      logger.log(`  Private Key: ${account.privatekey}`);
     }
   }
 }
@@ -243,7 +246,7 @@ function importAccount(id: string, key: string, alias: string): void {
 
   // Check if name is unique
   if (accounts && accounts[alias]) {
-    console.error("An account with this alias already exists.");
+    logger.error("An account with this alias already exists.");
     return;
   }
 
@@ -259,7 +262,7 @@ function importAccount(id: string, key: string, alias: string): void {
       privateKey = PrivateKey.fromStringED25519(key);
       break;
     default:
-      console.error(
+      logger.error(
         "Invalid key type. Only ECDSA and ED25519 keys are supported."
       );
       return;
@@ -298,16 +301,17 @@ async function getAccountBalance(accountIdOrAlias: string, options: GetAccountBa
   } else if (accounts && accounts[accountIdOrAlias]) {
     accountId = accounts[accountIdOrAlias].accountId;
   } else {
-    console.error("Invalid account ID or alias not found in address book.");
+    logger.error("Invalid account ID or alias not found in address book.");
     client.close();
     return;
   }
 
   try {
+    logger.log("Getting API balance")
     const response = await api.account.getAccountBalance(accountId);
     display("displayBalance", response, options);
-  } catch (error: any) {
-    console.error("Error fetching account balance:", error.message);
+  } catch (error) {
+    logger.error("Error fetching account balance:", error as object);
   }
 
   client.close();
