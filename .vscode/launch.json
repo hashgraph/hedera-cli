@@ -11,10 +11,12 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/hedera-cli.js",
+            "program": "${workspaceFolder}/dist/hedera-cli.js",
             "args": [
-                "account",
-                "clear"
+                "token",
+                "create-from-file",
+                "-f",
+                "template"
             ]
         }
     ]

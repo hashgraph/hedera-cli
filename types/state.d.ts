@@ -1,11 +1,12 @@
 export type Account = {
+  alias: string;
   accountId: string;
   type: string;
-  publickey: string;
+  publicKey: string;
   evmAddress: string;
   solidityAddress: string;
   solidityAddressFull: string;
-  privatekey: string;
+  privateKey: string;
 }
 
 type Script = {
@@ -14,7 +15,7 @@ type Script = {
   commands: string[];
 }
 
-type Token = {
+export type Token = {
   tokenId: string;
   name: string;
   symbol: string;
@@ -22,7 +23,13 @@ type Token = {
   treasuryKey: string;
   decimals: number;
   initialSupply: number;
-  adminKey: string;
+  adminKey?: string;
+  pauseKey?: string;
+  kycKey?: string;
+  wipeKey?: string;
+  freezeKey?: string;
+  supplyKey?: string;
+  feeScheduleKey?: string;
 }
 
 export interface State {
