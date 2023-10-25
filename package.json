@@ -4,9 +4,10 @@
   "description": "CLI tool to manage and setup developer environments for Hedera Hashgraph.",
   "main": "hedera-cli.js",
   "scripts": {
-    "build": "rm -rf dist/ && tsc && npm run copy-state",
+    "build": "rm -rf dist/ && tsc && npm run copy-state && npm run copy-input",
     "test": "jest",
-    "copy-state": "copyfiles -u 2 src/state/*.json dist/state"
+    "copy-state": "copyfiles -u 2 src/state/*.json dist/state",
+    "copy-input": "copyfiles -u 2 src/input/*.json dist/input"
   },
   "keywords": [
     "CLI",
