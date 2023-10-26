@@ -5,12 +5,19 @@ import {
   PrivateKey,
   TokenSupplyType,
   TokenAssociateTransaction,
+  TransferTransaction,
 } from "@hashgraph/sdk";
 
 import { myParseInt } from "../utils/verification";
 import { createAccount } from "../utils/account";
 import { getSupplyType } from "../utils/token";
-import { recordCommand, getAccountById, getAccountByAlias, getHederaClient } from "../state/stateService";
+import {
+  recordCommand,
+  getAccountById,
+  getAccountByAlias,
+  getHederaClient,
+  addTokenAssociation,
+} from "../state/stateService";
 import { saveStateAttribute, getState } from "../state/stateController";
 
 import type { Account, Command, Token } from "../../types";
@@ -79,7 +86,7 @@ export default (program: any) => {
         account = getAccountById(accountIdorAlias);
       } else {
         account = getAccountByAlias(accountIdorAlias);
-      }      
+      }
 
       if (!account) {
         console.log("Account not found:", accountIdorAlias);
@@ -99,11 +106,16 @@ export default (program: any) => {
         await tokenAssociateSubmit.getReceipt(client);
 
         console.log("Token associated:", options.tokenId);
+        client.close();
       } catch (error) {
         console.log("Failed to associate token:", options.tokenId);
         console.log(error);
+        client.close();
+        return;
       }
 
+      // Store association in state for token
+      addTokenAssociation(tokenId, account.accountId, account.alias);
       client.close();
     });
 
@@ -164,6 +176,96 @@ export default (program: any) => {
       } catch (error) {
         console.log(error);
       }
+    });
+
+  token
+    .command("transfer")
+    .hook("preAction", (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      recordCommand(command);
+    })
+    .description("Transfer a fungible token")
+    .requiredOption("-t, --token-id <tokenId>", "Token ID to transfer")
+    .requiredOption("-t, --to <to>", "Account ID to transfer token to")
+    .requiredOption("-f, --from <from>", "Account ID to transfer token from")
+    .requiredOption(
+      "-b, --balance <balance>",
+      "Amount of token to transfer",
+      myParseInt
+    )
+    .action(async (options: TransferTokenOptions) => {
+      const client = getHederaClient();
+      const tokenId = options.tokenId;
+      const toIdOrAlias = options.to;
+      const fromIdOrAlias = options.from;
+      const balance = options.balance;
+
+      // Fix overlapping -t options!
+      // Support aliases! for both accounts
+      // Verify token is associated?
+      // Sufficient balance in treasury?
+      // how to mint more? Can you add a "from treasury" option?
+
+      // Find sender account
+      let fromAccount;
+      let fromId;
+      const accountIdPattern = /^0\.0\.\d+$/;
+      const matchFrom = fromIdOrAlias.match(accountIdPattern);
+      if (matchFrom) {
+        fromAccount = getAccountById(fromIdOrAlias);
+      } else {
+        fromAccount = getAccountByAlias(fromIdOrAlias);
+      }
+
+      if (!fromAccount) {
+        console.log("From transfer account not found:", fromIdOrAlias);
+        client.close();
+        return;
+      }
+
+      fromId = fromAccount.accountId;
+
+      // Find receiver account
+      let toAccount;
+      let toId;
+      const matchTo = toIdOrAlias.match(accountIdPattern);
+      if (matchTo) {
+        toAccount = getAccountById(toIdOrAlias);
+      } else {
+        toAccount = getAccountByAlias(toIdOrAlias);
+      }
+
+      if (!toAccount) {
+        console.log("To transfer account not found:", toIdOrAlias);
+        client.close();
+        return;
+      }
+
+      toId = toAccount.accountId;
+
+      try {
+        const transferTx = await new TransferTransaction()
+          .addTokenTransfer(tokenId, fromId, balance * -1)
+          .addTokenTransfer(tokenId, toId, balance)
+          .freezeWith(client);
+
+        const transferTxSign = await transferTx.sign(
+          PrivateKey.fromString(fromAccount.privateKey)
+        );
+
+        const receipt = await transferTxSign.execute(client);
+        console.log(
+          "Transfer successful, tx ID",
+          receipt.transactionId.toString()
+        );
+      } catch (error) {
+        console.log(error);
+      }
+      
+      client.close();
     });
 };
 
@@ -299,10 +401,11 @@ async function createTokenFromFile(token: TokenInput) {
   }
 
   // Store new token in state
-  const tokens: Record<string, Token> = getState("token");
+  const tokens: Record<string, Token> = getState("tokens");
   const updatedTokens = {
     ...tokens,
     [tokenId.toString()]: {
+      associations: [],
       tokenId: tokenId.toString(),
       name: token.name,
       symbol: token.symbol,
@@ -320,7 +423,7 @@ async function createTokenFromFile(token: TokenInput) {
     },
   };
 
-  saveStateAttribute("token", updatedTokens);
+  saveStateAttribute("tokens", updatedTokens);
 
   client.close();
 }
@@ -435,4 +538,11 @@ interface TokenInput {
 
 interface Keys {
   [key: string]: string;
+}
+
+interface TransferTokenOptions {
+  tokenId: string;
+  to: string;
+  from: string;
+  balance: number;
 }
