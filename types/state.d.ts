@@ -16,6 +16,7 @@ type Script = {
 }
 
 export type Token = {
+  associations: Association[];
   tokenId: string;
   name: string;
   symbol: string;
@@ -30,6 +31,11 @@ export type Token = {
   freezeKey?: string;
   supplyKey?: string;
   feeScheduleKey?: string;
+}
+
+export interface Association {
+  alias: string;
+  accountId: string;
 }
 
 export interface State {
