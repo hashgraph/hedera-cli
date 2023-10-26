@@ -11,7 +11,7 @@ import {
   saveStateAttribute,
 } from "./stateController";
 
-import type { Account } from "../../types";
+import type { Account, Token } from "../../types";
 
 /** hook (middleware)
  * @example command ['account', 'create', '-b', '1000', '-t', 'ed25519']
@@ -64,6 +64,14 @@ function switchNetwork(name: string) {
   saveStateAttribute("network", name);
 }
 
+function addTokenAssociation(tokenId: string, accountId: string, alias: string) {
+  const tokens = getState("tokens");
+  const token: Token = tokens[tokenId];
+  token.associations.push({ alias, accountId });
+  tokens[tokenId] = token;
+  saveStateAttribute("tokens", tokens);
+}
+
 /* Accounts */
 function getAccountById(accountId: string): (Account|undefined) {
   const accounts: Record<string, Account> = getState("accounts");
@@ -80,7 +88,9 @@ export {
   getMirrorNodeURL,
   getHederaClient,
   recordCommand,
+
   switchNetwork,
+  addTokenAssociation,
 
   getAccountById,
   getAccountByAlias,
