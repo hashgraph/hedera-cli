@@ -223,14 +223,15 @@ function findNewKeyPattern(
 ): Promise<{ key: string; account: Account }>[] {
   let newAccountPromises: Promise<{ key: string; account: Account }>[] = [];
 
-  const newKeyPattern = /<newkey:(\d+)>/;
+  const newKeyPattern = /<newkey:(ecdsa|ECDSA|ed25519|ED25519):(\d+)>/;
   Object.keys(keys).forEach(key => {
     const match = keys[key as keyof typeof keys].match(newKeyPattern);
 
     if (match) {
-      const initialBalance = Number(match[1]);
+      const keyType = match[1]; // 'ecdsa' or 'ed25519' (can be capitals)
+      const initialBalance = Number(match[2]); // Initial balance in tinybars
       newAccountPromises.push(
-        createAccountForToken(key, initialBalance, "ecdsa", "random") // TODO: Make it possible to also create ed25519 accounts
+        createAccountForToken(key, initialBalance, keyType, "random") // Random alias because you can create an account upfront in scripts and give it an alias to be used in the template
       );
     }
   });
