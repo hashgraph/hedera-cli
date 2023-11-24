@@ -8,7 +8,7 @@
   "keys": {
     "supplyKey": "<alias:bob>",
     "treasuryKey": "<alias:alice>",
-    "adminKey": "<newkey:10000>",
+    "adminKey": "<newkey:ecdsa:10000>",
     "feeScheduleKey": "",
     "freezeKey": "",
     "wipeKey": "",
