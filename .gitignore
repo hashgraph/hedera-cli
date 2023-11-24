@@ -1,3 +1,6 @@
+# Dist folder
+dist/
+
 # Output file
 output.csv
 
