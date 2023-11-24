@@ -306,7 +306,7 @@ A token input file looks like below. You can define all properties you would nor
   "keys": {
     "supplyKey": "<alias:bob>",
     "treasuryKey": "<alias:alice>",
-    "adminKey": "<newkey:10000>",
+    "adminKey": "<newkey:ecdsa:10000>",
     "feeScheduleKey": "",
     "freezeKey": "",
     "wipeKey": "",
@@ -320,7 +320,7 @@ A token input file looks like below. You can define all properties you would nor
 
 > **Note:** that you can use placeholders for all keys on a token. The format `<alias:bob>` refers to an account with alias `bob` in your address book. It will use Bob's key. 
 > 
-> You can also tell the CLI tool to create a new account with an initial balance in TinyBars. The `<newkey:10000>` placeholder creates a new account with 10,000 TinyBars and uses its key.
+> You can also tell the CLI tool to create a new account with an account type (`ecdsa` or `ed25519`) and an initial balance in TinyBars. The `<newkey:ecdsa:10000>` placeholder creates a new ECDSA account with 10,000 TinyBars and uses its key for the admin key.
 
 **2. Create Fungible Token:**
 
