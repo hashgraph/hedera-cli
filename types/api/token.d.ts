@@ -55,3 +55,19 @@ type Fraction = {
   numerator: number;
   denominator: number;
 };
+
+/* Balance Response */
+interface BalanceEntry {
+  account: string;
+  balance: number;
+}
+
+interface Links {
+  next: string | null;
+}
+
+export type BalanceResponse = {
+  timestamp: string;
+  balances: BalanceEntry[];
+  links: Links;
+}

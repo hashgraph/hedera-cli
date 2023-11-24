@@ -1,19 +1,47 @@
 import * as path from "path";
 import * as dotenv from "dotenv";
 
-import { saveState } from "../state/stateController";
+import { recordCommand } from "../state/stateService";
+import { saveState, saveStateAttribute } from "../state/stateController";
 import config from "../state/config";
+import type { Command } from "../../types";
 
 export default (program: any) => {
-    program
-    .command("setup")
+  const setup = program.command("setup").description("Setup Hedera CLI");
+
+  setup
+    .command("init")
+    .hook("preAction", (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      recordCommand(command);
+    })
     .description("Setup the CLI with operator key and ID")
     .action(() => {
-      setup();
+      setupCLI("init");
+    });
+
+  setup
+    .command("reset")
+    .hook("preAction", (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      recordCommand(command);
+    })
+    .option("-a, --skip-accounts", "Skip resetting accounts", false)
+    .option("-t, --skip-tokens", "Skip resetting tokens", false)
+    .option("-s, --skip-scripts", "Skip resetting scripts", false)
+    .description("Reset the CLI to default settings")
+    .action((options: ResetOptions) => {
+      reset(options.skipAccounts, options.skipTokens, options.skipScripts);
     });
 };
 
-function setup(): void {
+function setupCLI(action: string): void {
   if (process.env.HOME === undefined) {
     console.error("Error: HOME environment variable is not defined");
     return;
@@ -42,11 +70,39 @@ function setup(): void {
     return;
   }
 
+  // Only write a fresh state file if the user is running the init command
+  if (action === "init") setupState(OPERATOR_ID, OPERATOR_KEY);
+}
+
+function setupState(operatorId: string, operatorKey: string): void {
   // Update state.json with operator key and ID
   const setupState = {
     ...config,
   };
-  setupState.operatorKey = OPERATOR_KEY;
-  setupState.operatorId = OPERATOR_ID;
+  setupState.operatorKey = operatorKey;
+  setupState.operatorId = operatorId;
   saveState(setupState);
+}
+
+function reset(
+  skipAccounts: boolean,
+  skipTokens: boolean,
+  skipScripts: boolean
+): void {
+  if (!skipAccounts && !skipTokens && !skipScripts) {
+    console.log("Resetting CLI to default settings...");
+    setupCLI("init");
+    return;
+  }
+
+  setupCLI("reset");
+  if (!skipAccounts) saveStateAttribute("accounts", {});
+  if (!skipTokens) saveStateAttribute("tokens", {});
+  if (!skipScripts) saveStateAttribute("scripts", {});
+}
+
+interface ResetOptions {
+  skipAccounts: boolean;
+  skipTokens: boolean;
+  skipScripts: boolean;
 }

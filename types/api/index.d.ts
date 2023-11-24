@@ -1,10 +1,9 @@
 import type { AccountResponse } from "./account.d.ts";
-import type { TokenResponse } from "./token.d.ts";
+import type { TokenResponse, BalanceResponse } from "./token.d.ts";
 
-export type APIResponseTypes = AccountResponse | TokenResponse;
-
-export type APIResponse = {
-    data: APIResponseTypes;
+type APIResponseTypes = AccountResponse | TokenResponse | BalanceResponse;
+export type APIResponse<T extends APIResponseTypes = APIResponseTypes> = {
+    data: T;
 }
 
 export type * from './account.d.ts';
