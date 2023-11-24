@@ -84,6 +84,23 @@ function getAccountByAlias(alias: string): (Account|undefined) {
   return accounts[alias];
 }
 
+function getAccountByIdOrAlias(accountIdOrAlias: string): (Account) {
+  const accountIdPattern = /^0\.0\.\d+$/;
+  const match = accountIdOrAlias.match(accountIdPattern);
+  let account;
+  if (match) {
+    account = getAccountById(accountIdOrAlias);
+  } else {
+    account = getAccountByAlias(accountIdOrAlias);
+  }
+
+  if (!account) {
+    throw new Error(`Account not found: ${accountIdOrAlias}`);
+  }
+
+  return account;
+}
+
 export {
   getMirrorNodeURL,
   getHederaClient,
@@ -94,4 +111,5 @@ export {
 
   getAccountById,
   getAccountByAlias,
+  getAccountByIdOrAlias,
 };

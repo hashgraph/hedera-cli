@@ -1,7 +1,11 @@
-import { saveState, saveStateAttribute, getAllState } from "../state/stateController.js";
+import {
+  saveState,
+  saveStateAttribute,
+  getAllState,
+} from "../state/stateController.js";
 
 export default (program: any) => {
-    program
+  program
     .command("record <action> [name]")
     .description("Manage recording of a script")
     .action((action: string, name: string) => {
@@ -31,13 +35,13 @@ function startRecording(scriptName: string) {
   state.recordingScriptName = `script-${scriptName}`;
   state.scripts[state.recordingScriptName] = {
     name: scriptName,
-    creation:  Date.now(),
-    commands: []
+    creation: Date.now(),
+    commands: [],
   };
   saveState(state);
 }
 
 function stopRecording(): void {
-  saveStateAttribute('recording', 0);
-  saveStateAttribute('recordingScriptName', "");
+  saveStateAttribute("recording", 0);
+  saveStateAttribute("recordingScriptName", "");
 }
