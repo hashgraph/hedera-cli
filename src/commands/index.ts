@@ -4,7 +4,7 @@ import networkCommands from "./network";
 import tokenCommands from "./token";
 import setupCommands from "./setup";
 import recordCommands from "./record";
-import loadScriptCommands from "./loadScript";
+import scriptCommands from "./script";
 
 const commands = {
   accountCommands,
@@ -13,7 +13,7 @@ const commands = {
   tokenCommands,
   setupCommands,
   recordCommands,
-  loadScriptCommands,
+  scriptCommands,
 };
 
 export default commands;

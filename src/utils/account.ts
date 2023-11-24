@@ -6,7 +6,7 @@ import {
 } from "@hashgraph/sdk";
 
 import { getState, saveStateAttribute } from "../state/stateController";
-import { getHederaClient } from "../state/stateService";
+import { getHederaClient, getAccountByIdOrAlias } from "../state/stateService";
 import { display } from "../utils/display";
 import { Logger } from "../utils/logger";
 import api from "../api";
@@ -17,6 +17,20 @@ const logger = Logger.getInstance();
 
 function clearAddressBook(): void {
   saveStateAttribute("accounts", {});
+}
+
+function deleteAccount(accountIdOrAlias: string): void {
+  const account = getAccountByIdOrAlias(accountIdOrAlias);
+
+  if (!account) {
+    logger.error("Account not found");
+    return;
+  }
+
+  const accounts = getState("accounts");  
+  delete accounts[account.alias];
+
+  saveStateAttribute("accounts", accounts);
 }
 
 async function createAccount(balance: number, type: string, alias: string): Promise<Account> {
@@ -216,6 +230,23 @@ async function getAccountBalance(
   client.close();
 }
 
+function findAccountByPrivateKey(privateKey: string): Account {
+  const accounts: Record<string, Account> = getState("accounts");
+  if (!accounts) throw new Error("No accounts found in state");
+
+  let matchingAccount: Account | null = null;
+  for (const [alias, account] of Object.entries(accounts)) {
+    if (account.privateKey === privateKey) {
+      matchingAccount = account;
+      break; // Exit the loop once a matching account is found
+    }
+  }
+
+  if (!matchingAccount) throw new Error("No matching account found for treasury key");
+
+  return matchingAccount;
+}
+
 function getKeyType(keyString: string): string {
   try {
     PrivateKey.fromStringED25519(keyString);
@@ -253,4 +284,6 @@ export {
   getKeyType,
   generateRandomAlias,
   clearAddressBook,
+  deleteAccount,
+  findAccountByPrivateKey,
 };

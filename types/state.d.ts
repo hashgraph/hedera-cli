@@ -1,3 +1,7 @@
+import {
+  TokenSupplyType,
+} from "@hashgraph/sdk";
+
 export type Account = {
   alias: string;
   accountId: string;
@@ -21,16 +25,22 @@ export type Token = {
   name: string;
   symbol: string;
   treasuryId: string;
-  treasuryKey: string;
   decimals: number;
   initialSupply: number;
-  adminKey?: string;
-  pauseKey?: string;
-  kycKey?: string;
-  wipeKey?: string;
-  freezeKey?: string;
-  supplyKey?: string;
-  feeScheduleKey?: string;
+  supplyType: TokenSupplyType;
+  maxSupply: number;
+  keys: Keys;
+}
+
+export interface Keys {
+  adminKey: string;
+  supplyKey: string;
+  wipeKey: string;
+  kycKey: string;
+  freezeKey: string;
+  pauseKey: string;
+  feeScheduleKey: string;
+  treasuryKey: string;
 }
 
 export interface Association {

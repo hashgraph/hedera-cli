@@ -1,6 +1,6 @@
 const { Command } = require("commander");
-const networkCommands = require("../../commands/network");
-const switchNetworkUtils = require("../../utils/switchNetwork");
+const networkCommands = require("../../src/commands");
+const switchNetworkUtils = require("../../src/utils/switchNetwork");
 
 const fs = require("fs");
 
