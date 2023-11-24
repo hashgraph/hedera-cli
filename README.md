@@ -293,21 +293,28 @@ hcli token create-from-file -f,--file <filename>
 Flags:
 - **File:** (required) Filename containing the token information in JSON format.
 
-A token input file looks like below. You can define all properties you would normally define when using using the SDK to create a token. 
+A token input file looks like below. You can define all properties you would normally define when using using the SDK to create a token. All of the properties are required. If you don't need a key, leave it as an empty string.
 
 ```json
 {
-    "name": "myToken",
-    "symbol": "MTK",
-    "decimals": 2,
-    "supplyType": "finite",
-    "initialSupply": 1000,
-    "maxSupply": 1000000,
+  "name": "myToken",
+  "symbol": "MTK",
+  "decimals": 2,
+  "supplyType": "finite",
+  "initialSupply": 1000,
+  "maxSupply": 1000000,
+  "keys": {
     "supplyKey": "<alias:bob>",
     "treasuryKey": "<alias:alice>",
     "adminKey": "<newkey:10000>",
-    "customFees": [],
-    "memo": "Test token"
+    "feeScheduleKey": "",
+    "freezeKey": "",
+    "wipeKey": "",
+    "pauseKey": "",
+    "kycKey": ""
+  },
+  "customFees": [],
+  "memo": "Test token"
 }
 ```
 
