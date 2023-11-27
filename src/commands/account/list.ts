@@ -1,7 +1,7 @@
 import { recordCommand } from "../../state/stateService";
 import { Logger } from "../../utils/logger";
 
-import { listAccounts } from "../../utils/account";
+import accountUtils from "../../utils/account";
 
 import type { Command } from "../../../types";
 
@@ -20,7 +20,7 @@ export default (program: any) => {
     .description("List all accounts in the address book")
     .option("-p, --private", "Show private keys")
     .action((options: ListAccountsOptions) => {
-      listAccounts(options.private);
+      accountUtils.listAccounts(options.private);
     });
 };
 

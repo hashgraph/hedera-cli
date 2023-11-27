@@ -2,7 +2,7 @@ import { recordCommand } from "../../state/stateService";
 import { Logger } from "../../utils/logger";
 import { myParseInt } from "../../utils/verification";
 
-import { createAccount } from "../../utils/account";
+import accountUtils from "../../utils/account";
 
 import type { Command } from "../../../types";
 
@@ -35,7 +35,7 @@ export default (program: any) => {
     )
     .action(async (options: CreateAccountOptions) => {
       try {
-        await createAccount(options.balance, options.type, options.alias);
+        await accountUtils.createAccount(options.balance, options.type, options.alias);
       } catch (error) {
         logger.error(error as object);
       }

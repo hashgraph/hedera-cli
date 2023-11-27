@@ -1,7 +1,7 @@
 import { recordCommand } from "../../state/stateService";
 import { Logger } from "../../utils/logger";
 
-import { getAccountBalance } from "../../utils/account";
+import accountUtils from "../../utils/account";
 
 import type { Command } from "../../../types";
 
@@ -30,7 +30,7 @@ export default (program: any) => {
         }
 
         try {
-          await getAccountBalance(
+          await accountUtils.getAccountBalance(
             accountIdOrAlias,
             options.onlyHbar,
             options.tokenId
@@ -44,5 +44,5 @@ export default (program: any) => {
 
 interface GetAccountBalanceOptions {
   onlyHbar: boolean;
-  tokenId: string;
+  tokenId?: string;
 }
