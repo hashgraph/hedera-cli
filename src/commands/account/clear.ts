@@ -1,7 +1,6 @@
 import { recordCommand } from "../../state/stateService";
-import { Logger } from "../../utils/logger";
 
-import { clearAddressBook } from "../../utils/account";
+import accountUtils from "../../utils/account";
 import type { Command } from "../../../types";
 
 export default (program: any) => {
@@ -16,6 +15,6 @@ export default (program: any) => {
     })
     .description("Clear all accounts from the address book")
     .action(() => {
-      clearAddressBook();
+      accountUtils.clearAddressBook();
     });
 };

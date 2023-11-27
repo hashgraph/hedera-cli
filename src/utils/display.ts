@@ -46,7 +46,7 @@ function displayBalance(response: APIResponse, options: DisplayBalanceOptions): 
 }
 
 function displayHbarBalance(accountId: string, hbars: number): void {
-  console.log(`Hbar Balance for account ${accountId}:`);
+  console.log(`Hbar balance for account ${accountId}:`);
   console.log(`${hbars} Hbars`);
 }
 

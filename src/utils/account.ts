@@ -276,7 +276,7 @@ function generateRandomAlias(): string {
   return result;
 }
 
-export {
+const accountUtils = {
   createAccount,
   listAccounts,
   importAccount,
@@ -287,3 +287,5 @@ export {
   deleteAccount,
   findAccountByPrivateKey,
 };
+
+export default accountUtils;

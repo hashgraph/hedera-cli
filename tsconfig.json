@@ -5,6 +5,7 @@
         "moduleResolution": "node",
         "outDir": "dist",
         "rootDir": "src",
+        "allowJs": true,
         "strict": true, // enable all strict type-checking options
         "sourceMap": true, // generate corresponding .map file which maps compiled javascript back to typescript
         "typeRoots": ["./types", "./node_modules/@types"],

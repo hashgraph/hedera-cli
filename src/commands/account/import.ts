@@ -1,5 +1,5 @@
 import { recordCommand } from "../../state/stateService";
-import { importAccount } from "../../utils/account";
+import accountUtils from "../../utils/account";
 
 import type { Command } from "../../../types";
 
@@ -20,7 +20,7 @@ export default (program: any) => {
     .requiredOption("-i, --id <id>", "Account ID")
     .requiredOption("-k, --key <key>", "Private key")
     .action((options: ImportAccountOptions) => {
-      importAccount(options.id, options.key, options.alias);
+      accountUtils.importAccount(options.id, options.key, options.alias);
     });
 };
 

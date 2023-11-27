@@ -2,7 +2,7 @@ import {
   saveState,
   saveStateAttribute,
   getAllState,
-} from "../state/stateController.js";
+} from "../state/stateController";
 
 export default (program: any) => {
   program

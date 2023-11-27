@@ -1,7 +1,7 @@
 import { recordCommand }  from "../../state/stateService";
 import { Logger } from "../../utils/logger";
 
-import { deleteAccount } from "../../utils/account";
+import accountUtils from "../../utils/account";
 
 import type { Command } from "../../../types";
 
@@ -28,7 +28,7 @@ export default (program: any) => {
         );
         return;
       }
-      deleteAccount(accountIdOrAlias);
+      accountUtils.deleteAccount(accountIdOrAlias);
     });
 };
 

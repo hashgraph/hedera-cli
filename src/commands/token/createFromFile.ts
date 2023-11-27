@@ -6,7 +6,7 @@ import {
   TokenSupplyType,
 } from "@hashgraph/sdk";
 
-import { createAccount, findAccountByPrivateKey } from "../../utils/account";
+import accountUtils from "../../utils/account";
 import { getSupplyType } from "../../utils/token";
 import { recordCommand, getHederaClient } from "../../state/stateService";
 import { Logger } from "../../utils/logger";
@@ -269,7 +269,7 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
 }
 
 function getTreasuryIdByTreasuryKey(treasuryKey: string): string {
-  const account = findAccountByPrivateKey(treasuryKey);
+  const account = accountUtils.findAccountByPrivateKey(treasuryKey);
   if (!account) {
     throw new Error("Treasury account not found");
   }
@@ -282,7 +282,7 @@ async function createAccountForToken(
   type: string,
   alias: string
 ): Promise<{ key: string; account: Account }> {
-  const account = await createAccount(initialBalance, type, alias);
+  const account = await accountUtils.createAccount(initialBalance, type, alias);
   return { key, account };
 }
 

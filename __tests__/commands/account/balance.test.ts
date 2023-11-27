@@ -1,41 +1,32 @@
-const { Command } = require("commander");
-const networkCommands = require("../../src/commands");
-const switchNetworkUtils = require("../../src/utils/switchNetwork");
+import { Command } from "commander";
+import commands from "../../../src/commands";
+import accountUtils from "../../../src/utils/account";
+import api from "../../../src/api";
 
-const fs = require("fs");
+import { accountResponse, getAccountBalanceResponseMock } from "../../helpers/api/apiAccountHelper";
 
-describe("network commands", () => {
-  describe("network use", () => {
-    test("✅ switching networks successfully", () => {
+describe("account balance command", () => {
+  describe("account balance - success path", () => {
+    test("✅ retrieve hbar balance", async () => {
       // Arrange
-      const switchNetworkSpy = jest.spyOn(switchNetworkUtils, "switchNetwork");
-      fs.readFileSync = jest.fn(() => JSON.stringify({ network: "mainnet" })); // Mock fs.readFileSync to return a sample config
-      fs.writeFileSync = jest.fn(); // Mock fs.writeFileSync to do nothing
-      console.log = jest.fn(); // Mock console.log to check the log messages
+      const logSpy = jest.spyOn(console, 'log');
+      const getAccountBalanceSpy = jest.spyOn(accountUtils, "getAccountBalance");
+
+      api.account.getAccountBalance = jest.fn().mockResolvedValue(getAccountBalanceResponseMock);
 
       const program = new Command();
-      networkCommands(program);
+      commands.accountCommands(program);
 
       // Act
-      program.parse(["node", "hedera-cli.js", "network", "use", "testnet"]);
+      await program.parse(["node", "hedera-cli.ts", "account", "balance", accountResponse.account, "--only-hbar"]);
 
       // Assert
-      console.log(switchNetworkSpy.mock.calls);
-      expect(switchNetworkSpy).toHaveBeenCalledWith("testnet");
-
-      // Check that console.log was called with the correct message
-      expect(console.log).toHaveBeenCalledWith("Switched to testnet");
-
-      // Check that fs.writeFileSync was called with the updated config
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        expect.any(String), // path
-        JSON.stringify({ network: "testnet" }, null, 2),
-        "utf-8"
-      );
+      expect(getAccountBalanceSpy).toHaveBeenCalledWith(accountResponse.account, true, undefined);
+      expect(logSpy).toHaveBeenCalledWith(`${accountResponse.balance.balance} Hbars`);
     });
 
     // write test when calling switchNetwork throws an error
-    test("❌ throw error when switching to incorrect network", () => {
+    /*test("❌ throw error when switching to incorrect network", () => {
       // Arrange
       console.error = jest.fn(); // Mock console.log to check the log messages
 
@@ -49,10 +40,10 @@ describe("network commands", () => {
       expect(console.error).toHaveBeenCalledWith(
         "Invalid network name. Available networks: mainnet, testnet"
       );
-    });
+    });*/
   });
 
-  describe("network ls", () => {
+  /*describe("network ls", () => {
     test("✅ list networks successfully", () => {
       // Arrange
       console.log = jest.fn(); // Mock console.log to check the log messages
@@ -86,5 +77,5 @@ describe("network commands", () => {
         "Unknown action. Available actions: use, ls"
       );
     });
-  });
+  });*/
 });
