@@ -4,28 +4,7 @@
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
   "recording": 0,
   "recordingScriptName": "",
-  "accounts": {
-    "bob": {
-      "alias": "bob",
-      "accountId": "0.0.4536940",
-      "type": "ED25519",
-      "publicKey": "302a300506032b6570032100ee0e3ff66e521f13c36c88fdef443e30bce7ec7e20a5b53ea1ac1cc93869a87b",
-      "evmAddress": "",
-      "solidityAddress": "",
-      "solidityAddressFull": "",
-      "privateKey": "302e020100300506032b6570042204202a6568253a539643468dda3128a734c9fcb07a927b3f742719a869db731f9f50"
-    },
-    "alice": {
-      "alias": "alice",
-      "accountId": "0.0.4536973",
-      "type": "ED25519",
-      "publicKey": "302a300506032b657003210080ab4b7811003c86c54bec68cf2522073aecd9f3f487f85ae73ad71ab66460f1",
-      "evmAddress": "",
-      "solidityAddress": "",
-      "solidityAddressFull": "",
-      "privateKey": "302e020100300506032b6570042204203c0708dc97a8e19dd1b501eb1687b73e862fcb8311605f3c3c6877f7eb897fe6"
-    }
-  },
+  "accounts": {},
   "scripts": {
     "script-da": {
       "name": "da",

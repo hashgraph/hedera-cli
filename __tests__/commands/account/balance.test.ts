@@ -6,12 +6,18 @@ import api from "../../../src/api";
 import { accountResponse, getAccountBalanceResponseMock } from "../../helpers/api/apiAccountHelper";
 
 describe("account balance command", () => {
+  const logSpy = jest.spyOn(console, 'log');
+  const getAccountBalanceSpy = jest.spyOn(accountUtils, "getAccountBalance");
+
   describe("account balance - success path", () => {
+    afterEach(() => {
+      // Spy cleanup
+      logSpy.mockClear();
+      getAccountBalanceSpy.mockClear();
+    });
+
     test("✅ retrieve hbar balance", async () => {
       // Arrange
-      const logSpy = jest.spyOn(console, 'log');
-      const getAccountBalanceSpy = jest.spyOn(accountUtils, "getAccountBalance");
-
       api.account.getAccountBalance = jest.fn().mockResolvedValue(getAccountBalanceResponseMock);
 
       const program = new Command();
@@ -25,57 +31,21 @@ describe("account balance command", () => {
       expect(logSpy).toHaveBeenCalledWith(`${accountResponse.balance.balance} Hbars`);
     });
 
-    // write test when calling switchNetwork throws an error
-    /*test("❌ throw error when switching to incorrect network", () => {
+    test("✅ retrieve token balance", async () => {
       // Arrange
-      console.error = jest.fn(); // Mock console.log to check the log messages
+      
+
+      api.account.getAccountBalance = jest.fn().mockResolvedValue(getAccountBalanceResponseMock);
 
       const program = new Command();
-      networkCommands(program);
+      commands.accountCommands(program);
 
       // Act
-      program.parse(["node", "hedera-cli.js", "network", "use", "notanetwork"]);
+      await program.parse(["node", "hedera-cli.ts", "account", "balance", accountResponse.account, "--token-id", accountResponse.balance.tokens[0].token_id]);
 
       // Assert
-      expect(console.error).toHaveBeenCalledWith(
-        "Invalid network name. Available networks: mainnet, testnet"
-      );
-    });*/
-  });
-
-  /*describe("network ls", () => {
-    test("✅ list networks successfully", () => {
-      // Arrange
-      console.log = jest.fn(); // Mock console.log to check the log messages
-
-      const program = new Command();
-      networkCommands(program);
-
-      // Act
-      program.parse(["node", "hedera-cli.js", "network", "ls"]);
-
-      // Assert
-      expect(console.log).toHaveBeenCalledWith(
-        "Available networks: mainnet, testnet"
-      );
+      expect(getAccountBalanceSpy).toHaveBeenCalledWith(accountResponse.account, undefined, accountResponse.balance.tokens[0].token_id);
+      expect(logSpy).toHaveBeenCalledWith(`Token ID ${accountResponse.balance.tokens[0].token_id}: ${accountResponse.balance.tokens[0].balance}`);
     });
   });
-
-  describe("network unknown action", () => {
-    test("❌ throw error for unknown action", () => {
-      // Arrange
-      console.error = jest.fn(); // Mock console.error to check the error messages
-
-      const program = new Command();
-      networkCommands(program);
-
-      // Act
-      program.parse(["node", "hedera-cli.js", "network", "unknown"]);
-
-      // Assert
-      expect(console.error).toHaveBeenCalledWith(
-        "Unknown action. Available actions: use, ls"
-      );
-    });
-  });*/
 });

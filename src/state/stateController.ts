@@ -11,11 +11,11 @@ const getAllState = () => {
 }
 
 const saveState = (config: State) => {
-    state.setAll(config);
+  state.setAll(config);
 }
 
 const saveStateAttribute = (key: string, value: any) => {
-    state.set(key, value);
+  state.set(key, value);
 }
 
 export {
