@@ -44,5 +44,5 @@ export default (program: any) => {
 
 interface GetAccountBalanceOptions {
   onlyHbar: boolean;
-  tokenId?: string;
+  tokenId: string;
 }
