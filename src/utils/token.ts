@@ -11,7 +11,7 @@ import {
   TokenSupplyType,
 } from "@hashgraph/sdk";
 
-const getSupplyType = (type: "finite" | "infinite"): TokenSupplyType => {
+const getSupplyType = (type: string): TokenSupplyType => {
   const tokenType = type.toLowerCase();
   if (tokenType === "finite") {
     return TokenSupplyType.Finite;

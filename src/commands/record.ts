@@ -1,8 +1,4 @@
-import {
-  saveState,
-  saveStateAttribute,
-  getAllState,
-} from "../state/stateController";
+import stateController from "../state/stateController";
 
 export default (program: any) => {
   program
@@ -30,7 +26,7 @@ export default (program: any) => {
 };
 
 function startRecording(scriptName: string) {
-  const state = getAllState();
+  const state = stateController.getAll();
   state.recording = 1;
   state.recordingScriptName = `script-${scriptName}`;
   state.scripts[state.recordingScriptName] = {
@@ -38,10 +34,10 @@ function startRecording(scriptName: string) {
     creation: Date.now(),
     commands: [],
   };
-  saveState(state);
+  stateController.saveState(state);
 }
 
 function stopRecording(): void {
-  saveStateAttribute("recording", 0);
-  saveStateAttribute("recordingScriptName", "");
+  stateController.saveKey("recording", 0);
+  stateController.saveKey("recordingScriptName", "");
 }

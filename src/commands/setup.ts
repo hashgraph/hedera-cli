@@ -2,7 +2,7 @@ import * as path from "path";
 import * as dotenv from "dotenv";
 
 import { recordCommand } from "../state/stateService";
-import { saveState, saveStateAttribute } from "../state/stateController";
+import stateController from "../state/stateController";
 import config from "../state/config";
 import type { Command } from "../../types";
 
@@ -81,7 +81,7 @@ function setupState(operatorId: string, operatorKey: string): void {
   };
   setupState.operatorKey = operatorKey;
   setupState.operatorId = operatorId;
-  saveState(setupState);
+  stateController.saveState(setupState);
 }
 
 function reset(
@@ -96,9 +96,9 @@ function reset(
   }
 
   setupCLI("reset");
-  if (!skipAccounts) saveStateAttribute("accounts", {});
-  if (!skipTokens) saveStateAttribute("tokens", {});
-  if (!skipScripts) saveStateAttribute("scripts", {});
+  if (!skipAccounts) stateController.saveKey("accounts", {});
+  if (!skipTokens) stateController.saveKey("tokens", {});
+  if (!skipScripts) stateController.saveKey("scripts", {});
 }
 
 interface ResetOptions {

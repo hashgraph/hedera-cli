@@ -1,15 +1,20 @@
+import { fullState  } from "../../helpers/state";
 import { Command } from "commander";
 import commands from "../../../src/commands";
 import accountUtils from "../../../src/utils/account";
-import { state as stateInstance } from "../../../src/state/state";
-import * as fs from 'fs';
+import stateController from "../../../src/state/stateController";
+
+jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("account clear command", () => {
+  beforeEach(() => {
+    stateController.saveState(fullState); // initialize state for each test
+  });
+
   describe("account clear - success path", () => {
-    test("✅ retrieve hbar balance", async () => {
+    test("✅ should clear accounts from state", async () => {
       // Arrange
       const clearAddressBookSpy = jest.spyOn(accountUtils, "clearAddressBook");
-      const saveStateAttribute = jest.fn();
 
       const program = new Command();
       commands.accountCommands(program);
@@ -19,8 +24,7 @@ describe("account clear command", () => {
 
       // Assert
       expect(clearAddressBookSpy).toHaveBeenCalled();
-      console.log(saveStateAttribute.caller)      
+      expect(stateController.get('accounts')).toEqual({});
     });
-
   });
 });

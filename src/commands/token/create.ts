@@ -12,7 +12,7 @@ import {
   getHederaClient,
 } from "../../state/stateService";
 import { Logger } from "../../utils/logger";
-import { saveStateAttribute, getState } from "../../state/stateController";
+import stateController from "../../state/stateController";
 
 import type { Command, Token } from "../../../types";
 
@@ -58,8 +58,6 @@ export default (program: any) => {
       "Admin key of the fungible token"
     )
     .action(async (options: CreateOptions) => {
-      const supplyType = getSupplyType(options.supplyType);
-
       try {
         await createFungibleToken(
           options.name,
@@ -68,7 +66,7 @@ export default (program: any) => {
           options.treasuryKey,
           options.decimals,
           options.initialSupply,
-          supplyType,
+          options.supplyType,
           options.adminKey
         );
       } catch (error) {
@@ -84,7 +82,7 @@ async function createFungibleToken(
   treasuryKey: string,
   decimals: number,
   initialSupply: number,
-  supplyType: TokenSupplyType,
+  supplyType: string,
   adminKey: string
 ) {
   const client = getHederaClient();
@@ -97,7 +95,7 @@ async function createFungibleToken(
       .setDecimals(decimals)
       .setInitialSupply(initialSupply)
       .setTokenType(TokenType.FungibleCommon)
-      .setSupplyType(supplyType)
+      .setSupplyType(getSupplyType(supplyType))
       .setTreasuryAccountId(treasuryId)
       .setAdminKey(PrivateKey.fromString(adminKey).publicKey)
       .freezeWith(client)
@@ -119,9 +117,9 @@ async function createFungibleToken(
   }
 
   // Store new token in state
-  const token: Record<string, Token> = getState("token");
-  const updatedToken = {
-    ...token,
+  const tokens: Record<string, Token> = stateController.get("tokens");
+  const updatedTokens = {
+    ...tokens,
     [tokenId.toString()]: {
       tokenId: tokenId.toString(),
       name,
@@ -134,7 +132,7 @@ async function createFungibleToken(
     },
   };
 
-  saveStateAttribute("token", updatedToken);
+  stateController.saveKey("tokens", updatedTokens);
 
   client.close();
 }

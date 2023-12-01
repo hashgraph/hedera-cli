@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 import { recordCommand } from "../../state/stateService";
-import { getState } from "../../state/stateController";
+import stateController from "../../state/stateController";
 
 import type { Command, Script } from "../../../types";
 
@@ -23,7 +23,7 @@ export default (program: any) => {
 };
 
 function listScripts() {
-  const scripts: Record<string, Script> = getState("scripts");
+  const scripts: Record<string, Script> = stateController.get("scripts");
   const scriptNames = Object.keys(scripts);
 
   if (scriptNames.length === 0) {

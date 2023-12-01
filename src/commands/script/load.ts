@@ -1,7 +1,7 @@
 const axios = require("axios");
 
 import { recordCommand } from "../../state/stateService";
-import { getState } from "../../state/stateController";
+import stateController from "../../state/stateController";
 import { execSync } from "child_process";
 
 import type { Command, Script } from "../../../types";
@@ -24,7 +24,7 @@ export default (program: any) => {
 };
 
 function loadScript(name: string) {
-  const scripts: Record<string, Script> = getState("scripts");
+  const scripts: Record<string, Script> = stateController.get("scripts");
   const scriptName = `script-${name}`;
   const script = scripts[scriptName];
 
