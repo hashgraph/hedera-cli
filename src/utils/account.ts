@@ -5,7 +5,7 @@ import {
   AccountId,
 } from "@hashgraph/sdk";
 
-import { getState, saveStateAttribute } from "../state/stateController";
+import stateController from "../state/stateController";
 import { getHederaClient, getAccountByIdOrAlias } from "../state/stateService";
 import { display } from "../utils/display";
 import { Logger } from "../utils/logger";
@@ -16,7 +16,7 @@ import type { Account } from "../../types";
 const logger = Logger.getInstance();
 
 function clearAddressBook(): void {
-  saveStateAttribute("accounts", {});
+  stateController.saveKey("accounts", {});
 }
 
 function deleteAccount(accountIdOrAlias: string): void {
@@ -27,10 +27,10 @@ function deleteAccount(accountIdOrAlias: string): void {
     return;
   }
 
-  const accounts = getState("accounts");  
+  const accounts = stateController.get("accounts");  
   delete accounts[account.alias];
 
-  saveStateAttribute("accounts", accounts);
+  stateController.saveKey("accounts", accounts);
 }
 
 async function createAccount(balance: number, type: string, alias: string): Promise<Account> {
@@ -47,7 +47,7 @@ async function createAccount(balance: number, type: string, alias: string): Prom
   }
 
   // Get client from config
-  const accounts: Record<string, Account> = getState("accounts");
+  const accounts: Record<string, Account> = stateController.get("accounts");
   const client = getHederaClient();
 
   // Generate random alias if "random" is provided
@@ -117,7 +117,7 @@ async function createAccount(balance: number, type: string, alias: string): Prom
 
   // Add the new account to the accounts object in the config
   const updatedAccounts = { ...accounts, [alias]: newAccountDetails };
-  saveStateAttribute("accounts", updatedAccounts);
+  stateController.saveKey("accounts", updatedAccounts);
 
   // Log the account ID
   logger.log(`The new account ID is: ${newAccountId}, with alias: ${alias}`);
@@ -128,7 +128,7 @@ async function createAccount(balance: number, type: string, alias: string): Prom
 }
 
 function listAccounts(showPrivateKeys: boolean = false): void {
-  const accounts: Record<string, Account> = getState("accounts");
+  const accounts: Record<string, Account> = stateController.get("accounts");
 
   // Check if there are any accounts in the config
   if (!accounts || Object.keys(accounts).length === 0) {
@@ -150,7 +150,7 @@ function listAccounts(showPrivateKeys: boolean = false): void {
 
 // Write the importAccount function here
 function importAccount(id: string, key: string, alias: string): void {
-  const accounts = getState("accounts");
+  const accounts = stateController.get("accounts");
 
   // Check if name is unique
   if (accounts && accounts[alias]) {
@@ -194,7 +194,7 @@ function importAccount(id: string, key: string, alias: string): void {
     privateKey: key,
   };
 
-  saveStateAttribute("accounts", updatedAccounts);
+  stateController.saveKey("accounts", updatedAccounts);
 }
 
 async function getAccountBalance(
@@ -202,7 +202,7 @@ async function getAccountBalance(
   onlyHbar: boolean = false,
   tokenId?: string
 ) {
-  const accounts = getState("accounts");
+  const accounts = stateController.get("accounts");
   const client = getHederaClient();
 
   let accountId;
@@ -231,7 +231,7 @@ async function getAccountBalance(
 }
 
 function findAccountByPrivateKey(privateKey: string): Account {
-  const accounts: Record<string, Account> = getState("accounts");
+  const accounts: Record<string, Account> = stateController.get("accounts");
   if (!accounts) throw new Error("No accounts found in state");
 
   let matchingAccount: Account | null = null;

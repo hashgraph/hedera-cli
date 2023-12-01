@@ -1,6 +1,6 @@
 import { recordCommand } from "../../state/stateService";
 
-import { getState, saveStateAttribute } from "../../state/stateController";
+import stateController from "../../state/stateController";
 
 import type { Command, Script } from "../../../types";
 
@@ -22,7 +22,7 @@ export default (program: any) => {
 };
 
 function deleteScript(name: string) {
-  const scripts: Record<string, Script> = getState("scripts");
+  const scripts: Record<string, Script> = stateController.get("scripts");
   const scriptName = `script-${name}`;
   const script = scripts[scriptName];
 
@@ -32,7 +32,7 @@ function deleteScript(name: string) {
   }
 
   delete scripts[scriptName];
-  saveStateAttribute("scripts", scripts);
+  stateController.saveKey("scripts", scripts);
   console.log(`Script ${scriptName} deleted successfully`);
 }
 

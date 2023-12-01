@@ -2,7 +2,7 @@ const axios = require("axios");
 
 import { recordCommand } from "../../state/stateService";
 import { Logger } from "../../utils/logger";
-import { getState, saveStateAttribute } from "../../state/stateController";
+import stateController from "../../state/stateController";
 
 import type { Command, Script } from "../../../types";
 
@@ -35,7 +35,7 @@ async function downloadScript(url: string) {
     logger.error(error as object);
   }
 
-  const scripts: Record<string, Script> = getState("scripts");
+  const scripts: Record<string, Script> = stateController.get("scripts");
   data.scripts.forEach((script: Script) => {
     const scriptName = `script-${script.name}`;
     const existingScript = scripts[scriptName];
@@ -50,7 +50,7 @@ async function downloadScript(url: string) {
       creation: Date.now(),
       commands: script.commands,
     };
-    saveStateAttribute("scripts", scripts);
+    stateController.saveKey("scripts", scripts);
     console.log(`Script "${script.name}" added successfully`);
   });
 }

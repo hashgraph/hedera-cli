@@ -11,7 +11,7 @@ describe("account balance command", () => {
 
   describe("account balance - success path", () => {
     afterEach(() => {
-      // Spy cleanup
+      // Spy cleanu
       logSpy.mockClear();
       getAccountBalanceSpy.mockClear();
     });
@@ -33,8 +33,6 @@ describe("account balance command", () => {
 
     test("✅ retrieve token balance", async () => {
       // Arrange
-      
-
       api.account.getAccountBalance = jest.fn().mockResolvedValue(getAccountBalanceResponseMock);
 
       const program = new Command();

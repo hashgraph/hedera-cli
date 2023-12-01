@@ -4,12 +4,7 @@ import {
   PrivateKey,
 } from "@hashgraph/sdk";
 
-import {
-  getState,
-  getAllState,
-  saveState,
-  saveStateAttribute,
-} from "./stateController";
+import stateController from "./stateController";
 
 import type { Account, Token } from "../../types";
 
@@ -17,25 +12,25 @@ import type { Account, Token } from "../../types";
  * @example command ['account', 'create', '-b', '1000', '-t', 'ed25519']
  */
 function recordCommand(command: string[]): void {
-  const state = getAllState();
+  const state = stateController.getAll();
   if (state.recording === 1) {
     state.scripts[state.recordingScriptName].commands.push(command.join(" "));
 
-    saveState(state);
+    stateController.saveState(state);
   }
 }
 
 function getMirrorNodeURL(): string {
-  const network = getState("network");
+  const network = stateController.get("network");
   const mirrorNodeURL =
     network === "testnet"
-      ? getState("mirrorNodeTestnet")
-      : getState("mirrorNodeMainnet");
+      ? stateController.get("mirrorNodeTestnet")
+      : stateController.get("mirrorNodeMainnet");
   return mirrorNodeURL;
 }
 
 function getHederaClient(): Client {
-  const state = getAllState();
+  const state = stateController.getAll();
   let client: Client;
 
   switch (state.network) {
@@ -61,26 +56,26 @@ function switchNetwork(name: string) {
     return;
   }
 
-  saveStateAttribute("network", name);
+  stateController.saveKey("network", name);
 }
 
 function addTokenAssociation(tokenId: string, accountId: string, alias: string) {
-  const tokens = getState("tokens");
+  const tokens = stateController.get("tokens");
   const token: Token = tokens[tokenId];
   token.associations.push({ alias, accountId });
   tokens[tokenId] = token;
-  saveStateAttribute("tokens", tokens);
+  stateController.saveKey("tokens", tokens);
 }
 
 /* Accounts */
 function getAccountById(accountId: string): (Account|undefined) {
-  const accounts: Record<string, Account> = getState("accounts");
+  const accounts: Record<string, Account> = stateController.get("accounts");
   const account = Object.values(accounts).find((account: Account) => account.accountId === accountId);
   return account;
 }
 
 function getAccountByAlias(alias: string): (Account|undefined) {
-  const accounts: Record<string, Account> = getState("accounts");
+  const accounts: Record<string, Account> = stateController.get("accounts");
   return accounts[alias];
 }
 

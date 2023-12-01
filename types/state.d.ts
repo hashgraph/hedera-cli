@@ -27,7 +27,7 @@ export type Token = {
   treasuryId: string;
   decimals: number;
   initialSupply: number;
-  supplyType: TokenSupplyType;
+  supplyType: string;
   maxSupply: number;
   keys: Keys;
 }

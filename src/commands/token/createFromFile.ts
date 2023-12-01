@@ -10,7 +10,7 @@ import accountUtils from "../../utils/account";
 import { getSupplyType } from "../../utils/token";
 import { recordCommand, getHederaClient } from "../../state/stateService";
 import { Logger } from "../../utils/logger";
-import { saveStateAttribute, getState } from "../../state/stateController";
+import stateController from "../../state/stateController";
 
 import type { Account, Command, Token, Keys } from "../../../types";
 
@@ -57,7 +57,7 @@ function initializeToken(tokenInput: TokenInput): Token {
     treasuryId: tokenInput.treasuryId || "",
     decimals: tokenInput.decimals,
     initialSupply: tokenInput.initialSupply,
-    supplyType: TokenSupplyType.Infinite,
+    supplyType: "infinite",
     maxSupply: tokenInput.maxSupply || 0,
     keys: {
       adminKey: tokenInput.keys.adminKey,
@@ -78,7 +78,7 @@ async function prepareTokenCreation(
   token: Token,
   tokenInput: TokenInput
 ): Promise<Token> {
-  token.supplyType = getSupplyType(tokenInput.supplyType);
+  token.supplyType = tokenInput.supplyType;
   token = await replaceKeysForToken(token);
 
   if (token.treasuryId === "") {
@@ -90,6 +90,7 @@ async function prepareTokenCreation(
 
 async function createTokenOnNetwork(token: Token) {
   const client = getHederaClient();
+
   try {
     const tokenCreateTx = new TokenCreateTransaction()
       .setTokenName(token.name)
@@ -97,10 +98,10 @@ async function createTokenOnNetwork(token: Token) {
       .setDecimals(token.decimals)
       .setInitialSupply(token.initialSupply)
       .setTokenType(TokenType.FungibleCommon)
-      .setSupplyType(token.supplyType)
+      .setSupplyType(getSupplyType(token.supplyType))
       .setTreasuryAccountId(token.treasuryId);
 
-    if (token.supplyType === TokenSupplyType.Finite) {
+    if (token.supplyType === "finite") {
       tokenCreateTx.setMaxSupply(token.maxSupply);
     }
 
@@ -165,13 +166,13 @@ async function createTokenFromFile(tokenInput: TokenInput) {
 }
 
 function updateTokenState(token: Token) {
-  const tokens: Record<string, Token> = getState("tokens");
+  const tokens: Record<string, Token> = stateController.get("tokens");
   const updatedTokens = {
     ...tokens,
     [token.tokenId]: token,
   };
 
-  saveStateAttribute("tokens", updatedTokens);
+  stateController.saveKey("tokens", updatedTokens);
   getHederaClient().close();
 }
 
@@ -193,7 +194,7 @@ async function replaceKeysForToken(token: Token): Promise<Token> {
  * @return updated keys
  */
 function replaceAliasPattern(keys: Keys): Keys {
-  const accounts = getState("accounts");
+  const accounts = stateController.get("accounts");
   const aliasPattern = /<alias:([a-zA-Z0-9_-]+)>/;
   let newKeys = { ...keys };
 
