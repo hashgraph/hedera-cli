@@ -1,4 +1,4 @@
-import { Account, State } from "../../types";
+import { Account, State, Script } from "../../types";
 
 export const baseState: State = {
   network: "testnet",
@@ -41,17 +41,14 @@ export const bob: Account = {
     "302e020100300506032b657004220420b4a0c427a47602aad6ad447dd3a0dc1cd482da23511e08a960c20bcaa77748fa",
 };
 
-const script_da = {
-  name: "script-da",
-  script: {
-    name: "da",
-    creation: 1697103669402,
-    commands: [
-      "network use testnet",
-      "account create -a random",
-      "token create-ft -n m -s mm -d 2 -i 1000 -a 302e020100300506032b6570042204202a6568253a539643468dda3128a734c9fcb07a927b3f742719a869db731f9f50 -t 0.0.4536940 -k 302e020100300506032b6570042204202a6568253a539643468dda3128a734c9fcb07a927b3f742719a869db731f9f50",
-    ],
-  },
+export const script_basic: Script = {
+  name: "basic",
+  creation: 1697103669402,
+  commands: [
+    "network use testnet",
+    "account create -a random",
+    "token create-ft -n m -s mm -d 2 -i 1000 -a 302e020100300506032b6570042204202a6568253a539643468dda3128a734c9fcb07a927b3f742719a869db731f9f50 -t 0.0.4536940 -k 302e020100300506032b6570042204202a6568253a539643468dda3128a734c9fcb07a927b3f742719a869db731f9f50",
+  ],
 };
 
 const token = {
@@ -79,16 +76,30 @@ const token = {
   },
 };
 
+export const scriptState: State = {
+  ...baseState,
+  scripts: {
+    [`script-${script_basic.name}`]: script_basic,
+  },
+};
+
+export const tokenState: State = {
+  ...baseState,
+  tokens: {
+    [token.tokenId]: token,
+  },
+};
+
 export const fullState: State = {
-    ...baseState,
-    accounts: {
-        [alice.alias]: alice,
-        [bob.alias]: bob,
-    },
-    scripts: {
-        [script_da.name]: script_da.script
-    },
-    tokens: {
-        [token.tokenId]: token,
-    },
+  ...baseState,
+  accounts: {
+    [alice.alias]: alice,
+    [bob.alias]: bob,
+  },
+  scripts: {
+    [`script-${script_basic.name}`]: script_basic,
+  },
+  tokens: {
+    [token.tokenId]: token,
+  },
 };

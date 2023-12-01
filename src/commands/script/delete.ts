@@ -1,6 +1,6 @@
 import { recordCommand } from "../../state/stateService";
 
-import stateController from "../../state/stateController";
+import scriptUtils from "../../utils/script";
 
 import type { Command, Script } from "../../../types";
 
@@ -17,24 +17,9 @@ export default (program: any) => {
     .description("Delete a script")
     .requiredOption("-n, --name <name>", "Name of script to delete")
     .action((options: ScriptDeleteOptions) => {
-      deleteScript(options.name);
+      scriptUtils.deleteScript(options.name);
     });
 };
-
-function deleteScript(name: string) {
-  const scripts: Record<string, Script> = stateController.get("scripts");
-  const scriptName = `script-${name}`;
-  const script = scripts[scriptName];
-
-  if (!script) {
-    console.error(`No script found with name: ${scriptName}`);
-    return;
-  }
-
-  delete scripts[scriptName];
-  stateController.saveKey("scripts", scripts);
-  console.log(`Script ${scriptName} deleted successfully`);
-}
 
 interface ScriptDeleteOptions {
   name: string;
