@@ -179,6 +179,7 @@ function importAccount(id: string, key: string, alias: string): void {
   // No Solidity and EVM address for ED25519 keys
   const updatedAccounts = { ...accounts };
   updatedAccounts[alias] = {
+    alias,
     accountId: id,
     type,
     publicKey: privateKey.publicKey.toString(),
@@ -190,7 +191,9 @@ function importAccount(id: string, key: string, alias: string): void {
       type.toLowerCase() === "ed25519"
         ? ""
         : privateKey.publicKey.toEvmAddress(),
-    solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
+    solidityAddressFull: type.toLocaleLowerCase() === "ed25519"
+      ? ""
+      : `0x${accountId.toSolidityAddress()}`,
     privateKey: key,
   };
 
@@ -247,6 +250,23 @@ function findAccountByPrivateKey(privateKey: string): Account {
   return matchingAccount;
 }
 
+function findAccountByAlias(alias: string): Account {
+  const accounts: Record<string, Account> = stateController.get("accounts");
+  if (!accounts) throw new Error("No accounts found in state");
+
+  let matchingAccount: Account | null = null;
+  for (const [alias, account] of Object.entries(accounts)) {
+    if (account.alias === alias) {
+      matchingAccount = account;
+      break; // Exit the loop once a matching account is found
+    }
+  }
+
+  if (!matchingAccount) throw new Error("No matching account found for treasury key");
+
+  return matchingAccount;
+}
+
 function getKeyType(keyString: string): string {
   try {
     PrivateKey.fromStringED25519(keyString);
@@ -285,7 +305,9 @@ const accountUtils = {
   generateRandomAlias,
   clearAddressBook,
   deleteAccount,
+
   findAccountByPrivateKey,
+  findAccountByAlias,
 };
 
 export default accountUtils;

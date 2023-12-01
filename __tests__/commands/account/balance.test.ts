@@ -11,7 +11,7 @@ describe("account balance command", () => {
 
   describe("account balance - success path", () => {
     afterEach(() => {
-      // Spy cleanu
+      // Spy cleanup
       logSpy.mockClear();
       getAccountBalanceSpy.mockClear();
     });
