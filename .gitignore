@@ -1,9 +1,6 @@
 # Dist folder
 dist/
 
-# Output file
-output.csv
-
 # Logs
 logs
 *.log
