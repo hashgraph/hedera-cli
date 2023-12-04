@@ -82,8 +82,14 @@ alias hcli="node /Users/myUser/hedera-cli/dist/hedera-cli.js"
 
 Let's explore the different commands, their options, and outputs.
 
-```
-const program = new Command();
+- [Setup Commands](#setup-commands)
+- [Network Commands](#network-commands)
+- [Account Commands](#account-commands)
+- [Token Commands](#token-commands)
+- [Backup Commands](#backup-commands)
+- [Record Commands](#record-commands)
+- [Script Commands](#script-commands)
+
 
 ## Setup Commands
 
