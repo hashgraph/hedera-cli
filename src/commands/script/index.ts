@@ -14,9 +14,4 @@ export default (program: any) => {
   listCommand(script);
   downloadCommand(script);
   loadCommand(script);
-
-  script.command('*').action((options: any, command: Command) => {
-    console.error(`Unknown command: script ${command.parent.args[0]}\n`);
-    script.outputHelp();
-  });
 };

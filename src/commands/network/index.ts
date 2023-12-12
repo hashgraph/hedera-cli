@@ -8,9 +8,4 @@ export default (program: any) => {
 
   useCommand(network);
   listCommand(network);
-
-  network.command('*').action((options: any, command: Command) => {
-    console.error(`Unknown command: network ${command.parent.args[0]}\n`);
-    network.outputHelp();
-  });
 };
