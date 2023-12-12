@@ -141,13 +141,12 @@ function listAccounts(showPrivateKeys: boolean = false): void {
   }
 
   // Log details for each account
-  logger.log('Accounts:');
+  logger.log('Alias, account ID, type, private key\n');
   for (const [alias, account] of Object.entries(accounts)) {
-    logger.log(`- Alias: ${alias}`);
-    logger.log(`  Account ID: ${account.accountId}`);
-    logger.log(`  Type: ${account.type}`);
     if (showPrivateKeys) {
-      logger.log(`  Private Key: ${account.privateKey}`);
+      logger.log(`${alias}, ${account.accountId}, ${account.type.toUpperCase()}, ${account.privateKey}`);
+    } else {
+      logger.log(`${alias}, ${account.accountId}, ${account.type.toUpperCase()}`);
     }
   }
 }
