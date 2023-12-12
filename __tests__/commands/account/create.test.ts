@@ -46,7 +46,7 @@ describe("account create command", () => {
     test("✅ should create ECDSA account in state", async () => {
         // Arrange
         const balance = 5000;
-        const newAccountAlias = "ben";
+        const newAccountAlias = "greg";
         const type = "ECDSA"
         const createAccountSpy = jest.spyOn(accountUtils, "createAccount");
   

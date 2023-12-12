@@ -281,7 +281,6 @@ function findAccountByAlias(inputAlias: string): Account {
 
   let matchingAccount: Account | null = null;
   for (const [alias, account] of Object.entries(accounts)) {
-    console.log(account.alias);
     if (account.alias === inputAlias) {
       matchingAccount = account;
       break; // Exit the loop once a matching account is found
