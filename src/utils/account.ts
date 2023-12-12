@@ -110,12 +110,8 @@ async function createAccount(
       type.toLowerCase() === 'ed25519'
         ? ''
         : newAccountPrivateKey.publicKey.toEvmAddress(),
-    solidityAddress:
-      type.toLowerCase() === 'ed25519' ? '' : newAccountId.toSolidityAddress(),
-    solidityAddressFull:
-      type.toLowerCase() === 'ed25519'
-        ? ''
-        : `0x${newAccountId.toSolidityAddress()}`,
+    solidityAddress: `${newAccountId.toSolidityAddress()}`,
+    solidityAddressFull: `0x${newAccountId.toSolidityAddress()}`,
     privateKey: newAccountPrivateKey.toString(),
   };
 
@@ -144,9 +140,15 @@ function listAccounts(showPrivateKeys: boolean = false): void {
   logger.log('Alias, account ID, type, private key\n');
   for (const [alias, account] of Object.entries(accounts)) {
     if (showPrivateKeys) {
-      logger.log(`${alias}, ${account.accountId}, ${account.type.toUpperCase()}, ${account.privateKey}`);
+      logger.log(
+        `${alias}, ${account.accountId}, ${account.type.toUpperCase()}, ${
+          account.privateKey
+        }`,
+      );
     } else {
-      logger.log(`${alias}, ${account.accountId}, ${account.type.toUpperCase()}`);
+      logger.log(
+        `${alias}, ${account.accountId}, ${account.type.toUpperCase()}`,
+      );
     }
   }
 }
@@ -273,20 +275,19 @@ function findAccountByPrivateKey(privateKey: string): Account {
   return matchingAccount;
 }
 
-function findAccountByAlias(alias: string): Account {
+function findAccountByAlias(inputAlias: string): Account {
   const accounts: Record<string, Account> = stateController.get('accounts');
   if (!accounts) throw new Error('No accounts found in state');
 
   let matchingAccount: Account | null = null;
   for (const [alias, account] of Object.entries(accounts)) {
-    if (account.alias === alias) {
+    if (account.alias === inputAlias) {
       matchingAccount = account;
       break; // Exit the loop once a matching account is found
     }
   }
 
-  if (!matchingAccount)
-    throw new Error('No matching account found for treasury key');
+  if (!matchingAccount) throw new Error('No matching account found for alias');
 
   return matchingAccount;
 }

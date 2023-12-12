@@ -23,9 +23,9 @@ export default (program: any) => {
 
 /**
  * Create a backup of the state file
- * 
+ *
  * @param backupAccounts Only backup the accounts from state
- * @param safe Remove the private keys from the backup file 
+ * @param safe Remove the private keys from the backup file
  */
 function backupState(backupAccounts: boolean, safe: boolean) {
   const timestamp = Date.now(); // UNIX timestamp in milliseconds
@@ -66,15 +66,17 @@ function backupState(backupAccounts: boolean, safe: boolean) {
 /**
  * Remove the private keys and other sensitive info from the state object
  * Warning: It does not remove the private keys from scripts
- * 
+ *
  * @param data Modify the state object to remove private keys and other sensitive info
  * @returns @type {State}
  */
 function filterState(data: State) {
   const filteredState = { ...data };
 
-  filteredState.operatorId = '';
-  filteredState.operatorKey = '';
+  filteredState.testnetOperatorId = '';
+  filteredState.testnetOperatorKey = '';
+  filteredState.mainnetOperatorId = '';
+  filteredState.mainnetOperatorKey = '';
 
   Object.keys(filteredState.tokens).forEach((key) => {
     filteredState.tokens[key].keys = {

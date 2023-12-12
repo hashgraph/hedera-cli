@@ -7,6 +7,8 @@ export default {
   accounts: {},
   tokens: {},
   scripts: {},
-  operatorKey: '',
-  operatorId: '',
+  testnetOperatorKey: '',
+  testnetOperatorId: '',
+  mainnetOperatorKey: '',
+  mainnetOperatorId: '',
 };

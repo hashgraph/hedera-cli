@@ -8,9 +8,11 @@ export const baseState: State = {
   recordingScriptName: "",
   accounts: {},
   scripts: {},
-  operatorKey:
+  testnetOperatorKey:
     "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
-  operatorId: "0.0.458179",
+  testnetOperatorId: "0.0.458179",
+  mainnetOperatorKey: "",
+  mainnetOperatorId: "",
   tokens: {},
 };
 
@@ -22,8 +24,8 @@ export const alice: Account = {
   publicKey:
     "302a300506032b6570032100052ff6e06c1610e33c1c631fa44c259ab62c7becb7a97932b3d60094d0a2f8ba",
   evmAddress: "",
-  solidityAddress: "",
-  solidityAddressFull: "",
+  solidityAddress: "00000000000000000000000000000000005bef6b",
+  solidityAddressFull: "0x00000000000000000000000000000000005bef6b",
   privateKey:
     "302e020100300506032b657004220420ece0b15b20e555f66d5f4cd83187567af9613276629d7e15161b0c929ea07697",
 };
@@ -35,8 +37,8 @@ export const bob: Account = {
   publicKey:
     "302a300506032b65700321009c7c0a15424226860552f0fd859f3995c55ebf64088214b692f87528f2e3d7e6",
   evmAddress: "",
-  solidityAddress: "",
-  solidityAddressFull: "",
+  solidityAddress: "00000000000000000000000000000000005bef6a",
+  solidityAddressFull: "0x00000000000000000000000000000000005bef6a",
   privateKey:
     "302e020100300506032b657004220420b4a0c427a47602aad6ad447dd3a0dc1cd482da23511e08a960c20bcaa77748fa",
 };

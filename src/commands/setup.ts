@@ -60,28 +60,77 @@ function setupCLI(action: string): void {
   }
 
   // Extract operator key and ID from environment variables
-  const { OPERATOR_KEY, OPERATOR_ID } = process.env;
+  const {
+    TESTNET_OPERATOR_KEY,
+    TESTNET_OPERATOR_ID,
+    MAINNET_OPERATOR_KEY,
+    MAINNET_OPERATOR_ID,
+  } = process.env;
 
-  // Validate operator key and ID
-  if (!OPERATOR_KEY || !OPERATOR_ID) {
+  let mainnetOperatorId = MAINNET_OPERATOR_ID || '';
+  let mainnetOperatorKey = MAINNET_OPERATOR_KEY || '';
+  let testnetOperatorId = TESTNET_OPERATOR_ID || '';
+  let testnetOperatorKey = TESTNET_OPERATOR_KEY || '';
+
+  // Validate operator key and ID pairs for testnet and mainnet
+  if (
+    (TESTNET_OPERATOR_KEY && !TESTNET_OPERATOR_ID) ||
+    (!TESTNET_OPERATOR_KEY && TESTNET_OPERATOR_ID)
+  ) {
     console.error(
-      'OPERATOR_KEY and OPERATOR_ID must be defined in the .env file',
+      'Both TESTNET_OPERATOR_KEY and TESTNET_OPERATOR_ID must be defined together in the .env file.',
+    );
+    return;
+  }
+
+  if (
+    (MAINNET_OPERATOR_KEY && !MAINNET_OPERATOR_ID) ||
+    (!MAINNET_OPERATOR_KEY && MAINNET_OPERATOR_ID)
+  ) {
+    console.error(
+      'Both MAINNET_OPERATOR_KEY and MAINNET_OPERATOR_ID must be defined together in the .env file.',
     );
     return;
   }
 
   // Only write a fresh state file if the user is running the init command
-  if (action === 'init') setupState(OPERATOR_ID, OPERATOR_KEY);
+  if (action === 'init') {
+    setupState();
+  }
+
+  setupOperatorAccounts(
+    testnetOperatorId,
+    testnetOperatorKey,
+    mainnetOperatorId,
+    mainnetOperatorKey,
+  );
 }
 
-function setupState(operatorId: string, operatorKey: string): void {
-  // Update state.json with operator key and ID
-  const setupState = {
+function setupOperatorAccounts(
+  testnetOperatorId: string,
+  testnetOperatorKey: string,
+  mainnetOperatorId: string,
+  mainnetOperatorKey: string,
+): void {
+  const state = stateController.getAll();
+  let newState = { ...state };
+  newState.testnetOperatorKey = testnetOperatorKey;
+  newState.testnetOperatorId = testnetOperatorId;
+  newState.mainnetOperatorKey = mainnetOperatorKey;
+  newState.mainnetOperatorId = mainnetOperatorId;
+
+  if (testnetOperatorKey === '' && testnetOperatorId === '')
+    newState.network = 'mainnet';
+
+  stateController.saveState(newState);
+}
+
+function setupState(): void {
+  const newState = {
     ...config,
   };
-  setupState.operatorKey = operatorKey;
-  setupState.operatorId = operatorId;
-  stateController.saveState(setupState);
+
+  stateController.saveState(newState);
 }
 
 function reset(

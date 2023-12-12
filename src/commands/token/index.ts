@@ -12,9 +12,4 @@ export default (program: any) => {
   createCommand(token);
   createFromFileCommand(token);
   transferCommand(token);
-
-  token.command('*').action((options: any, command: Command) => {
-    console.error(`Unknown command: token ${command.parent.args[0]}\n`);
-    token.outputHelp();
-  });
 };

@@ -2,11 +2,13 @@
   "network": "testnet",
   "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
+  "testnetOperatorKey": "",
+  "testnetOperatorId": "",
+  "mainnetOperatorKey": "",
+  "mainnetOperatorId": "",
   "recording": 0,
   "recordingScriptName": "",
   "accounts": {},
   "scripts": {},
-  "operatorKey": "",
-  "operatorId": "",
   "tokens": {}
 }

@@ -16,9 +16,4 @@ export default (program: any) => {
   importCommand(account);
   listCommand(account);
   clearCommand(account);
-
-  account.command('*').action((options: any, command: Command) => {
-    console.error(`Unknown command: account ${command.parent.args[0]}\n`);
-    account.outputHelp();
-  });
 };

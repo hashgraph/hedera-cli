@@ -6,7 +6,7 @@ import stateController from "../../../src/state/stateController";
 
 jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
-describe("account import command", () => {
+describe("account create command", () => {
   beforeEach(() => {
     stateController.saveState(baseState);
   });
@@ -23,7 +23,7 @@ describe("account import command", () => {
       commands.accountCommands(program);
 
       // Act
-      await program.parse([
+      await program.parseAsync([
         "node",
         "hedera-cli.ts",
         "account",
@@ -54,7 +54,7 @@ describe("account import command", () => {
         commands.accountCommands(program);
   
         // Act
-        await program.parse([
+        await program.parseAsync([
           "node",
           "hedera-cli.ts",
           "account",

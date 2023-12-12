@@ -56,11 +56,13 @@ Create a `.env` file to securely store your operator credentials.
 touch .env
 ```
 
-Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key:
+Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for testnet and mainnet. It's not mandatory to set both testnet and mainnet credentials. If you only want to use one network, you can leave the other credentials empty. 
 
 ```text
-OPERATOR_KEY=302e0201003005060[...]
-OPERATOR_ID=0.0.12345
+TESTNET_OPERATOR_KEY=302e0201003005060[...]
+TESTNET_OPERATOR_ID=0.0.12345
+MAINNET_OPERATOR_KEY=
+MAINNET_OPERATOR_ID=
 ```
 
 **4. Verify Installation:**
@@ -116,14 +118,14 @@ hcli setup init
 When executed, the setup command performs several key functions:
 
 **Environment Variable Validation:**
-It checks if the HOME environment variable is defined and reads `OPERATOR_KEY` and `OPERATOR_ID` from the `~/.hedera/.env` file.
+It checks if the HOME environment variable is defined and reads `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID` from the `~/.hedera/.env` file.
 
 **State Update:**
-Once the operator key and ID are validated, these credentials are used to update the `state/state.json` file, which holds the configuration state of the CLI tool.
+Once the testnet and mainnet operator key and ID are validated, these credentials are used to update the `state/state.json` file, which holds the configuration state of the CLI tool.
 
 **2. Reset Setup:**
 
-Depending on the flags provided, it resets the entire state or skips certain parts of the state, such as the accounts, tokens, or scripts sections in your state. This might be useful when you want to reset your state but keep your address book.
+Depending on the flags provided, it resets the entire state or skips certain parts of the state, such as the accounts, tokens, or scripts sections in your state. This might be useful when you want to reset your state but keep your address book. By default, it resets the entire state and it will **reload the operator key and ID from the `.env` file.**
 
 ```sh
 hcli setup reset [-a, --skip-accounts] [-t, --skip-tokens] [-s, --skip-scripts]
@@ -539,6 +541,8 @@ If you add features that affect the initial config, make sure to update both the
 
 You need to create a local clone of commander program each time you run a unit test to ensure test encapsulation: `const program = new Command();`
 
+Use `program.parseAsync` if you are testing an asynchronous command.
+
 ```js
 const { Command } = require('commander');
 const networkCommands = require("../../commands/network");
@@ -562,9 +566,7 @@ describe("network commands", () => {
 
       // Assert
       const opts = program.opts();
-      console.log(opts)
       expect(opts.network).toBe("testnet");
-      console.log(program.args);
       // expect(program.args).toEqual(["--type", "order-cake"]);
 
       // Check that console.log was called with the correct message
