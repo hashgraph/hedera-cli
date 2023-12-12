@@ -505,6 +505,21 @@ _You can access an example [here](https://gist.githubusercontent.com/michielmuld
 
 # Contributing Tips
 
+## Development Mode
+
+You can run the application in development mode. It will watch for changes in the `src` folder and automatically recompile the application while maintaining the `dist/state.json` file.
+
+```sh
+npm run dev-build
+```
+
+Further, you can lint or format the code using the following commands:
+
+```sh
+npm run lint
+npm run format
+```
+
 ## Config
 
 **How to handle config?**
