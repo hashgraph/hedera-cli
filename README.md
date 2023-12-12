@@ -118,10 +118,10 @@ hcli setup init
 When executed, the setup command performs several key functions:
 
 **Environment Variable Validation:**
-It checks if the HOME environment variable is defined and reads `OPERATOR_KEY` and `OPERATOR_ID` from the `~/.hedera/.env` file.
+It checks if the HOME environment variable is defined and reads `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID` from the `~/.hedera/.env` file.
 
 **State Update:**
-Once the operator key and ID are validated, these credentials are used to update the `state/state.json` file, which holds the configuration state of the CLI tool.
+Once the testnet and mainnet operator key and ID are validated, these credentials are used to update the `state/state.json` file, which holds the configuration state of the CLI tool.
 
 **2. Reset Setup:**
 
