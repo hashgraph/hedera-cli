@@ -154,5 +154,4 @@ interface ResetOptions {
   skipAccounts: boolean;
   skipTokens: boolean;
   skipScripts: boolean;
-  operator: boolean;
 }
