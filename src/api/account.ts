@@ -1,6 +1,6 @@
-import axios from "axios";
-import type { APIResponse } from "../../types";
-import { getMirrorNodeURL } from "../state/stateService";
+import axios from 'axios';
+import type { APIResponse } from '../../types';
+import { getMirrorNodeURL } from '../state/stateService';
 
 /**
  * API functions:
@@ -13,10 +13,10 @@ async function getAccountBalance(accountId: string): Promise<APIResponse> {
     const response = await axios.get(`${mirrorNodeURL}/accounts/${accountId}`);
     return response;
   } catch (error) {
-    if (axios.isAxiosError(error)){
+    if (axios.isAxiosError(error)) {
       throw new Error(`Error fetching account balance: ${error.message}`);
     } else {
-      throw new Error(`Unexpected error: ${error}`)
+      throw new Error(`Unexpected error: ${error}`);
     }
   }
 }

@@ -11,13 +11,13 @@ program
   .option('-v, --verbose', 'output extra debugging')
   .option('-q, --quiet', 'output only errors and warnings');
 
-  if (process.argv.includes('-v')) {
-    logger.setLevel('verbose');
-  } else if (process.argv.includes('-q')) {
-    logger.setLevel('quiet');
-  }
+if (process.argv.includes('-v')) {
+  logger.setLevel('verbose');
+} else if (process.argv.includes('-q')) {
+  logger.setLevel('quiet');
+}
 
-  // Commands
+// Commands
 commands.setupCommands(program);
 commands.networkCommands(program);
 commands.accountCommands(program);

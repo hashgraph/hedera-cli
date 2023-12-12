@@ -1,22 +1,22 @@
-import stateController from "../state/stateController";
+import stateController from '../state/stateController';
 
 export default (program: any) => {
   program
-    .command("record <action> [name]")
-    .description("Manage recording of a script")
+    .command('record <action> [name]')
+    .description('Manage recording of a script')
     .action((action: string, name: string) => {
       switch (action) {
-        case "start":
+        case 'start':
           if (!name) {
-            console.error("Error: Script name is required for start action");
+            console.error('Error: Script name is required for start action');
             process.exit(1);
           }
           startRecording(name);
           console.log(`Recording started for script: ${name}`);
           break;
-        case "stop":
+        case 'stop':
           stopRecording();
-          console.log("Recording stopped");
+          console.log('Recording stopped');
           break;
         default:
           console.error(`Unknown action: ${action}`);
@@ -38,6 +38,6 @@ function startRecording(scriptName: string) {
 }
 
 function stopRecording(): void {
-  stateController.saveKey("recording", 0);
-  stateController.saveKey("recordingScriptName", "");
+  stateController.saveKey('recording', 0);
+  stateController.saveKey('recordingScriptName', '');
 }

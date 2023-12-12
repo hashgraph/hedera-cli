@@ -1,35 +1,35 @@
-import * as path from "path";
+import * as path from 'path';
 import {
   TokenCreateTransaction,
   TokenType,
   PrivateKey,
   TokenSupplyType,
-} from "@hashgraph/sdk";
+} from '@hashgraph/sdk';
 
-import accountUtils from "../../utils/account";
-import { getSupplyType } from "../../utils/token";
-import { recordCommand, getHederaClient } from "../../state/stateService";
-import { Logger } from "../../utils/logger";
-import stateController from "../../state/stateController";
+import accountUtils from '../../utils/account';
+import { getSupplyType } from '../../utils/token';
+import { recordCommand, getHederaClient } from '../../state/stateService';
+import { Logger } from '../../utils/logger';
+import stateController from '../../state/stateController';
 
-import type { Account, Command, Token, Keys } from "../../../types";
+import type { Account, Command, Token, Keys } from '../../../types';
 
 const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
-    .command("create-from-file")
-    .hook("preAction", (thisCommand: Command) => {
+    .command('create-from-file')
+    .hook('preAction', (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
       recordCommand(command);
     })
-    .description("Create a new token from a file")
+    .description('Create a new token from a file')
     .requiredOption(
-      "-f, --file <filename>",
-      "Filename containing the token information"
+      '-f, --file <filename>',
+      'Filename containing the token information',
     )
     .action(createTokenFromCLI);
 };
@@ -45,19 +45,19 @@ async function createTokenFromCLI(options: CreateTokenFromFileOptions) {
 }
 
 function resolveTokenFilePath(filename: string): string {
-  return path.join(__dirname, "../..", "input", `token.${filename}.json`);
+  return path.join(__dirname, '../..', 'input', `token.${filename}.json`);
 }
 
 function initializeToken(tokenInput: TokenInput): Token {
   const token: Token = {
     associations: [],
-    tokenId: "",
+    tokenId: '',
     name: tokenInput.name,
     symbol: tokenInput.symbol,
-    treasuryId: tokenInput.treasuryId || "",
+    treasuryId: tokenInput.treasuryId || '',
     decimals: tokenInput.decimals,
     initialSupply: tokenInput.initialSupply,
-    supplyType: "infinite",
+    supplyType: 'infinite',
     maxSupply: tokenInput.maxSupply || 0,
     keys: {
       adminKey: tokenInput.keys.adminKey,
@@ -76,12 +76,12 @@ function initializeToken(tokenInput: TokenInput): Token {
 
 async function prepareTokenCreation(
   token: Token,
-  tokenInput: TokenInput
+  tokenInput: TokenInput,
 ): Promise<Token> {
   token.supplyType = tokenInput.supplyType;
   token = await replaceKeysForToken(token);
 
-  if (token.treasuryId === "") {
+  if (token.treasuryId === '') {
     token.treasuryId = getTreasuryIdByTreasuryKey(token.keys.treasuryKey);
   }
 
@@ -101,19 +101,19 @@ async function createTokenOnNetwork(token: Token) {
       .setSupplyType(getSupplyType(token.supplyType))
       .setTreasuryAccountId(token.treasuryId);
 
-    if (token.supplyType === "finite") {
+    if (token.supplyType === 'finite') {
       tokenCreateTx.setMaxSupply(token.maxSupply);
     }
 
     // Add keys
     addKeysToTokenCreateTx(tokenCreateTx, token);
-  
+
     // Signing
     tokenCreateTx
       .freezeWith(client)
       .sign(PrivateKey.fromString(token.keys.treasuryKey));
 
-    if (token.keys.adminKey !== "") {
+    if (token.keys.adminKey !== '') {
       tokenCreateTx.sign(PrivateKey.fromString(token.keys.adminKey));
     }
 
@@ -121,10 +121,10 @@ async function createTokenOnNetwork(token: Token) {
     let tokenCreateSubmit = await tokenCreateTx.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
 
-    if (tokenCreateRx.tokenId == null) throw new Error("Token was not created");
+    if (tokenCreateRx.tokenId == null) throw new Error('Token was not created');
 
     token.tokenId = tokenCreateRx.tokenId.toString();
-    console.log("Token ID:", token.tokenId);
+    console.log('Token ID:', token.tokenId);
     client.close();
   } catch (error) {
     logger.error(error as object);
@@ -133,7 +133,10 @@ async function createTokenOnNetwork(token: Token) {
   }
 }
 
-function addKeysToTokenCreateTx(tokenCreateTx: TokenCreateTransaction, token: Token) {
+function addKeysToTokenCreateTx(
+  tokenCreateTx: TokenCreateTransaction,
+  token: Token,
+) {
   // Mapping key names to their corresponding setter methods
   const keySetters = {
     adminKey: tokenCreateTx.setAdminKey,
@@ -147,10 +150,10 @@ function addKeysToTokenCreateTx(tokenCreateTx: TokenCreateTransaction, token: To
 
   Object.entries(keySetters).forEach(([key, setter]) => {
     const keyValue = token.keys[key as keyof typeof token.keys];
-    if (keyValue && keyValue !== "") {
+    if (keyValue && keyValue !== '') {
       setter.call(tokenCreateTx, PrivateKey.fromString(keyValue).publicKey);
     }
-  }); 
+  });
 }
 
 async function createTokenFromFile(tokenInput: TokenInput) {
@@ -166,13 +169,13 @@ async function createTokenFromFile(tokenInput: TokenInput) {
 }
 
 function updateTokenState(token: Token) {
-  const tokens: Record<string, Token> = stateController.get("tokens");
+  const tokens: Record<string, Token> = stateController.get('tokens');
   const updatedTokens = {
     ...tokens,
     [token.tokenId]: token,
   };
 
-  stateController.saveKey("tokens", updatedTokens);
+  stateController.saveKey('tokens', updatedTokens);
   getHederaClient().close();
 }
 
@@ -194,7 +197,7 @@ async function replaceKeysForToken(token: Token): Promise<Token> {
  * @return updated keys
  */
 function replaceAliasPattern(keys: Keys): Keys {
-  const accounts = stateController.get("accounts");
+  const accounts = stateController.get('accounts');
   const aliasPattern = /<alias:([a-zA-Z0-9_-]+)>/;
   let newKeys = { ...keys };
 
@@ -215,24 +218,24 @@ function replaceAliasPattern(keys: Keys): Keys {
 /**
  * Create new accounts for keys that match the `newkey` pattern
  * and replace the pattern with the new private key
- * 
- * @param keys 
+ *
+ * @param keys
  * @returns promise array of new accounts
  */
 function findNewKeyPattern(
-  keys: Keys
+  keys: Keys,
 ): Promise<{ key: string; account: Account }>[] {
   let newAccountPromises: Promise<{ key: string; account: Account }>[] = [];
 
   const newKeyPattern = /<newkey:(ecdsa|ECDSA|ed25519|ED25519):(\d+)>/;
-  Object.keys(keys).forEach(key => {
+  Object.keys(keys).forEach((key) => {
     const match = keys[key as keyof typeof keys].match(newKeyPattern);
 
     if (match) {
       const keyType = match[1]; // 'ecdsa' or 'ed25519' (can be capitals)
       const initialBalance = Number(match[2]); // Initial balance in tinybars
       newAccountPromises.push(
-        createAccountForToken(key, initialBalance, keyType, "random") // Random alias because you can create an account upfront in scripts and give it an alias to be used in the template
+        createAccountForToken(key, initialBalance, keyType, 'random'), // Random alias because you can create an account upfront in scripts and give it an alias to be used in the template
       );
     }
   });
@@ -242,7 +245,7 @@ function findNewKeyPattern(
 
 /**
  * Replace keys that match the `newkey` pattern with the new private key
- * @param keys 
+ * @param keys
  * @returns updated keys
  */
 async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
@@ -260,9 +263,7 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
       });
     } catch (error) {
       logger.error(error as object);
-      throw new Error(
-        `Failed to create new accounts for token`
-      );
+      throw new Error(`Failed to create new accounts for token`);
     }
   }
 
@@ -272,7 +273,7 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
 function getTreasuryIdByTreasuryKey(treasuryKey: string): string {
   const account = accountUtils.findAccountByPrivateKey(treasuryKey);
   if (!account) {
-    throw new Error("Treasury account not found");
+    throw new Error('Treasury account not found');
   }
   return account.accountId;
 }
@@ -281,7 +282,7 @@ async function createAccountForToken(
   key: string,
   initialBalance: number,
   type: string,
-  alias: string
+  alias: string,
 ): Promise<{ key: string; account: Account }> {
   const account = await accountUtils.createAccount(initialBalance, type, alias);
   return { key, account };
@@ -295,7 +296,7 @@ interface TokenInput {
   name: string;
   symbol: string;
   decimals: number;
-  supplyType: "finite" | "infinite";
+  supplyType: 'finite' | 'infinite';
   initialSupply: number;
   keys: Keys;
   maxSupply: number;

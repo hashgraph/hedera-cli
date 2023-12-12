@@ -1,31 +1,29 @@
-import { associateToken } from "../../utils/token";
-import {
-  recordCommand,
-} from "../../state/stateService";
-import { Logger } from "../../utils/logger";
+import { associateToken } from '../../utils/token';
+import { recordCommand } from '../../state/stateService';
+import { Logger } from '../../utils/logger';
 
-import type { Command } from "../../../types";
+import type { Command } from '../../../types';
 
 const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
-    .command("associate")
-    .hook("preAction", (thisCommand: Command) => {
+    .command('associate')
+    .hook('preAction', (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
       recordCommand(command);
     })
-    .description("Associate a token with an account")
+    .description('Associate a token with an account')
     .requiredOption(
-      "-a, --account-id <accountId>", // alias is also possible for --acount-id
-      "Account ID or account alias to associate with token"
+      '-a, --account-id <accountId>', // alias is also possible for --acount-id
+      'Account ID or account alias to associate with token',
     )
     .requiredOption(
-      "-t, --token-id <tokenId>",
-      "Token ID to associate with account"
+      '-t, --token-id <tokenId>',
+      'Token ID to associate with account',
     )
     .action(async (options: AssociateTokenOptions) => {
       try {
@@ -37,6 +35,6 @@ export default (program: any) => {
 };
 
 interface AssociateTokenOptions {
-    tokenId: string;
-    accountId: string;
+  tokenId: string;
+  accountId: string;
 }

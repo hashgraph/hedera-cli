@@ -1,17 +1,17 @@
-import stateController from "../state/stateController";
+import stateController from '../state/stateController';
 
-import type { Script } from "../../types";
+import type { Script } from '../../types';
 
 function listScripts() {
-  const scripts: Record<string, Script> = stateController.get("scripts");
+  const scripts: Record<string, Script> = stateController.get('scripts');
   const scriptNames = Object.keys(scripts);
 
   if (scriptNames.length === 0) {
-    console.log("No scripts found");
+    console.log('No scripts found');
     return;
   }
 
-  console.log("Scripts:");
+  console.log('Scripts:');
   scriptNames.forEach((scriptName) => {
     console.log(`\t${scriptName}`);
     console.log(`\t- Commands:`);
@@ -22,7 +22,7 @@ function listScripts() {
 }
 
 function deleteScript(name: string) {
-  const scripts: Record<string, Script> = stateController.get("scripts");
+  const scripts: Record<string, Script> = stateController.get('scripts');
   const scriptName = `script-${name}`;
   const script = scripts[scriptName];
 
@@ -32,7 +32,7 @@ function deleteScript(name: string) {
   }
 
   delete scripts[scriptName];
-  stateController.saveKey("scripts", scripts);
+  stateController.saveKey('scripts', scripts);
   console.log(`Script ${scriptName} deleted successfully`);
 }
 
