@@ -56,7 +56,9 @@ export interface State {
   recordingScriptName: string;
   accounts: Record<string, Account>;
   scripts: Record<string, Script>;
-  operatorKey: string;
-  operatorId: string;
   tokens: Record<string, Token>;
+  testnetOperatorKey: string;
+  testnetOperatorId: string;
+  mainnetOperatorKey: string;
+  mainnetOperatorId: string;
 }

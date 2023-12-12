@@ -73,8 +73,10 @@ function backupState(backupAccounts: boolean, safe: boolean) {
 function filterState(data: State) {
   const filteredState = { ...data };
 
-  filteredState.operatorId = '';
-  filteredState.operatorKey = '';
+  filteredState.testnetOperatorId = '';
+  filteredState.testnetOperatorKey = '';
+  filteredState.mainnetOperatorId = '';
+  filteredState.mainnetOperatorKey = '';
 
   Object.keys(filteredState.tokens).forEach((key) => {
     filteredState.tokens[key].keys = {

@@ -28,21 +28,30 @@ function getMirrorNodeURL(): string {
 function getHederaClient(): Client {
   const state = stateController.getAll();
   let client: Client;
+  let operatorId, operatorKey;
 
   switch (state.network) {
     case 'mainnet':
       client = Client.forMainnet();
+      operatorId = state.mainnetOperatorId;
+      operatorKey = state.mainnetOperatorKey;
       break;
     case 'testnet':
       client = Client.forTestnet();
+      operatorId = state.testnetOperatorId;
+      operatorKey = state.testnetOperatorKey;
       break;
     default:
       throw new Error(`Unsupported network: ${state.network}`);
   }
 
+  if (operatorId === '' || operatorKey === '') {
+    throw new Error(`operator key and ID not set for ${state.network}`);
+  }
+
   return client.setOperator(
-    AccountId.fromString(state.operatorId),
-    PrivateKey.fromString(state.operatorKey),
+    AccountId.fromString(operatorId),
+    PrivateKey.fromString(operatorKey),
   );
 }
 
@@ -50,6 +59,23 @@ function switchNetwork(name: string) {
   if (!['mainnet', 'testnet'].includes(name)) {
     console.error('Invalid network name. Available networks: mainnet, testnet');
     return;
+  }
+
+  const state = stateController.getAll();
+  let operatorId, operatorKey;
+  switch (state.network) {
+    case 'mainnet':
+      operatorId = state.mainnetOperatorId;
+      operatorKey = state.mainnetOperatorKey;
+      break;
+    case 'testnet':
+      operatorId = state.testnetOperatorId;
+      operatorKey = state.testnetOperatorKey;
+      break;
+  }
+
+  if (operatorId === '' || operatorKey === '') {
+    throw new Error(`operator key and ID not set for ${state.network}`);
   }
 
   stateController.saveKey('network', name);

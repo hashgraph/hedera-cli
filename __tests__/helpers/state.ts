@@ -8,9 +8,11 @@ export const baseState: State = {
   recordingScriptName: "",
   accounts: {},
   scripts: {},
-  operatorKey:
+  testnetOperatorKey:
     "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
-  operatorId: "0.0.458179",
+  testnetOperatorId: "0.0.458179",
+  mainnetOperatorKey: "",
+  mainnetOperatorId: "",
   tokens: {},
 };
 
