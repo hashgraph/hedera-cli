@@ -14,13 +14,17 @@ export default (program: any) => {
       recordCommand(command);
     })
     .description(
-      'Import an existing account using a private key, type, account ID, and alias',
+      'Import an existing account using an account ID, alias, type, and optional private key.',
     )
     .requiredOption('-a, --alias <alias>', 'account must have an alias')
     .requiredOption('-i, --id <id>', 'Account ID')
-    .requiredOption('-k, --key <key>', 'Private key')
+    .option('-k, --key <key>', 'Private key')
     .action((options: ImportAccountOptions) => {
-      accountUtils.importAccount(options.id, options.key, options.alias);
+      if (options.key) {
+        accountUtils.importAccount(options.id, options.key, options.alias);
+      } else {
+        accountUtils.importAccountId(options.id, options.alias);
+      }
     });
 };
 

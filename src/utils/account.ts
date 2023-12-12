@@ -152,7 +152,6 @@ function listAccounts(showPrivateKeys: boolean = false): void {
   }
 }
 
-// Write the importAccount function here
 function importAccount(id: string, key: string, alias: string): void {
   const accounts = stateController.get('accounts');
 
@@ -200,6 +199,31 @@ function importAccount(id: string, key: string, alias: string): void {
         ? ''
         : `0x${accountId.toSolidityAddress()}`,
     privateKey: key,
+  };
+
+  stateController.saveKey('accounts', updatedAccounts);
+}
+
+function importAccountId(id: string, alias: string): void {
+  const accounts = stateController.get('accounts');
+
+  // Check if name is unique
+  if (accounts && accounts[alias]) {
+    logger.error('An account with this alias already exists.');
+    return;
+  }
+
+  const accountId = AccountId.fromString(id);
+  const updatedAccounts = { ...accounts };
+  updatedAccounts[alias] = {
+    alias,
+    accountId: id,
+    type: '',
+    publicKey: '',
+    evmAddress: '',
+    solidityAddress: '',
+    solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
+    privateKey: '',
   };
 
   stateController.saveKey('accounts', updatedAccounts);
@@ -307,6 +331,7 @@ const accountUtils = {
   createAccount,
   listAccounts,
   importAccount,
+  importAccountId,
   getAccountBalance,
   getKeyType,
   generateRandomAlias,
