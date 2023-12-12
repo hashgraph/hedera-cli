@@ -238,19 +238,20 @@ Accounts:
 
 **4. Import an Existing Account:**
 
-Allows users to import an existing account into the CLI tool using the account's private key, type, ID, and an alias.
+Allows users to import an existing account into the CLI tool using the account's alias, ID, type, and optionally private key. You can import accounts without a private key, but you won't be able to sign transactions with them.
 
 ```sh
-hcli account import -a,--alias <alias> -i,--id <id> -k,--key <key>
+hcli account import -a,--alias <alias> -i,--id <id> [-k,--key <key>]
 
 // Example
-hcli account import -a alice -i 0.0.5892294 -k 30300201 [...]
+hcli account import -a alice -i 0.0.5892294 -k 30300201[...]
+hcli account import -a alice -i 0.0.12450
 ```
 
 Flags:
 - **Alias:** (required) Alias for the imported account.
 - **Id:** (required) Account ID.
-- **Key:** (required) Private key.
+- **Key:** (optional) Private key.
 
 **5. Clear All Accounts:**
 
