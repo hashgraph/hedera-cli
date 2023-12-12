@@ -541,6 +541,8 @@ If you add features that affect the initial config, make sure to update both the
 
 You need to create a local clone of commander program each time you run a unit test to ensure test encapsulation: `const program = new Command();`
 
+Use `program.parseAsync` if you are testing an asynchronous command.
+
 ```js
 const { Command } = require('commander');
 const networkCommands = require("../../commands/network");
@@ -564,9 +566,7 @@ describe("network commands", () => {
 
       // Assert
       const opts = program.opts();
-      console.log(opts)
       expect(opts.network).toBe("testnet");
-      console.log(program.args);
       // expect(program.args).toEqual(["--type", "order-cake"]);
 
       // Check that console.log was called with the correct message
