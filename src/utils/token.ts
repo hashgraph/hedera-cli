@@ -1,24 +1,24 @@
-import { BalanceResponse } from "../../types/api";
-import api from "../api";
+import { BalanceResponse } from '../../types/api';
+import api from '../api';
 import {
   getAccountByIdOrAlias,
   getHederaClient,
   addTokenAssociation,
-} from "../state/stateService";
+} from '../state/stateService';
 import {
   TokenAssociateTransaction,
   PrivateKey,
   TokenSupplyType,
-} from "@hashgraph/sdk";
+} from '@hashgraph/sdk';
 
 const getSupplyType = (type: string): TokenSupplyType => {
   const tokenType = type.toLowerCase();
-  if (tokenType === "finite") {
+  if (tokenType === 'finite') {
     return TokenSupplyType.Finite;
-  } else if (tokenType === "infinite") {
+  } else if (tokenType === 'infinite') {
     return TokenSupplyType.Infinite;
   } else {
-    throw new Error("Invalid supply type");
+    throw new Error('Invalid supply type');
   }
 };
 
@@ -31,7 +31,7 @@ const getSupplyType = (type: string): TokenSupplyType => {
  */
 const isTokenAssociated = async (
   tokenId: string,
-  accountId: string
+  accountId: string,
 ): Promise<boolean> => {
   const response = await api.token.getTokenBalance(tokenId, accountId);
   const balanceResponse = response.data as BalanceResponse;
@@ -48,7 +48,7 @@ const isTokenAssociated = async (
 
 const associateToken = async (
   tokenId: string,
-  accountIdorAlias: string
+  accountIdorAlias: string,
 ): Promise<void> => {
   let account = getAccountByIdOrAlias(accountIdorAlias);
 
@@ -64,10 +64,10 @@ const associateToken = async (
     let tokenAssociateSubmit = await tokenAssociateTx.execute(client);
     await tokenAssociateSubmit.getReceipt(client);
 
-    console.log("Token associated:", tokenId);
+    console.log('Token associated:', tokenId);
     client.close();
   } catch (error) {
-    console.log("Failed to associate token:", tokenId);
+    console.log('Failed to associate token:', tokenId);
     console.log(error);
     client.close();
     return;

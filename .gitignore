@@ -1,6 +1,9 @@
 # Dist folder
 dist/
 
+# Testing state
+src/state/test_state.json
+
 # Logs
 logs
 *.log

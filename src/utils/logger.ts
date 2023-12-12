@@ -15,7 +15,7 @@ export class Logger {
     this.level = level;
   }
 
-  log(message: string|object) {
+  log(message: string | object) {
     if (this.level !== 'quiet') {
       if (typeof message === 'object') {
         message = this._convertObjectToString(message);
@@ -24,7 +24,7 @@ export class Logger {
     }
   }
 
-  verbose(message: string|object) {
+  verbose(message: string | object) {
     if (this.level === 'verbose') {
       if (typeof message === 'object') {
         message = this._convertObjectToString(message);
@@ -34,7 +34,7 @@ export class Logger {
   }
 
   // Overload signatures
-  error(message: string|object): void;
+  error(message: string | object): void;
   error(message: string, error: object): void;
 
   // Unified implementation

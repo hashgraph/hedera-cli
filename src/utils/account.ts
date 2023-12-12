@@ -3,56 +3,60 @@ import {
   AccountCreateTransaction,
   Hbar,
   AccountId,
-} from "@hashgraph/sdk";
+} from '@hashgraph/sdk';
 
-import stateController from "../state/stateController";
-import { getHederaClient, getAccountByIdOrAlias } from "../state/stateService";
-import { display } from "../utils/display";
-import { Logger } from "../utils/logger";
-import api from "../api";
+import stateController from '../state/stateController';
+import { getHederaClient, getAccountByIdOrAlias } from '../state/stateService';
+import { display } from '../utils/display';
+import { Logger } from '../utils/logger';
+import api from '../api';
 
-import type { Account } from "../../types";
+import type { Account } from '../../types';
 
 const logger = Logger.getInstance();
 
 function clearAddressBook(): void {
-  stateController.saveKey("accounts", {});
+  stateController.saveKey('accounts', {});
 }
 
 function deleteAccount(accountIdOrAlias: string): void {
   const account = getAccountByIdOrAlias(accountIdOrAlias);
 
   if (!account) {
-    logger.error("Account not found");
+    logger.error('Account not found');
     return;
   }
 
-  const accounts = stateController.get("accounts");  
+  const accounts = stateController.get('accounts');
   delete accounts[account.alias];
 
-  stateController.saveKey("accounts", accounts);
+  stateController.saveKey('accounts', accounts);
 }
 
-async function createAccount(balance: number, type: string, alias: string): Promise<Account> {
+async function createAccount(
+  balance: number,
+  type: string,
+  alias: string,
+): Promise<Account> {
   // Validate balance
   if (isNaN(balance) || balance <= 0) {
-    logger.error("Invalid balance. Balance must be a positive number.");
-    throw new Error("Invalid balance. Balance must be a positive number.");
+    logger.error('Invalid balance. Balance must be a positive number.');
+    throw new Error('Invalid balance. Balance must be a positive number.');
   }
 
   // Validate type
-  if (!["ecdsa", "ed25519"].includes(type.toLowerCase())) {
+  if (!['ecdsa', 'ed25519'].includes(type.toLowerCase())) {
     logger.error('Invalid type. Type must be either "ecdsa" or "ed25519".');
-    throw new Error('Invalid type. Type must be either "ecdsa" or "ed25519".')
+    throw new Error('Invalid type. Type must be either "ecdsa" or "ed25519".');
   }
 
   // Get client from config
-  const accounts: Record<string, Account> = stateController.get("accounts");
+  const accounts: Record<string, Account> = stateController.get('accounts');
   const client = getHederaClient();
 
   // Generate random alias if "random" is provided
   let isRandomAlias = false;
-  if (alias.toLowerCase() === "random") {
+  if (alias.toLowerCase() === 'random') {
     isRandomAlias = true;
     let newAlias = generateRandomAlias();
     alias = newAlias; // Implement this function to generate a random string
@@ -60,14 +64,14 @@ async function createAccount(balance: number, type: string, alias: string): Prom
 
   // Check if name is unique
   if (!isRandomAlias && accounts && accounts[alias]) {
-    logger.error("An account with this alias already exists.");
+    logger.error('An account with this alias already exists.');
     client.close();
-    throw new Error("An account with this alias already exists.")
+    throw new Error('An account with this alias already exists.');
   }
 
   // Handle different types of account creation
   let newAccountPrivateKey, newAccountPublicKey;
-  if (type.toLowerCase() === "ed25519") {
+  if (type.toLowerCase() === 'ed25519') {
     newAccountPrivateKey = PrivateKey.generateED25519();
     newAccountPublicKey = newAccountPrivateKey.publicKey;
   } else {
@@ -86,14 +90,14 @@ async function createAccount(balance: number, type: string, alias: string): Prom
     const getReceipt = await newAccount.getReceipt(client);
     newAccountId = getReceipt.accountId;
   } catch (error) {
-    logger.error("Error creating new account:", error as object);
+    logger.error('Error creating new account:', error as object);
     client.close();
   }
 
   if (newAccountId == null) {
-    logger.error("Account was not created");
+    logger.error('Account was not created');
     client.close();
-    throw new Error("Account was not created");
+    throw new Error('Account was not created');
   }
 
   // Store the new account in the config
@@ -103,21 +107,21 @@ async function createAccount(balance: number, type: string, alias: string): Prom
     type,
     publicKey: newAccountPrivateKey.publicKey.toString(),
     evmAddress:
-      type.toLowerCase() === "ed25519"
-        ? ""
+      type.toLowerCase() === 'ed25519'
+        ? ''
         : newAccountPrivateKey.publicKey.toEvmAddress(),
     solidityAddress:
-      type.toLowerCase() === "ed25519" ? "" : newAccountId.toSolidityAddress(),
+      type.toLowerCase() === 'ed25519' ? '' : newAccountId.toSolidityAddress(),
     solidityAddressFull:
-      type.toLowerCase() === "ed25519"
-        ? ""
+      type.toLowerCase() === 'ed25519'
+        ? ''
         : `0x${newAccountId.toSolidityAddress()}`,
     privateKey: newAccountPrivateKey.toString(),
   };
 
   // Add the new account to the accounts object in the config
   const updatedAccounts = { ...accounts, [alias]: newAccountDetails };
-  stateController.saveKey("accounts", updatedAccounts);
+  stateController.saveKey('accounts', updatedAccounts);
 
   // Log the account ID
   logger.log(`The new account ID is: ${newAccountId}, with alias: ${alias}`);
@@ -128,50 +132,48 @@ async function createAccount(balance: number, type: string, alias: string): Prom
 }
 
 function listAccounts(showPrivateKeys: boolean = false): void {
-  const accounts: Record<string, Account> = stateController.get("accounts");
+  const accounts: Record<string, Account> = stateController.get('accounts');
 
   // Check if there are any accounts in the config
   if (!accounts || Object.keys(accounts).length === 0) {
-    logger.log("No accounts found.");
+    logger.log('No accounts found.');
     return;
   }
 
   // Log details for each account
-  logger.log("Accounts:");
+  logger.log('Alias, account ID, type, private key\n');
   for (const [alias, account] of Object.entries(accounts)) {
-    logger.log(`- Alias: ${alias}`);
-    logger.log(`  Account ID: ${account.accountId}`);
-    logger.log(`  Type: ${account.type}`);
     if (showPrivateKeys) {
-      logger.log(`  Private Key: ${account.privateKey}`);
+      logger.log(`${alias}, ${account.accountId}, ${account.type.toUpperCase()}, ${account.privateKey}`);
+    } else {
+      logger.log(`${alias}, ${account.accountId}, ${account.type.toUpperCase()}`);
     }
   }
 }
 
-// Write the importAccount function here
 function importAccount(id: string, key: string, alias: string): void {
-  const accounts = stateController.get("accounts");
+  const accounts = stateController.get('accounts');
 
   // Check if name is unique
   if (accounts && accounts[alias]) {
-    logger.error("An account with this alias already exists.");
+    logger.error('An account with this alias already exists.');
     return;
   }
 
   let privateKey, type;
   const accountId = AccountId.fromString(id);
   switch (getKeyType(key)) {
-    case "ecdsa":
-      type = "ECDSA";
+    case 'ecdsa':
+      type = 'ECDSA';
       privateKey = PrivateKey.fromStringECDSA(key);
       break;
-    case "ed25519":
-      type = "ED25519";
+    case 'ed25519':
+      type = 'ED25519';
       privateKey = PrivateKey.fromStringED25519(key);
       break;
     default:
       logger.error(
-        "Invalid key type. Only ECDSA and ED25519 keys are supported."
+        'Invalid key type. Only ECDSA and ED25519 keys are supported.',
       );
       return;
   }
@@ -184,28 +186,48 @@ function importAccount(id: string, key: string, alias: string): void {
     type,
     publicKey: privateKey.publicKey.toString(),
     evmAddress:
-      type.toLowerCase() === "ed25519"
-        ? ""
+      type.toLowerCase() === 'ed25519'
+        ? ''
         : privateKey.publicKey.toEvmAddress(),
-    solidityAddress:
-      type.toLowerCase() === "ed25519"
-        ? ""
-        : privateKey.publicKey.toEvmAddress(),
-    solidityAddressFull: type.toLocaleLowerCase() === "ed25519"
-      ? ""
-      : `0x${accountId.toSolidityAddress()}`,
+    solidityAddress: `${accountId.toSolidityAddress()}`,
+    solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: key,
   };
 
-  stateController.saveKey("accounts", updatedAccounts);
+  stateController.saveKey('accounts', updatedAccounts);
+}
+
+function importAccountId(id: string, alias: string): void {
+  const accounts = stateController.get('accounts');
+
+  // Check if name is unique
+  if (accounts && accounts[alias]) {
+    logger.error('An account with this alias already exists.');
+    return;
+  }
+
+  const accountId = AccountId.fromString(id);
+  const updatedAccounts = { ...accounts };
+  updatedAccounts[alias] = {
+    alias,
+    accountId: id,
+    type: '',
+    publicKey: '',
+    evmAddress: '',
+    solidityAddress: `${accountId.toSolidityAddress()}`,
+    solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
+    privateKey: '',
+  };
+
+  stateController.saveKey('accounts', updatedAccounts);
 }
 
 async function getAccountBalance(
   accountIdOrAlias: string,
   onlyHbar: boolean = false,
-  tokenId?: string
+  tokenId?: string,
 ) {
-  const accounts = stateController.get("accounts");
+  const accounts = stateController.get('accounts');
   const client = getHederaClient();
 
   let accountId;
@@ -217,25 +239,25 @@ async function getAccountBalance(
   } else if (accounts && accounts[accountIdOrAlias]) {
     accountId = accounts[accountIdOrAlias].accountId;
   } else {
-    logger.error("Invalid account ID or alias not found in address book.");
+    logger.error('Invalid account ID or alias not found in address book.');
     client.close();
     return;
   }
 
   try {
-    logger.log("Getting API balance");
+    logger.log('Getting API balance');
     const response = await api.account.getAccountBalance(accountId);
-    display("displayBalance", response, { onlyHbar, tokenId });
+    display('displayBalance', response, { onlyHbar, tokenId });
   } catch (error) {
-    logger.error("Error fetching account balance:", error as object);
+    logger.error('Error fetching account balance:', error as object);
   }
 
   client.close();
 }
 
 function findAccountByPrivateKey(privateKey: string): Account {
-  const accounts: Record<string, Account> = stateController.get("accounts");
-  if (!accounts) throw new Error("No accounts found in state");
+  const accounts: Record<string, Account> = stateController.get('accounts');
+  if (!accounts) throw new Error('No accounts found in state');
 
   let matchingAccount: Account | null = null;
   for (const [alias, account] of Object.entries(accounts)) {
@@ -245,14 +267,15 @@ function findAccountByPrivateKey(privateKey: string): Account {
     }
   }
 
-  if (!matchingAccount) throw new Error("No matching account found for treasury key");
+  if (!matchingAccount)
+    throw new Error('No matching account found for treasury key');
 
   return matchingAccount;
 }
 
 function findAccountByAlias(alias: string): Account {
-  const accounts: Record<string, Account> = stateController.get("accounts");
-  if (!accounts) throw new Error("No accounts found in state");
+  const accounts: Record<string, Account> = stateController.get('accounts');
+  if (!accounts) throw new Error('No accounts found in state');
 
   let matchingAccount: Account | null = null;
   for (const [alias, account] of Object.entries(accounts)) {
@@ -262,7 +285,8 @@ function findAccountByAlias(alias: string): Account {
     }
   }
 
-  if (!matchingAccount) throw new Error("No matching account found for treasury key");
+  if (!matchingAccount)
+    throw new Error('No matching account found for treasury key');
 
   return matchingAccount;
 }
@@ -270,26 +294,26 @@ function findAccountByAlias(alias: string): Account {
 function getKeyType(keyString: string): string {
   try {
     PrivateKey.fromStringED25519(keyString);
-    return "ed25519";
+    return 'ed25519';
   } catch (e) {
     // Not an Ed25519 private key
   }
 
   try {
     PrivateKey.fromStringECDSA(keyString);
-    return "ecdsa";
+    return 'ecdsa';
   } catch (e) {
     // Not an ECDSA private key
   }
 
-  return "Unknown key type";
+  return 'Unknown key type';
 }
 
 function generateRandomAlias(): string {
   const length = 20; // Define the length of the random string
   const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
@@ -300,6 +324,7 @@ const accountUtils = {
   createAccount,
   listAccounts,
   importAccount,
+  importAccountId,
   getAccountBalance,
   getKeyType,
   generateRandomAlias,

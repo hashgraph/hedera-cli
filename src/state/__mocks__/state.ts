@@ -1,4 +1,4 @@
-import { State as StateInterface } from "../../../types";
+import { State as StateInterface } from '../../../types';
 
 class StateMock {
   private state: Record<string, any> = {};

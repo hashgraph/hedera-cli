@@ -238,19 +238,20 @@ Accounts:
 
 **4. Import an Existing Account:**
 
-Allows users to import an existing account into the CLI tool using the account's private key, type, ID, and an alias.
+Allows users to import an existing account into the CLI tool using the account's alias, ID, type, and optionally private key. You can import accounts without a private key, but you won't be able to sign transactions with them.
 
 ```sh
-hcli account import -a,--alias <alias> -i,--id <id> -k,--key <key>
+hcli account import -a,--alias <alias> -i,--id <id> [-k,--key <key>]
 
 // Example
-hcli account import -a alice -i 0.0.5892294 -k 30300201 [...]
+hcli account import -a alice -i 0.0.5892294 -k 30300201[...]
+hcli account import -a alice -i 0.0.12450
 ```
 
 Flags:
 - **Alias:** (required) Alias for the imported account.
 - **Id:** (required) Account ID.
-- **Key:** (required) Private key.
+- **Key:** (optional) Private key.
 
 **5. Clear All Accounts:**
 
@@ -394,8 +395,17 @@ backup create
 This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`.
 
 ```sh
+hcli backup create [--accounts] [--safe]
+
+// Example
+hcli backup create --accounts --safe
+hcli backup create --safe
 hcli backup create
 ```
+
+Flags:
+- **Accounts:** (optional) Creates a backup of the accounts section of the state. The backup file is named `accounts.backup.<timestamp>.json`.
+- **Safe:** (optional) Removes private information from the backup like token keys, account keys, and operator key/ID. It does not remove the private keys in scripts' commands.
 
 ## Record Commands
 
@@ -503,6 +513,21 @@ Format for remote script files:
 _You can access an example [here](https://gist.githubusercontent.com/michielmulders/ed7a639bb3a5629380cdd57290d24b91/raw/fc072bf5682467113faaae19ce65f0ef92b6a4cd/createAccAndFT.json)._
 
 # Contributing Tips
+
+## Development Mode
+
+You can run the application in development mode. It will watch for changes in the `src` folder and automatically recompile the application while maintaining the `dist/state.json` file.
+
+```sh
+npm run dev-build
+```
+
+Further, you can lint or format the code using the following commands:
+
+```sh
+npm run lint
+npm run format
+```
 
 ## Config
 

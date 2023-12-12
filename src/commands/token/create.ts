@@ -3,59 +3,56 @@ import {
   TokenType,
   PrivateKey,
   TokenSupplyType,
-} from "@hashgraph/sdk";
+} from '@hashgraph/sdk';
 
-import { myParseInt } from "../../utils/verification";
-import { getSupplyType } from "../../utils/token";
-import {
-  recordCommand,
-  getHederaClient,
-} from "../../state/stateService";
-import { Logger } from "../../utils/logger";
-import stateController from "../../state/stateController";
+import { myParseInt } from '../../utils/verification';
+import { getSupplyType } from '../../utils/token';
+import { recordCommand, getHederaClient } from '../../state/stateService';
+import { Logger } from '../../utils/logger';
+import stateController from '../../state/stateController';
 
-import type { Command, Token } from "../../../types";
+import type { Command, Token } from '../../../types';
 
 const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
-    .command("create")
-    .hook("preAction", (thisCommand: Command) => {
+    .command('create')
+    .hook('preAction', (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
       recordCommand(command);
     })
-    .description("Create a new fungible token")
+    .description('Create a new fungible token')
     .requiredOption(
-      "-t, --treasury-id <treasuryId>",
-      "Treasury of the fungible token"
+      '-t, --treasury-id <treasuryId>',
+      'Treasury of the fungible token',
     )
     .requiredOption(
-      "-k, --treasury-key <treasuryKey>",
-      "Treasury of the fungible token"
+      '-k, --treasury-key <treasuryKey>',
+      'Treasury of the fungible token',
     )
-    .requiredOption("-n, --name <name>", "Name of the fungible token")
-    .requiredOption("-s, --symbol <symbol>", "Symbol of the fungible token")
+    .requiredOption('-n, --name <name>', 'Name of the fungible token')
+    .requiredOption('-s, --symbol <symbol>', 'Symbol of the fungible token')
     .requiredOption(
-      "-d, --decimals <decimals>",
-      "Decimals of the fungible token",
-      myParseInt
-    )
-    .requiredOption(
-      "-i, --initial-supply <initialSupply>",
-      "Initial supply of the fungible token",
-      myParseInt
+      '-d, --decimals <decimals>',
+      'Decimals of the fungible token',
+      myParseInt,
     )
     .requiredOption(
-      "--supply-type <supplyType>",
-      "Supply type of the token: finite or infinite"
+      '-i, --initial-supply <initialSupply>',
+      'Initial supply of the fungible token',
+      myParseInt,
     )
     .requiredOption(
-      "-a, --admin-key <adminKey>",
-      "Admin key of the fungible token"
+      '--supply-type <supplyType>',
+      'Supply type of the token: finite or infinite',
+    )
+    .requiredOption(
+      '-a, --admin-key <adminKey>',
+      'Admin key of the fungible token',
     )
     .action(async (options: CreateOptions) => {
       try {
@@ -67,7 +64,7 @@ export default (program: any) => {
           options.decimals,
           options.initialSupply,
           options.supplyType,
-          options.adminKey
+          options.adminKey,
         );
       } catch (error) {
         logger.error(error as object);
@@ -83,7 +80,7 @@ async function createFungibleToken(
   decimals: number,
   initialSupply: number,
   supplyType: string,
-  adminKey: string
+  adminKey: string,
 ) {
   const client = getHederaClient();
 
@@ -106,10 +103,10 @@ async function createFungibleToken(
     tokenId = tokenCreateRx.tokenId;
 
     if (tokenId == null) {
-      throw new Error("Token was not created");
+      throw new Error('Token was not created');
     }
 
-    console.log("Token ID:", tokenId.toString());
+    console.log('Token ID:', tokenId.toString());
   } catch (error) {
     logger.error(error as object);
     client.close();
@@ -117,7 +114,7 @@ async function createFungibleToken(
   }
 
   // Store new token in state
-  const tokens: Record<string, Token> = stateController.get("tokens");
+  const tokens: Record<string, Token> = stateController.get('tokens');
   const updatedTokens = {
     ...tokens,
     [tokenId.toString()]: {
@@ -132,7 +129,7 @@ async function createFungibleToken(
     },
   };
 
-  stateController.saveKey("tokens", updatedTokens);
+  stateController.saveKey('tokens', updatedTokens);
 
   client.close();
 }
@@ -144,6 +141,6 @@ interface CreateOptions {
   treasuryKey: string;
   decimals: number;
   initialSupply: number;
-  supplyType: "finite" | "infinite";
+  supplyType: 'finite' | 'infinite';
   adminKey: string;
 }
