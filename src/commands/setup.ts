@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 import { recordCommand } from '../state/stateService';
 import stateController from '../state/stateController';
 import config from '../state/config';
-import type { Command, State } from '../../types';
+import type { Command } from '../../types';
 
 export default (program: any) => {
   const setup = program.command('setup').description('Setup Hedera CLI');
@@ -94,31 +94,41 @@ function setupCLI(action: string): void {
   }
 
   // Only write a fresh state file if the user is running the init command
-  if (action === 'init')
-    setupState(
-      testnetOperatorId,
-      testnetOperatorKey,
-      mainnetOperatorId,
-      mainnetOperatorKey,
-    );
+  if (action === 'init') {
+    setupState();
+  }
+
+  setupOperatorAccounts(
+    testnetOperatorId,
+    testnetOperatorKey,
+    mainnetOperatorId,
+    mainnetOperatorKey,
+  );
 }
 
-function setupState(
+function setupOperatorAccounts(
   testnetOperatorId: string,
   testnetOperatorKey: string,
   mainnetOperatorId: string,
   mainnetOperatorKey: string,
 ): void {
-  // Update state.json with operator key and ID for testnet and mainnet
-  const newState = {
-    ...config,
-  };
+  const state = stateController.getAll();
+  let newState = {...state};
   newState.testnetOperatorKey = testnetOperatorKey;
   newState.testnetOperatorId = testnetOperatorId;
   newState.mainnetOperatorKey = mainnetOperatorKey;
   newState.mainnetOperatorId = mainnetOperatorId;
 
   if (testnetOperatorKey === '' && testnetOperatorId === '') newState.network = "mainnet";
+
+  stateController.saveState(newState);
+}
+
+function setupState(
+): void {
+  const newState = {
+    ...config,
+  };
 
   stateController.saveState(newState);
 }
@@ -144,4 +154,5 @@ interface ResetOptions {
   skipAccounts: boolean;
   skipTokens: boolean;
   skipScripts: boolean;
+  operator: boolean;
 }

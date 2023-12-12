@@ -125,7 +125,7 @@ Once the testnet and mainnet operator key and ID are validated, these credential
 
 **2. Reset Setup:**
 
-Depending on the flags provided, it resets the entire state or skips certain parts of the state, such as the accounts, tokens, or scripts sections in your state. This might be useful when you want to reset your state but keep your address book.
+Depending on the flags provided, it resets the entire state or skips certain parts of the state, such as the accounts, tokens, or scripts sections in your state. This might be useful when you want to reset your state but keep your address book. By default, it resets the entire state and it will **reload the operator key and ID from the `.env` file.**
 
 ```sh
 hcli setup reset [-a, --skip-accounts] [-t, --skip-tokens] [-s, --skip-scripts]
