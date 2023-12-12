@@ -395,8 +395,17 @@ backup create
 This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`.
 
 ```sh
+hcli backup create [--accounts] [--safe]
+
+// Example
+hcli backup create --accounts --safe
+hcli backup create --safe
 hcli backup create
 ```
+
+Flags:
+- **Accounts:** (optional) Creates a backup of the accounts section of the state. The backup file is named `accounts.backup.<timestamp>.json`.
+- **Safe:** (optional) Removes private information from the backup like token keys, account keys, and operator key/ID. It does not remove the private keys in scripts' commands.
 
 ## Record Commands
 
