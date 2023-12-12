@@ -117,6 +117,9 @@ function setupState(
   newState.testnetOperatorId = testnetOperatorId;
   newState.mainnetOperatorKey = mainnetOperatorKey;
   newState.mainnetOperatorId = mainnetOperatorId;
+
+  if (testnetOperatorKey === '' && testnetOperatorId === '') newState.network = "mainnet";
+
   stateController.saveState(newState);
 }
 
