@@ -56,11 +56,13 @@ Create a `.env` file to securely store your operator credentials.
 touch .env
 ```
 
-Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key:
+Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for testnet and mainnet. It's not mandatory to set both testnet and mainnet credentials. If you only want to use one network, you can leave the other credentials empty. 
 
 ```text
-OPERATOR_KEY=302e0201003005060[...]
-OPERATOR_ID=0.0.12345
+TESTNET_OPERATOR_KEY=302e0201003005060[...]
+TESTNET_OPERATOR_ID=0.0.12345
+MAINNET_OPERATOR_KEY=
+MAINNET_OPERATOR_ID=
 ```
 
 **4. Verify Installation:**
