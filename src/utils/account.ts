@@ -190,14 +190,8 @@ function importAccount(id: string, key: string, alias: string): void {
       type.toLowerCase() === 'ed25519'
         ? ''
         : privateKey.publicKey.toEvmAddress(),
-    solidityAddress:
-      type.toLowerCase() === 'ed25519'
-        ? ''
-        : privateKey.publicKey.toEvmAddress(),
-    solidityAddressFull:
-      type.toLocaleLowerCase() === 'ed25519'
-        ? ''
-        : `0x${accountId.toSolidityAddress()}`,
+    solidityAddress: `${accountId.toSolidityAddress()}`,
+    solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: key,
   };
 
@@ -221,7 +215,7 @@ function importAccountId(id: string, alias: string): void {
     type: '',
     publicKey: '',
     evmAddress: '',
-    solidityAddress: '',
+    solidityAddress: `${accountId.toSolidityAddress()}`,
     solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: '',
   };
