@@ -113,19 +113,19 @@ function setupOperatorAccounts(
   mainnetOperatorKey: string,
 ): void {
   const state = stateController.getAll();
-  let newState = {...state};
+  let newState = { ...state };
   newState.testnetOperatorKey = testnetOperatorKey;
   newState.testnetOperatorId = testnetOperatorId;
   newState.mainnetOperatorKey = mainnetOperatorKey;
   newState.mainnetOperatorId = mainnetOperatorId;
 
-  if (testnetOperatorKey === '' && testnetOperatorId === '') newState.network = "mainnet";
+  if (testnetOperatorKey === '' && testnetOperatorId === '')
+    newState.network = 'mainnet';
 
   stateController.saveState(newState);
 }
 
-function setupState(
-): void {
+function setupState(): void {
   const newState = {
     ...config,
   };
