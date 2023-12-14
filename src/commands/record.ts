@@ -33,6 +33,7 @@ function startRecording(scriptName: string) {
     name: scriptName,
     creation: Date.now(),
     commands: [],
+    args: {},
   };
   stateController.saveState(state);
 }

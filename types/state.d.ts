@@ -17,6 +17,7 @@ type Script = {
   name: string;
   creation: number;
   commands: string[];
+  args: Record<string, string>;
 }
 
 export type Token = {
@@ -54,6 +55,8 @@ export interface State {
   mirrorNodeMainnet: string;
   recording: number;
   recordingScriptName: string;
+  scriptExecution: number;
+  scriptExecutionName: string;
   accounts: Record<string, Account>;
   scripts: Record<string, Script>;
   tokens: Record<string, Token>;

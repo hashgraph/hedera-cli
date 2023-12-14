@@ -4,6 +4,8 @@ export default {
   mirrorNodeMainnet: 'https://mainnet.mirrornode.hedera.com/api/v1',
   recording: 0,
   recordingScriptName: '',
+  scriptExecution: 1,
+  scriptExecutionName: 'test',
   accounts: {},
   tokens: {},
   scripts: {},

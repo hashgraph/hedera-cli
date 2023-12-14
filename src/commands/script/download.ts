@@ -49,6 +49,7 @@ async function downloadScript(url: string) {
       name: script.name,
       creation: Date.now(),
       commands: script.commands,
+      args: {},
     };
     stateController.saveKey('scripts', scripts);
     console.log(`Script "${script.name}" added successfully`);
