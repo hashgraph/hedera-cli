@@ -1,4 +1,4 @@
-import { Account, Token } from '../../types';
+import { Account } from '../../types';
 import stateController from '../state/stateController';
 
 /**

@@ -24,13 +24,22 @@ export default (program: any) => {
 };
 
 function loadScript(name: string) {
-  const scripts: Record<string, Script> = stateController.get('scripts');
+  const state = stateController.getAll();
+
+  state.scriptExecutionName = name;
+  state.scriptExecution = 1;
+  stateController.saveState(state);
+
+  const scripts: Record<string, Script> = state.scripts;
   const scriptName = `script-${name}`;
   const script = scripts[scriptName];
 
   if (!script) {
     console.error(`No script found with name: ${scriptName}`);
-    return;
+    state.scriptExecutionName = '';
+    state.scriptExecution = 0;
+    stateController.saveState(state);
+    process.exit(1);
   }
 
   console.log(`Executing script: ${script.name}\n`);
@@ -43,7 +52,10 @@ function loadScript(name: string) {
     } catch (error: any) {
       console.error(`Error executing command: ${command}`);
       console.error(error.message);
-      return;
+      /*state.scriptExecutionName = '';
+      state.scriptExecution = 0;
+      stateController.saveState(state);*/
+      process.exit(1);
     }
   });
 

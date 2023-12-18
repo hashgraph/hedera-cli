@@ -59,6 +59,7 @@ export default (program: any) => {
     )
     .action(async (options: CreateOptions) => {
       try {
+        options = dynamicVariablesUtils.replaceOptions(options);
         const tokenId = await createFungibleToken(
           options.name,
           options.symbol,
@@ -101,7 +102,7 @@ async function createFungibleToken(
 
   let tokenId;
   try {
-    const tokenCreateTx = await new TokenCreateTransaction()
+    let tokenCreateTx = await new TokenCreateTransaction()
       .setTokenName(name)
       .setTokenSymbol(symbol)
       .setDecimals(decimals)
@@ -111,9 +112,10 @@ async function createFungibleToken(
       .setTreasuryAccountId(treasuryId)
       .setAdminKey(PrivateKey.fromString(adminKey).publicKey)
       .freezeWith(client)
-      .sign(PrivateKey.fromString(treasuryKey));
+      .sign(PrivateKey.fromString(treasuryKey))
 
-    let tokenCreateSubmit = await tokenCreateTx.execute(client);
+    let tokenCreateTxSigned = await tokenCreateTx.sign(PrivateKey.fromString(adminKey));
+    let tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
     tokenId = tokenCreateRx.tokenId;
 
