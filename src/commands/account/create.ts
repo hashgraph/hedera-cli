@@ -42,32 +42,19 @@ export default (program: any) => {
       [],
     )
     .action(async (options: CreateAccountOptions) => {
+      options = replaceOptionsWithArgs(options);
       try {
-        options = replaceOptionsWithArgs(options);
-        console.log(options);
-        /*let accountDetails = await accountUtils.createAccount(
+        let accountDetails = await accountUtils.createAccount(
           options.balance,
           options.type,
           options.alias,
-        );*/
-        /*const accountDetails = {
-          alias: 'alice',
-          accountId: '0.0.6025067',
-          type: 'ED25519',
-          publicKey:
-            '302a300506032b6570032100052ff6e06c1610e33c1c631fa44c259ab62c7becb7a97932b3d60094d0a2f8ba',
-          evmAddress: '',
-          solidityAddress: '00000000000000000000000000000000005bef6b',
-          solidityAddressFull: '0x00000000000000000000000000000000005bef6b',
-          privateKey:
-            '302e020100300506032b657004220420ece0b15b20e555f66d5f4cd83187567af9613276629d7e15161b0c929ea07697',
-        };
+        );
 
         storeArgs(
           options.args,
           commandActions.account.create.action,
           accountDetails,
-        );*/
+        );
       } catch (error) {
         logger.error(error as object);
       }
@@ -87,6 +74,10 @@ function replaceOptionsWithArgs<T extends Record<string, any>>(options: T): T {
     if (match === null) return;
 
     const argument = match[1];
+    if (!state.scripts[`script-${state.scriptExecutionName}`].args[argument]) {
+      console.error(`Unable to find argument value for: ${argument} for script: ${state.scriptExecutionName}`)
+      process.exit(1);
+    }
     const argumentValue = state.scripts[`script-${state.scriptExecutionName}`].args[argument];
     (options as Record<string, any>)[option] = argumentValue;
   })
