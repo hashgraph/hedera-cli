@@ -1,11 +1,11 @@
 import { recordCommand } from '../../state/stateService';
 import { Logger } from '../../utils/logger';
 import { myParseInt } from '../../utils/verification';
-import stateController from '../../state/stateController';
 
 import accountUtils from '../../utils/account';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
-import type { Command, Account, Token } from '../../../types';
+import type { Command } from '../../../types';
 
 const logger = Logger.getInstance();
 
@@ -42,7 +42,7 @@ export default (program: any) => {
       [],
     )
     .action(async (options: CreateAccountOptions) => {
-      options = replaceOptionsWithArgs(options);
+      options = dynamicVariablesUtils.replaceOptions(options);
       try {
         let accountDetails = await accountUtils.createAccount(
           options.balance,
@@ -50,9 +50,9 @@ export default (program: any) => {
           options.alias,
         );
 
-        storeArgs(
+        dynamicVariablesUtils.storeArgs(
           options.args,
-          commandActions.account.create.action,
+          dynamicVariablesUtils.commandActions.account.create.action,
           accountDetails,
         );
       } catch (error) {
@@ -60,97 +60,6 @@ export default (program: any) => {
       }
     });
 };
-
-function replaceOptionsWithArgs<T extends Record<string, any>>(options: T): T {
-  const state = stateController.getAll();
-  if (state.scriptExecution === 0) return options;
-
-  Object.keys(options).forEach(option => {
-    if (option === "args") return;
-    if (typeof options[option] !== "string") return;
-
-    const regex = /\{\{(.+?)\}\}/g;
-    const match = regex.exec(options[option]);
-    if (match === null) return;
-
-    const argument = match[1];
-    if (!state.scripts[`script-${state.scriptExecutionName}`].args[argument]) {
-      console.error(`Unable to find argument value for: ${argument} for script: ${state.scriptExecutionName}`)
-      process.exit(1);
-    }
-    const argumentValue = state.scripts[`script-${state.scriptExecutionName}`].args[argument];
-    (options as Record<string, any>)[option] = argumentValue;
-  })
-
-  return options;
-}
-
-interface CommandAction {
-  action: string;
-}
-
-interface CommandActions {
-  [key: string]: {
-    [key: string]: CommandAction;
-  };
-}
-
-const commandActions: CommandActions = {
-  account: {
-    create: {
-      action: 'accountCreate',
-    },
-  },
-  token: {
-    associate: {
-      action: 'tokenAssociate',
-    },
-  },
-};
-
-interface CommandOutputs {
-  [key: string]: CommandOutput;
-}
-
-interface CommandOutput {
-  [key: number]: string;
-}
-
-const commandOutputs: CommandOutputs = {
-  accountCreate: {
-    1: 'alias',
-    2: 'accountId',
-    3: 'type',
-    4: 'publicKey',
-    5: 'evmAddress',
-    6: 'solidityAddress',
-    7: 'solidityAddressFull',
-    8: 'privateKey',
-  },
-};
-
-function storeArgs(
-  args: string[],
-  action: string,
-  output: Record<string, any>,
-) {
-  const state = stateController.getAll();
-  if (state.scriptExecution === 0) return;
-
-  let stateArgs: Record<string, string> = {};
-
-  args.forEach((arg) => {
-    const splittedArg = arg.split(',');
-    const position = Number(splittedArg[0]);
-    const variableName = splittedArg[1];
-    const outputVar = commandOutputs[action][position];
-    stateArgs[variableName] = output[outputVar];
-  });
-
-  const newScripts = {...state.scripts}
-  newScripts[`script-${state.scriptExecutionName}`].args = stateArgs;
-  stateController.saveKey('scripts', newScripts);
-}
 
 interface CreateAccountOptions {
   alias: string;

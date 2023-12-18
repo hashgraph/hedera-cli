@@ -2,6 +2,7 @@ import { recordCommand } from '../../state/stateService';
 import { Logger } from '../../utils/logger';
 
 import accountUtils from '../../utils/account';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 import type { Command } from '../../../types';
 
@@ -21,6 +22,7 @@ export default (program: any) => {
     .option('-a, --alias <alias>', 'account must have an alias')
     .option('-i, --id <id>', 'Account ID')
     .action((options: AccountDeleteOptions) => {
+      options = dynamicVariablesUtils.replaceOptions(options);
       const accountIdOrAlias = options.id || options.alias;
       if (!accountIdOrAlias) {
         logger.error(

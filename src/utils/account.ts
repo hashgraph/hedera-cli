@@ -153,13 +153,13 @@ function listAccounts(showPrivateKeys: boolean = false): void {
   }
 }
 
-function importAccount(id: string, key: string, alias: string): void {
+function importAccount(id: string, key: string, alias: string): Account {
   const accounts = stateController.get('accounts');
 
   // Check if name is unique
   if (accounts && accounts[alias]) {
     logger.error('An account with this alias already exists.');
-    return;
+    process.exit(1);
   }
 
   let privateKey, type;
@@ -177,7 +177,7 @@ function importAccount(id: string, key: string, alias: string): void {
       logger.error(
         'Invalid key type. Only ECDSA and ED25519 keys are supported.',
       );
-      return;
+      process.exit(1);
   }
 
   // No Solidity and EVM address for ED25519 keys
@@ -197,15 +197,16 @@ function importAccount(id: string, key: string, alias: string): void {
   };
 
   stateController.saveKey('accounts', updatedAccounts);
+  return updatedAccounts[alias];
 }
 
-function importAccountId(id: string, alias: string): void {
+function importAccountId(id: string, alias: string): Account {
   const accounts = stateController.get('accounts');
 
   // Check if name is unique
   if (accounts && accounts[alias]) {
     logger.error('An account with this alias already exists.');
-    return;
+    process.exit(1);
   }
 
   const accountId = AccountId.fromString(id);
@@ -222,6 +223,7 @@ function importAccountId(id: string, alias: string): void {
   };
 
   stateController.saveKey('accounts', updatedAccounts);
+  return updatedAccounts[alias];
 }
 
 async function getAccountBalance(

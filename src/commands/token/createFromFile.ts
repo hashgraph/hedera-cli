@@ -1,16 +1,12 @@
 import * as path from 'path';
-import {
-  TokenCreateTransaction,
-  TokenType,
-  PrivateKey,
-  TokenSupplyType,
-} from '@hashgraph/sdk';
+import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
 
 import accountUtils from '../../utils/account';
 import { getSupplyType } from '../../utils/token';
 import { recordCommand, getHederaClient } from '../../state/stateService';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 import type { Account, Command, Token, Keys } from '../../../types';
 
@@ -31,14 +27,40 @@ export default (program: any) => {
       '-f, --file <filename>',
       'Filename containing the token information',
     )
+    .option(
+      '--args <args>',
+      'Store arguments for scripts',
+      (value: string, previous: string) =>
+        previous ? previous.concat(value) : [value],
+      [],
+    )
     .action(createTokenFromCLI);
 };
 
 async function createTokenFromCLI(options: CreateTokenFromFileOptions) {
+  options = dynamicVariablesUtils.replaceOptions(options);
   try {
     const filepath = resolveTokenFilePath(options.file);
     const tokenDefinition = require(filepath);
-    await createTokenFromFile(tokenDefinition);
+    const token = await createTokenFromFile(tokenDefinition);
+    dynamicVariablesUtils.storeArgs(
+      options.args,
+      dynamicVariablesUtils.commandActions.token.createFromFile.action,
+      {
+        tokenId: token.tokenId,
+        name: token.name,
+        symbol: token.symbol,
+        treasuryId: token.treasuryId,
+        adminKey: token.keys.adminKey,
+        pauseKey: token.keys.pauseKey,
+        kycKey: token.keys.kycKey,
+        wipeKey: token.keys.wipeKey,
+        freezeKey: token.keys.freezeKey,
+        supplyKey: token.keys.supplyKey,
+        feeScheduleKey: token.keys.feeScheduleKey,
+        treasuryKey: token.keys.treasuryKey,
+      },
+    );
   } catch (error) {
     logger.error(error as object);
   }
@@ -156,15 +178,17 @@ function addKeysToTokenCreateTx(
   });
 }
 
-async function createTokenFromFile(tokenInput: TokenInput) {
+async function createTokenFromFile(tokenInput: TokenInput): Promise<Token> {
   try {
     let token = initializeToken(tokenInput);
     token = await prepareTokenCreation(token, tokenInput);
     await createTokenOnNetwork(token);
     updateTokenState(token);
+    return token;
   } catch (error) {
     logger.error(error as object);
     getHederaClient().close();
+    process.exit(1);
   }
 }
 
@@ -290,6 +314,7 @@ async function createAccountForToken(
 
 interface CreateTokenFromFileOptions {
   file: string;
+  args: string[];
 }
 
 interface TokenInput {

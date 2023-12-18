@@ -6,6 +6,7 @@ import {
   getHederaClient,
   getAccountByIdOrAlias,
 } from '../../state/stateService';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 import type { Command } from '../../../types';
 
@@ -29,6 +30,8 @@ export default (program: any) => {
       myParseInt,
     )
     .action(async (options: TransferTokenOptions) => {
+      options = dynamicVariablesUtils.replaceOptions(options);
+
       const tokenId = options.tokenId;
       const toIdOrAlias = options.to;
       const fromIdOrAlias = options.from;

@@ -1,11 +1,7 @@
 import { recordCommand } from '../../state/stateService';
-import { Logger } from '../../utils/logger';
-
 import accountUtils from '../../utils/account';
 
 import type { Command } from '../../../types';
-
-const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
