@@ -12,7 +12,7 @@ Before proceeding with the installation and setup of the Hedera CLI Tool, ensure
 
 **1. Node.js Installation:**
 
-The Hedera CLI Tool requires Node.js (version LTS 16.20.2 or higher). You can check your current version by running `node -v`` in your terminal. If you do not have Node.js installed, you can download it from [Node.js official website](https://nodejs.org/en).
+The Hedera CLI Tool requires Node.js (version LTS 16.20.2 or higher). You can check your current version by running `node -v` in your terminal. If you do not have Node.js installed, you can download it from [Node.js official website](https://nodejs.org/en).
 
 **2. Hedera Account Setup:**
 
@@ -91,7 +91,7 @@ Let's explore the different commands, their options, and outputs.
 - [Backup Commands](#backup-commands): Create a backup of your state
 - [Record Commands](#record-commands): Record CLI interactions and store it in scripts
 - [Script Commands](#script-commands): Replay and manage scripts containing recorded CLI interactions
-
+  * [Dynamic Variables in Scripts](#dynamic-variables-in-scripts): Use dynamic variables in scripts
 
 ## Setup Commands
 
@@ -463,8 +463,7 @@ Loads a script by name from state and sequentially executes each command in the 
 hcli script load -n,--name <name>
 ```
 
-> **Note:** Commands are executed in the order they were recorded.
-Each command is executed via execSync, which runs the command in a synchronous child process.
+Each command is executed via [`execSync`](https://nodejs.org/api/child_process.html), which runs the command in a synchronous child process.
 
 **2. List All Scripts:**
 
@@ -513,6 +512,41 @@ Format for remote script files:
 ```
 
 _You can access an example [here](https://gist.githubusercontent.com/michielmulders/ed7a639bb3a5629380cdd57290d24b91/raw/fc072bf5682467113faaae19ce65f0ef92b6a4cd/createAccAndFT.json)._
+
+### Dynamic Variables in Scripts
+
+The dynamic variables feature in our script execution command (`script load`) allows you to store variables during script execution and reference them in other commands within the script. This feature enhances script flexibility and reusability by enabling you to replace options with arguments or state variables, and store and retrieve variables as needed.
+
+#### Example
+
+Let's look at an example of how dynamic variables work. In this example, we'll create a script that creates a random account and stores the privateKey in a variable called `tokenMichielAdminKey` and the account alias in a variable called `accountAlias`. We'll then use these variables to create a new token. Funnily, we are using the `accountAlias` variable to set the token name.
+
+```json
+{
+  "name": "test",
+  "commands": [
+    "network use testnet",
+    "account create -a random --args privateKey,tokenMichielAdminKey --args alias,accountAlias",
+    "token create -n {{accountAlias}} --symbol rand --decimals 2 --initial-supply 1000 --supply-type infinite --admin-key {{tokenMichielAdminKey}} --treasury-id 0.0.4536940 --treasury-key 302302[...]"
+  ],
+  "args": {}
+}
+```
+
+> Make sure to not use a space between the variable name and the comma. Otherwise, the CLI tool will not recognize the variable. `--args privateKey,tokenMichielAdminKey` is correct, `--args privateKey, tokenMichielAdminKey` is not.
+
+When a command fails, the script execution stops and the error is displayed.
+
+#### Mapping Dynamic Variables to Commands
+
+Not each command exposes the same variables. Here's a list of commands and the variables they expose, which you can use in your scripts.
+
+| Command | Variables |
+| --- | --- |
+| `account create` | `alias`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
+| `account import` | `alias`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
+| `token create` | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey` |
+| `token create-from-file` | `tokenId`, `name`, `symbol`, `treasuryId`, `treasuryKey`, `adminKey`, `pauseKey`, `kycKey`, `wipeKey`, `freezeKey`, `supplyKey`, `feeScheduleKey` |
 
 # Contributing Tips
 
@@ -582,10 +616,115 @@ describe("network commands", () => {
   });
 
   describe("network switch ls", () => {
-    // TODO
+    // [...]
   });
 });
 ```
+
+## Dynamic Variables
+
+[Dynamic variables](#dynamic-variables-in-scripts) are variables that are stored in the state and can be used in scripts. They are useful for storing information that is generated during script execution and can be used in other commands within the script. 
+
+### How to allow processing of dynamic variables in a command?
+
+To allow processing of dynamic variables in a command, you need to add a single line of code converting the dynamic variables in your `options` to their actual values. Don't forget to import the `dynamicVariablesUtils` which holds the `replaceOptions` function.
+
+```js
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
+
+program
+    .command('create')
+    .action(async (options: CreateAccountOptions) => {
+      options = dynamicVariablesUtils.replaceOptions(options);
+      // [...]
+    })
+```
+
+### How to allow storing variables in the state?
+
+To allow dynamic variables in a command, you need to add the `--args` flag to the command. The `--args` flag takes a list of arguments that are allowed to be dynamic variables. 
+
+```js
+program
+    .command('create')
+    // ...
+    .option(
+      '--args <args>',
+      'Store arguments for scripts',
+      (value: string, previous: string) =>
+        previous ? previous.concat(value) : [value],
+      [],
+    )
+```
+
+Further, for each command you want to allow the user to store variables, you need to define a command action. Command actions define the mapping between script commands and the corresponding actions. You can specify actions for different commands and use them when storing variables. 
+
+```js
+const commandActions: CommandActions = {
+  account: {
+    create: {
+      action: 'accountCreate',
+    },
+    import: {
+      action: 'accountImport',
+    },
+  },
+  token: {
+    create: {
+      action: 'tokenCreate',
+    },
+    createFromFile: {
+      action: 'tokenCreateFromFile',
+    }
+  },
+};
+```
+
+Next, you can define command outputs for your action. Command outputs define the output variables that can be captured and stored for specific actions. You can specify the output variables for each action to use them later in the script.
+
+```js
+const commandOutputs: CommandOutputs = {
+  accountCreate: {
+    alias: 'alias',
+    accountId: 'accountId',
+    type: 'type',
+    publicKey: 'publicKey',
+    evmAddress: 'evmAddress',
+    solidityAddress: 'solidityAddress',
+    solidityAddressFull: 'solidityAddressFull',
+    privateKey: 'privateKey',
+  },
+  // Define outputs for other actions here
+};
+```
+
+Make sure that each property you define exists in the output for the command. Here's the code for the `accountCreate` command. The `accountDetails` output contains all the properties defined in the `commandOutputs` object. If you define a property in the `commandOutputs` object that doesn't exist in the `accountDetails` output, the script execution will fail.
+
+```js
+.action(async (options: CreateAccountOptions) => {
+  options = dynamicVariablesUtils.replaceOptions(options);
+  try {
+    let accountDetails = await accountUtils.createAccount(
+      options.balance,
+      options.type,
+      options.alias,
+    );
+
+    // Store dynamic variables
+    dynamicVariablesUtils.storeArgs(
+      options.args,
+      dynamicVariablesUtils.commandActions.account.create.action,
+      accountDetails,
+    );
+  } catch (error) {
+    logger.error(error as object);
+  }
+});
+```
+
+The `storeArgs` function takes the `options.args` and the `commandAction` as arguments. It then stores the output variables in the state according to the user's instructions. 
+
+Whenever changing the `commandActions` or `commandOutputs` objects, make sure to update the documentation as well.
 
 ## Support
 

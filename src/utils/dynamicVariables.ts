@@ -137,7 +137,7 @@ const commandOutputs: CommandOutputs = {
     adminKey: 'adminKey',
     pauseKey: 'pauseKey',
     kycKey: 'kycKey',
-    wipeKey: 'keys.wipeKey',
+    wipeKey: 'wipeKey',
     freezeKey: 'freezeKey',
     supplyKey: 'supplyKey',
     feeScheduleKey: 'feeScheduleKey',
