@@ -30,8 +30,8 @@ function deleteScript(name: string) {
   const script = scripts[scriptName];
 
   if (!script) {
-    console.error(`No script found with name: ${scriptName}`);
-    process.exit(0);
+    logger.error(`No script found with name: ${scriptName}`);
+    process.exit(1);
   }
 
   delete scripts[scriptName];

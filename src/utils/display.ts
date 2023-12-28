@@ -4,7 +4,6 @@ import type {
   AccountResponse,
   TokenBalance,
   DisplayBalanceOptions,
-  DisplayTokenOptions,
   DisplayOptions,
 } from '../../types';
 import { Logger } from './logger';
@@ -15,7 +14,6 @@ type DisplayFunction = (response: APIResponse, options?: any) => void;
 
 const displayFunctions: Record<string, DisplayFunction> = {
   displayBalance: displayBalance,
-  displayTokenKeys: displayTokenKeys,
 };
 
 // -- main display function -- //
@@ -25,23 +23,6 @@ function display(
   options: DisplayOptions,
 ): void {
   displayFunctions[displayFunctionName](response, options);
-}
-
-// -- display token functions -- //
-function displayTokenKeys(
-  response: APIResponse,
-  options: DisplayTokenOptions,
-): void {
-  // TODO: Handle options!
-
-  const tokenResponse = response.data as TokenResponse;
-  logger.log(`Admin key: ${tokenResponse.admin_key}`);
-  logger.log(`Kyc key: ${tokenResponse.kyc_key}`);
-  logger.log(`Freeze key: ${tokenResponse.freeze_key}`);
-  logger.log(`Wipe key: ${tokenResponse.wipe_key}`);
-  logger.log(`Supply key: ${tokenResponse.supply_key}`);
-  logger.log(`Treasury: ${tokenResponse.treasury_account_id}`);
-  logger.log(`Pause key: ${tokenResponse.pause_key}`);
 }
 
 // -- display balance functions -- //

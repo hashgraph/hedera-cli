@@ -248,7 +248,6 @@ async function getAccountBalance(
     process.exit(1);
   }
 
-  logger.log(`Getting API balance for ${accountId}`);
   const response = await api.account.getAccountBalance(accountId);
   display('displayBalance', response, { onlyHbar, tokenId });
 
