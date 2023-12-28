@@ -2,6 +2,7 @@ const axios = require('axios');
 
 import { recordCommand } from '../../state/stateService';
 import stateController from '../../state/stateController';
+import { startScriptExecution, stopScriptExecution } from '../../state/stateService';
 import { execSync } from 'child_process';
 
 import type { Command, Script } from '../../../types';
@@ -24,21 +25,16 @@ export default (program: any) => {
 };
 
 function loadScript(name: string) {
+  startScriptExecution(name);
+
   const state = stateController.getAll();
-
-  state.scriptExecutionName = name;
-  state.scriptExecution = 1;
-  stateController.saveState(state);
-
   const scripts: Record<string, Script> = state.scripts;
   const scriptName = `script-${name}`;
   const script = scripts[scriptName];
 
   if (!script) {
     console.error(`No script found with name: ${scriptName}`);
-    state.scriptExecutionName = '';
-    state.scriptExecution = 0;
-    stateController.saveState(state);
+    stopScriptExecution();
     process.exit(1);
   }
 
@@ -52,9 +48,7 @@ function loadScript(name: string) {
     } catch (error: any) {
       console.error(`Error executing command: ${command}`);
       console.error(error.message);
-      /*state.scriptExecutionName = '';
-      state.scriptExecution = 0;
-      stateController.saveState(state);*/
+      stopScriptExecution();
       process.exit(1);
     }
   });

@@ -124,6 +124,20 @@ function getAccountByIdOrAlias(accountIdOrAlias: string): Account {
   return account;
 }
 
+function startScriptExecution(name: string) {
+  const state = stateController.getAll();
+  state.scriptExecutionName = name;
+  state.scriptExecution = 1;
+  stateController.saveState(state);
+}
+
+function stopScriptExecution() {
+  const state = stateController.getAll();
+  state.scriptExecutionName = '';
+  state.scriptExecution = 0;
+  stateController.saveState(state);
+}
+
 export {
   getMirrorNodeURL,
   getHederaClient,
@@ -133,4 +147,6 @@ export {
   getAccountById,
   getAccountByAlias,
   getAccountByIdOrAlias,
+  startScriptExecution,
+  stopScriptExecution,
 };
