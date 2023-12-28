@@ -1,8 +1,11 @@
 import { Client, AccountId, PrivateKey } from '@hashgraph/sdk';
 
 import stateController from './stateController';
+import { Logger } from '../utils/logger';
 
 import type { Account, Token } from '../../types';
+
+const logger = Logger.getInstance();
 
 /** hook (middleware)
  * @example command ['account', 'create', '-b', '1000', '-t', 'ed25519']
@@ -42,11 +45,13 @@ function getHederaClient(): Client {
       operatorKey = state.testnetOperatorKey;
       break;
     default:
-      throw new Error(`Unsupported network: ${state.network}`);
+      logger.error('Invalid network name');
+      process.exit(1);
   }
 
   if (operatorId === '' || operatorKey === '') {
-    throw new Error(`operator key and ID not set for ${state.network}`);
+    logger.error(`operator key and ID not set for ${state.network}`);
+    process.exit(1);
   }
 
   return client.setOperator(
@@ -57,8 +62,8 @@ function getHederaClient(): Client {
 
 function switchNetwork(name: string) {
   if (!['mainnet', 'testnet'].includes(name)) {
-    console.error('Invalid network name. Available networks: mainnet, testnet');
-    return;
+    logger.error('Invalid network name. Available networks: mainnet, testnet');
+    process.exit(1);
   }
 
   const state = stateController.getAll();
@@ -75,7 +80,8 @@ function switchNetwork(name: string) {
   }
 
   if (operatorId === '' || operatorKey === '') {
-    throw new Error(`operator key and ID not set for ${state.network}`);
+    logger.error(`operator key and ID not set for ${state.network}`);
+    process.exit(1);
   }
 
   stateController.saveKey('network', name);
@@ -118,7 +124,8 @@ function getAccountByIdOrAlias(accountIdOrAlias: string): Account {
   }
 
   if (!account) {
-    throw new Error(`Account not found: ${accountIdOrAlias}`);
+    logger.error(`Account not found: ${accountIdOrAlias}`);
+    process.exit(1);
   }
 
   return account;
