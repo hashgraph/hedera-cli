@@ -7,8 +7,11 @@ import {
   getAccountByIdOrAlias,
 } from '../../state/stateService';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -31,6 +34,7 @@ export default (program: any) => {
     )
     .action(async (options: TransferTokenOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options);
+      logger.verbose(`Transfering tokens from ${options.from} to ${options.to}`);
 
       const tokenId = options.tokenId;
       const toIdOrAlias = options.to;
@@ -57,12 +61,11 @@ export default (program: any) => {
         );
 
         const receipt = await transferTxSign.execute(client);
-        console.log(
-          'Transfer successful, tx ID',
-          receipt.transactionId.toString(),
+        logger.log(
+          `Transfer successful with tx ID: ${receipt.transactionId.toString()}`
         );
       } catch (error) {
-        console.log(error);
+        logger.error('Unable to transfer token', error as object);
       }
 
       client.close();

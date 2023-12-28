@@ -38,32 +38,32 @@ export default (program: any) => {
 };
 
 async function createTokenFromCLI(options: CreateTokenFromFileOptions) {
+  logger.verbose(`Creating token from template with name: ${options.file}`);
   options = dynamicVariablesUtils.replaceOptions(options);
-  try {
-    const filepath = resolveTokenFilePath(options.file);
-    const tokenDefinition = require(filepath);
-    const token = await createTokenFromFile(tokenDefinition);
-    dynamicVariablesUtils.storeArgs(
-      options.args,
-      dynamicVariablesUtils.commandActions.token.createFromFile.action,
-      {
-        tokenId: token.tokenId,
-        name: token.name,
-        symbol: token.symbol,
-        treasuryId: token.treasuryId,
-        adminKey: token.keys.adminKey,
-        pauseKey: token.keys.pauseKey,
-        kycKey: token.keys.kycKey,
-        wipeKey: token.keys.wipeKey,
-        freezeKey: token.keys.freezeKey,
-        supplyKey: token.keys.supplyKey,
-        feeScheduleKey: token.keys.feeScheduleKey,
-        treasuryKey: token.keys.treasuryKey,
-      },
-    );
-  } catch (error) {
-    logger.error(error as object);
-  }
+
+  const filepath = resolveTokenFilePath(options.file);
+  const tokenDefinition = require(filepath);
+  const token = await createTokenFromFile(tokenDefinition);
+
+  // Store dynamic script variables
+  dynamicVariablesUtils.storeArgs(
+    options.args,
+    dynamicVariablesUtils.commandActions.token.createFromFile.action,
+    {
+      tokenId: token.tokenId,
+      name: token.name,
+      symbol: token.symbol,
+      treasuryId: token.treasuryId,
+      adminKey: token.keys.adminKey,
+      pauseKey: token.keys.pauseKey,
+      kycKey: token.keys.kycKey,
+      wipeKey: token.keys.wipeKey,
+      freezeKey: token.keys.freezeKey,
+      supplyKey: token.keys.supplyKey,
+      feeScheduleKey: token.keys.feeScheduleKey,
+      treasuryKey: token.keys.treasuryKey,
+    },
+  );
 }
 
 function resolveTokenFilePath(filename: string): string {
@@ -143,15 +143,19 @@ async function createTokenOnNetwork(token: Token) {
     let tokenCreateSubmit = await tokenCreateTx.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
 
-    if (tokenCreateRx.tokenId == null) throw new Error('Token was not created');
+    if (tokenCreateRx.tokenId == null) {
+      logger.error('Token was not created');
+      client.close();
+      process.exit(1);
+    }
 
     token.tokenId = tokenCreateRx.tokenId.toString();
-    console.log('Token ID:', token.tokenId);
+    logger.log(`Token ID: ${token.tokenId}`);
     client.close();
   } catch (error) {
     logger.error(error as object);
     client.close();
-    return;
+    process.exit(1);
   }
 }
 
@@ -286,8 +290,11 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
           newAccount.account.privateKey;
       });
     } catch (error) {
-      logger.error(error as object);
-      throw new Error(`Failed to create new accounts for token`);
+      logger.error(
+        'Failed to create new account(s) for token',
+        error as object,
+      );
+      process.exit(1);
     }
   }
 
@@ -297,7 +304,8 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
 function getTreasuryIdByTreasuryKey(treasuryKey: string): string {
   const account = accountUtils.findAccountByPrivateKey(treasuryKey);
   if (!account) {
-    throw new Error('Treasury account not found');
+    logger.error('Treasury account not found');
+    process.exit(1);
   }
   return account.accountId;
 }

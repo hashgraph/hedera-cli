@@ -23,13 +23,16 @@ export default (program: any) => {
     .option('-i, --id <id>', 'Account ID')
     .action((options: AccountDeleteOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options);
+
       const accountIdOrAlias = options.id || options.alias;
+      logger.verbose(`Deleting account with alias or ID: ${accountIdOrAlias}`);
       if (!accountIdOrAlias) {
         logger.error(
-          'Error: You must provide either an account ID or an alias.',
+          'You must provide either an account ID or an alias.',
         );
-        return;
+        process.exit(1);
       }
+
       accountUtils.deleteAccount(accountIdOrAlias);
     });
 };

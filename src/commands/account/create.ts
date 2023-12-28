@@ -42,22 +42,21 @@ export default (program: any) => {
       [],
     )
     .action(async (options: CreateAccountOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options);
-      try {
-        let accountDetails = await accountUtils.createAccount(
-          options.balance,
-          options.type,
-          options.alias,
-        );
+      logger.verbose(`Creating account with alias: ${options.alias}`);
 
-        dynamicVariablesUtils.storeArgs(
-          options.args,
-          dynamicVariablesUtils.commandActions.account.create.action,
-          accountDetails,
-        );
-      } catch (error) {
-        logger.error(error as object);
-      }
+      options = dynamicVariablesUtils.replaceOptions(options);
+      
+      let accountDetails = await accountUtils.createAccount(
+        options.balance,
+        options.type,
+        options.alias,
+      );
+
+      dynamicVariablesUtils.storeArgs(
+        options.args,
+        dynamicVariablesUtils.commandActions.account.create.action,
+        accountDetails,
+      );
     });
 };
 

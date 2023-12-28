@@ -1,8 +1,11 @@
 import { recordCommand } from '../../state/stateService';
-
 import scriptUtils from '../../utils/script';
+import { Logger } from '../../utils/logger';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
-import type { Command, Script } from '../../../types';
+import type { Command } from '../../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -17,6 +20,9 @@ export default (program: any) => {
     .description('Delete a script')
     .requiredOption('-n, --name <name>', 'Name of script to delete')
     .action((options: ScriptDeleteOptions) => {
+      options = dynamicVariablesUtils.replaceOptions(options);
+      logger.verbose(`Deleting script: ${options.name}`);
+
       scriptUtils.deleteScript(options.name);
     });
 };

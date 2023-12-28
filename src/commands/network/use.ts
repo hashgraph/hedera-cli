@@ -1,6 +1,9 @@
 import { recordCommand, switchNetwork } from '../../state/stateService';
+import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -14,6 +17,7 @@ export default (program: any) => {
     })
     .description('Switch to a specific network')
     .action((name: string) => {
+      logger.verbose(`Switching to network: ${name}`);
       switchNetwork(name);
     });
 };

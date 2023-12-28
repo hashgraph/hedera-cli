@@ -2,8 +2,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { recordCommand } from '../state/stateService';
+import { Logger } from '../utils/logger';
 
 import type { Command, State } from '../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   const network = program.command('backup');
@@ -17,6 +20,7 @@ export default (program: any) => {
     .option('--accounts', 'Backup the accounts')
     .option('--safe', 'Remove the private keys from the backup')
     .action((options: BackupOptions) => {
+      logger.verbose('Creating backup of state');
       backupState(options.accounts, options.safe);
     });
 };
@@ -35,8 +39,8 @@ function backupState(backupAccounts: boolean, safe: boolean) {
     const statePath = path.join(__dirname, '..', 'state', 'state.json');
     data = JSON.parse(fs.readFileSync(statePath, 'utf8')) as State;
   } catch (error) {
-    console.error('Error reading the state file:', error);
-    return;
+    logger.error('Unable to read state file:', error as object);
+    process.exit(1);
   }
 
   // Create backup filename
@@ -55,12 +59,11 @@ function backupState(backupAccounts: boolean, safe: boolean) {
 
   try {
     fs.writeFileSync(backupPath, JSON.stringify(data, null, 2), 'utf8');
+    logger.log(`Backup created with filename: ${backupFilename}`);
   } catch (error) {
-    console.error('Error creating the backup file:', error);
-    return;
+    logger.error('Unable to create backup file:', error as object);
+    process.exit(1);
   }
-
-  console.log(`Backup created successfully: ${backupFilename}`);
 }
 
 /**
@@ -96,7 +99,7 @@ function filterState(data: State) {
     filteredState.accounts[alias].privateKey = '';
   });
 
-  console.log('Warning: The private keys were not removed from scripts');
+  logger.log('Warning: The private keys were not removed from scripts');
 
   return filteredState;
 }

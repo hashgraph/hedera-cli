@@ -2,7 +2,10 @@ const axios = require('axios');
 
 import { recordCommand } from '../../state/stateService';
 import scriptUtils from '../../utils/script';
-import type { Command, Script } from '../../../types';
+import type { Command } from '../../../types';
+import { Logger } from '../../utils/logger';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -16,6 +19,7 @@ export default (program: any) => {
     })
     .description('List all scripts')
     .action(() => {
+      logger.verbose(`Listing all script names`);
       scriptUtils.listScripts();
     });
 };

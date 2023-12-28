@@ -58,33 +58,30 @@ export default (program: any) => {
       [],
     )
     .action(async (options: CreateOptions) => {
-      try {
-        options = dynamicVariablesUtils.replaceOptions(options);
-        const tokenId = await createFungibleToken(
-          options.name,
-          options.symbol,
-          options.treasuryId,
-          options.treasuryKey,
-          options.decimals,
-          options.initialSupply,
-          options.supplyType,
-          options.adminKey,
-        );
+      logger.verbose('Creating new token');
+      options = dynamicVariablesUtils.replaceOptions(options);
+      const tokenId = await createFungibleToken(
+        options.name,
+        options.symbol,
+        options.treasuryId,
+        options.treasuryKey,
+        options.decimals,
+        options.initialSupply,
+        options.supplyType,
+        options.adminKey,
+      );
 
-        dynamicVariablesUtils.storeArgs(
-          options.args,
-          dynamicVariablesUtils.commandActions.token.create.action,
-          {
-            tokenId: tokenId.toString(),
-            name: options.name,
-            symbol: options.symbol,
-            treasuryId: options.treasuryId,
-            adminKey: options.adminKey,
-          },
-        );
-      } catch (error) {
-        logger.error(error as object);
-      }
+      dynamicVariablesUtils.storeArgs(
+        options.args,
+        dynamicVariablesUtils.commandActions.token.create.action,
+        {
+          tokenId: tokenId.toString(),
+          name: options.name,
+          symbol: options.symbol,
+          treasuryId: options.treasuryId,
+          adminKey: options.adminKey,
+        },
+      );
     });
 };
 
@@ -112,18 +109,21 @@ async function createFungibleToken(
       .setTreasuryAccountId(treasuryId)
       .setAdminKey(PrivateKey.fromString(adminKey).publicKey)
       .freezeWith(client)
-      .sign(PrivateKey.fromString(treasuryKey))
+      .sign(PrivateKey.fromString(treasuryKey));
 
-    let tokenCreateTxSigned = await tokenCreateTx.sign(PrivateKey.fromString(adminKey));
+    let tokenCreateTxSigned = await tokenCreateTx.sign(
+      PrivateKey.fromString(adminKey),
+    );
     let tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
     tokenId = tokenCreateRx.tokenId;
 
     if (tokenId == null) {
-      throw new Error('Token was not created');
+      logger.error('Token was not created');
+      process.exit(1);
     }
 
-    console.log('Token ID:', tokenId.toString());
+    logger.log(`Token ID: ${tokenId.toString()}`);
   } catch (error) {
     logger.error(error as object);
     client.close();
@@ -131,6 +131,7 @@ async function createFungibleToken(
   }
 
   // Store new token in state
+  logger.verbose(`Storing new token with ID ${tokenId} in state`);
   const tokens: Record<string, Token> = stateController.get('tokens');
   const updatedTokens = {
     ...tokens,

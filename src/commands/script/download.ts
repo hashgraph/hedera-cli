@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 import { recordCommand } from '../../state/stateService';
 import { Logger } from '../../utils/logger';
@@ -21,6 +21,7 @@ export default (program: any) => {
     .description('Download a script from a URL')
     .requiredOption('-u, --url <url>', 'URL of script to download')
     .action(async (options: DownloadScriptOptions) => {
+      logger.verbose(`Downloading script from ${options.url}`);
       downloadScript(options.url);
     });
 };
@@ -31,8 +32,12 @@ async function downloadScript(url: string) {
     const response = await axios.get(url);
     data = response.data;
   } catch (error) {
-    console.error('Error downloading the file:', error);
-    logger.error(error as object);
+    if (axios.isAxiosError(error)) {
+      logger.error(error.message);
+    } else {
+      logger.error('Unexpected error downloading file', error as object);
+    }
+    process.exit(1);
   }
 
   const scripts: Record<string, Script> = stateController.get('scripts');
@@ -41,8 +46,8 @@ async function downloadScript(url: string) {
     const existingScript = scripts[scriptName];
 
     if (existingScript) {
-      console.error(`Script with name ${scriptName} already exists`);
-      return;
+      logger.error(`Script with name ${scriptName} already exists`);
+      process.exit(1);
     }
 
     scripts[scriptName] = {
@@ -52,7 +57,7 @@ async function downloadScript(url: string) {
       args: {},
     };
     stateController.saveKey('scripts', scripts);
-    console.log(`Script "${script.name}" added successfully`);
+    logger.log(`Script "${script.name}" added successfully`);
   });
 }
 

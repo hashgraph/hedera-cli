@@ -1,8 +1,11 @@
 import { recordCommand } from '../../state/stateService';
 import accountUtils from '../../utils/account';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -29,6 +32,7 @@ export default (program: any) => {
     )
     .action((options: ImportAccountOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options);
+      logger.verbose(`Importing account with alias: ${options.alias}`);
 
       let accountDetails;
       if (options.key) {

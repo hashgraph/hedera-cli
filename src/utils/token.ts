@@ -23,7 +23,8 @@ const getSupplyType = (type: string): TokenSupplyType => {
   } else if (tokenType === 'infinite') {
     return TokenSupplyType.Infinite;
   } else {
-    throw new Error('Invalid supply type');
+    logger.error('Invalid supply type');
+    process.exit(1);
   }
 };
 
@@ -32,7 +33,6 @@ const getSupplyType = (type: string): TokenSupplyType => {
  * @param tokenId The token ID
  * @param accountId The account ID
  * @returns True if the token is associated with the account, false otherwise
- * @throws Error if the API call fails
  */
 const isTokenAssociated = async (
   tokenId: string,

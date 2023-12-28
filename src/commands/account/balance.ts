@@ -22,11 +22,13 @@ export default (program: any) => {
     .option('-t, --token-id <tokenId>', 'Show balance for a specific token ID')
     .action(
       async (accountIdOrAlias: string, options: GetAccountBalanceOptions) => {
+        logger.verbose(`Getting balance for ${accountIdOrAlias}`);
+        
         if (options.onlyHbar && options.tokenId) {
           logger.error(
             'You cannot use both --only-hbar and --token-id options at the same time.',
           );
-          return;
+          process.exit(1);
         }
 
         await accountUtils.getAccountBalance(

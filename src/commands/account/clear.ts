@@ -2,6 +2,9 @@ import { recordCommand } from '../../state/stateService';
 
 import accountUtils from '../../utils/account';
 import type { Command } from '../../../types';
+import { Logger } from '../../utils/logger';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -15,6 +18,7 @@ export default (program: any) => {
     })
     .description('Clear all accounts from the address book')
     .action(() => {
+      logger.verbose('Clearing address book');
       accountUtils.clearAddressBook();
     });
 };
