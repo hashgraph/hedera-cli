@@ -3,13 +3,15 @@
   "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
   "testnetOperatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+  "previewnetOperatorId": "",
+  "previewnetOperatorKey": "",
   "testnetOperatorId": "0.0.458179",
   "mainnetOperatorKey": "",
   "mainnetOperatorId": "",
   "recording": 0,
   "recordingScriptName": "",
-  "scriptExecution": 1,
-  "scriptExecutionName": "test",
+  "scriptExecution": 0,
+  "scriptExecutionName": "",
   "accounts": {},
   "scripts": {
     "script-test": {

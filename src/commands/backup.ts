@@ -76,6 +76,8 @@ function backupState(backupAccounts: boolean, safe: boolean) {
 function filterState(data: State) {
   const filteredState = { ...data };
 
+  filteredState.previewnetOperatorId = '';
+  filteredState.previewnetOperatorKey = '';
   filteredState.testnetOperatorId = '';
   filteredState.testnetOperatorKey = '';
   filteredState.mainnetOperatorId = '';

@@ -44,6 +44,11 @@ function getHederaClient(): Client {
       operatorId = state.testnetOperatorId;
       operatorKey = state.testnetOperatorKey;
       break;
+    case 'previewnet':
+      client = Client.forPreviewnet();
+      operatorId = state.previewnetOperatorId;
+      operatorKey = state.previewnetOperatorKey;
+      break;
     default:
       logger.error('Invalid network name');
       process.exit(1);
@@ -61,8 +66,10 @@ function getHederaClient(): Client {
 }
 
 function switchNetwork(name: string) {
-  if (!['mainnet', 'testnet'].includes(name)) {
-    logger.error('Invalid network name. Available networks: mainnet, testnet');
+  if (!['mainnet', 'testnet', 'previewnet'].includes(name)) {
+    logger.error(
+      'Invalid network name. Available networks: mainnet, testnet, previewnet',
+    );
     process.exit(1);
   }
 
@@ -76,6 +83,10 @@ function switchNetwork(name: string) {
     case 'testnet':
       operatorId = state.testnetOperatorId;
       operatorKey = state.testnetOperatorKey;
+      break;
+    case 'previewnet':
+      operatorId = state.previewnetOperatorId;
+      operatorKey = state.previewnetOperatorKey;
       break;
   }
 

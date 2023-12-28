@@ -60,6 +60,8 @@ export interface State {
   accounts: Record<string, Account>;
   scripts: Record<string, Script>;
   tokens: Record<string, Token>;
+  previewnetOperatorKey: string;
+  previewnetOperatorId: string;
   testnetOperatorKey: string;
   testnetOperatorId: string;
   mainnetOperatorKey: string;

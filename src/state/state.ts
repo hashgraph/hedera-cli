@@ -20,7 +20,7 @@ class State {
         JSON.stringify(updatedData, null, 2),
         'utf-8',
       );
-      logger.log(`State saved for key: ${key}`);
+      logger.verbose(`State saved for key: ${key}`);
     } catch (error: any) {
       logger.error('Unable to save state:', error.message);
     }
@@ -29,7 +29,7 @@ class State {
   setAll(data: StateInterface): void {
     try {
       fs.writeFileSync(this._statePath, JSON.stringify(data, null, 2), 'utf-8');
-      logger.log('Full state saved');
+      logger.verbose('Full state saved');
     } catch (error: any) {
       logger.error('Unable to save state:', error.message);
     }

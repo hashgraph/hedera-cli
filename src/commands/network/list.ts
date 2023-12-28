@@ -18,6 +18,6 @@ export default (program: any) => {
     .description('List all available networks')
     .action(() => {
       logger.verbose('Listing networks');
-      logger.log('Available networks: mainnet, testnet');
+      logger.log('Available networks: mainnet, testnet, previewnet');
     });
 };

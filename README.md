@@ -56,23 +56,41 @@ Create a `.env` file to securely store your operator credentials.
 touch .env
 ```
 
-Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for testnet and mainnet. It's not mandatory to set both testnet and mainnet credentials. If you only want to use one network, you can leave the other credentials empty. 
+Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for previewnet, testnet, and mainnet. It's **not mandatory** to set keys for all networks. If you only want to use one network, you can leave the other credentials empty. 
 
 ```text
+PREVIEWNET_OPERATOR_KEY=
+PREVIEWNET_OPERATOR_ID=
 TESTNET_OPERATOR_KEY=302e0201003005060[...]
 TESTNET_OPERATOR_ID=0.0.12345
 MAINNET_OPERATOR_KEY=
 MAINNET_OPERATOR_ID=
 ```
 
+Next, set up the CLI tool with the command:
+
+```sh
+node dist/hedera-cli.js setup init
+```
+
 **4. Verify Installation:**
+
+You can verify the installation by listing all accounts in your address book. If you haven't added any accounts yet, you should see the following output:
 
 ```sh
 node dist/hedera-cli.js account ls
 // No accounts found.
 ```
 
-**5. Optional: Setting Up an Alias**
+**5. Set Network**
+
+When first using the network, the CLI tool will use the `testnet` network. You can switch to the `mainnet` (or `previewnet`) network using the following command:
+
+```sh
+node dist/hedera-cli.js network use mainnet
+```
+
+**6. Optional: Setting Up an Alias**
 
 To avoid typing the full command each time, you can set an alias in your shell profile. For example, in bash or Zshell, you can add the following line to your `.bashrc`/`.bash_profile` or `.zshrc`. Replace the path with the absolute path to your `hedera-cli` installation path.
 
@@ -123,10 +141,10 @@ hcli setup init
 When executed, the setup command performs several key functions:
 
 **Environment Variable Validation:**
-It checks if the HOME environment variable is defined and reads `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID` from the `~/.hedera/.env` file.
+It checks if the HOME environment variable is defined and reads `PREVIEWNET_OPERATOR_KEY`, `PREVIEWNET_OPERATOR_KEY`, `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID` from the `~/.hedera/.env` file.
 
 **State Update:**
-Once the testnet and mainnet operator key and ID are validated, these credentials are used to update the `state/state.json` file, which holds the configuration state of the CLI tool.
+Once the previewnet, testnet, and mainnet operator key and ID are validated, these credentials are used to update the `state/state.json` file, which holds the configuration state of the CLI tool.
 
 **2. Reset Setup:**
 
@@ -145,7 +163,7 @@ Flags:
 
 ### Overview
 
-The network command in the Hedera CLI tool is designed to manage and interact with different Hedera networks. It allows users to switch between networks (such as mainnet and testnet) and list available networks. This flexibility is crucial for developers who need to test their applications in different network environments.
+The network command in the Hedera CLI tool is designed to manage and interact with different Hedera networks. It allows users to switch between networks and list available networks. This flexibility is crucial for developers who need to test their applications in different network environments.
 
 ```
 network use
@@ -162,7 +180,7 @@ This command switches the current network context to the specified network.
 hcli network use <name>
 ```
 
-Replace `<name>` with the name of the network you wish to switch to (e.g., `mainnet`, `testnet`).
+Replace `<name>` with the name of the network you wish to switch to (`mainnet`, `testnet`, or `previewnet`).
 
 **2. Listing Available Networks:**
 
@@ -170,7 +188,7 @@ This command lists all available networks that the CLI tool can interact with. I
 
 ```sh
 hcli network list
-// Available networks: mainnet, testnet
+// Available networks: mainnet, testnet, previewnet
 ```
 
 #### Description
@@ -178,7 +196,7 @@ hcli network list
 The network command includes a catch-all for unknown subcommands. If an unrecognized command is entered, it triggers an error message and displays the help text for the network command.
 
 ```sh
-// Invalid network name. Available networks: mainnet, testnet
+// Invalid network name. Available networks: mainnet, testnet, previewnet
 ```
 
 ## Account Commands

@@ -71,14 +71,28 @@ function setupCLI(action: string): void {
     TESTNET_OPERATOR_ID,
     MAINNET_OPERATOR_KEY,
     MAINNET_OPERATOR_ID,
+    PREVIEWNET_OPERATOR_ID,
+    PREVIEWNET_OPERATOR_KEY
   } = process.env;
 
   let mainnetOperatorId = MAINNET_OPERATOR_ID || '';
   let mainnetOperatorKey = MAINNET_OPERATOR_KEY || '';
   let testnetOperatorId = TESTNET_OPERATOR_ID || '';
   let testnetOperatorKey = TESTNET_OPERATOR_KEY || '';
+  let previewnetOperatorId = PREVIEWNET_OPERATOR_ID || '';
+  let previewnetOperatorKey = PREVIEWNET_OPERATOR_KEY || '';
 
-  // Validate operator key and ID pairs for testnet and mainnet
+  // Validate operator key and ID pairs for previewnet, testnet, and mainnet
+  if (
+    (PREVIEWNET_OPERATOR_KEY && !PREVIEWNET_OPERATOR_ID) ||
+    (!PREVIEWNET_OPERATOR_KEY && PREVIEWNET_OPERATOR_ID)
+  ) {
+    logger.error(
+      'Both PREVIEWNET_OPERATOR_KEY and PREVIEWNET_OPERATOR_ID must be defined together in the .env file.',
+    );
+    process.exit(1);
+  }
+
   if (
     (TESTNET_OPERATOR_KEY && !TESTNET_OPERATOR_ID) ||
     (!TESTNET_OPERATOR_KEY && TESTNET_OPERATOR_ID)
@@ -109,6 +123,8 @@ function setupCLI(action: string): void {
     testnetOperatorKey,
     mainnetOperatorId,
     mainnetOperatorKey,
+    previewnetOperatorId,
+    previewnetOperatorKey
   );
 }
 
@@ -117,6 +133,8 @@ function setupOperatorAccounts(
   testnetOperatorKey: string,
   mainnetOperatorId: string,
   mainnetOperatorKey: string,
+  previewnetOperatorId: string,
+  previewnetOperatorKey: string
 ): void {
   const state = stateController.getAll();
   let newState = { ...state };
@@ -124,9 +142,10 @@ function setupOperatorAccounts(
   newState.testnetOperatorId = testnetOperatorId;
   newState.mainnetOperatorKey = mainnetOperatorKey;
   newState.mainnetOperatorId = mainnetOperatorId;
+  newState.previewnetOperatorId = previewnetOperatorId;
+  newState.previewnetOperatorKey = previewnetOperatorKey;
 
-  if (testnetOperatorKey === '' && testnetOperatorId === '')
-    newState.network = 'mainnet';
+  newState.network = 'testnet';
 
   stateController.saveState(newState);
 }

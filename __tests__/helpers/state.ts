@@ -15,6 +15,8 @@ export const baseState: State = {
   testnetOperatorId: "0.0.458179",
   mainnetOperatorKey: "",
   mainnetOperatorId: "",
+  previewnetOperatorKey: "",
+  previewnetOperatorId: "",
   tokens: {},
 };
 

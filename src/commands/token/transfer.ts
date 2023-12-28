@@ -60,9 +60,10 @@ export default (program: any) => {
           PrivateKey.fromString(fromAccount.privateKey),
         );
 
-        const receipt = await transferTxSign.execute(client);
+        const transfer = await transferTxSign.execute(client);
+        const receipt = await transfer.getReceipt(client);
         logger.log(
-          `Transfer successful with tx ID: ${receipt.transactionId.toString()}`
+          `Transfer successful with status: ${receipt.status.toString()} and ID: ${receipt.toString()}`
         );
       } catch (error) {
         logger.error('Unable to transfer token', error as object);
