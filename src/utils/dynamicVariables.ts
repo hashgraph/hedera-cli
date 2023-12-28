@@ -1,5 +1,8 @@
 import { Account } from '../../types';
 import stateController from '../state/stateController';
+import { Logger } from './logger';
+
+const logger = Logger.getInstance();
 
 /**
  * Replace options with arguments or state variables
@@ -21,7 +24,7 @@ function replaceOptions<T extends Record<string, any>>(options: T): T {
 
     const argument = match[1];
     if (!state.scripts[`script-${state.scriptExecutionName}`].args[argument]) {
-      console.error(
+      logger.error(
         `Unable to find argument value for: ${argument} for script: ${state.scriptExecutionName}`,
       );
       process.exit(1);

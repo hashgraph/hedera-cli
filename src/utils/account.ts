@@ -24,7 +24,7 @@ function deleteAccount(accountIdOrAlias: string): void {
 
   if (!account) {
     logger.error('Account not found');
-    return;
+    process.exit(1);
   }
 
   const accounts = stateController.get('accounts');
@@ -41,13 +41,13 @@ async function createAccount(
   // Validate balance
   if (isNaN(balance) || balance <= 0) {
     logger.error('Invalid balance. Balance must be a positive number.');
-    throw new Error('Invalid balance. Balance must be a positive number.');
+    process.exit(1);
   }
 
   // Validate type
   if (!['ecdsa', 'ed25519'].includes(type.toLowerCase())) {
     logger.error('Invalid type. Type must be either "ecdsa" or "ed25519".');
-    throw new Error('Invalid type. Type must be either "ecdsa" or "ed25519".');
+    process.exit(1);
   }
 
   // Get client from config
@@ -66,7 +66,7 @@ async function createAccount(
   if (!isRandomAlias && accounts && accounts[alias]) {
     logger.error('An account with this alias already exists.');
     client.close();
-    throw new Error('An account with this alias already exists.');
+    process.exit(1);
   }
 
   // Handle different types of account creation
@@ -92,12 +92,13 @@ async function createAccount(
   } catch (error) {
     logger.error('Error creating new account:', error as object);
     client.close();
+    process.exit(1);
   }
 
   if (newAccountId == null) {
     logger.error('Account was not created');
     client.close();
-    throw new Error('Account was not created');
+    process.exit(1);
   }
 
   // Store the new account in the config
@@ -121,7 +122,6 @@ async function createAccount(
 
   // Log the account ID
   logger.log(`The new account ID is: ${newAccountId}, with alias: ${alias}`);
-
   client.close();
 
   return newAccountDetails;
@@ -133,7 +133,7 @@ function listAccounts(showPrivateKeys: boolean = false): void {
   // Check if there are any accounts in the config
   if (!accounts || Object.keys(accounts).length === 0) {
     logger.log('No accounts found.');
-    return;
+    process.exit(0);
   }
 
   // Log details for each account
@@ -230,7 +230,7 @@ async function getAccountBalance(
   accountIdOrAlias: string,
   onlyHbar: boolean = false,
   tokenId?: string,
-) {
+): Promise<void> {
   const accounts = stateController.get('accounts');
   const client = getHederaClient();
 
@@ -245,7 +245,7 @@ async function getAccountBalance(
   } else {
     logger.error('Invalid account ID or alias not found in address book.');
     client.close();
-    return;
+    process.exit(1);
   }
 
   logger.log(`Getting API balance for ${accountId}`);
@@ -257,7 +257,10 @@ async function getAccountBalance(
 
 function findAccountByPrivateKey(privateKey: string): Account {
   const accounts: Record<string, Account> = stateController.get('accounts');
-  if (!accounts) throw new Error('No accounts found in state');
+  if (!accounts) {
+    logger.error('No accounts found in state');
+    process.exit(1);
+  }
 
   let matchingAccount: Account | null = null;
   for (const [alias, account] of Object.entries(accounts)) {
@@ -267,15 +270,20 @@ function findAccountByPrivateKey(privateKey: string): Account {
     }
   }
 
-  if (!matchingAccount)
-    throw new Error('No matching account found for treasury key');
+  if (!matchingAccount) {
+    logger.error('No matching account found for private key');
+    process.exit(1);
+  }
 
   return matchingAccount;
 }
 
 function findAccountByAlias(inputAlias: string): Account {
   const accounts: Record<string, Account> = stateController.get('accounts');
-  if (!accounts) throw new Error('No accounts found in state');
+  if (!accounts) {
+    logger.error('No accounts found in state');
+    process.exit(1);
+  }
 
   let matchingAccount: Account | null = null;
   for (const [alias, account] of Object.entries(accounts)) {
@@ -285,11 +293,19 @@ function findAccountByAlias(inputAlias: string): Account {
     }
   }
 
-  if (!matchingAccount) throw new Error('No matching account found for alias');
+  if (!matchingAccount) {
+    logger.error('No matching account found for alias');
+    process.exit(1);
+  }
 
   return matchingAccount;
 }
 
+/**
+ * @description Returns the type of a private key
+ * @param keyString Input private key
+ * @returns {string} key type {ed25519, ecdsa, Unknown key type}
+ */
 function getKeyType(keyString: string): string {
   try {
     PrivateKey.fromStringED25519(keyString);

@@ -1,22 +1,25 @@
 import stateController from '../state/stateController';
 
 import type { Script } from '../../types';
+import { Logger } from './logger';
+
+const logger = Logger.getInstance();
 
 function listScripts() {
   const scripts: Record<string, Script> = stateController.get('scripts');
   const scriptNames = Object.keys(scripts);
 
   if (scriptNames.length === 0) {
-    console.log('No scripts found');
+    logger.log('No scripts found');
     return;
   }
 
-  console.log('Scripts:');
+  logger.log('Scripts:');
   scriptNames.forEach((scriptName) => {
-    console.log(`\t${scriptName}`);
-    console.log(`\t- Commands:`);
+    logger.log(`\t${scriptName}`);
+    logger.log(`\t- Commands:`);
     scripts[scriptName].commands.forEach((command) => {
-      console.log(`\t\t${command}`);
+      logger.log(`\t\t${command}`);
     });
   });
 }
@@ -28,12 +31,12 @@ function deleteScript(name: string) {
 
   if (!script) {
     console.error(`No script found with name: ${scriptName}`);
-    return;
+    process.exit(0);
   }
 
   delete scripts[scriptName];
   stateController.saveKey('scripts', scripts);
-  console.log(`Script ${scriptName} deleted successfully`);
+  logger.log(`Script ${scriptName} deleted successfully`);
 }
 
 const scriptUtils = {

@@ -7,6 +7,9 @@ import type {
   DisplayTokenOptions,
   DisplayOptions,
 } from '../../types';
+import { Logger } from './logger';
+
+const logger = Logger.getInstance();
 
 type DisplayFunction = (response: APIResponse, options?: any) => void;
 
@@ -32,19 +35,19 @@ function displayTokenKeys(
   // TODO: Handle options!
 
   const tokenResponse = response.data as TokenResponse;
-  console.log(`Admin key: ${tokenResponse.admin_key}`);
-  console.log(`Kyc key: ${tokenResponse.kyc_key}`);
-  console.log(`Freeze key: ${tokenResponse.freeze_key}`);
-  console.log(`Wipe key: ${tokenResponse.wipe_key}`);
-  console.log(`Supply key: ${tokenResponse.supply_key}`);
-  console.log(`Treasury: ${tokenResponse.treasury_account_id}`);
-  console.log(`Pause key: ${tokenResponse.pause_key}`);
+  logger.log(`Admin key: ${tokenResponse.admin_key}`);
+  logger.log(`Kyc key: ${tokenResponse.kyc_key}`);
+  logger.log(`Freeze key: ${tokenResponse.freeze_key}`);
+  logger.log(`Wipe key: ${tokenResponse.wipe_key}`);
+  logger.log(`Supply key: ${tokenResponse.supply_key}`);
+  logger.log(`Treasury: ${tokenResponse.treasury_account_id}`);
+  logger.log(`Pause key: ${tokenResponse.pause_key}`);
 }
 
 // -- display balance functions -- //
 function displayHbarBalance(accountId: string, hbars: number): void {
-  console.log(`Hbar balance for account ${accountId}:`);
-  console.log(`${hbars} Hbars`);
+  logger.log(`Hbar balance for account ${accountId}:`);
+  logger.log(`${hbars} Hbars`);
 }
 
 function displayTokenBalance(
@@ -56,10 +59,10 @@ function displayTokenBalance(
     (token: TokenBalance) => token.token_id === tokenId,
   );
   if (tokenBalance) {
-    console.log(`Token balance(s) for account ${accountId}:\n`);
-    console.log(`Token ID ${tokenId}: ${tokenBalance.balance}`);
+    logger.log(`Token balance(s) for account ${accountId}:\n`);
+    logger.log(`Token ID ${tokenId}: ${tokenBalance.balance}`);
   } else {
-    console.log(
+    logger.log(
       `No balance found for token ID ${tokenId} in account ${accountId}`,
     );
   }
@@ -70,13 +73,13 @@ function displayAllBalances(
   hbars: number,
   tokens: TokenBalance[],
 ): void {
-  console.log(`Balance for account ${accountId}:`);
-  console.log(`${hbars} Hbars\n`);
+  logger.log(`Balance for account ${accountId}:`);
+  logger.log(`${hbars} Hbars\n`);
 
   if (tokens && tokens.length > 0) {
-    console.log('Token balances:');
+    logger.log('Token balances:');
     tokens.forEach((token: TokenBalance) => {
-      console.log(`${token.token_id}: ${token.balance}`);
+      logger.log(`${token.token_id}: ${token.balance}`);
     });
   }
 }
