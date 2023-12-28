@@ -27,7 +27,9 @@ export default (program: any) => {
       'Token ID to associate with account',
     )
     .action(async (options: AssociateTokenOptions) => {
-      logger.verbose(`Associating token ${options.tokenId} with ${options.accountId}`);
+      logger.verbose(
+        `Associating token ${options.tokenId} with ${options.accountId}`,
+      );
       options = dynamicVariablesUtils.replaceOptions(options);
       await associateToken(options.tokenId, options.accountId);
     });

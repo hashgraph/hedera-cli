@@ -36,9 +36,16 @@ export default (program: any) => {
 
       let accountDetails;
       if (options.key) {
-        accountDetails = accountUtils.importAccount(options.id, options.key, options.alias);
+        accountDetails = accountUtils.importAccount(
+          options.id,
+          options.key,
+          options.alias,
+        );
       } else {
-        accountDetails = accountUtils.importAccountId(options.id, options.alias);
+        accountDetails = accountUtils.importAccountId(
+          options.id,
+          options.alias,
+        );
       }
 
       dynamicVariablesUtils.storeArgs(

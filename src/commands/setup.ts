@@ -24,7 +24,7 @@ export default (program: any) => {
     })
     .description('Setup the CLI with operator key and ID')
     .action(() => {
-      logger.verbose('Initializing the CLI tool with the config')
+      logger.verbose('Initializing the CLI tool with the config');
       setupCLI('init');
     });
 
@@ -42,7 +42,7 @@ export default (program: any) => {
     .option('-s, --skip-scripts', 'Skip resetting scripts', false)
     .description('Reset the CLI to default settings')
     .action((options: ResetOptions) => {
-      logger.verbose('Resetting the CLI tool state')
+      logger.verbose('Resetting the CLI tool state');
       reset(options.skipAccounts, options.skipTokens, options.skipScripts);
     });
 };
@@ -72,7 +72,7 @@ function setupCLI(action: string): void {
     MAINNET_OPERATOR_KEY,
     MAINNET_OPERATOR_ID,
     PREVIEWNET_OPERATOR_ID,
-    PREVIEWNET_OPERATOR_KEY
+    PREVIEWNET_OPERATOR_KEY,
   } = process.env;
 
   let mainnetOperatorId = MAINNET_OPERATOR_ID || '';
@@ -124,7 +124,7 @@ function setupCLI(action: string): void {
     mainnetOperatorId,
     mainnetOperatorKey,
     previewnetOperatorId,
-    previewnetOperatorKey
+    previewnetOperatorKey,
   );
 }
 
@@ -134,7 +134,7 @@ function setupOperatorAccounts(
   mainnetOperatorId: string,
   mainnetOperatorKey: string,
   previewnetOperatorId: string,
-  previewnetOperatorKey: string
+  previewnetOperatorKey: string,
 ): void {
   const state = stateController.getAll();
   let newState = { ...state };

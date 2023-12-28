@@ -27,9 +27,7 @@ export default (program: any) => {
       const accountIdOrAlias = options.id || options.alias;
       logger.verbose(`Deleting account with alias or ID: ${accountIdOrAlias}`);
       if (!accountIdOrAlias) {
-        logger.error(
-          'You must provide either an account ID or an alias.',
-        );
+        logger.error('You must provide either an account ID or an alias.');
         process.exit(1);
       }
 

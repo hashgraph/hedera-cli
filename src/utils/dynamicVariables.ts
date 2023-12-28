@@ -99,7 +99,7 @@ const commandActions: CommandActions = {
     },
     createFromFile: {
       action: 'tokenCreateFromFile',
-    }
+    },
   },
 };
 
@@ -145,7 +145,7 @@ const commandOutputs: CommandOutputs = {
     supplyKey: 'supplyKey',
     feeScheduleKey: 'feeScheduleKey',
     treasuryKey: 'treasuryKey',
-  }
+  },
 };
 
 const dynamicVariables = {

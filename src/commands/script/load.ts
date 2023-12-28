@@ -2,7 +2,10 @@ const axios = require('axios');
 
 import { recordCommand } from '../../state/stateService';
 import stateController from '../../state/stateController';
-import { startScriptExecution, stopScriptExecution } from '../../state/stateService';
+import {
+  startScriptExecution,
+  stopScriptExecution,
+} from '../../state/stateService';
 import { execSync } from 'child_process';
 import { Logger } from '../../utils/logger';
 

@@ -45,7 +45,7 @@ export default (program: any) => {
       logger.verbose(`Creating account with alias: ${options.alias}`);
 
       options = dynamicVariablesUtils.replaceOptions(options);
-      
+
       let accountDetails = await accountUtils.createAccount(
         options.balance,
         options.type,

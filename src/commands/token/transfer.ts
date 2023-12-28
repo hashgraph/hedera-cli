@@ -34,7 +34,9 @@ export default (program: any) => {
     )
     .action(async (options: TransferTokenOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options);
-      logger.verbose(`Transfering tokens from ${options.from} to ${options.to}`);
+      logger.verbose(
+        `Transfering tokens from ${options.from} to ${options.to}`,
+      );
 
       const tokenId = options.tokenId;
       const toIdOrAlias = options.to;
@@ -63,7 +65,7 @@ export default (program: any) => {
         const transfer = await transferTxSign.execute(client);
         const receipt = await transfer.getReceipt(client);
         logger.log(
-          `Transfer successful with status: ${receipt.status.toString()} and ID: ${receipt.toString()}`
+          `Transfer successful with status: ${receipt.status.toString()} and ID: ${receipt.toString()}`,
         );
       } catch (error) {
         logger.error('Unable to transfer token', error as object);

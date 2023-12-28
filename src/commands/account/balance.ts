@@ -23,7 +23,7 @@ export default (program: any) => {
     .action(
       async (accountIdOrAlias: string, options: GetAccountBalanceOptions) => {
         logger.verbose(`Getting balance for ${accountIdOrAlias}`);
-        
+
         if (options.onlyHbar && options.tokenId) {
           logger.error(
             'You cannot use both --only-hbar and --token-id options at the same time.',
