@@ -1,6 +1,9 @@
 import axios from 'axios';
 import type { APIResponse } from '../../types';
 import { getMirrorNodeURL } from '../state/stateService';
+import { Logger } from '../utils/logger';
+
+const logger = Logger.getInstance();
 
 /**
  *
@@ -16,10 +19,11 @@ async function getTokenInfo(tokenId: string): Promise<APIResponse> {
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      throw new Error(`Error fetching token info: ${error.message}`);
+      logger.error(error.message);
     } else {
-      throw new Error(`Unexpected error: ${error}`);
+      logger.error('Unexpected error:', error as object);
     }
+    process.exit(1);
   }
 }
 
@@ -35,10 +39,11 @@ async function getTokenBalance(
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      throw new Error(`Error fetching token balance: ${error.message}`);
+      logger.error(error.message);
     } else {
-      throw new Error(`Unexpected error: ${error}`);
+      logger.error('Unexpected error:', error as object);
     }
+    process.exit(1);
   }
 }
 

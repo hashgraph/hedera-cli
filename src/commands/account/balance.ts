@@ -24,20 +24,16 @@ export default (program: any) => {
       async (accountIdOrAlias: string, options: GetAccountBalanceOptions) => {
         if (options.onlyHbar && options.tokenId) {
           logger.error(
-            'Error: You cannot use both --only-hbar and --token-id options at the same time.',
+            'You cannot use both --only-hbar and --token-id options at the same time.',
           );
           return;
         }
 
-        try {
-          await accountUtils.getAccountBalance(
-            accountIdOrAlias,
-            options.onlyHbar,
-            options.tokenId,
-          );
-        } catch (error) {
-          logger.error(error as object);
-        }
+        await accountUtils.getAccountBalance(
+          accountIdOrAlias,
+          options.onlyHbar,
+          options.tokenId,
+        );
       },
     );
 };

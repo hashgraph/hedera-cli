@@ -248,13 +248,9 @@ async function getAccountBalance(
     return;
   }
 
-  try {
-    logger.log('Getting API balance');
-    const response = await api.account.getAccountBalance(accountId);
-    display('displayBalance', response, { onlyHbar, tokenId });
-  } catch (error) {
-    logger.error('Error fetching account balance:', error as object);
-  }
+  logger.log(`Getting API balance for ${accountId}`);
+  const response = await api.account.getAccountBalance(accountId);
+  display('displayBalance', response, { onlyHbar, tokenId });
 
   client.close();
 }
