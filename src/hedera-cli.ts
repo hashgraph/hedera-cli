@@ -11,9 +11,9 @@ program
   .option('-v, --verbose', 'output extra debugging')
   .option('-q, --quiet', 'output only errors and warnings');
 
-if (process.argv.includes('-v')) {
+if (process.argv.includes('--verbose')) {
   logger.setLevel('verbose');
-} else if (process.argv.includes('-q')) {
+} else if (process.argv.includes('--quiet')) {
   logger.setLevel('quiet');
 }
 

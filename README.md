@@ -91,7 +91,12 @@ Let's explore the different commands, their options, and outputs.
 - [Backup Commands](#backup-commands): Create a backup of your state
 - [Record Commands](#record-commands): Record CLI interactions and store it in scripts
 - [Script Commands](#script-commands): Replay and manage scripts containing recorded CLI interactions
-  * [Dynamic Variables in Scripts](#dynamic-variables-in-scripts): Use dynamic variables in scripts
+  - [Dynamic Variables in Scripts](#dynamic-variables-in-scripts): Use dynamic variables in scripts
+
+
+> Each of the commands can be run with the `--help` flag to display the command's options and usage. 
+>
+> Use the `--quiet` flag to suppress the output of the command or the `--verbose` flag to display more information.
 
 ## Setup Commands
 
@@ -725,6 +730,21 @@ Make sure that each property you define exists in the output for the command. He
 The `storeArgs` function takes the `options.args` and the `commandAction` as arguments. It then stores the output variables in the state according to the user's instructions. 
 
 Whenever changing the `commandActions` or `commandOutputs` objects, make sure to update the documentation as well.
+
+## Logging
+
+You can use the `logger` object to log messages to the console. The logger object is defined in `src/utils/logger.ts`. It is defined as a singleton which you can import in your files. 
+
+```js
+import { Logger } from '../../utils/logger';
+const logger = Logger.getInstance();
+```
+
+- Regular output messages are logged using the `logger.log` function. 
+- Verbose output messages are logged using the `logger.verbose` function.
+- Error messages are logged using the `logger.error` function which has an overload signature
+  - `logger.error(error: Error | string)`: Log a single object or string
+  - `logger.error(error: string, data: object)`: Log an error string and object
 
 ## Support
 
