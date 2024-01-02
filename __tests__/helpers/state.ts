@@ -22,6 +22,7 @@ export const baseState: State = {
 
 /* accounts */
 export const alice: Account = {
+  network: "testnet",
   alias: "alice",
   accountId: "0.0.6025067",
   type: "ED25519",
@@ -35,6 +36,7 @@ export const alice: Account = {
 };
 
 export const bob: Account = {
+  network: "testnet",
   alias: "bob",
   accountId: "0.0.6025066",
   type: "ED25519",
@@ -59,6 +61,7 @@ export const script_basic: Script = {
 };
 
 const token = {
+  network: "testnet",
   associations: [],
   tokenId: "0.0.6025124",
   name: "myToken",

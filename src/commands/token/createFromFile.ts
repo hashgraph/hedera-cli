@@ -3,7 +3,7 @@ import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
 
 import accountUtils from '../../utils/account';
 import { getSupplyType } from '../../utils/token';
-import { recordCommand, getHederaClient } from '../../state/stateService';
+import { recordCommand, getHederaClient, getNetwork } from '../../state/stateService';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
@@ -72,6 +72,7 @@ function resolveTokenFilePath(filename: string): string {
 
 function initializeToken(tokenInput: TokenInput): Token {
   const token: Token = {
+    network: getNetwork(),
     associations: [],
     tokenId: '',
     name: tokenInput.name,

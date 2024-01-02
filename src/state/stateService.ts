@@ -65,6 +65,14 @@ function getHederaClient(): Client {
   );
 }
 
+/**
+ * @returns {string} network name
+ */
+function getNetwork() {
+  const state = stateController.getAll();
+  return state.network;
+}
+
 function switchNetwork(name: string) {
   if (!['mainnet', 'testnet', 'previewnet'].includes(name)) {
     logger.error(
@@ -161,6 +169,7 @@ export {
   getHederaClient,
   recordCommand,
   switchNetwork,
+  getNetwork,
   addTokenAssociation,
   getAccountById,
   getAccountByAlias,

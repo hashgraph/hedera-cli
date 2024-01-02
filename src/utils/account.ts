@@ -6,7 +6,7 @@ import {
 } from '@hashgraph/sdk';
 
 import stateController from '../state/stateController';
-import { getHederaClient, getAccountByIdOrAlias } from '../state/stateService';
+import { getHederaClient, getAccountByIdOrAlias, getNetwork } from '../state/stateService';
 import { display } from '../utils/display';
 import { Logger } from '../utils/logger';
 import api from '../api';
@@ -84,6 +84,7 @@ async function createAccount(
     const newAccount = await new AccountCreateTransaction()
       .setKey(newAccountPublicKey)
       .setInitialBalance(Hbar.fromTinybars(balance))
+      .setMaxAutomaticTokenAssociations(1)
       .execute(client);
 
     // Get the new account ID
@@ -103,6 +104,7 @@ async function createAccount(
 
   // Store the new account in the config
   const newAccountDetails = {
+    network: getNetwork(),
     alias,
     accountId: newAccountId.toString(),
     type,
@@ -183,6 +185,7 @@ function importAccount(id: string, key: string, alias: string): Account {
   // No Solidity and EVM address for ED25519 keys
   const updatedAccounts = { ...accounts };
   updatedAccounts[alias] = {
+    network: getNetwork(),
     alias,
     accountId: id,
     type,
@@ -212,6 +215,7 @@ function importAccountId(id: string, alias: string): Account {
   const accountId = AccountId.fromString(id);
   const updatedAccounts = { ...accounts };
   updatedAccounts[alias] = {
+    network: getNetwork(),
     alias,
     accountId: id,
     type: '',

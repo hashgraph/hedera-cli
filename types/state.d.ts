@@ -3,6 +3,7 @@ import {
 } from "@hashgraph/sdk";
 
 export type Account = {
+  network: string;
   alias: string;
   accountId: string;
   type: string;
@@ -13,7 +14,7 @@ export type Account = {
   privateKey: string;
 }
 
-type Script = {
+export type Script = {
   name: string;
   creation: number;
   commands: string[];
@@ -31,6 +32,7 @@ export type Token = {
   supplyType: string;
   maxSupply: number;
   keys: Keys;
+  network: string;
 }
 
 export interface Keys {

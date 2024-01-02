@@ -111,7 +111,7 @@ interface CommandOutput {
   [key: string]: string;
 }
 
-const accountOutput: Account = {
+const accountOutput: Record<string, string> = {
   alias: 'alias',
   accountId: 'accountId',
   type: 'type',

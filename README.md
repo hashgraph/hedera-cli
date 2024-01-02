@@ -571,6 +571,79 @@ Not each command exposes the same variables. Here's a list of commands and the v
 | `token create` | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey` |
 | `token create-from-file` | `tokenId`, `name`, `symbol`, `treasuryId`, `treasuryKey`, `adminKey`, `pauseKey`, `kycKey`, `wipeKey`, `freezeKey`, `supplyKey`, `feeScheduleKey` |
 
+# CLI State
+
+The Hedera CLI tool stores its state in the `dist/state/state.json` file. This file contains all the information about your accounts, tokens, scripts, and network. You can edit this file manually, but it's not recommended.
+
+Here's an example state:
+
+```json
+{
+  "network": "testnet",
+  "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
+  "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
+  "testnetOperatorKey": "",
+  "testnetOperatorId": "",
+  "mainnetOperatorKey": "",
+  "mainnetOperatorId": "",
+  "previewnetOperatorId": "",
+  "previewnetOperatorKey": "",
+  "recording": 0,
+  "recordingScriptName": "",
+  "scriptExecution": 0,
+  "scriptExecutionName": "",
+  "accounts": {
+    "bob": {
+      "network": "testnet",
+      "alias": "bob",
+      "accountId": "0.0.7393086",
+      "type": "ED25519",
+      "publicKey": "302a300506032b657003210059b9fc2413aa2a1dccda4b6ea0f99a48414db6f6ad6eb28589bab12f578f8697",
+      "evmAddress": "",
+      "solidityAddress": "000000000000000000000000000000000070cf3e",
+      "solidityAddressFull": "0x000000000000000000000000000000000070cf3e",
+      "privateKey": "302e0201003005060507c46c02ad871ffc38bb216497c6ac9a34aff3ac637153815a896"
+    }
+  },
+  "scripts": {
+    "script-test": {
+      "name": "test",
+      "creation": 1697103669402,
+      "commands": [
+        "network use testnet",
+        "account create -a random --args privateKey,tokenMichielAdminKey --args alias,accountAlias",
+        "token create -n {{accountAlias}} -s mm -d 2 -i 1000 --supply-type infinite -a {{tokenMichielAdminKey}} -t 0.0.4536940 -k 302e020100300506032b6568253a539643468dda3128a734c9fcb07a927b3f742719db731f9f50"
+      ],
+      "args": {}
+    }
+  },
+  "tokens": {
+    "0.0.7393102": {
+      "network": "testnet",
+      "associations": [],
+      "tokenId": "0.0.7393102",
+      "name": "myToken",
+      "symbol": "MTK",
+      "treasuryId": "0.0.7393093",
+      "decimals": 2,
+      "initialSupply": 1000,
+      "supplyType": "finite",
+      "maxSupply": 1000000,
+      "keys": {
+        "adminKey": "3030020100300506e9fdf92f82267a40c9ce7932d2622ba29aad3d8d7036dbe5d27",
+        "pauseKey": "",
+        "kycKey": "",
+        "wipeKey": "",
+        "freezeKey": "",
+        "supplyKey": "302e0201003005002ad871ffc38bb216497c6ac9a34aff3ac637153815a896",
+        "feeScheduleKey": "",
+        "treasuryKey": "302e0201003078aede2e6a5c46701d89ab48b3e28a31e50243bd85c19f0"
+      }
+    }
+  }
+}
+```
+
 # Contributing Tips
 
 ## Development Mode
