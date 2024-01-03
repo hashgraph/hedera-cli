@@ -449,7 +449,7 @@ You can combine the flags to restore only certain parts of the state. For exampl
 hcli backup restore -f state.backup.1704321015228.json --restore-accounts --restore-tokens
 ```
 
-> **Note:** If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.
+> **Note: If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.** You can still use the flags to restore only certain parts of the state.
 
 
 ## Record Commands
