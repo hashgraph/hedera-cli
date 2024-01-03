@@ -24,12 +24,12 @@ export default (program: any) => {
     })
     .description('Setup the CLI with operator key and ID')
     .action(() => {
-      logger.verbose('Initializing the CLI tool with the config');
+      logger.verbose('Initializing the CLI tool with the config and operator key and ID for different networks');
       setupCLI('init');
     });
 
   setup
-    .command('reset')
+    .command('reload')
     .hook('preAction', (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
@@ -37,13 +37,10 @@ export default (program: any) => {
       ];
       recordCommand(command);
     })
-    .option('-a, --skip-accounts', 'Skip resetting accounts', false)
-    .option('-t, --skip-tokens', 'Skip resetting tokens', false)
-    .option('-s, --skip-scripts', 'Skip resetting scripts', false)
-    .description('Reset the CLI to default settings')
-    .action((options: ResetOptions) => {
-      logger.verbose('Resetting the CLI tool state');
-      reset(options.skipAccounts, options.skipTokens, options.skipScripts);
+    .description('Reload the CLI with operator key and ID')
+    .action(() => {
+      logger.verbose('Reloading the CLI tool with operator key and ID for different networks');
+      setupCLI('reload');
     });
 };
 
@@ -156,27 +153,4 @@ function setupState(): void {
   };
 
   stateController.saveState(newState);
-}
-
-function reset(
-  skipAccounts: boolean,
-  skipTokens: boolean,
-  skipScripts: boolean,
-): void {
-  if (!skipAccounts && !skipTokens && !skipScripts) {
-    logger.log('Resetting CLI to default settings...');
-    setupCLI('init');
-    return;
-  }
-
-  setupCLI('reset');
-  if (!skipAccounts) stateController.saveKey('accounts', {});
-  if (!skipTokens) stateController.saveKey('tokens', {});
-  if (!skipScripts) stateController.saveKey('scripts', {});
-}
-
-interface ResetOptions {
-  skipAccounts: boolean;
-  skipTokens: boolean;
-  skipScripts: boolean;
 }

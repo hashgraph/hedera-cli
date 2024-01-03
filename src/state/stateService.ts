@@ -150,17 +150,30 @@ function getAccountByIdOrAlias(accountIdOrAlias: string): Account {
   return account;
 }
 
-function startScriptExecution(name: string) {
+function startScriptExecution(name: string): void {
   const state = stateController.getAll();
   state.scriptExecutionName = name;
   state.scriptExecution = 1;
   stateController.saveState(state);
 }
 
-function stopScriptExecution() {
+function stopScriptExecution(): void {
   const state = stateController.getAll();
   state.scriptExecutionName = '';
   state.scriptExecution = 0;
+  stateController.saveState(state);
+}
+
+function clearState(): void {
+  const state = stateController.getAll();
+  state.accounts = {};
+  state.tokens = {};
+  state.scripts = {};
+  state.scriptExecution = 0;
+  state.scriptExecutionName = '';
+  state.recording = 0;
+  state.recordingScriptName = '';
+
   stateController.saveState(state);
 }
 
@@ -176,4 +189,5 @@ export {
   getAccountByIdOrAlias,
   startScriptExecution,
   stopScriptExecution,
+  clearState,
 };

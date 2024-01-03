@@ -3,6 +3,7 @@ import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
 import { getAccountById } from '../../state/stateService';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 const logger = Logger.getInstance();
 
@@ -24,6 +25,7 @@ export default (program: any) => {
     .option('--token-id <token-id>', 'View token by ID')
     .option('--scripts', 'View scripts', false)
     .action((options: ViewStateOptions) => {
+      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for account-alias, account-id, and token-id
       logger.verbose('Viewing state');
 
       const state = stateController.getAll();
@@ -36,38 +38,38 @@ export default (program: any) => {
         !options.accountId &&
         !options.tokenId
       ) {
-        logger.log("\nState:")
+        logger.log('\nState:');
         logger.log(state);
         process.exit(0);
       }
 
       if (options.accountId) {
-        logger.log(`\nAccount ${options.accountId}:`)
+        logger.log(`\nAccount ${options.accountId}:`);
         logger.log(getAccountById(options.accountId) || 'Account not found');
       }
 
       if (options.accountAlias) {
-        logger.log("\nAccount:")
+        logger.log('\nAccount:');
         logger.log(state.accounts[options.accountAlias] || 'Account not found');
       }
 
       if (options.tokenId) {
-        logger.log(`\nToken ${options.tokenId}:`)
+        logger.log(`\nToken ${options.tokenId}:`);
         logger.log(state.tokens[options.tokenId] || 'Token not found');
       }
 
       if (options.accounts) {
-        logger.log("\nAccounts:")
+        logger.log('\nAccounts:');
         logger.log(state.accounts);
       }
 
       if (options.tokens) {
-        logger.log("\nTokens:")
+        logger.log('\nTokens:');
         logger.log(state.tokens);
       }
 
       if (options.scripts) {
-        logger.log("\nScripts:")
+        logger.log('\nScripts:');
         logger.log(state.scripts);
       }
     });
