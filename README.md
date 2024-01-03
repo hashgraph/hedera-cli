@@ -108,6 +108,7 @@ Let's explore the different commands, their options, and outputs.
 - [Token Commands](#token-commands): Create and manage tokens
 - [Backup Commands](#backup-commands): Create a backup of your state
 - [Record Commands](#record-commands): Record CLI interactions and store it in scripts
+- [State Commands](#state-commands): Manage the state of the CLI tool
 - [Script Commands](#script-commands): Replay and manage scripts containing recorded CLI interactions
   - [Dynamic Variables in Scripts](#dynamic-variables-in-scripts): Use dynamic variables in scripts
 
@@ -463,6 +464,115 @@ Ends the current recording session. The recorded commands are saved under the sc
 hcli record stop
 ```
 
+## State Commands
+
+### Overview
+
+The `state` command in the Hedera CLI tool is designed for managing the state of the CLI tool. It allows users to view the current state, clear the state, and download a new state via a remote URL.
+
+```
+state download
+state view
+state clear
+```
+
+#### Usage
+
+**1. Download State:**
+
+Downloads a state file from an external URL and add it to the `dist/state.json` file. You can use this command to update your state with new accounts, tokens, or scripts. You can choose to overwrite the current state or merge the downloaded state with the current state.
+
+```sh
+hcli state download --url <url> [--overwrite] [--merge]
+```
+
+Flags:
+- **URL:** (required) URL to download the state file from.
+- **Overwrite:** (optional) Overwrites the current state file with the contents of the downloaded file.
+- **Merge:** (optional) Merges the downloaded state file with the current state file. It won't fail when the state file contains duplicate keys.
+
+Format for remote script files:
+```json
+{
+  "accounts": {
+    "myalias": {
+      "network": "testnet",
+      "alias": "myalias",
+      "accountId": "0.0.7426198",
+      "type": "ecdsa",
+      "publicKey": "302d300706052b8104000a03220003732a9daae40e2a41ccd10dd35b521cbcafdd4bf906a66e37d0a65512a1d7db23",
+      "evmAddress": "a5accb5010ad3ee50c66a433d5b8fdfe0d0eab59",
+      "solidityAddress": "0000000000000000000000000000000000715096",
+      "solidityAddressFull": "0x0000000000000000000000000000000000715096",
+      "privateKey": "303002010030[...]"
+    }
+  },
+  "scripts": {
+    "script-script1": {
+      "name": "script1",
+      "commands": [
+        "account create -a alice",
+        "account create -a bob"
+      ]
+    }
+  },
+  "tokens": {
+    "0.0.7426199": {
+      "network": "testnet",
+      "associations": [],
+      "tokenId": "0.0.7426199",
+      "name": "myToken",
+      "symbol": "MTK",
+      "treasuryId": "0.0.7426195",
+      "decimals": 2,
+      "initialSupply": 1000,
+      "supplyType": "finite",
+      "maxSupply": 1000000,
+      "keys": {
+        "adminKey": "303002010030[...]",
+        "pauseKey": "",
+        "kycKey": "",
+        "wipeKey": "",
+        "freezeKey": "",
+        "supplyKey": "302e02010030[...]",
+        "feeScheduleKey": "",
+        "treasuryKey": "302e02010030[...]"
+      }
+    }
+  }
+}
+```
+
+_You can access an example [here](https://gist.githubusercontent.com/michielmulders/f8ae878431d3d551ecf5e478e9e96ea5/raw/9d5c0329eb3fe5bfda02b8ec1880c5894bd4539e/stateUpdate.json). You can use it like this:_
+
+```sh
+hcli state download --url https://gist.githubusercontent.com/michielmulders/f8ae878431d3d551ecf5e478e9e96ea5/raw/9d5c0329eb3fe5bfda02b8ec1880c5894bd4539e/stateUpdate.json --overwrite
+```
+
+**2. View State:**
+
+Displays the current state of the CLI tool.
+
+```sh
+hcli state view [--accounts] [--tokens] [--scripts] [--account-alias <account-alias>] [--account-id <account-id>] [--token-id <token-id>]
+```
+
+Flags:
+- **Accounts:** (optional) Displays the accounts section of the state.
+- **Tokens:** (optional) Displays the tokens section of the state.
+- **Scripts:** (optional) Displays the scripts section of the state.
+- **Account Alias:** (optional) Displays the account with the specified alias.
+- **Account ID:** (optional) Displays the account with the specified ID.
+- **Token ID:** (optional) Displays the token with the specified ID.
+
+**3. Clear State:**
+
+Clears the state of the CLI tool. This command is useful for resetting the state to its initial state.
+
+```sh
+hcli state clear
+```
+
 ## Script Commands
 
 ### Overview
@@ -473,7 +583,6 @@ The `script` command in the Hedera CLI tool allows users to load and execute pre
 script load
 script list
 script delete
-script download
 ```
 
 #### Usage
@@ -503,38 +612,6 @@ Deletes a script from the `dist/state.json` file.
 ```sh
 hcli script delete -n,--name <name>
 ```
-
-**4. Download Script:**
-
-Downloads a script from an external URL and adds it to the `dist/state.json` file.
-
-```sh
-hcli script download -u,--url <url>
-```
-
-Format for remote script files:
-```json
-{
-  "scripts": [
-    {
-      "name": "script1",
-      "commands": [
-        "account create -a alice",
-        "account create -a bob"
-      ]
-    },
-    {
-      "name": "script2",
-      "commands": [
-        "account create -a charlie",
-        "account create -a dave"
-      ]
-    }
-  ]
-}
-```
-
-_You can access an example [here](https://gist.githubusercontent.com/michielmulders/ed7a639bb3a5629380cdd57290d24b91/raw/fc072bf5682467113faaae19ce65f0ef92b6a4cd/createAccAndFT.json)._
 
 ### Dynamic Variables in Scripts
 

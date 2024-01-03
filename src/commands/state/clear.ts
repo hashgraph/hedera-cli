@@ -1,13 +1,13 @@
 import { recordCommand } from '../../state/stateService';
-import scriptUtils from '../../utils/script';
 import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
+import stateController from '../../state/stateController';
 
 const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
-    .command('list')
+    .command('clear')   
     .hook('preAction', (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
@@ -15,9 +15,10 @@ export default (program: any) => {
       ];
       recordCommand(command);
     })
-    .description('List all scripts')
+    .description('Clear all state and reset to default')
     .action(() => {
-      logger.verbose(`Listing all script names`);
-      scriptUtils.listScripts();
+      logger.verbose('Clearing state');
+      
+      //stateController.clearState();
     });
 };

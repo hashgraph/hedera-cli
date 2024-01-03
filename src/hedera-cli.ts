@@ -18,6 +18,7 @@ if (process.argv.includes('--verbose')) {
 }
 
 // Commands
+commands.stateCommands(program);
 commands.setupCommands(program);
 commands.networkCommands(program);
 commands.accountCommands(program);

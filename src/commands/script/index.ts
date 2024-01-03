@@ -1,6 +1,5 @@
 import deleteCommand from './delete';
 import listCommand from './list';
-import downloadCommand from './download';
 import loadCommand from './load';
 
 export default (program: any) => {
@@ -10,6 +9,5 @@ export default (program: any) => {
 
   deleteCommand(script);
   listCommand(script);
-  downloadCommand(script);
   loadCommand(script);
 };
