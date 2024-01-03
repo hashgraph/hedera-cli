@@ -24,7 +24,9 @@ export default (program: any) => {
     })
     .description('Setup the CLI with operator key and ID')
     .action(() => {
-      logger.verbose('Initializing the CLI tool with the config and operator key and ID for different networks');
+      logger.verbose(
+        'Initializing the CLI tool with the config and operator key and ID for different networks',
+      );
       setupCLI('init');
     });
 
@@ -39,7 +41,9 @@ export default (program: any) => {
     })
     .description('Reload the CLI with operator key and ID')
     .action(() => {
-      logger.verbose('Reloading the CLI tool with operator key and ID for different networks');
+      logger.verbose(
+        'Reloading the CLI tool with operator key and ID for different networks',
+      );
       setupCLI('reload');
     });
 };

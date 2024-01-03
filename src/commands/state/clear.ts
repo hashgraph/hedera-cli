@@ -8,7 +8,7 @@ const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
-    .command('clear')   
+    .command('clear')
     .hook('preAction', (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),

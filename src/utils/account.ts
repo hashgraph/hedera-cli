@@ -6,7 +6,11 @@ import {
 } from '@hashgraph/sdk';
 
 import stateController from '../state/stateController';
-import { getHederaClient, getAccountByIdOrAlias, getNetwork } from '../state/stateService';
+import {
+  getHederaClient,
+  getAccountByIdOrAlias,
+  getNetwork,
+} from '../state/stateService';
 import { display } from '../utils/display';
 import { Logger } from '../utils/logger';
 import api from '../api';

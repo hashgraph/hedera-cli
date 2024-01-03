@@ -34,7 +34,11 @@ export default (program: any) => {
       'Type of account to create (ECDSA or ED25519)',
       'ED25519',
     )
-    .option('--auto-associations <autoAssociations>', 'Set number of automatic associations', 0)
+    .option(
+      '--auto-associations <autoAssociations>',
+      'Set number of automatic associations',
+      0,
+    )
     .option(
       '--args <args>',
       'Store arguments for scripts',

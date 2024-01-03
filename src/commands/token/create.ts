@@ -2,7 +2,11 @@ import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
 
 import { myParseInt } from '../../utils/verification';
 import { getSupplyType } from '../../utils/token';
-import { recordCommand, getHederaClient, getNetwork } from '../../state/stateService';
+import {
+  recordCommand,
+  getHederaClient,
+  getNetwork,
+} from '../../state/stateService';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
 

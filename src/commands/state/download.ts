@@ -18,7 +18,9 @@ export default (program: any) => {
       ];
       recordCommand(command);
     })
-    .description('Download state from a URL and merge it with the current state')
+    .description(
+      'Download state from a URL and merge it with the current state',
+    )
     .requiredOption('--url <url>', 'URL of script to download')
     .option('--merge', 'Merge state with downloaded state', false)
     .option('--overwrite', 'Overwrite state with downloaded state', false)
@@ -48,7 +50,7 @@ async function downloadState(url: string): Promise<any> {
     }
     process.exit(1);
   }
-  
+
   return data;
 }
 
@@ -112,12 +114,16 @@ function addAccounts(importedAccounts: Account[], merge: boolean) {
     }
 
     if (merge && existingAccount) {
-      logger.log(`Account "${account.alias}" already exists, merging it with the new account details`);
+      logger.log(
+        `Account "${account.alias}" already exists, merging it with the new account details`,
+      );
     }
 
     accounts[account.alias] = account;
     stateController.saveKey('accounts', accounts);
-    logger.log(`Account "${account.alias}" with ID ${account.accountId} added successfully`);
+    logger.log(
+      `Account "${account.alias}" with ID ${account.accountId} added successfully`,
+    );
   });
 }
 
@@ -137,7 +143,9 @@ function addTokens(importedTokens: Token[], merge: boolean) {
 
     tokens[token.tokenId] = token;
     stateController.saveKey('tokens', tokens);
-    logger.log(`Token ${token.tokenId} with name "${token.name}" added successfully`);
+    logger.log(
+      `Token ${token.tokenId} with name "${token.name}" added successfully`,
+    );
   });
 }
 
