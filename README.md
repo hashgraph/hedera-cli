@@ -407,6 +407,7 @@ The `backup` command in the Hedera CLI tool is designed for creating backups of 
 
 ```
 backup create
+backup restore
 ```
 
 #### Usage
@@ -427,6 +428,29 @@ hcli backup create
 Flags:
 - **Accounts:** (optional) Creates a backup of the accounts section of the state. The backup file is named `accounts.backup.<timestamp>.json`.
 - **Safe:** (optional) Removes private information from the backup like token keys, account keys, and operator key/ID. It does not remove the private keys in scripts' commands.
+
+**2. Restoring Backup:**
+
+This command restores a backup of the `state.json` file stored in the same `dist/state` directory. It only restores state files with the format `state.backup.<timestamp>.json`.
+
+```sh
+hcli backup restore -f,--file <filename> [--restore-accounts] [--restore-tokens] [--restore-scripts]
+```
+
+Flags:
+- **File:** (optional) Filename of the backup file to restore.
+- **Restore Accounts:** (optional) Restores the accounts section of the state.
+- **Restore Tokens:** (optional) Restores the tokens section of the state.
+- **Restore Scripts:** (optional) Restores the scripts section of the state.
+
+You can combine the flags to restore only certain parts of the state. For example, you can restore only the accounts and tokens section of the state by using the following command:
+
+```sh
+hcli backup restore -f state.backup.1704321015228.json --restore-accounts --restore-tokens
+```
+
+> **Note:** If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.
+
 
 ## Record Commands
 
