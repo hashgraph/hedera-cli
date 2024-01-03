@@ -134,10 +134,10 @@ async function createTokenOnNetwork(token: Token) {
     // Signing
     tokenCreateTx
       .freezeWith(client)
-      .sign(PrivateKey.fromString(token.keys.treasuryKey));
+      .sign(PrivateKey.fromStringDer(token.keys.treasuryKey));
 
     if (token.keys.adminKey !== '') {
-      tokenCreateTx.sign(PrivateKey.fromString(token.keys.adminKey));
+      tokenCreateTx.sign(PrivateKey.fromStringDer(token.keys.adminKey));
     }
 
     // Execute
@@ -178,7 +178,7 @@ function addKeysToTokenCreateTx(
   Object.entries(keySetters).forEach(([key, setter]) => {
     const keyValue = token.keys[key as keyof typeof token.keys];
     if (keyValue && keyValue !== '') {
-      setter.call(tokenCreateTx, PrivateKey.fromString(keyValue).publicKey);
+      setter.call(tokenCreateTx, PrivateKey.fromStringDer(keyValue).publicKey);
     }
   });
 }

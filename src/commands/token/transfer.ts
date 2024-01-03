@@ -59,7 +59,7 @@ export default (program: any) => {
           .freezeWith(client);
 
         const transferTxSign = await transferTx.sign(
-          PrivateKey.fromString(fromAccount.privateKey),
+          PrivateKey.fromStringDer(fromAccount.privateKey),
         );
 
         const transfer = await transferTxSign.execute(client);

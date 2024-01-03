@@ -107,12 +107,12 @@ async function createFungibleToken(
       .setTokenType(TokenType.FungibleCommon)
       .setSupplyType(getSupplyType(supplyType))
       .setTreasuryAccountId(treasuryId)
-      .setAdminKey(PrivateKey.fromString(adminKey).publicKey)
+      .setAdminKey(PrivateKey.fromStringDer(adminKey).publicKey)
       .freezeWith(client)
-      .sign(PrivateKey.fromString(treasuryKey));
+      .sign(PrivateKey.fromStringDer(treasuryKey));
 
     let tokenCreateTxSigned = await tokenCreateTx.sign(
-      PrivateKey.fromString(adminKey),
+      PrivateKey.fromStringDer(adminKey),
     );
     let tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);

@@ -61,7 +61,7 @@ function getHederaClient(): Client {
 
   return client.setOperator(
     AccountId.fromString(operatorId),
-    PrivateKey.fromString(operatorKey),
+    PrivateKey.fromStringDer(operatorKey),
   );
 }
 

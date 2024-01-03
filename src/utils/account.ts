@@ -37,6 +37,7 @@ async function createAccount(
   balance: number,
   type: string,
   alias: string,
+  setMaxAutomaticTokenAssociations: number = 0,
 ): Promise<Account> {
   // Validate balance
   if (isNaN(balance) || balance <= 0) {
@@ -84,7 +85,7 @@ async function createAccount(
     const newAccount = await new AccountCreateTransaction()
       .setKey(newAccountPublicKey)
       .setInitialBalance(Hbar.fromTinybars(balance))
-      .setMaxAutomaticTokenAssociations(1)
+      .setMaxAutomaticTokenAssociations(setMaxAutomaticTokenAssociations)
       .execute(client);
 
     // Get the new account ID

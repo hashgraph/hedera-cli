@@ -64,7 +64,7 @@ const associateToken = async (
       .setAccountId(account.accountId)
       .setTokenIds([tokenId])
       .freezeWith(client)
-      .sign(PrivateKey.fromString(account.privateKey));
+      .sign(PrivateKey.fromStringDer(account.privateKey));
 
     let tokenAssociateSubmit = await tokenAssociateTx.execute(client);
     await tokenAssociateSubmit.getReceipt(client);
