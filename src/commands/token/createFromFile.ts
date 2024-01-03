@@ -38,10 +38,10 @@ export default (program: any) => {
         previous ? previous.concat(value) : [value],
       [],
     )
-    .action(createTokenFromCLI);
+    .action(createToken);
 };
 
-async function createTokenFromCLI(options: CreateTokenFromFileOptions) {
+async function createToken(options: CreateTokenFromFileOptions) {
   logger.verbose(`Creating token from template with name: ${options.file}`);
   options = dynamicVariablesUtils.replaceOptions(options);
 
