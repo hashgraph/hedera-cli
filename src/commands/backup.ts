@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { prompt } from 'enquirer';
 
 import { recordCommand } from '../state/stateService';
 import stateController from '../state/stateController';
@@ -43,9 +44,33 @@ export default (program: any) => {
   .option('--restore-accounts', 'Restore the accounts', false)
   .option('--restore-tokens', 'Restore the tokens', false)
   .option('--restore-scripts', 'Restore the scripts', false)
-  .action((options: RestoreOptions) => {
+  .action(async (options: RestoreOptions) => {
     logger.verbose('Restoring backup of state');
-    restoreState(options.file, options.restoreAccounts, options.restoreTokens, options.restoreScripts);
+    
+    let filename = options.file;
+    if (!options.file) {
+      const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
+
+      // filter out the pattern state.backup.TIMESTAMP.json
+      const pattern = /^state\.backup\.\d+\.json$/;
+      const backups = files.filter((file) => pattern.test(file));
+
+      try {
+        const response: PromptResponse = await prompt({
+          type: 'select',
+          name: 'selection',
+          message: 'Choose a backup:',
+          choices: backups,
+        });
+    
+        filename = response.selection;
+      } catch (error) {
+        logger.error('Unable to read backup file:', error as object);
+        process.exit(1);
+      }
+    }
+
+    restoreState(filename, options.restoreAccounts, options.restoreTokens, options.restoreScripts);
   });
 };
 
@@ -176,4 +201,8 @@ interface RestoreOptions {
   restoreAccounts: boolean;
   restoreTokens: boolean;
   restoreScripts: boolean;
+}
+
+interface PromptResponse {
+  selection: string;
 }
