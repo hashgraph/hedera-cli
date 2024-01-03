@@ -64,9 +64,16 @@ export default (program: any) => {
 
         const transfer = await transferTxSign.execute(client);
         const receipt = await transfer.getReceipt(client);
-        logger.log(
-          `Transfer successful with status: ${receipt.status.toString()} and ID: ${receipt.toString()}`,
-        );
+        if (receipt.status._code === 22) {
+          logger.log(
+            `Transfer successful with tx ID: ${transfer.transactionId.toString()}`,
+          );
+        } else {
+          logger.error(
+            `Transfer failed with tx ID: ${transfer.transactionId.toString()}`,
+          );
+          process.exit(1);
+        }
       } catch (error) {
         logger.error('Unable to transfer token', error as object);
       }
