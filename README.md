@@ -127,7 +127,7 @@ The setup command is an essential component of the Hedera CLI tool, designed to 
 
 ```sh
 setup init
-setup reset
+setup reload
 ```
 
 #### Usage
@@ -147,18 +147,13 @@ It checks if the HOME environment variable is defined and reads `PREVIEWNET_OPER
 **State Update:**
 Once the previewnet, testnet, and mainnet operator key and ID are validated, these credentials are used to update the `state/state.json` file, which holds the configuration state of the CLI tool.
 
-**2. Reset Setup:**
+**2. Reload Operator Key and Id:**
 
-Depending on the flags provided, it resets the entire state or skips certain parts of the state, such as the accounts, tokens, or scripts sections in your state. This might be useful when you want to reset your state but keep your address book. By default, it resets the entire state and it will **reload the operator key and ID from the `.env` file.**
+Reload the operator key and ID from the `.env` file. This command is useful when you add new networks to your `.env` file and want to update the state, so you can use the new networks.
 
 ```sh
-hcli setup reset [-a, --skip-accounts] [-t, --skip-tokens] [-s, --skip-scripts]
+hcli setup reload
 ```
-
-Flags:
-- **-a, --skip-accounts**: (optional) Skips resetting accounts.
-- **-t, --skip-tokens:** (optional) Skips resetting tokens.
-- **-s, --skip-scripts:** (optional) Skips resetting scripts.
 
 ## Network Commands
 
@@ -567,11 +562,16 @@ Flags:
 
 **3. Clear State:**
 
-Clears the state of the CLI tool. This command is useful for resetting the state to its initial state.
+Clears the state of the CLI tool. This command is useful for resetting the state to its initial state. Depending on the flags provided, it resets the entire state or skips certain parts of the state, such as the accounts, tokens, or scripts sections in your state. For example, this might be useful when you want to reset your state but keep your address book (`state.accounts`).
 
 ```sh
-hcli state clear
+hcli state clear [-a, --skip-accounts] [-t, --skip-tokens] [-s, --skip-scripts]
 ```
+
+Flags:
+- **-a, --skip-accounts**: (optional) Skips clearing accounts.
+- **-t, --skip-tokens:** (optional) Skips clearing tokens.
+- **-s, --skip-scripts:** (optional) Skips clearing scripts.
 
 ## Script Commands
 
