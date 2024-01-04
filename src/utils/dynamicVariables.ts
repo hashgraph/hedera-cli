@@ -59,7 +59,10 @@ function storeArgs(
   });
 
   const newScripts = { ...state.scripts };
-  const newArgs = {...newScripts[`script-${state.scriptExecutionName}`].args, ...stateArgs};
+  const newArgs = {
+    ...newScripts[`script-${state.scriptExecutionName}`].args,
+    ...stateArgs,
+  };
   newScripts[`script-${state.scriptExecutionName}`].args = newArgs;
   stateController.saveKey('scripts', newScripts);
 }

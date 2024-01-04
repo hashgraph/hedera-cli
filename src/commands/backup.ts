@@ -31,47 +31,52 @@ export default (program: any) => {
     });
 
   network
-  .command('restore')
-  .hook('preAction', (thisCommand: Command) => {
-    const command = [
-      thisCommand.parent.action().name(),
-      ...thisCommand.parent.args,
-    ];
-    recordCommand(command);
-  })
-  .description('Restore a backup of the full state')
-  .option('-f, --file <filename>', 'Filename containing the state backup')
-  .option('--restore-accounts', 'Restore the accounts', false)
-  .option('--restore-tokens', 'Restore the tokens', false)
-  .option('--restore-scripts', 'Restore the scripts', false)
-  .action(async (options: RestoreOptions) => {
-    logger.verbose('Restoring backup of state');
-    
-    let filename = options.file;
-    if (!options.file) {
-      const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
+    .command('restore')
+    .hook('preAction', (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      recordCommand(command);
+    })
+    .description('Restore a backup of the full state')
+    .option('-f, --file <filename>', 'Filename containing the state backup')
+    .option('--restore-accounts', 'Restore the accounts', false)
+    .option('--restore-tokens', 'Restore the tokens', false)
+    .option('--restore-scripts', 'Restore the scripts', false)
+    .action(async (options: RestoreOptions) => {
+      logger.verbose('Restoring backup of state');
 
-      // filter out the pattern state.backup.TIMESTAMP.json
-      const pattern = /^state\.backup\.\d+\.json$/;
-      const backups = files.filter((file) => pattern.test(file));
+      let filename = options.file;
+      if (!options.file) {
+        const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
 
-      try {
-        const response: PromptResponse = await prompt({
-          type: 'select',
-          name: 'selection',
-          message: 'Choose a backup:',
-          choices: backups,
-        });
-    
-        filename = response.selection;
-      } catch (error) {
-        logger.error('Unable to read backup file:', error as object);
-        process.exit(1);
+        // filter out the pattern state.backup.TIMESTAMP.json
+        const pattern = /^state\.backup\.\d+\.json$/;
+        const backups = files.filter((file) => pattern.test(file));
+
+        try {
+          const response: PromptResponse = await prompt({
+            type: 'select',
+            name: 'selection',
+            message: 'Choose a backup:',
+            choices: backups,
+          });
+
+          filename = response.selection;
+        } catch (error) {
+          logger.error('Unable to read backup file:', error as object);
+          process.exit(1);
+        }
       }
-    }
 
-    restoreState(filename, options.restoreAccounts, options.restoreTokens, options.restoreScripts);
-  });
+      restoreState(
+        filename,
+        options.restoreAccounts,
+        options.restoreTokens,
+        options.restoreScripts,
+      );
+    });
 };
 
 /**
@@ -79,7 +84,12 @@ export default (program: any) => {
  *
  * @param filename File containing the state backup
  */
-function restoreState(filename: string, restoreAccounts: boolean, restoreTokens: boolean, restoreScripts: boolean) {
+function restoreState(
+  filename: string,
+  restoreAccounts: boolean,
+  restoreTokens: boolean,
+  restoreScripts: boolean,
+) {
   let data;
   try {
     const backupPath = path.join(__dirname, '..', 'state', filename);
