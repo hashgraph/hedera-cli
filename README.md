@@ -689,7 +689,7 @@ The following example shows how you can use dynamic variables to create a script
 
 ```json
 {
-  "name": "test",
+  "name": "transfer",
   "commands": [
     "network use testnet",
     "account create -a random --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
