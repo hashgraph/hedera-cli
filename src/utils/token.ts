@@ -77,6 +77,7 @@ const associateToken = async (
   }
 
   // Store association in state for token
+  console.log(tokenId, account.accountId, account.alias);
   addTokenAssociation(tokenId, account.accountId, account.alias);
   client.close();
 };

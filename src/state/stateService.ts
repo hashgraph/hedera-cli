@@ -159,6 +159,7 @@ function startScriptExecution(name: string): void {
 
 function stopScriptExecution(): void {
   const state = stateController.getAll();
+  state.scripts[`script-${state.scriptExecutionName}`].args = {};
   state.scriptExecutionName = '';
   state.scriptExecution = 0;
   stateController.saveState(state);

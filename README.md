@@ -661,6 +661,26 @@ Let's look at an example of how dynamic variables work. In this example, we'll c
 
 When a command fails, the script execution stops and the error is displayed.
 
+#### Advanced example
+
+The following example shows how you can use dynamic variables to create a script that creates three accounts, creates a token, associates the token with the third account, and transfers one token from the second account (treasury) to the third account.
+
+```json
+{
+  "name": "test",
+  "commands": [
+    "network use testnet",
+    "account create -a random --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+    "account create -a random --args privateKey,privKeyAcc2 --args alias,aliasAcc2 --args accountId,idAcc2",
+    "account create -a random --args privateKey,privKeyAcc3 --args alias,aliasAcc3 --args accountId,idAcc3",
+    "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite --admin-key {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId,tokenId",
+    "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
+    "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}"
+  ],
+  "args": {}
+}
+```
+
 #### Mapping Dynamic Variables to Commands
 
 Not each command exposes the same variables. Here's a list of commands and the variables they expose, which you can use in your scripts.

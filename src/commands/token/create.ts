@@ -141,6 +141,7 @@ async function createFungibleToken(
     ...tokens,
     [tokenId.toString()]: {
       tokenId: tokenId.toString(),
+      associations: [],
       name,
       symbol,
       treasuryId,

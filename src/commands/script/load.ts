@@ -48,7 +48,7 @@ function loadScript(name: string) {
   logger.log(`Executing script: ${script.name}\n`);
 
   script.commands.forEach((command) => {
-    logger.log(`Executing command: \t${command}`);
+    logger.log(`\nExecuting command: \t${command}`);
 
     try {
       execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
@@ -59,6 +59,7 @@ function loadScript(name: string) {
     }
   });
 
+  stopScriptExecution();
   logger.log(`\nScript ${script.name} executed successfully`);
 }
 
