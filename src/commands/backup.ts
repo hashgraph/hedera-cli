@@ -6,7 +6,7 @@ import { recordCommand } from '../state/stateService';
 import stateController from '../state/stateController';
 import { Logger } from '../utils/logger';
 
-import type { Command, State } from '../../types';
+import type { Command, PromptResponse, State } from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -201,8 +201,4 @@ interface RestoreOptions {
   restoreAccounts: boolean;
   restoreTokens: boolean;
   restoreScripts: boolean;
-}
-
-interface PromptResponse {
-  selection: string;
 }

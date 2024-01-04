@@ -106,6 +106,7 @@ Let's explore the different commands, their options, and outputs.
 - [Network Commands](#network-commands): Switch Hedera networks
 - [Account Commands](#account-commands): Create and manage accounts
 - [Token Commands](#token-commands): Create and manage tokens
+- [Hbar Command](#hbar-command): Transfer Hbars between accounts
 - [Backup Commands](#backup-commands): Create a backup of your state
 - [Record Commands](#record-commands): Record CLI interactions and store it in scripts
 - [State Commands](#state-commands): Manage the state of the CLI tool
@@ -398,6 +399,27 @@ Flags:
 - **To:** (required) Account ID to transfer the token to.
 - **From:** (required) Account ID to transfer the token from.
 - **Balance:** (required) Amount of token to transfer.
+
+## Hbar Command
+
+### Overview
+
+The `hbar` command in the Hedera CLI tool is designed for transferring Hbars between accounts.
+
+```sh
+hcli hbar transfer -b,--balance <balance> [-f,--from <from>] [-t,--to <to>]
+
+// Example
+hcli hbar transfer -f alice -t bob -b 1000
+hcli hbar transfer -f alice -t 0.0.12345 -b 1000
+```
+
+Flags:
+- **Balance:** (required) Amount of Hbars to transfer.
+- **From:** (optional) Account ID or alias to transfer the Hbars from.
+- **To:** (optional) Account ID or alias to transfer the Hbars to.
+
+> **Note:** If you don't specify a `from` or `to` account, the CLI tool will prompt you to select an account from your address book, listed by alias.
 
 ## Backup Commands
 
