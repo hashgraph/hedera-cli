@@ -1,6 +1,9 @@
 import axios from 'axios';
 import type { APIResponse } from '../../types';
 import { getMirrorNodeURL } from '../state/stateService';
+import { Logger } from '../utils/logger';
+
+const logger = Logger.getInstance();
 
 /**
  * API functions:
@@ -14,10 +17,11 @@ async function getAccountBalance(accountId: string): Promise<APIResponse> {
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      throw new Error(`Error fetching account balance: ${error.message}`);
+      logger.error(`Resource ${accountId} doesn't exist. ${error.message}`);
     } else {
-      throw new Error(`Unexpected error: ${error}`);
+      logger.error('Unexpected error:', error as object);
     }
+    process.exit(1);
   }
 }
 

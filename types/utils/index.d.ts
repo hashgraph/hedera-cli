@@ -3,8 +3,5 @@ export interface DisplayBalanceOptions {
   tokenId: string | undefined;
 }
 
-export interface DisplayTokenOptions {
-  short: boolean;
-}
-
-export type DisplayOptions = DisplayBalanceOptions | DisplayTokenOptions;
+// export type DisplayOptions = DisplayBalanceOptions | DisplayTokenOptions;
+export type DisplayOptions = DisplayBalanceOptions;

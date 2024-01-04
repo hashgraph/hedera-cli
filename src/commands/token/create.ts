@@ -1,17 +1,17 @@
-import {
-  TokenCreateTransaction,
-  TokenType,
-  PrivateKey,
-  TokenSupplyType,
-} from '@hashgraph/sdk';
+import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
 
 import { myParseInt } from '../../utils/verification';
 import { getSupplyType } from '../../utils/token';
-import { recordCommand, getHederaClient } from '../../state/stateService';
+import {
+  recordCommand,
+  getHederaClient,
+  getNetwork,
+} from '../../state/stateService';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
 
 import type { Command, Token } from '../../../types';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 const logger = Logger.getInstance();
 
@@ -54,21 +54,38 @@ export default (program: any) => {
       '-a, --admin-key <adminKey>',
       'Admin key of the fungible token',
     )
+    .option(
+      '--args <args>',
+      'Store arguments for scripts',
+      (value: string, previous: string) =>
+        previous ? previous.concat(value) : [value],
+      [],
+    )
     .action(async (options: CreateOptions) => {
-      try {
-        await createFungibleToken(
-          options.name,
-          options.symbol,
-          options.treasuryId,
-          options.treasuryKey,
-          options.decimals,
-          options.initialSupply,
-          options.supplyType,
-          options.adminKey,
-        );
-      } catch (error) {
-        logger.error(error as object);
-      }
+      logger.verbose('Creating new token');
+      options = dynamicVariablesUtils.replaceOptions(options);
+      const tokenId = await createFungibleToken(
+        options.name,
+        options.symbol,
+        options.treasuryId,
+        options.treasuryKey,
+        options.decimals,
+        options.initialSupply,
+        options.supplyType,
+        options.adminKey,
+      );
+
+      dynamicVariablesUtils.storeArgs(
+        options.args,
+        dynamicVariablesUtils.commandActions.token.create.action,
+        {
+          tokenId: tokenId.toString(),
+          name: options.name,
+          symbol: options.symbol,
+          treasuryId: options.treasuryId,
+          adminKey: options.adminKey,
+        },
+      );
     });
 };
 
@@ -81,12 +98,12 @@ async function createFungibleToken(
   initialSupply: number,
   supplyType: string,
   adminKey: string,
-) {
+): Promise<string> {
   const client = getHederaClient();
 
   let tokenId;
   try {
-    const tokenCreateTx = await new TokenCreateTransaction()
+    let tokenCreateTx = await new TokenCreateTransaction()
       .setTokenName(name)
       .setTokenSymbol(symbol)
       .setDecimals(decimals)
@@ -94,31 +111,37 @@ async function createFungibleToken(
       .setTokenType(TokenType.FungibleCommon)
       .setSupplyType(getSupplyType(supplyType))
       .setTreasuryAccountId(treasuryId)
-      .setAdminKey(PrivateKey.fromString(adminKey).publicKey)
+      .setAdminKey(PrivateKey.fromStringDer(adminKey).publicKey)
       .freezeWith(client)
-      .sign(PrivateKey.fromString(treasuryKey));
+      .sign(PrivateKey.fromStringDer(treasuryKey));
 
-    let tokenCreateSubmit = await tokenCreateTx.execute(client);
+    let tokenCreateTxSigned = await tokenCreateTx.sign(
+      PrivateKey.fromStringDer(adminKey),
+    );
+    let tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
     tokenId = tokenCreateRx.tokenId;
 
     if (tokenId == null) {
-      throw new Error('Token was not created');
+      logger.error('Token was not created');
+      process.exit(1);
     }
 
-    console.log('Token ID:', tokenId.toString());
+    logger.log(`Token ID: ${tokenId.toString()}`);
   } catch (error) {
     logger.error(error as object);
     client.close();
-    return;
+    process.exit(1);
   }
 
   // Store new token in state
+  logger.verbose(`Storing new token with ID ${tokenId} in state`);
   const tokens: Record<string, Token> = stateController.get('tokens');
   const updatedTokens = {
     ...tokens,
     [tokenId.toString()]: {
       tokenId: tokenId.toString(),
+      associations: [],
       name,
       symbol,
       treasuryId,
@@ -126,12 +149,14 @@ async function createFungibleToken(
       decimals,
       initialSupply,
       adminKey,
+      network: getNetwork(),
     },
   };
 
   stateController.saveKey('tokens', updatedTokens);
 
   client.close();
+  return tokenId.toString();
 }
 
 interface CreateOptions {
@@ -143,4 +168,5 @@ interface CreateOptions {
   initialSupply: number;
   supplyType: 'finite' | 'infinite';
   adminKey: string;
+  args: string[];
 }

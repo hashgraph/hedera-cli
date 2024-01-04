@@ -1,8 +1,11 @@
 import { Client, AccountId, PrivateKey } from '@hashgraph/sdk';
 
 import stateController from './stateController';
+import { Logger } from '../utils/logger';
 
 import type { Account, Token } from '../../types';
+
+const logger = Logger.getInstance();
 
 /** hook (middleware)
  * @example command ['account', 'create', '-b', '1000', '-t', 'ed25519']
@@ -41,24 +44,41 @@ function getHederaClient(): Client {
       operatorId = state.testnetOperatorId;
       operatorKey = state.testnetOperatorKey;
       break;
+    case 'previewnet':
+      client = Client.forPreviewnet();
+      operatorId = state.previewnetOperatorId;
+      operatorKey = state.previewnetOperatorKey;
+      break;
     default:
-      throw new Error(`Unsupported network: ${state.network}`);
+      logger.error('Invalid network name');
+      process.exit(1);
   }
 
   if (operatorId === '' || operatorKey === '') {
-    throw new Error(`operator key and ID not set for ${state.network}`);
+    logger.error(`operator key and ID not set for ${state.network}`);
+    process.exit(1);
   }
 
   return client.setOperator(
     AccountId.fromString(operatorId),
-    PrivateKey.fromString(operatorKey),
+    PrivateKey.fromStringDer(operatorKey),
   );
 }
 
+/**
+ * @returns {string} network name
+ */
+function getNetwork() {
+  const state = stateController.getAll();
+  return state.network;
+}
+
 function switchNetwork(name: string) {
-  if (!['mainnet', 'testnet'].includes(name)) {
-    console.error('Invalid network name. Available networks: mainnet, testnet');
-    return;
+  if (!['mainnet', 'testnet', 'previewnet'].includes(name)) {
+    logger.error(
+      'Invalid network name. Available networks: mainnet, testnet, previewnet',
+    );
+    process.exit(1);
   }
 
   const state = stateController.getAll();
@@ -72,10 +92,15 @@ function switchNetwork(name: string) {
       operatorId = state.testnetOperatorId;
       operatorKey = state.testnetOperatorKey;
       break;
+    case 'previewnet':
+      operatorId = state.previewnetOperatorId;
+      operatorKey = state.previewnetOperatorKey;
+      break;
   }
 
   if (operatorId === '' || operatorKey === '') {
-    throw new Error(`operator key and ID not set for ${state.network}`);
+    logger.error(`operator key and ID not set for ${state.network}`);
+    process.exit(1);
   }
 
   stateController.saveKey('network', name);
@@ -118,10 +143,39 @@ function getAccountByIdOrAlias(accountIdOrAlias: string): Account {
   }
 
   if (!account) {
-    throw new Error(`Account not found: ${accountIdOrAlias}`);
+    logger.error(`Account not found: ${accountIdOrAlias}`);
+    process.exit(1);
   }
 
   return account;
+}
+
+function startScriptExecution(name: string): void {
+  const state = stateController.getAll();
+  state.scriptExecutionName = name;
+  state.scriptExecution = 1;
+  stateController.saveState(state);
+}
+
+function stopScriptExecution(): void {
+  const state = stateController.getAll();
+  state.scripts[`script-${state.scriptExecutionName}`].args = {};
+  state.scriptExecutionName = '';
+  state.scriptExecution = 0;
+  stateController.saveState(state);
+}
+
+function clearState(): void {
+  const state = stateController.getAll();
+  state.accounts = {};
+  state.tokens = {};
+  state.scripts = {};
+  state.scriptExecution = 0;
+  state.scriptExecutionName = '';
+  state.recording = 0;
+  state.recordingScriptName = '';
+
+  stateController.saveState(state);
 }
 
 export {
@@ -129,8 +183,12 @@ export {
   getHederaClient,
   recordCommand,
   switchNetwork,
+  getNetwork,
   addTokenAssociation,
   getAccountById,
   getAccountByAlias,
   getAccountByIdOrAlias,
+  startScriptExecution,
+  stopScriptExecution,
+  clearState,
 };

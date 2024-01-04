@@ -1,6 +1,9 @@
 import { recordCommand } from '../../state/stateService';
+import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -14,6 +17,7 @@ export default (program: any) => {
     })
     .description('List all available networks')
     .action(() => {
-      console.log('Available networks: mainnet, testnet');
+      logger.verbose('Listing networks');
+      logger.log('Available networks: mainnet, testnet, previewnet');
     });
 };

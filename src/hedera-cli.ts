@@ -11,13 +11,14 @@ program
   .option('-v, --verbose', 'output extra debugging')
   .option('-q, --quiet', 'output only errors and warnings');
 
-if (process.argv.includes('-v')) {
+if (process.argv.includes('--verbose')) {
   logger.setLevel('verbose');
-} else if (process.argv.includes('-q')) {
+} else if (process.argv.includes('--quiet')) {
   logger.setLevel('quiet');
 }
 
 // Commands
+commands.stateCommands(program);
 commands.setupCommands(program);
 commands.networkCommands(program);
 commands.accountCommands(program);
@@ -25,5 +26,7 @@ commands.recordCommands(program);
 commands.scriptCommands(program);
 commands.backupCommands(program);
 commands.tokenCommands(program);
+commands.hbarCommands(program);
+commands.waitCommands(program);
 
 program.parseAsync(process.argv);

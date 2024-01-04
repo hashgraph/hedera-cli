@@ -3,6 +3,7 @@ import { recordCommand } from '../../state/stateService';
 import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 const logger = Logger.getInstance();
 
@@ -26,11 +27,11 @@ export default (program: any) => {
       'Token ID to associate with account',
     )
     .action(async (options: AssociateTokenOptions) => {
-      try {
-        await associateToken(options.tokenId, options.accountId);
-      } catch (error) {
-        logger.error(error as object);
-      }
+      logger.verbose(
+        `Associating token ${options.tokenId} with ${options.accountId}`,
+      );
+      options = dynamicVariablesUtils.replaceOptions(options);
+      await associateToken(options.tokenId, options.accountId);
     });
 };
 

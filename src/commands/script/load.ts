@@ -2,9 +2,16 @@ const axios = require('axios');
 
 import { recordCommand } from '../../state/stateService';
 import stateController from '../../state/stateController';
+import {
+  startScriptExecution,
+  stopScriptExecution,
+} from '../../state/stateService';
 import { execSync } from 'child_process';
+import { Logger } from '../../utils/logger';
 
 import type { Command, Script } from '../../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -19,35 +26,41 @@ export default (program: any) => {
     .description('Load and execute a script')
     .requiredOption('-n, --name <name>', 'Name of script to load and execute')
     .action((options: ScriptLoadOptions) => {
+      logger.verbose(`Loading script ${options.name}`);
       loadScript(options.name);
     });
 };
 
 function loadScript(name: string) {
-  const scripts: Record<string, Script> = stateController.get('scripts');
+  startScriptExecution(name);
+
+  const state = stateController.getAll();
+  const scripts: Record<string, Script> = state.scripts;
   const scriptName = `script-${name}`;
   const script = scripts[scriptName];
 
   if (!script) {
-    console.error(`No script found with name: ${scriptName}`);
-    return;
+    logger.error(`No script found with name: ${scriptName}`);
+    stopScriptExecution();
+    process.exit(1);
   }
 
-  console.log(`Executing script: ${script.name}\n`);
+  logger.log(`Executing script: ${script.name}\n`);
 
   script.commands.forEach((command) => {
-    console.log(`Executing command: \t${command}`);
+    logger.log(`\nExecuting command: \t${command}`);
 
     try {
       execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
     } catch (error: any) {
-      console.error(`Error executing command: ${command}`);
-      console.error(error.message);
-      return;
+      logger.error('Unable to execute command', error.message || error);
+      stopScriptExecution();
+      process.exit(1);
     }
   });
 
-  console.log(`\nScript ${script.name} executed successfully`);
+  stopScriptExecution();
+  logger.log(`\nScript ${script.name} executed successfully`);
 }
 
 interface ScriptLoadOptions {

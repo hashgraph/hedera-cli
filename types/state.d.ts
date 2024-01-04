@@ -3,6 +3,7 @@ import {
 } from "@hashgraph/sdk";
 
 export type Account = {
+  network: string;
   alias: string;
   accountId: string;
   type: string;
@@ -13,10 +14,11 @@ export type Account = {
   privateKey: string;
 }
 
-type Script = {
+export type Script = {
   name: string;
   creation: number;
   commands: string[];
+  args: Record<string, string>;
 }
 
 export type Token = {
@@ -30,6 +32,7 @@ export type Token = {
   supplyType: string;
   maxSupply: number;
   keys: Keys;
+  network: string;
 }
 
 export interface Keys {
@@ -54,9 +57,13 @@ export interface State {
   mirrorNodeMainnet: string;
   recording: number;
   recordingScriptName: string;
+  scriptExecution: number;
+  scriptExecutionName: string;
   accounts: Record<string, Account>;
   scripts: Record<string, Script>;
   tokens: Record<string, Token>;
+  previewnetOperatorKey: string;
+  previewnetOperatorId: string;
   testnetOperatorKey: string;
   testnetOperatorId: string;
   mainnetOperatorKey: string;

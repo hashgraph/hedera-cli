@@ -4,7 +4,11 @@ import * as dotenv from 'dotenv';
 import { recordCommand } from '../state/stateService';
 import stateController from '../state/stateController';
 import config from '../state/config';
+import { Logger } from '../utils/logger';
+
 import type { Command } from '../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   const setup = program.command('setup').description('Setup Hedera CLI');
@@ -20,11 +24,14 @@ export default (program: any) => {
     })
     .description('Setup the CLI with operator key and ID')
     .action(() => {
+      logger.verbose(
+        'Initializing the CLI tool with the config and operator key and ID for different networks',
+      );
       setupCLI('init');
     });
 
   setup
-    .command('reset')
+    .command('reload')
     .hook('preAction', (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
@@ -32,19 +39,19 @@ export default (program: any) => {
       ];
       recordCommand(command);
     })
-    .option('-a, --skip-accounts', 'Skip resetting accounts', false)
-    .option('-t, --skip-tokens', 'Skip resetting tokens', false)
-    .option('-s, --skip-scripts', 'Skip resetting scripts', false)
-    .description('Reset the CLI to default settings')
-    .action((options: ResetOptions) => {
-      reset(options.skipAccounts, options.skipTokens, options.skipScripts);
+    .description('Reload the CLI with operator key and ID')
+    .action(() => {
+      logger.verbose(
+        'Reloading the CLI tool with operator key and ID for different networks',
+      );
+      setupCLI('reload');
     });
 };
 
 function setupCLI(action: string): void {
   if (process.env.HOME === undefined) {
-    console.error('Error: HOME environment variable is not defined');
-    return;
+    logger.error('HOME environment variable is not defined');
+    process.exit(1);
   }
 
   // Path to the .env file in the .hedera directory in the user's home directory
@@ -55,8 +62,8 @@ function setupCLI(action: string): void {
 
   // Check for errors in loading .env file
   if (envConfig.error) {
-    console.error('Error loading .env file:', envConfig.error.message);
-    return;
+    logger.error(`Can't load .env file: ${envConfig.error.message}`);
+    process.exit(1);
   }
 
   // Extract operator key and ID from environment variables
@@ -65,32 +72,46 @@ function setupCLI(action: string): void {
     TESTNET_OPERATOR_ID,
     MAINNET_OPERATOR_KEY,
     MAINNET_OPERATOR_ID,
+    PREVIEWNET_OPERATOR_ID,
+    PREVIEWNET_OPERATOR_KEY,
   } = process.env;
 
   let mainnetOperatorId = MAINNET_OPERATOR_ID || '';
   let mainnetOperatorKey = MAINNET_OPERATOR_KEY || '';
   let testnetOperatorId = TESTNET_OPERATOR_ID || '';
   let testnetOperatorKey = TESTNET_OPERATOR_KEY || '';
+  let previewnetOperatorId = PREVIEWNET_OPERATOR_ID || '';
+  let previewnetOperatorKey = PREVIEWNET_OPERATOR_KEY || '';
 
-  // Validate operator key and ID pairs for testnet and mainnet
+  // Validate operator key and ID pairs for previewnet, testnet, and mainnet
+  if (
+    (PREVIEWNET_OPERATOR_KEY && !PREVIEWNET_OPERATOR_ID) ||
+    (!PREVIEWNET_OPERATOR_KEY && PREVIEWNET_OPERATOR_ID)
+  ) {
+    logger.error(
+      'Both PREVIEWNET_OPERATOR_KEY and PREVIEWNET_OPERATOR_ID must be defined together in the .env file.',
+    );
+    process.exit(1);
+  }
+
   if (
     (TESTNET_OPERATOR_KEY && !TESTNET_OPERATOR_ID) ||
     (!TESTNET_OPERATOR_KEY && TESTNET_OPERATOR_ID)
   ) {
-    console.error(
+    logger.error(
       'Both TESTNET_OPERATOR_KEY and TESTNET_OPERATOR_ID must be defined together in the .env file.',
     );
-    return;
+    process.exit(1);
   }
 
   if (
     (MAINNET_OPERATOR_KEY && !MAINNET_OPERATOR_ID) ||
     (!MAINNET_OPERATOR_KEY && MAINNET_OPERATOR_ID)
   ) {
-    console.error(
+    logger.error(
       'Both MAINNET_OPERATOR_KEY and MAINNET_OPERATOR_ID must be defined together in the .env file.',
     );
-    return;
+    process.exit(1);
   }
 
   // Only write a fresh state file if the user is running the init command
@@ -103,6 +124,8 @@ function setupCLI(action: string): void {
     testnetOperatorKey,
     mainnetOperatorId,
     mainnetOperatorKey,
+    previewnetOperatorId,
+    previewnetOperatorKey,
   );
 }
 
@@ -111,6 +134,8 @@ function setupOperatorAccounts(
   testnetOperatorKey: string,
   mainnetOperatorId: string,
   mainnetOperatorKey: string,
+  previewnetOperatorId: string,
+  previewnetOperatorKey: string,
 ): void {
   const state = stateController.getAll();
   let newState = { ...state };
@@ -118,9 +143,10 @@ function setupOperatorAccounts(
   newState.testnetOperatorId = testnetOperatorId;
   newState.mainnetOperatorKey = mainnetOperatorKey;
   newState.mainnetOperatorId = mainnetOperatorId;
+  newState.previewnetOperatorId = previewnetOperatorId;
+  newState.previewnetOperatorKey = previewnetOperatorKey;
 
-  if (testnetOperatorKey === '' && testnetOperatorId === '')
-    newState.network = 'mainnet';
+  newState.network = 'testnet';
 
   stateController.saveState(newState);
 }
@@ -131,27 +157,4 @@ function setupState(): void {
   };
 
   stateController.saveState(newState);
-}
-
-function reset(
-  skipAccounts: boolean,
-  skipTokens: boolean,
-  skipScripts: boolean,
-): void {
-  if (!skipAccounts && !skipTokens && !skipScripts) {
-    console.log('Resetting CLI to default settings...');
-    setupCLI('init');
-    return;
-  }
-
-  setupCLI('reset');
-  if (!skipAccounts) stateController.saveKey('accounts', {});
-  if (!skipTokens) stateController.saveKey('tokens', {});
-  if (!skipScripts) stateController.saveKey('scripts', {});
-}
-
-interface ResetOptions {
-  skipAccounts: boolean;
-  skipTokens: boolean;
-  skipScripts: boolean;
 }

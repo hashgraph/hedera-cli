@@ -16,7 +16,7 @@ describe("account create command", () => {
       // Arrange
       const balance = 5000;
       const newAccountAlias = "greg";
-      const type = "ED25519"
+      const type = "ED25519";
       const createAccountSpy = jest.spyOn(accountUtils, "createAccount");
 
       const program = new Command();
@@ -38,7 +38,7 @@ describe("account create command", () => {
 
       // Assert
       const greg = accountUtils.findAccountByAlias(newAccountAlias);
-      expect(createAccountSpy).toHaveBeenCalledWith(balance, type, newAccountAlias);
+      expect(createAccountSpy).toHaveBeenCalledWith(balance, type, newAccountAlias, 0);
       expect(greg.alias).toBe(newAccountAlias);
       expect(greg.type).toBe(type);
     });
@@ -69,7 +69,7 @@ describe("account create command", () => {
   
         // Assert
         const greg = accountUtils.findAccountByAlias(newAccountAlias);
-        expect(createAccountSpy).toHaveBeenCalledWith(balance, type, newAccountAlias);
+        expect(createAccountSpy).toHaveBeenCalledWith(balance, type, newAccountAlias, 0);
         expect(greg.alias).toBe(newAccountAlias);
         expect(greg.type).toBe(type);
       });

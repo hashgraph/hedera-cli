@@ -4,3 +4,7 @@ export interface Command {
       args: string[];
     };
 }
+
+export interface PromptResponse {
+  selection: string;
+}

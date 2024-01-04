@@ -6,6 +6,8 @@ export const baseState: State = {
   mirrorNodeMainnet: "https://mainnet.mirrornode.hedera.com/api/v1",
   recording: 0,
   recordingScriptName: "",
+  scriptExecution: 0,
+  scriptExecutionName: "",
   accounts: {},
   scripts: {},
   testnetOperatorKey:
@@ -13,11 +15,14 @@ export const baseState: State = {
   testnetOperatorId: "0.0.458179",
   mainnetOperatorKey: "",
   mainnetOperatorId: "",
+  previewnetOperatorKey: "",
+  previewnetOperatorId: "",
   tokens: {},
 };
 
 /* accounts */
 export const alice: Account = {
+  network: "testnet",
   alias: "alice",
   accountId: "0.0.6025067",
   type: "ED25519",
@@ -31,6 +36,7 @@ export const alice: Account = {
 };
 
 export const bob: Account = {
+  network: "testnet",
   alias: "bob",
   accountId: "0.0.6025066",
   type: "ED25519",
@@ -51,9 +57,11 @@ export const script_basic: Script = {
     "account create -a random",
     "token create-ft -n m -s mm -d 2 -i 1000 -a 302e020100300506032b6570042204202a6568253a539643468dda3128a734c9fcb07a927b3f742719a869db731f9f50 -t 0.0.4536940 -k 302e020100300506032b6570042204202a6568253a539643468dda3128a734c9fcb07a927b3f742719a869db731f9f50",
   ],
+  args: {}
 };
 
 const token = {
+  network: "testnet",
   associations: [],
   tokenId: "0.0.6025124",
   name: "myToken",

@@ -1,15 +1,20 @@
-import { BalanceResponse } from '../../types/api';
+import { Logger } from './logger';
 import api from '../api';
 import {
   getAccountByIdOrAlias,
   getHederaClient,
   addTokenAssociation,
 } from '../state/stateService';
+
 import {
   TokenAssociateTransaction,
   PrivateKey,
   TokenSupplyType,
 } from '@hashgraph/sdk';
+
+import { BalanceResponse } from '../../types/api';
+
+const logger = Logger.getInstance();
 
 const getSupplyType = (type: string): TokenSupplyType => {
   const tokenType = type.toLowerCase();
@@ -18,7 +23,8 @@ const getSupplyType = (type: string): TokenSupplyType => {
   } else if (tokenType === 'infinite') {
     return TokenSupplyType.Infinite;
   } else {
-    throw new Error('Invalid supply type');
+    logger.error('Invalid supply type');
+    process.exit(1);
   }
 };
 
@@ -27,7 +33,6 @@ const getSupplyType = (type: string): TokenSupplyType => {
  * @param tokenId The token ID
  * @param accountId The account ID
  * @returns True if the token is associated with the account, false otherwise
- * @throws Error if the API call fails
  */
 const isTokenAssociated = async (
   tokenId: string,
@@ -59,18 +64,16 @@ const associateToken = async (
       .setAccountId(account.accountId)
       .setTokenIds([tokenId])
       .freezeWith(client)
-      .sign(PrivateKey.fromString(account.privateKey));
+      .sign(PrivateKey.fromStringDer(account.privateKey));
 
     let tokenAssociateSubmit = await tokenAssociateTx.execute(client);
     await tokenAssociateSubmit.getReceipt(client);
 
-    console.log('Token associated:', tokenId);
-    client.close();
+    logger.log(`Token associated: ${tokenId}`);
   } catch (error) {
-    console.log('Failed to associate token:', tokenId);
-    console.log(error);
+    logger.error(`Failed to associate token: ${tokenId}`, error as object);
     client.close();
-    return;
+    process.exit(1);
   }
 
   // Store association in state for token

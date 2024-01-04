@@ -1,9 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { prompt } from 'enquirer';
 
 import { recordCommand } from '../state/stateService';
+import stateController from '../state/stateController';
+import { Logger } from '../utils/logger';
 
-import type { Command, State } from '../../types';
+import type { Command, PromptResponse, State } from '../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   const network = program.command('backup');
@@ -11,15 +16,109 @@ export default (program: any) => {
   network
     .command('create')
     .hook('preAction', (thisCommand: Command) => {
-      recordCommand(thisCommand.parent.args);
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      recordCommand(command);
     })
     .description('Create a backup of the config.json file')
     .option('--accounts', 'Backup the accounts')
     .option('--safe', 'Remove the private keys from the backup')
     .action((options: BackupOptions) => {
+      logger.verbose('Creating backup of state');
       backupState(options.accounts, options.safe);
     });
+
+  network
+    .command('restore')
+    .hook('preAction', (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      recordCommand(command);
+    })
+    .description('Restore a backup of the full state')
+    .option('-f, --file <filename>', 'Filename containing the state backup')
+    .option('--restore-accounts', 'Restore the accounts', false)
+    .option('--restore-tokens', 'Restore the tokens', false)
+    .option('--restore-scripts', 'Restore the scripts', false)
+    .action(async (options: RestoreOptions) => {
+      logger.verbose('Restoring backup of state');
+
+      let filename = options.file;
+      if (!options.file) {
+        const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
+
+        // filter out the pattern state.backup.TIMESTAMP.json
+        const pattern = /^state\.backup\.\d+\.json$/;
+        const backups = files.filter((file) => pattern.test(file));
+
+        try {
+          const response: PromptResponse = await prompt({
+            type: 'select',
+            name: 'selection',
+            message: 'Choose a backup:',
+            choices: backups,
+          });
+
+          filename = response.selection;
+        } catch (error) {
+          logger.error('Unable to read backup file:', error as object);
+          process.exit(1);
+        }
+      }
+
+      restoreState(
+        filename,
+        options.restoreAccounts,
+        options.restoreTokens,
+        options.restoreScripts,
+      );
+    });
 };
+
+/**
+ * Restore a backup of the state file
+ *
+ * @param filename File containing the state backup
+ */
+function restoreState(
+  filename: string,
+  restoreAccounts: boolean,
+  restoreTokens: boolean,
+  restoreScripts: boolean,
+) {
+  let data;
+  try {
+    const backupPath = path.join(__dirname, '..', 'state', filename);
+    data = JSON.parse(fs.readFileSync(backupPath, 'utf8')) as State;
+  } catch (error) {
+    logger.error('Unable to read backup file:', error as object);
+    process.exit(1);
+  }
+
+  if (!restoreAccounts && !restoreTokens && !restoreScripts) {
+    stateController.saveState(data);
+    logger.log('Backup restored successfully');
+    process.exit(0);
+  }
+
+  if (restoreAccounts) {
+    stateController.saveKey('accounts', data.accounts || {});
+  }
+
+  if (restoreTokens) {
+    stateController.saveKey('tokens', data.tokens || {});
+  }
+
+  if (restoreScripts) {
+    stateController.saveKey('scripts', data.scripts || {});
+  }
+
+  logger.log('Backup restored successfully');
+}
 
 /**
  * Create a backup of the state file
@@ -35,8 +134,8 @@ function backupState(backupAccounts: boolean, safe: boolean) {
     const statePath = path.join(__dirname, '..', 'state', 'state.json');
     data = JSON.parse(fs.readFileSync(statePath, 'utf8')) as State;
   } catch (error) {
-    console.error('Error reading the state file:', error);
-    return;
+    logger.error('Unable to read state file:', error as object);
+    process.exit(1);
   }
 
   // Create backup filename
@@ -55,12 +154,11 @@ function backupState(backupAccounts: boolean, safe: boolean) {
 
   try {
     fs.writeFileSync(backupPath, JSON.stringify(data, null, 2), 'utf8');
+    logger.log(`Backup created with filename: ${backupFilename}`);
   } catch (error) {
-    console.error('Error creating the backup file:', error);
-    return;
+    logger.error('Unable to create backup file:', error as object);
+    process.exit(1);
   }
-
-  console.log(`Backup created successfully: ${backupFilename}`);
 }
 
 /**
@@ -73,6 +171,8 @@ function backupState(backupAccounts: boolean, safe: boolean) {
 function filterState(data: State) {
   const filteredState = { ...data };
 
+  filteredState.previewnetOperatorId = '';
+  filteredState.previewnetOperatorKey = '';
   filteredState.testnetOperatorId = '';
   filteredState.testnetOperatorKey = '';
   filteredState.mainnetOperatorId = '';
@@ -96,7 +196,7 @@ function filterState(data: State) {
     filteredState.accounts[alias].privateKey = '';
   });
 
-  console.log('Warning: The private keys were not removed from scripts');
+  logger.log('Warning: The private keys were not removed from scripts');
 
   return filteredState;
 }
@@ -104,4 +204,11 @@ function filterState(data: State) {
 interface BackupOptions {
   accounts: boolean;
   safe: boolean;
+}
+
+interface RestoreOptions {
+  file: string;
+  restoreAccounts: boolean;
+  restoreTokens: boolean;
+  restoreScripts: boolean;
 }

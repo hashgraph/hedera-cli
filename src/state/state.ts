@@ -1,6 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import type { State as StateInterface } from '../../types';
+import { Logger } from '../utils/logger';
+
+const logger = Logger.getInstance();
 
 class State {
   private _statePath: string; // private class property
@@ -17,18 +20,18 @@ class State {
         JSON.stringify(updatedData, null, 2),
         'utf-8',
       );
-      console.log('Config saved.');
+      logger.verbose(`State saved for key: ${key}`);
     } catch (error: any) {
-      console.error('Error saving config:', error.message);
+      logger.error('Unable to save state:', error.message);
     }
   }
 
   setAll(data: StateInterface): void {
     try {
       fs.writeFileSync(this._statePath, JSON.stringify(data, null, 2), 'utf-8');
-      console.log('Config saved.');
+      logger.verbose('Full state saved');
     } catch (error: any) {
-      console.error('Error saving config:', error.message);
+      logger.error('Unable to save state:', error.message);
     }
   }
 

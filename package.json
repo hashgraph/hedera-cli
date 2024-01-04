@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "CLI tool to manage and setup developer environments for Hedera Hashgraph.",
   "main": "hedera-cli.js",
+  "target": "esnext",
+  "module": "esnext",
   "scripts": {
     "build": "npm run format && rm -rf dist/ && tsc && npm run copy-state && npm run rename-base-state && npm run copy-input",
     "dev-build": "rm -rf dist/ && tsc && npm run copy-test-state && npm run copy-input && npm run rename-test-state && npm run watch",
@@ -28,7 +30,8 @@
     "@hashgraph/sdk": "^2.35.0",
     "axios": "^1.5.1",
     "commander": "^11.0.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "enquirer": "^2.4.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.10",

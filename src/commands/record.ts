@@ -1,4 +1,7 @@
 import stateController from '../state/stateController';
+import { Logger } from '../utils/logger';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -8,18 +11,18 @@ export default (program: any) => {
       switch (action) {
         case 'start':
           if (!name) {
-            console.error('Error: Script name is required for start action');
+            logger.error('Script name is required for start action');
             process.exit(1);
           }
           startRecording(name);
-          console.log(`Recording started for script: ${name}`);
+          logger.log(`Recording started for script: ${name}`);
           break;
         case 'stop':
           stopRecording();
-          console.log('Recording stopped');
+          logger.log('Recording stopped');
           break;
         default:
-          console.error(`Unknown action: ${action}`);
+          logger.error(`Unknown recording action called: ${action}`);
           process.exit(1);
       }
     });
@@ -33,6 +36,7 @@ function startRecording(scriptName: string) {
     name: scriptName,
     creation: Date.now(),
     commands: [],
+    args: {},
   };
   stateController.saveState(state);
 }

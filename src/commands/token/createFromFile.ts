@@ -1,16 +1,16 @@
 import * as path from 'path';
-import {
-  TokenCreateTransaction,
-  TokenType,
-  PrivateKey,
-  TokenSupplyType,
-} from '@hashgraph/sdk';
+import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
 
 import accountUtils from '../../utils/account';
 import { getSupplyType } from '../../utils/token';
-import { recordCommand, getHederaClient } from '../../state/stateService';
+import {
+  recordCommand,
+  getHederaClient,
+  getNetwork,
+} from '../../state/stateService';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 import type { Account, Command, Token, Keys } from '../../../types';
 
@@ -31,17 +31,43 @@ export default (program: any) => {
       '-f, --file <filename>',
       'Filename containing the token information',
     )
-    .action(createTokenFromCLI);
+    .option(
+      '--args <args>',
+      'Store arguments for scripts',
+      (value: string, previous: string) =>
+        previous ? previous.concat(value) : [value],
+      [],
+    )
+    .action(createToken);
 };
 
-async function createTokenFromCLI(options: CreateTokenFromFileOptions) {
-  try {
-    const filepath = resolveTokenFilePath(options.file);
-    const tokenDefinition = require(filepath);
-    await createTokenFromFile(tokenDefinition);
-  } catch (error) {
-    logger.error(error as object);
-  }
+async function createToken(options: CreateTokenFromFileOptions) {
+  logger.verbose(`Creating token from template with name: ${options.file}`);
+  options = dynamicVariablesUtils.replaceOptions(options);
+
+  const filepath = resolveTokenFilePath(options.file);
+  const tokenDefinition = require(filepath);
+  const token = await createTokenFromFile(tokenDefinition);
+
+  // Store dynamic script variables
+  dynamicVariablesUtils.storeArgs(
+    options.args,
+    dynamicVariablesUtils.commandActions.token.createFromFile.action,
+    {
+      tokenId: token.tokenId,
+      name: token.name,
+      symbol: token.symbol,
+      treasuryId: token.treasuryId,
+      adminKey: token.keys.adminKey,
+      pauseKey: token.keys.pauseKey,
+      kycKey: token.keys.kycKey,
+      wipeKey: token.keys.wipeKey,
+      freezeKey: token.keys.freezeKey,
+      supplyKey: token.keys.supplyKey,
+      feeScheduleKey: token.keys.feeScheduleKey,
+      treasuryKey: token.keys.treasuryKey,
+    },
+  );
 }
 
 function resolveTokenFilePath(filename: string): string {
@@ -50,6 +76,7 @@ function resolveTokenFilePath(filename: string): string {
 
 function initializeToken(tokenInput: TokenInput): Token {
   const token: Token = {
+    network: getNetwork(),
     associations: [],
     tokenId: '',
     name: tokenInput.name,
@@ -111,25 +138,29 @@ async function createTokenOnNetwork(token: Token) {
     // Signing
     tokenCreateTx
       .freezeWith(client)
-      .sign(PrivateKey.fromString(token.keys.treasuryKey));
+      .sign(PrivateKey.fromStringDer(token.keys.treasuryKey));
 
     if (token.keys.adminKey !== '') {
-      tokenCreateTx.sign(PrivateKey.fromString(token.keys.adminKey));
+      tokenCreateTx.sign(PrivateKey.fromStringDer(token.keys.adminKey));
     }
 
     // Execute
     let tokenCreateSubmit = await tokenCreateTx.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
 
-    if (tokenCreateRx.tokenId == null) throw new Error('Token was not created');
+    if (tokenCreateRx.tokenId == null) {
+      logger.error('Token was not created');
+      client.close();
+      process.exit(1);
+    }
 
     token.tokenId = tokenCreateRx.tokenId.toString();
-    console.log('Token ID:', token.tokenId);
+    logger.log(`Token ID: ${token.tokenId}`);
     client.close();
   } catch (error) {
     logger.error(error as object);
     client.close();
-    return;
+    process.exit(1);
   }
 }
 
@@ -151,20 +182,22 @@ function addKeysToTokenCreateTx(
   Object.entries(keySetters).forEach(([key, setter]) => {
     const keyValue = token.keys[key as keyof typeof token.keys];
     if (keyValue && keyValue !== '') {
-      setter.call(tokenCreateTx, PrivateKey.fromString(keyValue).publicKey);
+      setter.call(tokenCreateTx, PrivateKey.fromStringDer(keyValue).publicKey);
     }
   });
 }
 
-async function createTokenFromFile(tokenInput: TokenInput) {
+async function createTokenFromFile(tokenInput: TokenInput): Promise<Token> {
   try {
     let token = initializeToken(tokenInput);
     token = await prepareTokenCreation(token, tokenInput);
     await createTokenOnNetwork(token);
     updateTokenState(token);
+    return token;
   } catch (error) {
     logger.error(error as object);
     getHederaClient().close();
+    process.exit(1);
   }
 }
 
@@ -262,8 +295,11 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
           newAccount.account.privateKey;
       });
     } catch (error) {
-      logger.error(error as object);
-      throw new Error(`Failed to create new accounts for token`);
+      logger.error(
+        'Failed to create new account(s) for token',
+        error as object,
+      );
+      process.exit(1);
     }
   }
 
@@ -273,7 +309,8 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
 function getTreasuryIdByTreasuryKey(treasuryKey: string): string {
   const account = accountUtils.findAccountByPrivateKey(treasuryKey);
   if (!account) {
-    throw new Error('Treasury account not found');
+    logger.error('Treasury account not found');
+    process.exit(1);
   }
   return account.accountId;
 }
@@ -290,6 +327,7 @@ async function createAccountForToken(
 
 interface CreateTokenFromFileOptions {
   file: string;
+  args: string[];
 }
 
 interface TokenInput {

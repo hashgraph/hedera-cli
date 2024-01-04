@@ -6,8 +6,12 @@ import {
   getHederaClient,
   getAccountByIdOrAlias,
 } from '../../state/stateService';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
+
+const logger = Logger.getInstance();
 
 export default (program: any) => {
   program
@@ -29,6 +33,11 @@ export default (program: any) => {
       myParseInt,
     )
     .action(async (options: TransferTokenOptions) => {
+      options = dynamicVariablesUtils.replaceOptions(options);
+      logger.verbose(
+        `Transfering tokens from ${options.from} to ${options.to}`,
+      );
+
       const tokenId = options.tokenId;
       const toIdOrAlias = options.to;
       const fromIdOrAlias = options.from;
@@ -50,16 +59,23 @@ export default (program: any) => {
           .freezeWith(client);
 
         const transferTxSign = await transferTx.sign(
-          PrivateKey.fromString(fromAccount.privateKey),
+          PrivateKey.fromStringDer(fromAccount.privateKey),
         );
 
-        const receipt = await transferTxSign.execute(client);
-        console.log(
-          'Transfer successful, tx ID',
-          receipt.transactionId.toString(),
-        );
+        const transfer = await transferTxSign.execute(client);
+        const receipt = await transfer.getReceipt(client);
+        if (receipt.status._code === 22) {
+          logger.log(
+            `Transfer successful with tx ID: ${transfer.transactionId.toString()}`,
+          );
+        } else {
+          logger.error(
+            `Transfer failed with tx ID: ${transfer.transactionId.toString()}`,
+          );
+          process.exit(1);
+        }
       } catch (error) {
-        console.log(error);
+        logger.error('Unable to transfer token', error as object);
       }
 
       client.close();

@@ -45,7 +45,7 @@ export class Logger {
     if (error) {
       console.error(message, error);
     } else {
-      console.error(message);
+      console.error('Error:', message);
     }
   }
 

@@ -5,8 +5,6 @@ import importCommand from './import';
 import listCommand from './list';
 import clearCommand from './clear';
 
-import type { Command } from '../../../types';
-
 export default (program: any) => {
   const account = program.command('account');
 
