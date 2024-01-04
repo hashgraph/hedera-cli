@@ -28,7 +28,7 @@ function display(
 // -- display balance functions -- //
 function displayHbarBalance(accountId: string, hbars: number): void {
   logger.log(`Hbar balance for account ${accountId}:`);
-  logger.log(`${hbars} Hbars`);
+  logger.log(`${hbars} Tinybars or ${hbars / 100000000} Hbar`);
 }
 
 function displayTokenBalance(
