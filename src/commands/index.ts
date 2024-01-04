@@ -7,6 +7,7 @@ import setupCommands from './setup';
 import stateCommands from './state';
 import recordCommands from './record';
 import scriptCommands from './script';
+import waitCommands from './wait';
 
 const commands = {
   accountCommands,
@@ -18,6 +19,7 @@ const commands = {
   stateCommands,
   recordCommands,
   scriptCommands,
+  waitCommands,
 };
 
 export default commands;

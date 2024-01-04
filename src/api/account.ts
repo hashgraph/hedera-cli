@@ -17,7 +17,7 @@ async function getAccountBalance(accountId: string): Promise<APIResponse> {
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      logger.error(error.message);
+      logger.error(`Resource ${accountId} doesn't exist. ${error.message}`);
     } else {
       logger.error('Unexpected error:', error as object);
     }

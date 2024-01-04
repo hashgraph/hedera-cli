@@ -27,5 +27,6 @@ commands.scriptCommands(program);
 commands.backupCommands(program);
 commands.tokenCommands(program);
 commands.hbarCommands(program);
+commands.waitCommands(program);
 
 program.parseAsync(process.argv);
