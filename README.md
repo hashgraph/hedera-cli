@@ -695,9 +695,9 @@ The following example shows how you can use dynamic variables to create a script
     "account create -a random --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
     "account create -a random --args privateKey,privKeyAcc2 --args alias,aliasAcc2 --args accountId,idAcc2",
     "account create -a random --args privateKey,privKeyAcc3 --args alias,aliasAcc3 --args accountId,idAcc3",
-    "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite --admin-key {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId,tokenId",
-    "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
-    "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}"
+    "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite --admin-key {{privKeyAcc1}} --treasury-id {{idAcc2}} --treasury-key {{privKeyAcc2}} --args tokenId,myTokenId",
+    "token associate --account-id {{idAcc3}} --token-id {{myTokenId}}",
+    "token transfer -t {{myTokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}"
   ],
   "args": {}
 }
