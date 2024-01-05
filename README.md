@@ -100,7 +100,9 @@ alias hcli="node /Users/myUser/hedera-cli/dist/hedera-cli.js"
 
 # Video Guide
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/3XCkdtMzR14?si=fmQP9UALy1IK2VbW" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+Learn how to use the Hedera CLI Tool by watching the video below.
+
+[![Thumbnail video guide](https://img.youtube.com/vi/3XCkdtMzR14/0.jpg)](https://www.youtube.com/watch?v=3XCkdtMzR14 "Learn how to use the Hedera CLI")
 
 # Commands
 
