@@ -78,7 +78,7 @@ node dist/hedera-cli.js setup init
 You can verify the installation by listing all accounts in your address book. If you haven't added any accounts yet, you should see the following output:
 
 ```sh
-node dist/hedera-cli.js account ls
+node dist/hedera-cli.js account list
 // No accounts found.
 ```
 
@@ -97,6 +97,12 @@ To avoid typing the full command each time, you can set an alias in your shell p
 ```sh
 alias hcli="node /Users/myUser/hedera-cli/dist/hedera-cli.js"
 ```
+
+# Video Guide
+
+Learn how to use the Hedera CLI Tool by watching the video below.
+
+[![Thumbnail video guide](https://img.youtube.com/vi/3XCkdtMzR14/0.jpg)](https://www.youtube.com/watch?v=3XCkdtMzR14 "Learn how to use the Hedera CLI")
 
 # Commands
 
