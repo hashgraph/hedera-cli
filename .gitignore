@@ -3,7 +3,6 @@ dist/
 
 # Testing state
 src/state/test_state.json
-src/state/base_state.json
 
 # Logs
 logs

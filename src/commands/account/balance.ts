@@ -24,25 +24,23 @@ export default (program: any) => {
     )
     .option('-h, --only-hbar', 'Show only Hbar balance')
     .option('-t, --token-id <tokenId>', 'Show balance for a specific token ID')
-    .action(
-      async (options: GetAccountBalanceOptions) => {
-        logger.verbose(`Getting balance for ${options.accountIdOrAlias}`);
-        options = dynamicVariablesUtils.replaceOptions(options);
+    .action(async (options: GetAccountBalanceOptions) => {
+      logger.verbose(`Getting balance for ${options.accountIdOrAlias}`);
+      options = dynamicVariablesUtils.replaceOptions(options);
 
-        if (options.onlyHbar && options.tokenId) {
-          logger.error(
-            'You cannot use both --only-hbar and --token-id options at the same time.',
-          );
-          process.exit(1);
-        }
-
-        await accountUtils.getAccountBalance(
-          options.accountIdOrAlias,
-          options.onlyHbar,
-          options.tokenId,
+      if (options.onlyHbar && options.tokenId) {
+        logger.error(
+          'You cannot use both --only-hbar and --token-id options at the same time.',
         );
-      },
-    );
+        process.exit(1);
+      }
+
+      await accountUtils.getAccountBalance(
+        options.accountIdOrAlias,
+        options.onlyHbar,
+        options.tokenId,
+      );
+    });
 };
 
 interface GetAccountBalanceOptions {

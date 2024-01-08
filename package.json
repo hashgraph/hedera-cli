@@ -6,14 +6,14 @@
   "target": "esnext",
   "module": "esnext",
   "scripts": {
-    "build": "npm run format && rm -rf dist/ && tsc && npm run copy-state && npm run rename-base-state && npm run copy-input",
+    "build": "npm run format && rimraf --glob 'dist/' && tsc && npm run copy-state && npm run rename-base-state && npm run copy-input",
     "dev-build": "rm -rf dist/ && tsc && npm run copy-test-state && npm run copy-input && npm run rename-test-state && npm run watch",
     "watch": "tsc --watch",
-    "copy-test-state": "copyfiles -u 2 src/state/test_state.json dist/state",
+    "copy-test-state": "copyfiles -u 2 src/state/test_state.json dist/state/",
     "rename-base-state": "node -e \"require('fs').rename('dist/state/base_state.json', 'dist/state/state.json', function(err) { if (err) console.log(err); })\"",
     "rename-test-state": "node -e \"require('fs').rename('dist/state/test_state.json', 'dist/state/state.json', function(err) { if (err) console.log(err); })\"",
-    "copy-state": "copyfiles -u 2 src/state/base_state.json dist/state",
-    "copy-input": "copyfiles -u 2 src/input/*.json dist/input",
+    "copy-state": "copyfiles -u 2 src/state/base_state.json dist/state/",
+    "copy-input": "copyfiles -u 2 src/input/*.json dist/input/",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet",
     "format": "prettier --write 'src/**/*.{js,ts,tsx}'",
     "test": "jest"
@@ -45,6 +45,7 @@
     "eslint-plugin-prettier": "^5.0.1",
     "jest": "^29.7.0",
     "prettier": "^3.1.1",
+    "rimraf": "^5.0.5",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
   }

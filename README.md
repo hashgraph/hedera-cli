@@ -833,6 +833,17 @@ Here's an example state:
 
 You can run the application in development mode. It will watch for changes in the `src` folder and automatically recompile the application while maintaining the `dist/state.json` file.
 
+To get started, create a new state file called `test_state.json` in the `/src/state/` folder.
+
+```sh
+cd src/state
+touch test_state.json
+```
+
+Next, copy the contents of the `src/state/base_state.json` file into the `test_state.json` file.
+
+Once that's done, you can start the application in development mode using the following command:
+
 ```sh
 npm run dev-build
 ```
