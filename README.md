@@ -43,20 +43,20 @@ npm run build
 
 **3. Set Up Operator Credentials**
 
-Create a .hedera folder in your home directory. This folder will store your configuration files.
+Create a `.hedera` folder in your user's home directory. This folder will store your configuration files.
 
 ```sh
 mkdir -p ~/.hedera
 cd ~/.hedera
 ```
 
-Create a `.env` file to securely store your operator credentials.
+Create a `.env` file within the `.hedera` folder to securely store your operator credentials.
 
 ```sh
 touch .env
 ```
 
-Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for previewnet, testnet, and mainnet. It's **not mandatory** to set keys for all networks. If you only want to use one network, you can leave the other credentials empty. 
+Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for previewnet, testnet, and mainnet. It's **not mandatory** to set keys for all networks. If you only want to use one network, you can leave the other credentials blank. 
 
 ```text
 PREVIEWNET_OPERATOR_KEY=
@@ -72,6 +72,8 @@ Next, set up the CLI tool with the command:
 ```sh
 node dist/hedera-cli.js setup init
 ```
+
+> **Note:** You can set a custom absolute path for your `.env` file by using the `--path` flag. For example, `node dist/hedera-cli.js setup init --path /Users/myUser/projects/cli/.env`. More information can be found in the [setup command](#setup-commands) section below.
 
 **4. Verify Installation:**
 
@@ -144,8 +146,11 @@ setup reload
 Sets up the CLI with the operator key and ID.
 
 ```sh
-hcli setup init
+hcli setup init [--path <path>]
 ```
+
+**Flags:**
+- **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
 
 When executed, the setup command performs several key functions:
 
@@ -160,8 +165,11 @@ Once the previewnet, testnet, and mainnet operator key and ID are validated, the
 Reload the operator key and ID from the `.env` file. This command is useful when you add new networks to your `.env` file and want to update the state, so you can use the new networks.
 
 ```sh
-hcli setup reload
+hcli setup reload [--path <path>]
 ```
+
+**Flags:**
+- **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
 
 ## Network Commands
 
