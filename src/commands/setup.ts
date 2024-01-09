@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+import * as os from 'os';
 
 import { recordCommand } from '../state/stateService';
 import stateController from '../state/stateController';
@@ -23,11 +24,13 @@ export default (program: any) => {
       recordCommand(command);
     })
     .description('Setup the CLI with operator key and ID')
-    .action(() => {
+    .option('--path <path>', 'Specify a custom path for the .env file')
+    .action((options: SetupOptions) => {
       logger.verbose(
         'Initializing the CLI tool with the config and operator key and ID for different networks',
       );
-      setupCLI('init');
+
+      setupCLI('init', options.path);
     });
 
   setup
@@ -40,6 +43,7 @@ export default (program: any) => {
       recordCommand(command);
     })
     .description('Reload the CLI with operator key and ID')
+    .option('--path <path>', 'Specify a custom path for the .env file')
     .action(() => {
       logger.verbose(
         'Reloading the CLI tool with operator key and ID for different networks',
@@ -48,17 +52,28 @@ export default (program: any) => {
     });
 };
 
-function setupCLI(action: string): void {
-  if (process.env.HOME === undefined) {
-    logger.error('HOME environment variable is not defined');
-    process.exit(1);
-  }
+function setupCLI(action: string, envPath: string = ''): void {
+  let finalPath = '';
+  if (envPath !== '') {
+    finalPath = path.normalize(envPath);
+  } else {
+    try {
+      const homePath = os.homedir();
+      if (!homePath) {
+        logger.error('Can not find home directory');
+        process.exit(1);
+      }
+      finalPath = path.join(homePath, '.hedera/.env');
+    } catch (error) {
+      logger.error('Failed to retrieve home directory');
+      process.exit(1);
+    }
+ }
 
   // Path to the .env file in the .hedera directory in the user's home directory
-  const envPath = path.join(process.env.HOME, '.hedera/.env');
-
+  
   // Load environment variables from .env file
-  const envConfig = dotenv.config({ path: envPath });
+  const envConfig = dotenv.config({ path: finalPath });
 
   // Check for errors in loading .env file
   if (envConfig.error) {
@@ -157,4 +172,8 @@ function setupState(): void {
   };
 
   stateController.saveState(newState);
+}
+
+interface SetupOptions {
+  path: string;
 }
