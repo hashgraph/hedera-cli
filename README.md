@@ -6,6 +6,8 @@ The Hedera CLI Tool elegantly addresses the complexities associated with distrib
 
 A key advantage of the Hedera CLI Tool is its potential to enhance your workflow. It's not just about performing individual tasks; it's about integrating these tasks into a larger, more efficient development process. With plans for future integration into Continuous Integration/Continuous Deployment (CI/CD) pipelines, this tool promises to be a versatile asset in the automation and management of Hedera network operations.
 
+> **🎯 Feature requests** can be submitted on the Hedera CLI repository as an issue. Please check the [issues](https://github.com/hashgraph/hedera-cli/issues) before submitting a new one and tag it with the `Feature Request` label.
+
 ## Prerequisites
 
 Before proceeding with the installation and setup of the Hedera CLI Tool, ensure the following prerequisites are met:
