@@ -1,4 +1,3 @@
-import { prompt } from 'enquirer';
 import { PrivateKey, TransferTransaction } from '@hashgraph/sdk';
 
 import {
@@ -7,10 +6,11 @@ import {
   getAccountByIdOrAlias,
 } from '../state/stateService';
 import stateController from '../state/stateController';
+import enquirerUtils from '../utils/enquirer';
 import dynamicVariablesUtils from '../utils/dynamicVariables';
 import { Logger } from '../utils/logger';
 
-import type { Command, PromptResponse } from '../../types';
+import type { Command } from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -40,14 +40,11 @@ export default (program: any) => {
       if (!options.from) {
         try {
           const accounts = Object.keys(stateController.getAll().accounts);
-          const response: PromptResponse = await prompt({
-            type: 'select',
-            name: 'selection',
-            message: 'Choose account to transfer hbar from:',
-            choices: accounts,
-          });
-
-          to = response.selection;
+          if (accounts.length === 0) {
+            logger.error('No accounts found to transfer hbar from. Please create an account first.');
+            process.exit(1);
+          }
+          from = await enquirerUtils.createPrompt(accounts, 'Choose account to transfer hbar from:');
         } catch (error) {
           logger.error('Unable to get response:', error as object);
           process.exit(1);
@@ -57,14 +54,11 @@ export default (program: any) => {
       if (!options.to) {
         try {
           const accounts = Object.keys(stateController.getAll().accounts);
-          const response: PromptResponse = await prompt({
-            type: 'select',
-            name: 'selection',
-            message: 'Choose account to transfer hbar to:',
-            choices: accounts,
-          });
-
-          from = response.selection;
+          if (accounts.length === 0) {
+            logger.error('No accounts found to transfer hbar from. Please create an account first.');
+            process.exit(1);
+          }
+          to = await enquirerUtils.createPrompt(accounts, 'Choose account to transfer hbar to:');
         } catch (error) {
           logger.error('Unable to get response:', error as object);
           process.exit(1);
@@ -108,7 +102,7 @@ async function transferHbar(amount: number, from: string, to: string) {
       process.exit(1);
     }
   } catch (error) {
-    logger.error('Unable to transfer token', error as object);
+    logger.error('Unable to transfer hbar', error as object);
   }
 
   client.close();

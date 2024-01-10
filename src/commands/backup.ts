@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { prompt } from 'enquirer';
 
 import { recordCommand } from '../state/stateService';
+import enquirerUtils from '../utils/enquirer';
 import stateController from '../state/stateController';
 import { Logger } from '../utils/logger';
 
 import type { Command, PromptResponse, State } from '../../types';
+import balance from './account/balance';
 
 const logger = Logger.getInstance();
 
@@ -55,15 +56,13 @@ export default (program: any) => {
         const pattern = /^state\.backup\.\d+\.json$/;
         const backups = files.filter((file) => pattern.test(file));
 
-        try {
-          const response: PromptResponse = await prompt({
-            type: 'select',
-            name: 'selection',
-            message: 'Choose a backup:',
-            choices: backups,
-          });
+        if (backups.length === 0) {
+          logger.error('No backup files found');
+          process.exit(1);
+        }
 
-          filename = response.selection;
+        try {
+          filename = await enquirerUtils.createPrompt(backups, 'Choose a backup:');
         } catch (error) {
           logger.error('Unable to read backup file:', error as object);
           process.exit(1);

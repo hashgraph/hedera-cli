@@ -1,6 +1,5 @@
 import type {
   APIResponse,
-  TokenResponse,
   AccountResponse,
   TokenBalance,
   DisplayBalanceOptions,
