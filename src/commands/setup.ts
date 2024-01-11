@@ -6,6 +6,7 @@ import { recordCommand } from '../state/stateService';
 import stateController from '../state/stateController';
 import config from '../state/config';
 import { Logger } from '../utils/logger';
+import accountUtils from '../utils/account';
 
 import type { Command } from '../../types';
 
@@ -25,7 +26,7 @@ export default (program: any) => {
     })
     .description('Setup the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
-    .action((options: SetupOptions) => {
+    .action(async (options: SetupOptions) => {
       logger.verbose(
         'Initializing the CLI tool with the config and operator key and ID for different networks',
       );
@@ -52,7 +53,12 @@ export default (program: any) => {
     });
 };
 
-function setupCLI(action: string, envPath: string = ''): void {
+/**
+ * @description Setup the CLI with operator key and ID for different networks
+ * @param action Action to perform (init or reload)
+ * @param envPath Path to the .env file
+ */
+async function setupCLI(action: string, envPath: string = ''): Promise<void> {
   let finalPath = '';
   if (envPath !== '') {
     finalPath = path.normalize(envPath);
@@ -134,6 +140,10 @@ function setupCLI(action: string, envPath: string = ''): void {
     setupState();
   }
 
+  await verifyOperatorBalance(previewnetOperatorId);
+  await verifyOperatorBalance(testnetOperatorId);
+  await verifyOperatorBalance(mainnetOperatorId);
+
   setupOperatorAccounts(
     testnetOperatorId,
     testnetOperatorKey,
@@ -144,6 +154,26 @@ function setupCLI(action: string, envPath: string = ''): void {
   );
 }
 
+/**
+ * @description Verify that the operator account has enough balance to pay for transactions (at least 1 Hbar)
+ * @param operatorId Operator ID to check balance for
+ */
+async function verifyOperatorBalance(operatorId: string): Promise<void> {
+  // Skip if operator ID is not defined
+  if (operatorId) {
+    const balance = await accountUtils.getAccountHbarBalance(operatorId);
+    if (balance < 100000000) {
+      logger.error(
+        `The operator account ${operatorId} does not have enough balance to pay for transactions (less than 1 Hbar). Please add more balance to the account.`,
+      );
+      process.exit(1);
+    }
+  }
+}
+
+/**
+ * @description Setup operator accounts for previewnet, testnet, and mainnet in the state file
+ */
 function setupOperatorAccounts(
   testnetOperatorId: string,
   testnetOperatorKey: string,
@@ -166,6 +196,9 @@ function setupOperatorAccounts(
   stateController.saveState(newState);
 }
 
+/**
+ * @description Setup the state file with the init config
+ */
 function setupState(): void {
   const newState = {
     ...config,
