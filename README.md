@@ -58,7 +58,7 @@ Create a `.env` file within the `.hedera` folder to securely store your operator
 touch .env
 ```
 
-Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for previewnet, testnet, and mainnet. It's **not mandatory** to set keys for all networks. If you only want to use one network, you can leave the other credentials blank. 
+Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for previewnet, testnet, and mainnet. It's **not mandatory** to set keys for all networks. If you only want to use one network, you can leave the other credentials blank. Make sure that each operator account **contains at least 1 Hbar**.
 
 ```text
 PREVIEWNET_OPERATOR_KEY=
