@@ -1,0 +1,28 @@
+{
+    "scripts": {
+      "script-token": {
+        "name": "token",
+        "commands": [
+          "network use testnet",
+          "account create -a random --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+          "account create -a random --args privateKey,privKeyAcc2 --args alias,aliasAcc2 --args accountId,idAcc2",
+          "account create -a random --args privateKey,privKeyAcc3 --args alias,aliasAcc3 --args accountId,idAcc3",
+          "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId,tokenId",
+          "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
+          "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}",
+          "wait 3",
+          "account balance --account-id-or-alias {{aliasAcc3}} --token-id {{tokenId}}",
+          "state view --token-id {{tokenId}}"
+        ]
+      },
+      "script-account-create": {
+        "name": "account-create",
+        "commands": [
+          "network use testnet",
+          "account create -a random -b 10000000 --type ecdsa --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+          "wait 3",
+          "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
+        ]
+      }
+    }
+  }
