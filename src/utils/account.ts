@@ -261,6 +261,18 @@ async function getAccountBalance(
   display('displayBalance', response, { onlyHbar, tokenId });
 
   client.close();
+  return 
+}
+
+async function getAccountHbarBalance(accountId: string): Promise<number> {
+  const response = await api.account.getAccountBalance(accountId);
+
+  if (!response) {
+    logger.error('Error getting account balance');
+    process.exit(1);
+  }
+
+  return response.data.balance.balance;
 }
 
 function findAccountByPrivateKey(privateKey: string): Account {
@@ -349,6 +361,7 @@ const accountUtils = {
   importAccount,
   importAccountId,
   getAccountBalance,
+  getAccountHbarBalance,
   getKeyType,
   generateRandomAlias,
   clearAddressBook,

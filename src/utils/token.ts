@@ -39,7 +39,7 @@ const isTokenAssociated = async (
   accountId: string,
 ): Promise<boolean> => {
   const response = await api.token.getTokenBalance(tokenId, accountId);
-  const balanceResponse = response.data as BalanceResponse;
+  const balanceResponse = response.data;
 
   // verify if the accountId occurs in the balances array
   for (const balance of balanceResponse.balances) {
