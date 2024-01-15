@@ -33,7 +33,7 @@ function clear(
 ): void {
   if (!skipAccounts && !skipTokens && !skipScripts) {
     clearState();
-    process.exit(0);
+    return;
   }
 
   if (!skipAccounts) stateController.saveKey('accounts', {});

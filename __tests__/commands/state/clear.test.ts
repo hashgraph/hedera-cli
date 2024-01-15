@@ -18,13 +18,13 @@ describe("state clear command", () => {
       // Spy cleanup
       saveStateControllerSpy.mockClear();
       saveKeyStateControllerSpy.mockClear();
+      
     });
 
     test("✅ clear entire CLI state", async () => {
         // Arrange  
         const program = new Command();
         commands.stateCommands(program);
-        const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => { return undefined as never })
   
         // Act
         await program.parse(["node", "hedera-cli.ts", "state", "clear"]);
