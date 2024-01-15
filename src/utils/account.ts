@@ -261,7 +261,7 @@ async function getAccountBalance(
   display('displayBalance', response, { onlyHbar, tokenId });
 
   client.close();
-  return 
+  return;
 }
 
 async function getAccountHbarBalance(accountId: string): Promise<number> {

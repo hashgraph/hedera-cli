@@ -10,7 +10,9 @@ const logger = Logger.getInstance();
  * - getAccountBalance(accountId): Get the balance of an account
  */
 
-async function getAccountBalance(accountId: string): Promise<APIResponse<AccountResponse>> {
+async function getAccountBalance(
+  accountId: string,
+): Promise<APIResponse<AccountResponse>> {
   try {
     const mirrorNodeURL = getMirrorNodeURL();
     const response = await axios.get(`${mirrorNodeURL}/accounts/${accountId}`);

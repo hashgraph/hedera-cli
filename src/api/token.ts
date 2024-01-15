@@ -12,7 +12,9 @@ const logger = Logger.getInstance();
  * - getTokenBalance(tokenId, accountId): Get the balance of a token for an account
  */
 
-async function getTokenInfo(tokenId: string): Promise<APIResponse<TokenResponse>> {
+async function getTokenInfo(
+  tokenId: string,
+): Promise<APIResponse<TokenResponse>> {
   try {
     const mirrorNodeURL = getMirrorNodeURL();
     const response = await axios.get(`${mirrorNodeURL}/tokens/${tokenId}`);

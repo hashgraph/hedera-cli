@@ -41,10 +41,15 @@ export default (program: any) => {
         try {
           const accounts = Object.keys(stateController.getAll().accounts);
           if (accounts.length === 0) {
-            logger.error('No accounts found to transfer hbar from. Please create an account first.');
+            logger.error(
+              'No accounts found to transfer hbar from. Please create an account first.',
+            );
             process.exit(1);
           }
-          from = await enquirerUtils.createPrompt(accounts, 'Choose account to transfer hbar from:');
+          from = await enquirerUtils.createPrompt(
+            accounts,
+            'Choose account to transfer hbar from:',
+          );
         } catch (error) {
           logger.error('Unable to get response:', error as object);
           process.exit(1);
@@ -55,10 +60,15 @@ export default (program: any) => {
         try {
           const accounts = Object.keys(stateController.getAll().accounts);
           if (accounts.length === 0) {
-            logger.error('No accounts found to transfer hbar from. Please create an account first.');
+            logger.error(
+              'No accounts found to transfer hbar from. Please create an account first.',
+            );
             process.exit(1);
           }
-          to = await enquirerUtils.createPrompt(accounts, 'Choose account to transfer hbar to:');
+          to = await enquirerUtils.createPrompt(
+            accounts,
+            'Choose account to transfer hbar to:',
+          );
         } catch (error) {
           logger.error('Unable to get response:', error as object);
           process.exit(1);

@@ -62,7 +62,10 @@ export default (program: any) => {
         }
 
         try {
-          filename = await enquirerUtils.createPrompt(backups, 'Choose a backup:');
+          filename = await enquirerUtils.createPrompt(
+            backups,
+            'Choose a backup:',
+          );
         } catch (error) {
           logger.error('Unable to read backup file:', error as object);
           process.exit(1);

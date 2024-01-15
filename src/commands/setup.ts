@@ -74,10 +74,10 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
       logger.error('Failed to retrieve home directory');
       process.exit(1);
     }
- }
+  }
 
   // Path to the .env file in the .hedera directory in the user's home directory
-  
+
   // Load environment variables from .env file
   const envConfig = dotenv.config({ path: finalPath });
 
