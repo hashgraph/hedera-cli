@@ -40,7 +40,7 @@ export default (program: any) => {
       ) {
         logger.log('\nState:');
         logger.log(state);
-        process.exit(0);
+        return;
       }
 
       if (options.accountId) {
