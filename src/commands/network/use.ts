@@ -1,4 +1,4 @@
-import { recordCommand, switchNetwork } from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
@@ -13,11 +13,11 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Switch to a specific network')
     .action((name: string) => {
       logger.verbose(`Switching to network: ${name}`);
-      switchNetwork(name);
+      stateUtils.switchNetwork(name);
     });
 };

@@ -60,7 +60,7 @@ export const script_basic: Script = {
   args: {}
 };
 
-const token = {
+export const token = {
   network: "testnet",
   associations: [],
   tokenId: "0.0.6025124",
@@ -83,6 +83,14 @@ const token = {
     feeScheduleKey: "",
     treasuryKey:
       "302e020100300506032b657004220420ece0b15b20e555f66d5f4cd83187567af9613276629d7e15161b0c929ea07697",
+  },
+};
+
+export const accountState: State = {
+  ...baseState,
+  accounts: {
+    [alice.alias]: alice,
+    [bob.alias]: bob,
   },
 };
 
@@ -113,3 +121,16 @@ export const fullState: State = {
     [token.tokenId]: token,
   },
 };
+
+export const downloadState: object = {
+  accounts: {
+    [alice.alias]: alice,
+    [bob.alias]: bob,
+  },
+  scripts: {
+    [`script-${script_basic.name}`]: script_basic,
+  },
+  tokens: {
+    [token.tokenId]: token,
+  },
+}

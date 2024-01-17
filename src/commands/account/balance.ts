@@ -1,4 +1,4 @@
-import { recordCommand } from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import accountUtils from '../../utils/account';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
@@ -15,7 +15,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Retrieve the balance for an account ID or alias')
     .requiredOption(

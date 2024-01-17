@@ -1,8 +1,7 @@
-import { recordCommand } from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
-import { getAccountById } from '../../state/stateService';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 const logger = Logger.getInstance();
@@ -15,7 +14,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('View state')
     .option('--accounts', 'View accounts', false)
@@ -40,12 +39,12 @@ export default (program: any) => {
       ) {
         logger.log('\nState:');
         logger.log(state);
-        process.exit(0);
+        return;
       }
 
       if (options.accountId) {
         logger.log(`\nAccount ${options.accountId}:`);
-        logger.log(getAccountById(options.accountId) || 'Account not found');
+        logger.log(stateUtils.getAccountById(options.accountId) || 'Account not found');
       }
 
       if (options.accountAlias) {

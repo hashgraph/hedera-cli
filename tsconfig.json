@@ -12,5 +12,5 @@
         "skipLibCheck": true, // skip type checking of declaration files
     },
     "include": ["src/**/*"],
-    "exclude": ["node_modules", "**/*.spec.ts", "**/*.json"]
+    "exclude": ["node_modules", "**/*.spec.ts", "**/*.json", "**/__mocks__/**/*"]
 }

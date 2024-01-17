@@ -1,7 +1,6 @@
 import { baseState, scriptState, script_basic } from "../../helpers/state";
 import { Command } from "commander";
 import commands from "../../../src/commands";
-import scriptUtils from "../../../src/utils/script";
 import stateController from "../../../src/state/stateController";
 
 jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory

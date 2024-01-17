@@ -1,4 +1,4 @@
-import { recordCommand } from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import scriptUtils from '../../utils/script';
 import { Logger } from '../../utils/logger';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
@@ -15,7 +15,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Delete a script')
     .requiredOption('-n, --name <name>', 'Name of script to delete')

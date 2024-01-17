@@ -1,18 +1,13 @@
-import { Logger } from './logger';
-import api from '../api';
-import {
-  getAccountByIdOrAlias,
-  getHederaClient,
-  addTokenAssociation,
-} from '../state/stateService';
-
 import {
   TokenAssociateTransaction,
   PrivateKey,
   TokenSupplyType,
+  TransferTransaction,
 } from '@hashgraph/sdk';
 
-import { BalanceResponse } from '../../types/api';
+import { Logger } from './logger';
+import api from '../api';
+import stateUtils from '../utils/state';
 
 const logger = Logger.getInstance();
 
@@ -55,9 +50,9 @@ const associateToken = async (
   tokenId: string,
   accountIdorAlias: string,
 ): Promise<void> => {
-  let account = getAccountByIdOrAlias(accountIdorAlias);
+  let account = stateUtils.getAccountByIdOrAlias(accountIdorAlias);
 
-  const client = getHederaClient();
+  const client = stateUtils.getHederaClient();
   try {
     // Associate token with account
     const tokenAssociateTx = await new TokenAssociateTransaction()
@@ -77,8 +72,40 @@ const associateToken = async (
   }
 
   // Store association in state for token
-  addTokenAssociation(tokenId, account.accountId, account.alias);
+  stateUtils.addTokenAssociation(tokenId, account.accountId, account.alias);
   client.close();
 };
 
-export { getSupplyType, isTokenAssociated, associateToken };
+const transfer = async (tokenId: string, fromId: string, fromPrivateKey: string, toId: string, balance: number) => {
+  const client = stateUtils.getHederaClient();
+  try {
+    const transferTx = await new TransferTransaction()
+      .addTokenTransfer(tokenId, fromId, balance * -1)
+      .addTokenTransfer(tokenId, toId, balance)
+      .freezeWith(client);
+
+    const transferTxSign = await transferTx.sign(
+      PrivateKey.fromStringDer(fromPrivateKey),
+    );
+
+    const transfer = await transferTxSign.execute(client);
+    const receipt = await transfer.getReceipt(client);
+    if (receipt.status._code === 22) {
+      logger.log(
+        `Transfer successful with tx ID: ${transfer.transactionId.toString()}`,
+      );
+    } else {
+      logger.error(
+        `Transfer failed with tx ID: ${transfer.transactionId.toString()}`,
+      );
+      process.exit(1);
+    }
+  } catch (error) {
+    logger.error('Unable to transfer token', error as object);
+  }
+
+  client.close();
+};
+
+const tokenUtils = { getSupplyType, isTokenAssociated, associateToken, transfer };
+export default tokenUtils;

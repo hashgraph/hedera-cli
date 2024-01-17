@@ -1,5 +1,5 @@
-import { associateToken } from '../../utils/token';
-import { recordCommand } from '../../state/stateService';
+import tokenUtils from '../../utils/token';
+import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
@@ -15,7 +15,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Associate a token with an account')
     .requiredOption(
@@ -31,7 +31,7 @@ export default (program: any) => {
         `Associating token ${options.tokenId} with ${options.accountId}`,
       );
       options = dynamicVariablesUtils.replaceOptions(options);
-      await associateToken(options.tokenId, options.accountId);
+      await tokenUtils.associateToken(options.tokenId, options.accountId);
     });
 };
 

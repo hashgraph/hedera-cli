@@ -1,4 +1,4 @@
-import { recordCommand } from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import { myParseInt } from '../../utils/verification';
 
@@ -17,7 +17,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description(
       'Create a new Hedera account using NEW recovery words and keypair. This is default.',

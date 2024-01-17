@@ -6,11 +6,7 @@ import {
 } from '@hashgraph/sdk';
 
 import stateController from '../state/stateController';
-import {
-  getHederaClient,
-  getAccountByIdOrAlias,
-  getNetwork,
-} from '../state/stateService';
+import stateUtils from '../utils/state';
 import { display } from '../utils/display';
 import { Logger } from '../utils/logger';
 import api from '../api';
@@ -24,7 +20,7 @@ function clearAddressBook(): void {
 }
 
 function deleteAccount(accountIdOrAlias: string): void {
-  const account = getAccountByIdOrAlias(accountIdOrAlias);
+  const account = stateUtils.getAccountByIdOrAlias(accountIdOrAlias);
 
   if (!account) {
     logger.error('Account not found');
@@ -57,7 +53,7 @@ async function createAccount(
 
   // Get client from config
   const accounts: Record<string, Account> = stateController.get('accounts');
-  const client = getHederaClient();
+  const client = stateUtils.getHederaClient();
 
   // Generate random alias if "random" is provided
   let isRandomAlias = false;
@@ -109,7 +105,7 @@ async function createAccount(
 
   // Store the new account in the config
   const newAccountDetails = {
-    network: getNetwork(),
+    network: stateUtils.getNetwork(),
     alias,
     accountId: newAccountId.toString(),
     type,
@@ -190,7 +186,7 @@ function importAccount(id: string, key: string, alias: string): Account {
   // No Solidity and EVM address for ED25519 keys
   const updatedAccounts = { ...accounts };
   updatedAccounts[alias] = {
-    network: getNetwork(),
+    network: stateUtils.getNetwork(),
     alias,
     accountId: id,
     type,
@@ -220,7 +216,7 @@ function importAccountId(id: string, alias: string): Account {
   const accountId = AccountId.fromString(id);
   const updatedAccounts = { ...accounts };
   updatedAccounts[alias] = {
-    network: getNetwork(),
+    network: stateUtils.getNetwork(),
     alias,
     accountId: id,
     type: '',
@@ -241,7 +237,7 @@ async function getAccountBalance(
   tokenId?: string,
 ): Promise<void> {
   const accounts = stateController.get('accounts');
-  const client = getHederaClient();
+  const client = stateUtils.getHederaClient();
 
   let accountId;
 
@@ -261,7 +257,7 @@ async function getAccountBalance(
   display('displayBalance', response, { onlyHbar, tokenId });
 
   client.close();
-  return 
+  return;
 }
 
 async function getAccountHbarBalance(accountId: string): Promise<number> {

@@ -2,12 +2,8 @@ import * as path from 'path';
 import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
 
 import accountUtils from '../../utils/account';
-import { getSupplyType } from '../../utils/token';
-import {
-  recordCommand,
-  getHederaClient,
-  getNetwork,
-} from '../../state/stateService';
+import tokenUtils from '../../utils/token';
+import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
@@ -24,7 +20,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Create a new token from a file')
     .requiredOption(
@@ -76,7 +72,7 @@ function resolveTokenFilePath(filename: string): string {
 
 function initializeToken(tokenInput: TokenInput): Token {
   const token: Token = {
-    network: getNetwork(),
+    network: stateUtils.getNetwork(),
     associations: [],
     tokenId: '',
     name: tokenInput.name,
@@ -116,7 +112,7 @@ async function prepareTokenCreation(
 }
 
 async function createTokenOnNetwork(token: Token) {
-  const client = getHederaClient();
+  const client = stateUtils.getHederaClient();
 
   try {
     const tokenCreateTx = new TokenCreateTransaction()
@@ -125,7 +121,7 @@ async function createTokenOnNetwork(token: Token) {
       .setDecimals(token.decimals)
       .setInitialSupply(token.initialSupply)
       .setTokenType(TokenType.FungibleCommon)
-      .setSupplyType(getSupplyType(token.supplyType))
+      .setSupplyType(tokenUtils.getSupplyType(token.supplyType))
       .setTreasuryAccountId(token.treasuryId);
 
     if (token.supplyType === 'finite') {
@@ -196,7 +192,7 @@ async function createTokenFromFile(tokenInput: TokenInput): Promise<Token> {
     return token;
   } catch (error) {
     logger.error(error as object);
-    getHederaClient().close();
+    stateUtils.getHederaClient().close();
     process.exit(1);
   }
 }
@@ -209,7 +205,7 @@ function updateTokenState(token: Token) {
   };
 
   stateController.saveKey('tokens', updatedTokens);
-  getHederaClient().close();
+  stateUtils.getHederaClient().close();
 }
 
 async function replaceKeysForToken(token: Token): Promise<Token> {

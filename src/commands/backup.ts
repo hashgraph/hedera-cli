@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { recordCommand } from '../state/stateService';
+import stateUtils from '../utils/state';
 import enquirerUtils from '../utils/enquirer';
 import stateController from '../state/stateController';
 import { Logger } from '../utils/logger';
@@ -21,7 +21,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Create a backup of the config.json file')
     .option('--accounts', 'Backup the accounts')
@@ -38,7 +38,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Restore a backup of the full state')
     .option('-f, --file <filename>', 'Filename containing the state backup')
@@ -62,7 +62,10 @@ export default (program: any) => {
         }
 
         try {
-          filename = await enquirerUtils.createPrompt(backups, 'Choose a backup:');
+          filename = await enquirerUtils.createPrompt(
+            backups,
+            'Choose a backup:',
+          );
         } catch (error) {
           logger.error('Unable to read backup file:', error as object);
           process.exit(1);

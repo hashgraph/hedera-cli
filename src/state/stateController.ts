@@ -9,8 +9,8 @@ const getAll = () => {
   return state.getAll();
 };
 
-const saveState = (config: State) => {
-  state.setAll(config);
+const saveState = (newState: State) => {
+  state.setAll(newState);
 };
 
 const saveKey = (key: string, value: any) => {

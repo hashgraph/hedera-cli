@@ -1,12 +1,8 @@
 import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
 
 import { myParseInt } from '../../utils/verification';
-import { getSupplyType } from '../../utils/token';
-import {
-  recordCommand,
-  getHederaClient,
-  getNetwork,
-} from '../../state/stateService';
+import tokenUtils from '../../utils/token';
+import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
 
@@ -23,7 +19,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Create a new fungible token')
     .requiredOption(
@@ -99,7 +95,7 @@ async function createFungibleToken(
   supplyType: string,
   adminKey: string,
 ): Promise<string> {
-  const client = getHederaClient();
+  const client = stateUtils.getHederaClient();
 
   let tokenId;
   try {
@@ -109,7 +105,7 @@ async function createFungibleToken(
       .setDecimals(decimals)
       .setInitialSupply(initialSupply)
       .setTokenType(TokenType.FungibleCommon)
-      .setSupplyType(getSupplyType(supplyType))
+      .setSupplyType(tokenUtils.getSupplyType(supplyType))
       .setTreasuryAccountId(treasuryId)
       .setAdminKey(PrivateKey.fromStringDer(adminKey).publicKey)
       .freezeWith(client)
@@ -149,7 +145,7 @@ async function createFungibleToken(
       decimals,
       initialSupply,
       adminKey,
-      network: getNetwork(),
+      network: stateUtils.getNetwork(),
     },
   };
 
