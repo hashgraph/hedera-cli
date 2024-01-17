@@ -2,6 +2,7 @@ import {
   TokenAssociateTransaction,
   PrivateKey,
   TokenSupplyType,
+  TransferTransaction,
 } from '@hashgraph/sdk';
 
 import { Logger } from './logger';
@@ -75,5 +76,36 @@ const associateToken = async (
   client.close();
 };
 
-const tokenUtils = { getSupplyType, isTokenAssociated, associateToken };
+const transfer = async (tokenId: string, fromId: string, fromPrivateKey: string, toId: string, balance: number) => {
+  const client = stateUtils.getHederaClient();
+  try {
+    const transferTx = await new TransferTransaction()
+      .addTokenTransfer(tokenId, fromId, balance * -1)
+      .addTokenTransfer(tokenId, toId, balance)
+      .freezeWith(client);
+
+    const transferTxSign = await transferTx.sign(
+      PrivateKey.fromStringDer(fromPrivateKey),
+    );
+
+    const transfer = await transferTxSign.execute(client);
+    const receipt = await transfer.getReceipt(client);
+    if (receipt.status._code === 22) {
+      logger.log(
+        `Transfer successful with tx ID: ${transfer.transactionId.toString()}`,
+      );
+    } else {
+      logger.error(
+        `Transfer failed with tx ID: ${transfer.transactionId.toString()}`,
+      );
+      process.exit(1);
+    }
+  } catch (error) {
+    logger.error('Unable to transfer token', error as object);
+  }
+
+  client.close();
+};
+
+const tokenUtils = { getSupplyType, isTokenAssociated, associateToken, transfer };
 export default tokenUtils;

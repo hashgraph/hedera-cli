@@ -3,10 +3,11 @@ import * as dotenv from 'dotenv';
 import * as os from 'os';
 
 import stateUtils from '../utils/state';
-import stateController from '../state/stateController';
 import config from '../state/config';
 import { Logger } from '../utils/logger';
 import accountUtils from '../utils/account';
+import setupUtils from '../utils/setup';
+import stateController from '../state/stateController';
 
 import type { Command } from '../../types';
 
@@ -30,8 +31,7 @@ export default (program: any) => {
       logger.verbose(
         'Initializing the CLI tool with the config and operator key and ID for different networks',
       );
-
-      setupCLI('init', options.path);
+      await setupCLI('init', options.path);
     });
 
   setup
@@ -45,11 +45,11 @@ export default (program: any) => {
     })
     .description('Reload the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
-    .action(() => {
+    .action(async () => {
       logger.verbose(
         'Reloading the CLI tool with operator key and ID for different networks',
       );
-      setupCLI('reload');
+      await setupCLI('reload');
     });
 };
 
@@ -144,7 +144,7 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
   await verifyOperatorBalance(testnetOperatorId);
   await verifyOperatorBalance(mainnetOperatorId);
 
-  setupOperatorAccounts(
+  setupUtils.setupOperatorAccounts(
     testnetOperatorId,
     testnetOperatorKey,
     mainnetOperatorId,
@@ -169,31 +169,6 @@ async function verifyOperatorBalance(operatorId: string): Promise<void> {
       process.exit(1);
     }
   }
-}
-
-/**
- * @description Setup operator accounts for previewnet, testnet, and mainnet in the state file
- */
-function setupOperatorAccounts(
-  testnetOperatorId: string,
-  testnetOperatorKey: string,
-  mainnetOperatorId: string,
-  mainnetOperatorKey: string,
-  previewnetOperatorId: string,
-  previewnetOperatorKey: string,
-): void {
-  const state = stateController.getAll();
-  let newState = { ...state };
-  newState.testnetOperatorKey = testnetOperatorKey;
-  newState.testnetOperatorId = testnetOperatorId;
-  newState.mainnetOperatorKey = mainnetOperatorKey;
-  newState.mainnetOperatorId = mainnetOperatorId;
-  newState.previewnetOperatorId = previewnetOperatorId;
-  newState.previewnetOperatorKey = previewnetOperatorKey;
-
-  newState.network = 'testnet';
-
-  stateController.saveState(newState);
 }
 
 /**

@@ -18,7 +18,6 @@ describe("state clear command", () => {
       // Spy cleanup
       saveStateControllerSpy.mockClear();
       saveKeyStateControllerSpy.mockClear();
-      
     });
 
     test("✅ clear entire CLI state", async () => {

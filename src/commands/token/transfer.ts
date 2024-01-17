@@ -1,11 +1,10 @@
-import { PrivateKey, TransferTransaction } from '@hashgraph/sdk';
-
 import { myParseInt } from '../../utils/verification';
 import stateUtils from '../../utils/state';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
+import tokenUtils from '../../utils/token';
 
 const logger = Logger.getInstance();
 
@@ -47,34 +46,7 @@ export default (program: any) => {
       let toAccount = stateUtils.getAccountByIdOrAlias(toIdOrAlias);
       let toId = toAccount.accountId;
 
-      const client = stateUtils.getHederaClient();
-      try {
-        const transferTx = await new TransferTransaction()
-          .addTokenTransfer(tokenId, fromId, balance * -1)
-          .addTokenTransfer(tokenId, toId, balance)
-          .freezeWith(client);
-
-        const transferTxSign = await transferTx.sign(
-          PrivateKey.fromStringDer(fromAccount.privateKey),
-        );
-
-        const transfer = await transferTxSign.execute(client);
-        const receipt = await transfer.getReceipt(client);
-        if (receipt.status._code === 22) {
-          logger.log(
-            `Transfer successful with tx ID: ${transfer.transactionId.toString()}`,
-          );
-        } else {
-          logger.error(
-            `Transfer failed with tx ID: ${transfer.transactionId.toString()}`,
-          );
-          process.exit(1);
-        }
-      } catch (error) {
-        logger.error('Unable to transfer token', error as object);
-      }
-
-      client.close();
+      await tokenUtils.transfer(tokenId, fromId, fromAccount.privateKey, toId, Number(balance))
     });
 };
 

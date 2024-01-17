@@ -5,7 +5,7 @@ export default {
   recording: 0,
   recordingScriptName: '',
   scriptExecution: 0,
-  scriptExecutionName: 'test',
+  scriptExecutionName: '',
   accounts: {},
   tokens: {},
   scripts: {},
