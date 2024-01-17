@@ -1,11 +1,7 @@
 import { PrivateKey, TransferTransaction } from '@hashgraph/sdk';
 
 import { myParseInt } from '../../utils/verification';
-import {
-  recordCommand,
-  getHederaClient,
-  getAccountByIdOrAlias,
-} from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
 
@@ -21,7 +17,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Transfer a fungible token')
     .requiredOption('-t, --token-id <tokenId>', 'Token ID to transfer')
@@ -44,14 +40,14 @@ export default (program: any) => {
       const balance = options.balance;
 
       // Find sender account
-      let fromAccount = getAccountByIdOrAlias(fromIdOrAlias);
+      let fromAccount = stateUtils.getAccountByIdOrAlias(fromIdOrAlias);
       let fromId = fromAccount.accountId;
 
       // Find receiver account
-      let toAccount = getAccountByIdOrAlias(toIdOrAlias);
+      let toAccount = stateUtils.getAccountByIdOrAlias(toIdOrAlias);
       let toId = toAccount.accountId;
 
-      const client = getHederaClient();
+      const client = stateUtils.getHederaClient();
       try {
         const transferTx = await new TransferTransaction()
           .addTokenTransfer(tokenId, fromId, balance * -1)

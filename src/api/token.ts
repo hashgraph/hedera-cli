@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { APIResponse, BalanceResponse, TokenResponse } from '../../types';
-import { getMirrorNodeURL } from '../state/stateService';
+import stateUtils from '../utils/state';
 import { Logger } from '../utils/logger';
 
 const logger = Logger.getInstance();
@@ -16,7 +16,7 @@ async function getTokenInfo(
   tokenId: string,
 ): Promise<APIResponse<TokenResponse>> {
   try {
-    const mirrorNodeURL = getMirrorNodeURL();
+    const mirrorNodeURL = stateUtils.getMirrorNodeURL();
     const response = await axios.get(`${mirrorNodeURL}/tokens/${tokenId}`);
     return response;
   } catch (error) {
@@ -34,7 +34,7 @@ async function getTokenBalance(
   accountId: string,
 ): Promise<APIResponse<BalanceResponse>> {
   try {
-    const mirrorNodeURL = getMirrorNodeURL();
+    const mirrorNodeURL = stateUtils.getMirrorNodeURL();
     const response = await axios.get(
       `${mirrorNodeURL}/tokens/${tokenId}/balances?account.id=eq:${accountId}`,
     );

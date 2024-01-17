@@ -1,11 +1,7 @@
 const axios = require('axios');
 
-import { recordCommand } from '../../state/stateService';
 import stateController from '../../state/stateController';
-import {
-  startScriptExecution,
-  stopScriptExecution,
-} from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import { execSync } from 'child_process';
 import { Logger } from '../../utils/logger';
 
@@ -21,7 +17,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Load and execute a script')
     .requiredOption('-n, --name <name>', 'Name of script to load and execute')
@@ -32,7 +28,7 @@ export default (program: any) => {
 };
 
 function loadScript(name: string) {
-  startScriptExecution(name);
+  stateUtils.startScriptExecution(name);
 
   const state = stateController.getAll();
   const scripts: Record<string, Script> = state.scripts;
@@ -41,7 +37,7 @@ function loadScript(name: string) {
 
   if (!script) {
     logger.error(`No script found with name: ${scriptName}`);
-    stopScriptExecution();
+    stateUtils.stopScriptExecution();
     process.exit(1);
   }
 
@@ -54,12 +50,12 @@ function loadScript(name: string) {
       execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
     } catch (error: any) {
       logger.error('Unable to execute command', error.message || error);
-      stopScriptExecution();
+      stateUtils.stopScriptExecution();
       process.exit(1);
     }
   });
 
-  stopScriptExecution();
+  stateUtils.stopScriptExecution();
   logger.log(`\nScript ${script.name} executed successfully`);
 }
 

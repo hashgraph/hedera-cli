@@ -1,18 +1,12 @@
-import { Logger } from './logger';
-import api from '../api';
-import {
-  getAccountByIdOrAlias,
-  getHederaClient,
-  addTokenAssociation,
-} from '../state/stateService';
-
 import {
   TokenAssociateTransaction,
   PrivateKey,
   TokenSupplyType,
 } from '@hashgraph/sdk';
 
-import { BalanceResponse } from '../../types/api';
+import { Logger } from './logger';
+import api from '../api';
+import stateUtils from '../utils/state';
 
 const logger = Logger.getInstance();
 
@@ -55,9 +49,9 @@ const associateToken = async (
   tokenId: string,
   accountIdorAlias: string,
 ): Promise<void> => {
-  let account = getAccountByIdOrAlias(accountIdorAlias);
+  let account = stateUtils.getAccountByIdOrAlias(accountIdorAlias);
 
-  const client = getHederaClient();
+  const client = stateUtils.getHederaClient();
   try {
     // Associate token with account
     const tokenAssociateTx = await new TokenAssociateTransaction()
@@ -77,7 +71,7 @@ const associateToken = async (
   }
 
   // Store association in state for token
-  addTokenAssociation(tokenId, account.accountId, account.alias);
+  stateUtils.addTokenAssociation(tokenId, account.accountId, account.alias);
   client.close();
 };
 

@@ -1,4 +1,4 @@
-import { recordCommand } from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import accountUtils from '../../utils/account';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
@@ -15,7 +15,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description(
       'Import an existing account using an account ID, alias, type, and optional private key.',

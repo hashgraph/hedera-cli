@@ -1,6 +1,4 @@
-import {
-  recordCommand,
-} from '../state/stateService';
+import stateUtils from '../utils/state';
 import stateController from '../state/stateController';
 import enquirerUtils from '../utils/enquirer';
 import dynamicVariablesUtils from '../utils/dynamicVariables';
@@ -21,7 +19,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Transfer tinybars between accounts')
     .requiredOption('-b, --balance <balance>', 'Amount of tinybars to transfer')

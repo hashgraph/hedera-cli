@@ -1,23 +1,20 @@
 import { PrivateKey, TransferTransaction } from '@hashgraph/sdk';
 
-import {
-  getHederaClient,
-  getAccountByIdOrAlias,
-} from '../state/stateService';
+import stateUtils from './state';
 import { Logger } from '../utils/logger';
 
 const logger = Logger.getInstance();
 
 async function transfer(amount: number, from: string, to: string): Promise<void> {
     // Find sender account
-    let fromAccount = getAccountByIdOrAlias(from);
+    let fromAccount = stateUtils.getAccountByIdOrAlias(from);
     let fromId = fromAccount.accountId;
   
     // Find receiver account
-    let toAccount = getAccountByIdOrAlias(to);
+    let toAccount = stateUtils.getAccountByIdOrAlias(to);
     let toId = toAccount.accountId;
   
-    const client = getHederaClient();
+    const client = stateUtils.getHederaClient();
     try {
       const transferTx = new TransferTransaction()
         .addHbarTransfer(fromId, amount * -1)

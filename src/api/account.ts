@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { APIResponse, AccountResponse } from '../../types';
-import { getMirrorNodeURL } from '../state/stateService';
+import stateUtils from '../utils/state';
 import { Logger } from '../utils/logger';
 
 const logger = Logger.getInstance();
@@ -14,7 +14,7 @@ async function getAccountBalance(
   accountId: string,
 ): Promise<APIResponse<AccountResponse>> {
   try {
-    const mirrorNodeURL = getMirrorNodeURL();
+    const mirrorNodeURL = stateUtils.getMirrorNodeURL();
     const response = await axios.get(`${mirrorNodeURL}/accounts/${accountId}`);
     return response;
   } catch (error) {

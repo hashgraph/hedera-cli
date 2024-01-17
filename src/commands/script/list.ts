@@ -1,4 +1,4 @@
-import { recordCommand } from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import scriptUtils from '../../utils/script';
 import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
@@ -13,7 +13,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('List all scripts')
     .action(() => {

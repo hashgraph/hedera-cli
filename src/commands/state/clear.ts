@@ -1,8 +1,7 @@
-import { recordCommand } from '../../state/stateService';
+import stateUtils from '../../utils/state';
 import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
-import { clearState } from '../../state/stateService';
 
 const logger = Logger.getInstance();
 
@@ -14,7 +13,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Clear all state and reset to default')
     .option('-a, --skip-accounts', 'Skip resetting accounts', false)
@@ -32,7 +31,7 @@ function clear(
   skipScripts: boolean,
 ): void {
   if (!skipAccounts && !skipTokens && !skipScripts) {
-    clearState();
+    stateUtils.clearState();
     return;
   }
 

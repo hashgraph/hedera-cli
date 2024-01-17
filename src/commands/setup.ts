@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as dotenv from 'dotenv';
 import * as os from 'os';
 
-import { recordCommand } from '../state/stateService';
+import stateUtils from '../utils/state';
 import stateController from '../state/stateController';
 import config from '../state/config';
 import { Logger } from '../utils/logger';
@@ -22,7 +22,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Setup the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
@@ -41,7 +41,7 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
-      recordCommand(command);
+      stateUtils.recordCommand(command);
     })
     .description('Reload the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
