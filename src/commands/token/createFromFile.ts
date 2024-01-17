@@ -2,7 +2,7 @@ import * as path from 'path';
 import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
 
 import accountUtils from '../../utils/account';
-import { getSupplyType } from '../../utils/token';
+import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
@@ -121,7 +121,7 @@ async function createTokenOnNetwork(token: Token) {
       .setDecimals(token.decimals)
       .setInitialSupply(token.initialSupply)
       .setTokenType(TokenType.FungibleCommon)
-      .setSupplyType(getSupplyType(token.supplyType))
+      .setSupplyType(tokenUtils.getSupplyType(token.supplyType))
       .setTreasuryAccountId(token.treasuryId);
 
     if (token.supplyType === 'finite') {

@@ -1,4 +1,4 @@
-import { associateToken } from '../../utils/token';
+import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 
@@ -31,7 +31,7 @@ export default (program: any) => {
         `Associating token ${options.tokenId} with ${options.accountId}`,
       );
       options = dynamicVariablesUtils.replaceOptions(options);
-      await associateToken(options.tokenId, options.accountId);
+      await tokenUtils.associateToken(options.tokenId, options.accountId);
     });
 };
 

@@ -75,4 +75,5 @@ const associateToken = async (
   client.close();
 };
 
-export { getSupplyType, isTokenAssociated, associateToken };
+const tokenUtils = { getSupplyType, isTokenAssociated, associateToken };
+export default tokenUtils;
