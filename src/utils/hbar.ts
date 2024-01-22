@@ -2,6 +2,7 @@ import { PrivateKey, TransferTransaction } from '@hashgraph/sdk';
 
 import stateUtils from './state';
 import { Logger } from '../utils/logger';
+import signUtils from './sign';
 
 const logger = Logger.getInstance();
 
@@ -21,9 +22,7 @@ async function transfer(amount: number, from: string, to: string): Promise<void>
         .addHbarTransfer(toId, amount)
         .freezeWith(client);
   
-      const transferTxSign = await transferTx.sign(
-        PrivateKey.fromStringDer(fromAccount.privateKey),
-      );
+      const transferTxSign = await signUtils.sign(transferTx, fromAccount.privateKey);
   
       const transfer = await transferTxSign.execute(client);
       const receipt = await transfer.getReceipt(client);

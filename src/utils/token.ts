@@ -8,6 +8,7 @@ import {
 import { Logger } from './logger';
 import api from '../api';
 import stateUtils from '../utils/state';
+import signUtils from '../utils/sign';
 
 const logger = Logger.getInstance();
 
@@ -59,9 +60,10 @@ const associateToken = async (
       .setAccountId(account.accountId)
       .setTokenIds([tokenId])
       .freezeWith(client)
-      .sign(PrivateKey.fromStringDer(account.privateKey));
+    
+    const signedTokenAssociateTx = await signUtils.sign(tokenAssociateTx, account.privateKey);
 
-    let tokenAssociateSubmit = await tokenAssociateTx.execute(client);
+    let tokenAssociateSubmit = await signedTokenAssociateTx.execute(client);
     await tokenAssociateSubmit.getReceipt(client);
 
     logger.log(`Token associated: ${tokenId}`);
@@ -84,9 +86,7 @@ const transfer = async (tokenId: string, fromId: string, fromPrivateKey: string,
       .addTokenTransfer(tokenId, toId, balance)
       .freezeWith(client);
 
-    const transferTxSign = await transferTx.sign(
-      PrivateKey.fromStringDer(fromPrivateKey),
-    );
+    const transferTxSign = await signUtils.sign(transferTx, fromPrivateKey);
 
     const transfer = await transferTxSign.execute(client);
     const receipt = await transfer.getReceipt(client);

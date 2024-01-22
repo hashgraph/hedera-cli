@@ -8,6 +8,7 @@ import stateController from '../../state/stateController';
 
 import type { Command, Token } from '../../../types';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import signUtils from '../../utils/sign';
 
 const logger = Logger.getInstance();
 
@@ -109,11 +110,11 @@ async function createFungibleToken(
       .setTreasuryAccountId(treasuryId)
       .setAdminKey(PrivateKey.fromStringDer(adminKey).publicKey)
       .freezeWith(client)
-      .sign(PrivateKey.fromStringDer(treasuryKey));
 
-    let tokenCreateTxSigned = await tokenCreateTx.sign(
-      PrivateKey.fromStringDer(adminKey),
-    );
+    let tokenCreateTxSigned = await signUtils.signByType(tokenCreateTx, 'tokenCreate', {
+      'adminKey': adminKey,
+      'treasuryKey': treasuryKey,
+    })
     let tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
     tokenId = tokenCreateRx.tokenId;

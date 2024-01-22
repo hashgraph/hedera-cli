@@ -9,6 +9,7 @@ import stateController from '../../state/stateController';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 import type { Account, Command, Token, Keys } from '../../../types';
+import signUtils from '../../utils/sign';
 
 const logger = Logger.getInstance();
 
@@ -132,16 +133,14 @@ async function createTokenOnNetwork(token: Token) {
     addKeysToTokenCreateTx(tokenCreateTx, token);
 
     // Signing
-    tokenCreateTx
-      .freezeWith(client)
-      .sign(PrivateKey.fromStringDer(token.keys.treasuryKey));
-
-    if (token.keys.adminKey !== '') {
-      tokenCreateTx.sign(PrivateKey.fromStringDer(token.keys.adminKey));
-    }
+    tokenCreateTx.freezeWith(client);
+    const signedTokenCreateTx = await signUtils.signByType(tokenCreateTx, 'tokenCreate', {
+      adminKey: token.keys.adminKey,
+      treasuryKey: token.keys.treasuryKey,
+    });
 
     // Execute
-    let tokenCreateSubmit = await tokenCreateTx.execute(client);
+    let tokenCreateSubmit = await signedTokenCreateTx.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
 
     if (tokenCreateRx.tokenId == null) {
