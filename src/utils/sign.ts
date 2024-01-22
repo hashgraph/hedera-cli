@@ -18,27 +18,36 @@ async function sign(
   }
 }
 
-/*async function signMultiple(transaction: Transaction, type: string, keys: object): Promise<Transaction> {
-    let signedTx: Transaction;
-    try {
-      signedTx = await transaction.sign(
-        PrivateKey.fromStringDer(keys),
-      );
-      return signedTx;
-    } catch (error) {
-      logger.error('Unable to sign transaction', error as object);
-      process.exit(1);
+async function signByType(transaction: Transaction, type: string, keys: Record<string, string>): Promise<Transaction> {
+    if (!signingRequirements[type]) {
+        logger.error('Transaction type is not recognized');
+        process.exit(1);
     }
 
-  return signedTx;
+    const signatures = signingRequirements[type].sign; 
+    let signedTx: Transaction = transaction;
+    for (const signature of signatures) {
+        try {
+            if (!keys[signature]) continue; // skip iteration if the key is not set
+            signedTx = await sign(signedTx, keys[signature]);
+        } catch (error) {
+            logger.error('Unable to sign transaction', error as object);
+            process.exit(1);
+        }
+    }
+
+    return signedTx;
 }
 
-const signingRequirements = {
-    'tokenAssociate':
-}*/
+const signingRequirements: Record<string, Record<string, string[]>> = {
+    'tokenCreate': {
+        sign: ['treasuryKey', 'adminKey'],
+    }
+}
 
 const signUtils = {
   sign,
+  signByType,
 };
 
 export default signUtils;
