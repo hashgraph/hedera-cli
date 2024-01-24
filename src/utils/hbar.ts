@@ -7,16 +7,15 @@ import signUtils from './sign';
 const logger = Logger.getInstance();
 
 async function transfer(amount: number, from: string, to: string): Promise<void> {
+    if (from === to) {
+      logger.error('Cannot transfer to the same account');
+      process.exit(1);
+    }
+    
     // Find sender account
     let fromAccount, fromId;
-    if (from.toLocaleLowerCase() === "operator") {
-      let operator = stateUtils.getOperator();
-      fromAccount = { privateKey: operator.operatorKey };
-      fromId = operator.operatorId;
-    } else {
-      fromAccount = stateUtils.getAccountByIdOrAlias(from);
-      fromId = fromAccount.accountId;
-    }
+    fromAccount = stateUtils.getAccountByIdOrAlias(from);
+    fromId = fromAccount.accountId;
   
     // Find receiver account
     let toAccount = stateUtils.getAccountByIdOrAlias(to);
