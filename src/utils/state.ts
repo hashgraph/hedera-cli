@@ -75,6 +75,39 @@ function getNetwork() {
   return state.network;
 }
 
+function getOperator(): { operatorId: string; operatorKey: string } {
+  const state = stateController.getAll();
+  let operatorId, operatorKey;
+
+  switch (state.network) {
+    case 'mainnet':
+      operatorId = state.mainnetOperatorId;
+      operatorKey = state.mainnetOperatorKey;
+      break;
+    case 'testnet':
+      operatorId = state.testnetOperatorId;
+      operatorKey = state.testnetOperatorKey;
+      break;
+    case 'previewnet':
+      operatorId = state.previewnetOperatorId;
+      operatorKey = state.previewnetOperatorKey;
+      break;
+    default:
+      logger.error('Invalid network name');
+      process.exit(1);
+  }
+
+  if (operatorId === '' || operatorKey === '') {
+    logger.error(`operator key and ID not set for ${state.network}`);
+    process.exit(1);
+  }
+
+  return {
+    operatorId,
+    operatorKey,
+  };
+}
+
 function switchNetwork(name: string) {
   if (!['mainnet', 'testnet', 'previewnet'].includes(name)) {
     logger.error(
@@ -295,6 +328,7 @@ function addTokens(importedTokens: Token[], merge: boolean) {
 const stateUtils = {
   getMirrorNodeURL,
   getHederaClient,
+  getOperator,
   recordCommand,
   switchNetwork,
   getNetwork,

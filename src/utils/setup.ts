@@ -1,4 +1,6 @@
+import { AccountId } from '@hashgraph/sdk';
 import stateController from '../state/stateController';
+import accountUtils from './account';
 
 /**
  * @description Setup operator accounts for previewnet, testnet, and mainnet in the state file
@@ -11,7 +13,6 @@ function setupOperatorAccounts(
   previewnetOperatorId: string,
   previewnetOperatorKey: string,
 ): void {
-  console.log(testnetOperatorKey)
   const state = stateController.getAll();
   let newState = { ...state };
   newState.testnetOperatorKey = testnetOperatorKey;
@@ -20,6 +21,60 @@ function setupOperatorAccounts(
   newState.mainnetOperatorId = mainnetOperatorId;
   newState.previewnetOperatorId = previewnetOperatorId;
   newState.previewnetOperatorKey = previewnetOperatorKey;
+
+  if (testnetOperatorId) {
+    const privateKeyObject = accountUtils.getPrivateKeyObject(testnetOperatorKey);
+
+    newState.accounts['testnet-operator'] = {
+      accountId: testnetOperatorId,
+      privateKey: testnetOperatorKey,
+      network: 'testnet',
+      alias: 'testnet-operator',
+      type: privateKeyObject.type.toLowerCase(),
+      publicKey: privateKeyObject.publicKey.toString(),
+      evmAddress: privateKeyObject.type.toLowerCase() === 'ed25519'
+          ? ''
+          : privateKeyObject.publicKey.toEvmAddress(),
+      solidityAddress: `${AccountId.fromString(testnetOperatorId).toSolidityAddress()}`,
+      solidityAddressFull: `0x${AccountId.fromString(testnetOperatorId).toSolidityAddress()}`,
+    };
+  }
+
+  if (previewnetOperatorId) {
+    const privateKeyObject = accountUtils.getPrivateKeyObject(previewnetOperatorKey);
+
+    newState.accounts['preview-operator'] = {
+      accountId: previewnetOperatorId,
+      privateKey: previewnetOperatorKey,
+      network: 'previewnet',
+      alias: 'preview-operator',
+      type: privateKeyObject.type.toLowerCase(),
+      publicKey: privateKeyObject.publicKey.toString(),
+      evmAddress: privateKeyObject.type.toLowerCase() === 'ed25519'
+          ? ''
+          : privateKeyObject.publicKey.toEvmAddress(),
+      solidityAddress: `${AccountId.fromString(previewnetOperatorId).toSolidityAddress()}`,
+      solidityAddressFull: `0x${AccountId.fromString(previewnetOperatorId).toSolidityAddress()}`,
+    };
+  }
+
+  if (mainnetOperatorId) {
+    const privateKeyObject = accountUtils.getPrivateKeyObject(mainnetOperatorKey);
+
+    newState.accounts['mainnet-operator'] = {
+      accountId: mainnetOperatorId,
+      privateKey: mainnetOperatorKey,
+      network: 'mainnet',
+      alias: 'mainnet-operator',
+      type: privateKeyObject.type.toLowerCase(),
+      publicKey: privateKeyObject.publicKey.toString(),
+      evmAddress: privateKeyObject.type.toLowerCase() === 'ed25519'
+          ? ''
+          : privateKeyObject.publicKey.toEvmAddress(),
+      solidityAddress: `${AccountId.fromString(mainnetOperatorId).toSolidityAddress()}`,
+      solidityAddressFull: `0x${AccountId.fromString(mainnetOperatorId).toSolidityAddress()}`,
+    };
+  }
 
   newState.network = 'testnet';
 

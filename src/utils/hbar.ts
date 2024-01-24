@@ -1,4 +1,4 @@
-import { PrivateKey, TransferTransaction } from '@hashgraph/sdk';
+import { TransferTransaction } from '@hashgraph/sdk';
 
 import stateUtils from './state';
 import { Logger } from '../utils/logger';
@@ -8,8 +8,15 @@ const logger = Logger.getInstance();
 
 async function transfer(amount: number, from: string, to: string): Promise<void> {
     // Find sender account
-    let fromAccount = stateUtils.getAccountByIdOrAlias(from);
-    let fromId = fromAccount.accountId;
+    let fromAccount, fromId;
+    if (from.toLocaleLowerCase() === "operator") {
+      let operator = stateUtils.getOperator();
+      fromAccount = { privateKey: operator.operatorKey };
+      fromId = operator.operatorId;
+    } else {
+      fromAccount = stateUtils.getAccountByIdOrAlias(from);
+      fromId = fromAccount.accountId;
+    }
   
     // Find receiver account
     let toAccount = stateUtils.getAccountByIdOrAlias(to);

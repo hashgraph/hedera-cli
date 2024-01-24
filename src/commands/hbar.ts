@@ -36,10 +36,8 @@ export default (program: any) => {
         try {
           const accounts = Object.keys(stateController.getAll().accounts);
           if (accounts.length === 0) {
-            logger.error(
-              'No accounts found to transfer hbar from. Please create an account first.',
-            );
-            process.exit(1);
+            stateUtils.getNetwork()
+            accounts.push('testnet-operator');
           }
           from = await enquirerUtils.createPrompt(
             accounts,
