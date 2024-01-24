@@ -1,5 +1,5 @@
 
-import { baseState, scriptState, script_basic } from '../helpers/state';
+import { baseState, testnetOperatorAccount, testnetOperatorId, testnetOperatorKey } from '../helpers/state';
 import { Command } from 'commander';
 import commands from '../../src/commands';
 
@@ -11,7 +11,6 @@ import setupUtils from '../../src/utils/setup';
 
 jest.mock('os');
 jest.mock('dotenv');
-jest.mock('../../src/utils/account');
 jest.mock('../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe('setup init command', () => {
@@ -40,8 +39,6 @@ describe('setup init command', () => {
       commands.setupCommands(program);
 
       // Set up mock environment variables
-      const testnetOperatorKey = 'mockTestnetOperatorKey';
-      const testnetOperatorId = 'mockTestnetOperatorId';
       process.env.TESTNET_OPERATOR_KEY = testnetOperatorKey;
       process.env.TESTNET_OPERATOR_ID = testnetOperatorId;
       
@@ -66,6 +63,7 @@ describe('setup init command', () => {
         ...baseState,
         testnetOperatorId,
         testnetOperatorKey,
+        accounts: testnetOperatorAccount,
       });
     });
   });

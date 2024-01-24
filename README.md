@@ -77,6 +77,8 @@ node dist/hedera-cli.js setup init
 
 > **Note:** You can set a custom absolute path for your `.env` file by using the `--path` flag. For example, `node dist/hedera-cli.js setup init --path /Users/myUser/projects/cli/.env`. More information can be found in the [setup command](#setup-commands) section below.
 
+The `setup init` command will also create the different operator accounts in your address book (`dist/state/state.json` file) so you can use them in your commands.
+
 **4. Verify Installation:**
 
 You can verify the installation by listing all accounts in your address book. If you haven't added any accounts yet, you should see the following output:
@@ -168,7 +170,7 @@ When executed, the setup command performs several key functions:
 It checks if the HOME environment variable is defined and reads `PREVIEWNET_OPERATOR_KEY`, `PREVIEWNET_OPERATOR_KEY`, `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID` from the `~/.hedera/.env` file.
 
 **State Update:**
-Once the previewnet, testnet, and mainnet operator key and ID are validated, these credentials are used to update the `state/state.json` file, which holds the configuration state of the CLI tool.
+Once the previewnet, testnet, and mainnet operator key and ID are validated, these credentials are used to update the `dist/state/state.json` file, which holds the configuration state of the CLI tool. The command will also add the operator accounts to your address book.
 
 **2. Reload Operator Key and Id:**
 
@@ -266,7 +268,7 @@ Flags:
 - **Balance:** (optional) Initial balance in tinybars. Defaults to 1000.
 - **Type:** (optional) The account type (`ECDSA` or `ED25519`). Defaults to `ED25519`.
 
-> **Note:** Setting the **`<alias>` to `random`** will generate a random 20-char long alias. This is useful for scripting functionality to avoid running into non-unique alias errors. 
+> **Note:** Setting the **`<alias>` to `random`** will generate a random 20-char long alias. This is useful for scripting functionality to avoid running into non-unique alias errors. It's not allowed to use the word **operator** as an alias or as part of an alias because it's reserved for the operator accounts.
 
 **2. Retrieve Account Balance:**
 

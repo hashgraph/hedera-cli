@@ -134,3 +134,20 @@ export const downloadState: object = {
     [token.tokenId]: token,
   },
 }
+
+export const testnetOperatorKey = '302e020100300506032b6570042204202ef1cb430150535aa15bdcc6609ff2ef4ec843eb35f1d0cc655a4cad2130b796'; // dummy account
+export const testnetOperatorId = '0.0.7699836';
+
+export const testnetOperatorAccount = {
+  "testnet-operator": {
+    accountId: "0.0.7699836",
+    alias: "testnet-operator",
+    evmAddress: "",
+    network: "testnet",
+    privateKey: "302e020100300506032b6570042204202ef1cb430150535aa15bdcc6609ff2ef4ec843eb35f1d0cc655a4cad2130b796",
+    publicKey: "302a300506032b6570032100b5416f8c0c2836904c58082e4e4a4e923db30bcf85aa189b41fa91062eb8e98b",
+    solidityAddress: "0000000000000000000000000000000000757d7c",
+    solidityAddressFull: "0x0000000000000000000000000000000000757d7c",
+    type: "ed25519",
+  }
+};

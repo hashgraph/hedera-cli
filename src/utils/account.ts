@@ -51,6 +51,12 @@ async function createAccount(
     process.exit(1);
   }
 
+  // Validate alias: Not allowed to use "operator" as an alias or part of an alias
+  if (alias.toLowerCase().includes('operator')) {
+    logger.error('Invalid alias. Alias cannot contain the word "operator".');
+    process.exit(1);
+  }
+
   // Get client from config
   const accounts: Record<string, Account> = stateController.get('accounts');
   const client = stateUtils.getHederaClient();
@@ -319,25 +325,55 @@ function findAccountByAlias(inputAlias: string): Account {
 
 /**
  * @description Returns the type of a private key
- * @param keyString Input private key
+ * @param privateKey Input private key
  * @returns {string} key type {ed25519, ecdsa, Unknown key type}
  */
-function getKeyType(keyString: string): string {
+function getKeyType(privateKey: string): string {
   try {
-    PrivateKey.fromStringED25519(keyString);
+    PrivateKey.fromStringED25519(privateKey);
     return 'ed25519';
   } catch (e) {
     // Not an Ed25519 private key
   }
 
   try {
-    PrivateKey.fromStringECDSA(keyString);
+    PrivateKey.fromStringECDSA(privateKey);
     return 'ecdsa';
   } catch (e) {
     // Not an ECDSA private key
   }
 
   return 'Unknown key type';
+}
+
+function getPublicKeyFromPrivateKey(privateKey: string): string {
+  const keyType = getKeyType(privateKey);
+
+  if (keyType === 'ed25519') {
+    return PrivateKey.fromStringED25519(privateKey).publicKey.toString();
+  }
+
+  if (keyType === 'ecdsa') {
+    return PrivateKey.fromStringECDSA(privateKey).publicKey.toString();
+  }
+
+  logger.error('Invalid private key');
+  process.exit(1);
+}
+
+function getPrivateKeyObject(privateKey: string): PrivateKey {
+  const keyType = getKeyType(privateKey);
+
+  if (keyType === 'ed25519') {
+    return PrivateKey.fromStringED25519(privateKey);
+  }
+
+  if (keyType === 'ecdsa') {
+    return PrivateKey.fromStringECDSA(privateKey);
+  }
+
+  logger.error('Invalid private key');
+  process.exit(1);
 }
 
 function generateRandomAlias(): string {
@@ -359,6 +395,8 @@ const accountUtils = {
   getAccountBalance,
   getAccountHbarBalance,
   getKeyType,
+  getPublicKeyFromPrivateKey,
+  getPrivateKeyObject,
   generateRandomAlias,
   clearAddressBook,
   deleteAccount,

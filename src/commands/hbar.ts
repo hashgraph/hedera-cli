@@ -5,7 +5,7 @@ import dynamicVariablesUtils from '../utils/dynamicVariables';
 import { Logger } from '../utils/logger';
 import hbarUtils from '../utils/hbar';
 
-import type { Command } from '../../types';
+import type { Account, Command } from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -31,18 +31,20 @@ export default (program: any) => {
 
       let to = options.to;
       let from = options.from;
+      const network = stateUtils.getNetwork();
 
       if (!options.from) {
         try {
-          const accounts = Object.keys(stateController.getAll().accounts);
-          if (accounts.length === 0) {
+          const accounts: Account[] = Object.values(stateController.getAll().accounts);
+          const filteredAccounts = accounts.filter((account) => account.network === network);
+          if (filteredAccounts.length === 0) {
             logger.error(
               'No accounts found to transfer hbar from. Please create an account first.',
             );
             process.exit(1);
           }
           from = await enquirerUtils.createPrompt(
-            accounts,
+            filteredAccounts.map((account) => account.alias),
             'Choose account to transfer hbar from:',
           );
         } catch (error) {
@@ -53,15 +55,16 @@ export default (program: any) => {
 
       if (!options.to) {
         try {
-          const accounts = Object.keys(stateController.getAll().accounts);
-          if (accounts.length === 0) {
+          const accounts: Account[] = Object.values(stateController.getAll().accounts);
+          const filteredAccounts = accounts.filter((account) => account.network === network);
+          if (filteredAccounts.length === 0) {
             logger.error(
               'No accounts found to transfer hbar from. Please create an account first.',
             );
             process.exit(1);
           }
           to = await enquirerUtils.createPrompt(
-            accounts,
+            filteredAccounts.map((account) => account.alias),
             'Choose account to transfer hbar to:',
           );
         } catch (error) {

@@ -1,4 +1,4 @@
-import { PrivateKey, TransferTransaction } from '@hashgraph/sdk';
+import { TransferTransaction } from '@hashgraph/sdk';
 
 import stateUtils from './state';
 import { Logger } from '../utils/logger';
@@ -7,9 +7,15 @@ import signUtils from './sign';
 const logger = Logger.getInstance();
 
 async function transfer(amount: number, from: string, to: string): Promise<void> {
+    if (from === to) {
+      logger.error('Cannot transfer to the same account');
+      process.exit(1);
+    }
+    
     // Find sender account
-    let fromAccount = stateUtils.getAccountByIdOrAlias(from);
-    let fromId = fromAccount.accountId;
+    let fromAccount, fromId;
+    fromAccount = stateUtils.getAccountByIdOrAlias(from);
+    fromId = fromAccount.accountId;
   
     // Find receiver account
     let toAccount = stateUtils.getAccountByIdOrAlias(to);
