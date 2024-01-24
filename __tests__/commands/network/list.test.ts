@@ -19,7 +19,6 @@ describe("network list command", () => {
         await program.parse(["node", "hedera-cli.ts", "network", "list"]);
   
         // Assert
-        console.log(logSpy.mock.calls)
         expect(logSpy).toHaveBeenCalledWith(`Available networks: mainnet, testnet, previewnet`);
       });
   });
