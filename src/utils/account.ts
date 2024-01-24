@@ -51,6 +51,12 @@ async function createAccount(
     process.exit(1);
   }
 
+  // Validate alias: Not allowed to use "operator" as an alias or part of an alias
+  if (alias.toLowerCase().includes('operator')) {
+    logger.error('Invalid alias. Alias cannot contain the word "operator".');
+    process.exit(1);
+  }
+
   // Get client from config
   const accounts: Record<string, Account> = stateController.get('accounts');
   const client = stateUtils.getHederaClient();
