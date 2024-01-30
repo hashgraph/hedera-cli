@@ -1,5 +1,5 @@
 import createCommand from './create';
-import submitCommand from './submit';
+import messageCommand from './message';
 import listCommand from './list';
 
 export default (program: any) => {
@@ -10,6 +10,6 @@ export default (program: any) => {
     );
 
   createCommand(state);
-  submitCommand(state);
+  messageCommand(state);
   listCommand(state);
 };
