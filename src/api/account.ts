@@ -7,10 +7,9 @@ const logger = Logger.getInstance();
 
 /**
  * API functions:
- * - getAccountBalance(accountId): Get the balance of an account
+ * - getAccountInfo(accountId): Get the info of an account
  */
-
-async function getAccountBalance(
+async function getAccountInfo(
   accountId: string,
 ): Promise<APIResponse<AccountResponse>> {
   try {
@@ -28,5 +27,5 @@ async function getAccountBalance(
 }
 
 export default {
-  getAccountBalance,
+  getAccountInfo,
 };

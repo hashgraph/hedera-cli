@@ -6,8 +6,7 @@ import enquirerUtils from '../utils/enquirer';
 import stateController from '../state/stateController';
 import { Logger } from '../utils/logger';
 
-import type { Command, PromptResponse, State } from '../../types';
-import balance from './account/balance';
+import type { Command, State } from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -23,12 +22,13 @@ export default (program: any) => {
       ];
       stateUtils.recordCommand(command);
     })
-    .description('Create a backup of the config.json file')
+    .description('Create a backup of the state.json file')
     .option('--accounts', 'Backup the accounts')
     .option('--safe', 'Remove the private keys from the backup')
+    .option('--name <name>', 'Name of the backup file')
     .action((options: BackupOptions) => {
       logger.verbose('Creating backup of state');
-      backupState(options.accounts, options.safe);
+      backupState(options.name, options.accounts, options.safe);
     });
 
   network
@@ -104,7 +104,7 @@ function restoreState(
   if (!restoreAccounts && !restoreTokens && !restoreScripts) {
     stateController.saveState(data);
     logger.log('Backup restored successfully');
-    process.exit(0);
+    return;
   }
 
   if (restoreAccounts) {
@@ -128,9 +128,7 @@ function restoreState(
  * @param backupAccounts Only backup the accounts from state
  * @param safe Remove the private keys from the backup file
  */
-function backupState(backupAccounts: boolean, safe: boolean) {
-  const timestamp = Date.now(); // UNIX timestamp in milliseconds
-
+function backupState(name: string, backupAccounts: boolean, safe: boolean) {
   let data;
   try {
     const statePath = path.join(__dirname, '..', 'state', 'state.json');
@@ -141,7 +139,11 @@ function backupState(backupAccounts: boolean, safe: boolean) {
   }
 
   // Create backup filename
+  const timestamp = Date.now(); // UNIX timestamp in milliseconds
   let backupFilename = `state.backup.${timestamp}.json`;
+  if (name) {
+    backupFilename = `state.backup.${name}.json`;
+  }
 
   if (safe) {
     data = filterState(data);
@@ -206,6 +208,7 @@ function filterState(data: State) {
 interface BackupOptions {
   accounts: boolean;
   safe: boolean;
+  name: string;
 }
 
 interface RestoreOptions {

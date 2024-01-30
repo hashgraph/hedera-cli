@@ -2,28 +2,51 @@
   "network": "testnet",
   "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
-  "testnetOperatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
-  "testnetOperatorId": "0.0.458179",
-  "previewnetOperatorId": "",
-  "previewnetOperatorKey": "",
-  "mainnetOperatorKey": "",
-  "mainnetOperatorId": "",
   "recording": 0,
   "recordingScriptName": "",
   "scriptExecution": 0,
   "scriptExecutionName": "",
-  "accounts": {},
-  "scripts": {
-    "script-init": {
-      "name": "init",
-      "commands": [
-        "network use testnet",
-        "account create -a alice -b 1000000000 --type ecdsa",
-        "account create -a bob -b 1000000000 --type ecdsa",
-        "account create -a clarice -b 1000000000 --type ecdsa",
-        "state download --url https://raw.githubusercontent.com/hashgraph/hedera-cli/main/src/commands/script/examples.json --merge"
-      ]
+  "accounts": {
+    "testnet-operator": {
+      "accountId": "0.0.458179",
+      "privateKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+      "network": "testnet",
+      "alias": "testnet-operator",
+      "type": "ed25519",
+      "publicKey": "302a300506032b6570032100f2f4fc538b9b2fd8ce2dba228b109e534d198c40a09df8cbcb96446f7884d27c",
+      "evmAddress": "",
+      "solidityAddress": "000000000000000000000000000000000006fdc3",
+      "solidityAddressFull": "0x000000000000000000000000000000000006fdc3"
+    },
+    "preview-operator": {
+      "accountId": "0.0.2225",
+      "privateKey": "3030020100300706052b8104000a042204208d7eea780354f14dc9a3ef6d97daf9966051dc8fc44cbb533e32111f7058494b",
+      "network": "previewnet",
+      "alias": "preview-operator",
+      "type": "ecdsa",
+      "publicKey": "302d300706052b8104000a0322000393be0a979355e2249c813dceea855dbe91fa6c914e3e3dcb752b4f3444a047d1",
+      "evmAddress": "f2ad3082c76a6318dd2c8e281bd2e64dca6d01df",
+      "solidityAddress": "00000000000000000000000000000000000008b1",
+      "solidityAddressFull": "0x00000000000000000000000000000000000008b1"
+    },
+    "greg": {
+      "network": "testnet",
+      "alias": "greg",
+      "accountId": "0.0.7746572",
+      "type": "ECDSA",
+      "publicKey": "302d300706052b8104000a03220003ab945f94e817b6590efa07978a60c301216380c3401adb70677d829a0017d598",
+      "evmAddress": "561d1aa339256e66b84aed631b5e179482230185",
+      "solidityAddress": "000000000000000000000000000000000076340c",
+      "solidityAddressFull": "0x000000000000000000000000000000000076340c",
+      "privateKey": "3030020100300706052b8104000a04220420901393474f2650518f9fd91d1a094879b5d31d48ddea39c30b8b08f3d01d6678"
     }
   },
-  "tokens": {}
+  "tokens": {},
+  "scripts": {},
+  "previewnetOperatorId": "0.0.2225",
+  "previewnetOperatorKey": "3030020100300706052b8104000a042204208d7eea780354f14dc9a3ef6d97daf9966051dc8fc44cbb533e32111f7058494b",
+  "testnetOperatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+  "testnetOperatorId": "0.0.458179",
+  "mainnetOperatorKey": "",
+  "mainnetOperatorId": ""
 }

@@ -114,7 +114,7 @@ async function createAccount(
     network: stateUtils.getNetwork(),
     alias,
     accountId: newAccountId.toString(),
-    type,
+    type: type.toUpperCase(),
     publicKey: newAccountPrivateKey.publicKey.toString(),
     evmAddress:
       type.toLowerCase() === 'ed25519'
@@ -259,7 +259,7 @@ async function getAccountBalance(
     process.exit(1);
   }
 
-  const response = await api.account.getAccountBalance(accountId);
+  const response = await api.account.getAccountInfo(accountId);
   display('displayBalance', response, { onlyHbar, tokenId });
 
   client.close();
@@ -267,7 +267,7 @@ async function getAccountBalance(
 }
 
 async function getAccountHbarBalance(accountId: string): Promise<number> {
-  const response = await api.account.getAccountBalance(accountId);
+  const response = await api.account.getAccountInfo(accountId);
 
   if (!response) {
     logger.error('Error getting account balance');
