@@ -16,13 +16,12 @@ export default (program: any) => {
       stateUtils.recordCommand(command);
     })
     .description('Wait for a specified number of seconds')
-    .action((seconds: string) => {
+    .action(async (seconds: string) => {
       logger.verbose(`Waiting for ${seconds} seconds`);
-      wait(seconds);
+      await wait(Number(seconds));
     });
 };
 
-function wait(seconds: string) {
-  const ms = Number(seconds) * 1000;
-  setTimeout(() => {}, ms);
+async function wait(seconds: number) {
+  await new Promise((resolve) => setTimeout(resolve, (seconds * 1000)));
 }

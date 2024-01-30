@@ -28,21 +28,39 @@
       "evmAddress": "f2ad3082c76a6318dd2c8e281bd2e64dca6d01df",
       "solidityAddress": "00000000000000000000000000000000000008b1",
       "solidityAddressFull": "0x00000000000000000000000000000000000008b1"
-    },
-    "greg": {
-      "network": "testnet",
-      "alias": "greg",
-      "accountId": "0.0.7746572",
-      "type": "ECDSA",
-      "publicKey": "302d300706052b8104000a03220003ab945f94e817b6590efa07978a60c301216380c3401adb70677d829a0017d598",
-      "evmAddress": "561d1aa339256e66b84aed631b5e179482230185",
-      "solidityAddress": "000000000000000000000000000000000076340c",
-      "solidityAddressFull": "0x000000000000000000000000000000000076340c",
-      "privateKey": "3030020100300706052b8104000a04220420901393474f2650518f9fd91d1a094879b5d31d48ddea39c30b8b08f3d01d6678"
     }
   },
   "tokens": {},
-  "scripts": {},
+  "scripts": {
+    "script-token": {
+      "name": "token",
+      "creation": 1706620441178,
+      "commands": [
+        "network use testnet",
+        "account create -a random --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "account create -a random --args privateKey,privKeyAcc2 --args alias,aliasAcc2 --args accountId,idAcc2",
+        "account create -a random --args privateKey,privKeyAcc3 --args alias,aliasAcc3 --args accountId,idAcc3",
+        "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId,tokenId",
+        "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
+        "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}",
+        "wait 5",
+        "account balance --account-id-or-alias {{aliasAcc3}} --token-id {{tokenId}}",
+        "state view --token-id {{tokenId}}"
+      ],
+      "args": {}
+    },
+    "script-account-create": {
+      "name": "account-create",
+      "creation": 1706620441199,
+      "commands": [
+        "network use testnet",
+        "account create -a random -b 10000000 --type ecdsa --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "wait 5",
+        "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
+      ],
+      "args": {}
+    }
+  },
   "previewnetOperatorId": "0.0.2225",
   "previewnetOperatorKey": "3030020100300706052b8104000a042204208d7eea780354f14dc9a3ef6d97daf9966051dc8fc44cbb533e32111f7058494b",
   "testnetOperatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
