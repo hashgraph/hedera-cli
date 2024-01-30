@@ -1,4 +1,6 @@
 import createCommand from './create';
+import submitCommand from './submit';
+import listCommand from './list';
 
 export default (program: any) => {
   const state = program
@@ -8,4 +10,6 @@ export default (program: any) => {
     );
 
   createCommand(state);
+  submitCommand(state);
+  listCommand(state);
 };
