@@ -5,7 +5,6 @@ import { baseState } from '../helpers/state';
 import { program } from 'commander';
 import commands from '../../src/commands';
 import stateController from '../../src/state/stateController';
-import api from '../../src/api';
 
 /**
  * E2E testing flow for scripts:
@@ -15,7 +14,7 @@ import api from '../../src/api';
  */
 describe('End to end: Script features', () => {
   beforeEach(() => {
-    //stateController.saveState(baseState); // reset state to base state for each test
+    stateController.saveState(baseState); // reset state to base state for each test
   });
 
   test('✅ Script features', async () => {
