@@ -17,6 +17,10 @@ describe('End to end: Script features', () => {
     stateController.saveState(baseState); // reset state to base state for each test
   });
 
+  afterEach(() => {
+    stateController.saveState(baseState);
+  });
+
   test('✅ Script features', async () => {
     // Arrange: Setup init
     commands.setupCommands(program);
