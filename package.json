@@ -16,13 +16,8 @@
     "copy-input": "copyfiles -u 2 src/input/*.json dist/input/",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet",
     "format": "prettier --write 'src/**/*.{js,ts,tsx}'",
-    "test": "jest"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint && npm run format && npm run test",
-      "pre-push": ""
-    }
+    "test": "jest",
+    "prepare": "husky"
   },
   "keywords": [
     "CLI",

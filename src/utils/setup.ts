@@ -23,7 +23,8 @@ function setupOperatorAccounts(
   newState.previewnetOperatorKey = previewnetOperatorKey;
 
   if (testnetOperatorId) {
-    const privateKeyObject = accountUtils.getPrivateKeyObject(testnetOperatorKey);
+    const privateKeyObject =
+      accountUtils.getPrivateKeyObject(testnetOperatorKey);
     const type = accountUtils.getKeyType(testnetOperatorKey);
 
     newState.accounts['testnet-operator'] = {
@@ -33,16 +34,21 @@ function setupOperatorAccounts(
       alias: 'testnet-operator',
       type,
       publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress: type === 'ed25519'
-          ? ''
-          : privateKeyObject.publicKey.toEvmAddress(),
-      solidityAddress: `${AccountId.fromString(testnetOperatorId).toSolidityAddress()}`,
-      solidityAddressFull: `0x${AccountId.fromString(testnetOperatorId).toSolidityAddress()}`,
+      evmAddress:
+        type === 'ed25519' ? '' : privateKeyObject.publicKey.toEvmAddress(),
+      solidityAddress: `${AccountId.fromString(
+        testnetOperatorId,
+      ).toSolidityAddress()}`,
+      solidityAddressFull: `0x${AccountId.fromString(
+        testnetOperatorId,
+      ).toSolidityAddress()}`,
     };
   }
 
   if (previewnetOperatorId) {
-    const privateKeyObject = accountUtils.getPrivateKeyObject(previewnetOperatorKey);
+    const privateKeyObject = accountUtils.getPrivateKeyObject(
+      previewnetOperatorKey,
+    );
     const type = accountUtils.getKeyType(previewnetOperatorKey);
 
     newState.accounts['preview-operator'] = {
@@ -52,16 +58,20 @@ function setupOperatorAccounts(
       alias: 'preview-operator',
       type,
       publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress: type === 'ed25519'
-          ? ''
-          : privateKeyObject.publicKey.toEvmAddress(),
-      solidityAddress: `${AccountId.fromString(previewnetOperatorId).toSolidityAddress()}`,
-      solidityAddressFull: `0x${AccountId.fromString(previewnetOperatorId).toSolidityAddress()}`,
+      evmAddress:
+        type === 'ed25519' ? '' : privateKeyObject.publicKey.toEvmAddress(),
+      solidityAddress: `${AccountId.fromString(
+        previewnetOperatorId,
+      ).toSolidityAddress()}`,
+      solidityAddressFull: `0x${AccountId.fromString(
+        previewnetOperatorId,
+      ).toSolidityAddress()}`,
     };
   }
 
   if (mainnetOperatorId) {
-    const privateKeyObject = accountUtils.getPrivateKeyObject(mainnetOperatorKey);
+    const privateKeyObject =
+      accountUtils.getPrivateKeyObject(mainnetOperatorKey);
     const type = accountUtils.getKeyType(mainnetOperatorKey);
 
     newState.accounts['mainnet-operator'] = {
@@ -71,11 +81,14 @@ function setupOperatorAccounts(
       alias: 'mainnet-operator',
       type,
       publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress: type === 'ed25519'
-          ? ''
-          : privateKeyObject.publicKey.toEvmAddress(),
-      solidityAddress: `${AccountId.fromString(mainnetOperatorId).toSolidityAddress()}`,
-      solidityAddressFull: `0x${AccountId.fromString(mainnetOperatorId).toSolidityAddress()}`,
+      evmAddress:
+        type === 'ed25519' ? '' : privateKeyObject.publicKey.toEvmAddress(),
+      solidityAddress: `${AccountId.fromString(
+        mainnetOperatorId,
+      ).toSolidityAddress()}`,
+      solidityAddressFull: `0x${AccountId.fromString(
+        mainnetOperatorId,
+      ).toSolidityAddress()}`,
     };
   }
 

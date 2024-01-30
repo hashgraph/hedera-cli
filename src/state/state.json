@@ -6,13 +6,87 @@
   "recordingScriptName": "",
   "scriptExecution": 0,
   "scriptExecutionName": "",
-  "accounts": {},
+  "accounts": {
+    "testnet-operator": {
+      "accountId": "0.0.458179",
+      "privateKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+      "network": "testnet",
+      "alias": "testnet-operator",
+      "type": "ed25519",
+      "publicKey": "302a300506032b6570032100f2f4fc538b9b2fd8ce2dba228b109e534d198c40a09df8cbcb96446f7884d27c",
+      "evmAddress": "",
+      "solidityAddress": "000000000000000000000000000000000006fdc3",
+      "solidityAddressFull": "0x000000000000000000000000000000000006fdc3"
+    },
+    "preview-operator": {
+      "accountId": "0.0.2225",
+      "privateKey": "3030020100300706052b8104000a042204208d7eea780354f14dc9a3ef6d97daf9966051dc8fc44cbb533e32111f7058494b",
+      "network": "previewnet",
+      "alias": "preview-operator",
+      "type": "ecdsa",
+      "publicKey": "302d300706052b8104000a0322000393be0a979355e2249c813dceea855dbe91fa6c914e3e3dcb752b4f3444a047d1",
+      "evmAddress": "f2ad3082c76a6318dd2c8e281bd2e64dca6d01df",
+      "solidityAddress": "00000000000000000000000000000000000008b1",
+      "solidityAddressFull": "0x00000000000000000000000000000000000008b1"
+    },
+    "treasury": {
+      "network": "testnet",
+      "alias": "treasury",
+      "accountId": "0.0.7748343",
+      "type": "ED25519",
+      "publicKey": "302a300506032b6570032100f98a0685ea312a682c303ca9e9762d93117ca114425f8b461e03112cc907c949",
+      "evmAddress": "",
+      "solidityAddress": "0000000000000000000000000000000000763af7",
+      "solidityAddressFull": "0x0000000000000000000000000000000000763af7",
+      "privateKey": "302e020100300506032b657004220420049007e5e82aa1dfd5ed9581c91d9cce7868dc97736511cf8fe305f1eebbc32b"
+    },
+    "admin": {
+      "network": "testnet",
+      "alias": "admin",
+      "accountId": "0.0.7748345",
+      "type": "ED25519",
+      "publicKey": "302a300506032b6570032100225cebd34abf494dc0334603ee722daee08cd67648f95fd4faf0449a9bf65771",
+      "evmAddress": "",
+      "solidityAddress": "0000000000000000000000000000000000763af9",
+      "solidityAddressFull": "0x0000000000000000000000000000000000763af9",
+      "privateKey": "302e020100300506032b6570042204207caf0c58a28e02149b7ef5e37fc6e8bf06207bbd1dc2c357c236e291d12834e0"
+    },
+    "user": {
+      "network": "testnet",
+      "alias": "user",
+      "accountId": "0.0.7748347",
+      "type": "ED25519",
+      "publicKey": "302a300506032b6570032100ac735d09332ecdc5a44db934619305cf1f55e5c084506377135aeab09440707d",
+      "evmAddress": "",
+      "solidityAddress": "0000000000000000000000000000000000763afb",
+      "solidityAddressFull": "0x0000000000000000000000000000000000763afb",
+      "privateKey": "302e020100300506032b6570042204201734f623b8068893d015640b25a943734e290e78516463cd7af821aa5a2dff58"
+    }
+  },
+  "tokens": {
+    "0.0.7748349": {
+      "tokenId": "0.0.7748349",
+      "associations": [
+        {
+          "alias": "user",
+          "accountId": "0.0.7748347"
+        }
+      ],
+      "name": "test-token",
+      "symbol": "TT",
+      "treasuryId": "0.0.7748343",
+      "treasuryKey": "302e020100300506032b657004220420049007e5e82aa1dfd5ed9581c91d9cce7868dc97736511cf8fe305f1eebbc32b",
+      "decimals": 2,
+      "initialSupply": 1000,
+      "adminKey": "302e020100300506032b6570042204207caf0c58a28e02149b7ef5e37fc6e8bf06207bbd1dc2c357c236e291d12834e0",
+      "network": "testnet"
+    }
+  },
   "scripts": {},
+  "previewnetOperatorId": "0.0.2225",
+  "previewnetOperatorKey": "3030020100300706052b8104000a042204208d7eea780354f14dc9a3ef6d97daf9966051dc8fc44cbb533e32111f7058494b",
   "testnetOperatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
   "testnetOperatorId": "0.0.458179",
   "mainnetOperatorKey": "",
-  "mainnetOperatorId": "",
-  "previewnetOperatorKey": "",
-  "previewnetOperatorId": "",
-  "tokens": {}
+  "mainnetOperatorId": ""
 }

@@ -109,12 +109,16 @@ async function createFungibleToken(
       .setSupplyType(tokenUtils.getSupplyType(supplyType))
       .setTreasuryAccountId(treasuryId)
       .setAdminKey(PrivateKey.fromStringDer(adminKey).publicKey)
-      .freezeWith(client)
+      .freezeWith(client);
 
-    let tokenCreateTxSigned = await signUtils.signByType(tokenCreateTx, 'tokenCreate', {
-      'adminKey': adminKey,
-      'treasuryKey': treasuryKey,
-    })
+    let tokenCreateTxSigned = await signUtils.signByType(
+      tokenCreateTx,
+      'tokenCreate',
+      {
+        adminKey: adminKey,
+        treasuryKey: treasuryKey,
+      },
+    );
     let tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
     let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
     tokenId = tokenCreateRx.tokenId;
