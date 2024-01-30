@@ -15,11 +15,15 @@ async function findMessage(
 ): Promise<APIResponse<TopicResponse>> {
   try {
     const mirrorNodeURL = stateUtils.getMirrorNodeURL();
-    const response = await axios.get(`${mirrorNodeURL}/topics/${topicId}/messages/${sequenceNumber}`);
+    const response = await axios.get(
+      `${mirrorNodeURL}/topics/${topicId}/messages/${sequenceNumber}`,
+    );
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      logger.error(`Resource ${topicId} doesn't exist or ${sequenceNumber} is too high. ${error.message}`);
+      logger.error(
+        `Resource ${topicId} doesn't exist or ${sequenceNumber} is too high. ${error.message}`,
+      );
     } else {
       logger.error('Unexpected error:', error as object);
     }
@@ -28,5 +32,5 @@ async function findMessage(
 }
 
 export default {
-    findMessage,
+  findMessage,
 };

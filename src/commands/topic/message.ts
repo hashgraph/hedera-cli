@@ -22,8 +22,8 @@ export default (program: any) => {
       stateUtils.recordCommand(command);
     })
     .description('Create a new topic')
-    .option('-m, --message <message>', 'Submit a message to the topic')
-    .option('-t, --topic-id <topicId>', 'The topic ID')
+    .requiredOption('-m, --message <message>', 'Submit a message to the topic')
+    .requiredOption('-t, --topic-id <topicId>', 'The topic ID')
     .action(async (options: SubmitMessageOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for admin-key and submit-key
       logger.verbose(`Submitting message to topic: ${options.topicId}`);
@@ -73,11 +73,21 @@ export default (program: any) => {
     .option('-t, --topic-id <topicId>', 'The topic ID')
     .action(async (options: FindMessageOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for admin-key and submit-key
-      logger.verbose(`Finding message for topic: ${options.topicId} and sequence number: ${options.sequenceNumber}`);
+      logger.verbose(
+        `Finding message for topic: ${options.topicId} and sequence number: ${options.sequenceNumber}`,
+      );
 
-      const response = await api.topic.findMessage(options.topicId, Number(options.sequenceNumber));
+      const response = await api.topic.findMessage(
+        options.topicId,
+        Number(options.sequenceNumber),
+      );
 
-      logger.log(`Message found: "${Buffer.from(response.data.message, 'base64').toString('ascii')}"`);
+      logger.log(
+        `Message found: "${Buffer.from(
+          response.data.message,
+          'base64',
+        ).toString('ascii')}"`,
+      );
     });
 };
 

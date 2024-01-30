@@ -127,6 +127,7 @@ Let's explore the different commands, their options, and outputs.
 - [Wait Commmand](#wait-command): Wait for a specified amount of seconds
 - [Account Commands](#account-commands): Create and manage accounts
 - [Token Commands](#token-commands): Create and manage tokens
+- [Topic Commands](#topic-commands): Create and manage topics
 - [Hbar Command](#hbar-command): Transfer Hbars between accounts
 - [Backup Commands](#backup-commands): Create a backup of your state
 - [Record Commands](#record-commands): Record CLI interactions and store it in scripts
@@ -441,6 +442,66 @@ Flags:
 - **To:** (required) Account ID to transfer the token to.
 - **From:** (required) Account ID to transfer the token from.
 - **Balance:** (required) Amount of token to transfer.
+
+## Topic Commands
+
+### Overview
+
+The `topic` command in the Hedera CLI tool provides functionality for creating topics and retrieving information about topics on the Hedera network.
+
+```
+topic create
+topic list
+topic message submit
+topic message find
+```
+
+#### Usage
+
+**1. Create Topic:**
+
+Creates a new topic with a specified memo, submit key, and admin key. If you don't provide any options, a public topic will be generated. Setting the submit key creates a private topic. If you don't set an admin key, the topic is immutable.
+
+```sh
+hcli topic create [-s, --submit-key <submitKey>] [-a, --admin-key <adminKey>] [--memo <memo>]
+```
+
+Flags:
+- **Submit Key:** (optional) Submit key for the topic.
+- **Admin Key:** (optional) Admin key for the topic.
+- **Memo:** (optional) Memo for the topic (100 bytes).
+
+**2. List Topics:**
+
+Lists all topics on the Hedera network known by the CLI tool.
+
+```sh
+hcli topic list
+```
+
+**3. Submit Message to Topic:**
+
+Submits a message to a specified topic.
+
+```sh
+hcli topic message submit -t,--topic-id <topicId> -m,--message <message>
+```
+
+Flags:
+- **Topic ID:** (required) Topic ID to submit the message to.
+- **Message:** (required) Message to submit to the topic.
+
+**4. Find Messages for Topic:**
+
+Finds messages for a specified topic by its sequence number.
+
+```sh
+hcli topic message find -t,--topic-id <topicId> -s,--sequence-number <sequenceNumber>
+```
+
+Flags:
+- **Topic ID:** (required) Topic ID to find the message for.
+- **Sequence Number:** (required) Sequence number of the message you want to find.
 
 ## Hbar Command
 
