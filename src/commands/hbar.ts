@@ -35,8 +35,12 @@ export default (program: any) => {
 
       if (!options.from) {
         try {
-          const accounts: Account[] = Object.values(stateController.getAll().accounts);
-          const filteredAccounts = accounts.filter((account) => account.network === network);
+          const accounts: Account[] = Object.values(
+            stateController.getAll().accounts,
+          );
+          const filteredAccounts = accounts.filter(
+            (account) => account.network === network,
+          );
           if (filteredAccounts.length === 0) {
             logger.error(
               'No accounts found to transfer hbar from. Please create an account first.',
@@ -55,8 +59,12 @@ export default (program: any) => {
 
       if (!options.to) {
         try {
-          const accounts: Account[] = Object.values(stateController.getAll().accounts);
-          const filteredAccounts = accounts.filter((account) => account.network === network);
+          const accounts: Account[] = Object.values(
+            stateController.getAll().accounts,
+          );
+          const filteredAccounts = accounts.filter(
+            (account) => account.network === network,
+          );
           if (filteredAccounts.length === 0) {
             logger.error(
               'No accounts found to transfer hbar from. Please create an account first.',

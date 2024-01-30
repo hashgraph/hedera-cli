@@ -134,10 +134,14 @@ async function createTokenOnNetwork(token: Token) {
 
     // Signing
     tokenCreateTx.freezeWith(client);
-    const signedTokenCreateTx = await signUtils.signByType(tokenCreateTx, 'tokenCreate', {
-      adminKey: token.keys.adminKey,
-      treasuryKey: token.keys.treasuryKey,
-    });
+    const signedTokenCreateTx = await signUtils.signByType(
+      tokenCreateTx,
+      'tokenCreate',
+      {
+        adminKey: token.keys.adminKey,
+        treasuryKey: token.keys.treasuryKey,
+      },
+    );
 
     // Execute
     let tokenCreateSubmit = await signedTokenCreateTx.execute(client);

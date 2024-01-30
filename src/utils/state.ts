@@ -8,7 +8,6 @@ import type { Account, Script, Token } from '../../types';
 
 const logger = Logger.getInstance();
 
-
 /** hook (middleware)
  * @example command ['account', 'create', '-b', '1000', '-t', 'ed25519']
  */

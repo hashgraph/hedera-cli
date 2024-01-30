@@ -3,7 +3,7 @@ import commands from "../../../src/commands";
 import accountUtils from "../../../src/utils/account";
 import api from "../../../src/api";
 
-import { accountResponse, getAccountBalanceResponseMock } from "../../helpers/api/apiAccountHelper";
+import { accountResponse, getAccountInfoResponseMock } from "../../helpers/api/apiAccountHelper";
 
 describe("account balance command", () => {
   const logSpy = jest.spyOn(console, 'log');
@@ -18,7 +18,7 @@ describe("account balance command", () => {
 
     test("✅ retrieve hbar balance", async () => {
       // Arrange
-      api.account.getAccountBalance = jest.fn().mockResolvedValue(getAccountBalanceResponseMock);
+      api.account.getAccountInfo = jest.fn().mockResolvedValue(getAccountInfoResponseMock);
 
       const program = new Command();
       commands.accountCommands(program);
@@ -34,7 +34,7 @@ describe("account balance command", () => {
 
     test("✅ retrieve token balance", async () => {
       // Arrange
-      api.account.getAccountBalance = jest.fn().mockResolvedValue(getAccountBalanceResponseMock);
+      api.account.getAccountInfo = jest.fn().mockResolvedValue(getAccountInfoResponseMock);
 
       const program = new Command();
       commands.accountCommands(program);

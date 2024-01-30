@@ -44,7 +44,9 @@ export default (program: any) => {
 
       if (options.accountId) {
         logger.log(`\nAccount ${options.accountId}:`);
-        logger.log(stateUtils.getAccountById(options.accountId) || 'Account not found');
+        logger.log(
+          stateUtils.getAccountById(options.accountId) || 'Account not found',
+        );
       }
 
       if (options.accountAlias) {

@@ -59,9 +59,12 @@ const associateToken = async (
     const tokenAssociateTx = await new TokenAssociateTransaction()
       .setAccountId(account.accountId)
       .setTokenIds([tokenId])
-      .freezeWith(client)
-    
-    const signedTokenAssociateTx = await signUtils.sign(tokenAssociateTx, account.privateKey);
+      .freezeWith(client);
+
+    const signedTokenAssociateTx = await signUtils.sign(
+      tokenAssociateTx,
+      account.privateKey,
+    );
 
     let tokenAssociateSubmit = await signedTokenAssociateTx.execute(client);
     await tokenAssociateSubmit.getReceipt(client);
@@ -78,7 +81,13 @@ const associateToken = async (
   client.close();
 };
 
-const transfer = async (tokenId: string, fromId: string, fromPrivateKey: string, toId: string, balance: number) => {
+const transfer = async (
+  tokenId: string,
+  fromId: string,
+  fromPrivateKey: string,
+  toId: string,
+  balance: number,
+) => {
   const client = stateUtils.getHederaClient();
   try {
     const transferTx = await new TransferTransaction()
@@ -107,5 +116,10 @@ const transfer = async (tokenId: string, fromId: string, fromPrivateKey: string,
   client.close();
 };
 
-const tokenUtils = { getSupplyType, isTokenAssociated, associateToken, transfer };
+const tokenUtils = {
+  getSupplyType,
+  isTokenAssociated,
+  associateToken,
+  transfer,
+};
 export default tokenUtils;

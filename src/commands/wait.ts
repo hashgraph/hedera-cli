@@ -23,5 +23,5 @@ export default (program: any) => {
 };
 
 async function wait(seconds: number) {
-  await new Promise((resolve) => setTimeout(resolve, (seconds * 1000)));
+  await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 }

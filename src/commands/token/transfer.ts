@@ -46,7 +46,13 @@ export default (program: any) => {
       let toAccount = stateUtils.getAccountByIdOrAlias(toIdOrAlias);
       let toId = toAccount.accountId;
 
-      await tokenUtils.transfer(tokenId, fromId, fromAccount.privateKey, toId, Number(balance))
+      await tokenUtils.transfer(
+        tokenId,
+        fromId,
+        fromAccount.privateKey,
+        toId,
+        Number(balance),
+      );
     });
 };
 

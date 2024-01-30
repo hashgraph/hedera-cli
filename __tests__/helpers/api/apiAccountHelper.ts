@@ -29,6 +29,6 @@ export const accountResponse: AccountResponse = {
   transactions: [],
 };
 
-export const getAccountBalanceResponseMock: APIResponse = {
+export const getAccountInfoResponseMock: APIResponse = {
   data: accountResponse,
 };
