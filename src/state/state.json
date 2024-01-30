@@ -32,53 +32,53 @@
     "treasury": {
       "network": "testnet",
       "alias": "treasury",
-      "accountId": "0.0.7748343",
-      "type": "ED25519",
-      "publicKey": "302a300506032b6570032100f98a0685ea312a682c303ca9e9762d93117ca114425f8b461e03112cc907c949",
-      "evmAddress": "",
-      "solidityAddress": "0000000000000000000000000000000000763af7",
-      "solidityAddressFull": "0x0000000000000000000000000000000000763af7",
-      "privateKey": "302e020100300506032b657004220420049007e5e82aa1dfd5ed9581c91d9cce7868dc97736511cf8fe305f1eebbc32b"
+      "accountId": "0.0.7749369",
+      "type": "ECDSA",
+      "publicKey": "302d300706052b8104000a032200026f7f3a1705bb8e908c7732a9dc03fda1d3a3ac99dd1fada4faf316b0354d172a",
+      "evmAddress": "7079164b30da815e2c22b8cd2b20628a3f49bf2d",
+      "solidityAddress": "0000000000000000000000000000000000763ef9",
+      "solidityAddressFull": "0x0000000000000000000000000000000000763ef9",
+      "privateKey": "3030020100300706052b8104000a04220420fdacbaa53718fa4ef1ea5ce492522a7d453a47d91b9b2e8f2f101f2c0a3f8afe"
     },
     "admin": {
       "network": "testnet",
       "alias": "admin",
-      "accountId": "0.0.7748345",
-      "type": "ED25519",
-      "publicKey": "302a300506032b6570032100225cebd34abf494dc0334603ee722daee08cd67648f95fd4faf0449a9bf65771",
-      "evmAddress": "",
-      "solidityAddress": "0000000000000000000000000000000000763af9",
-      "solidityAddressFull": "0x0000000000000000000000000000000000763af9",
-      "privateKey": "302e020100300506032b6570042204207caf0c58a28e02149b7ef5e37fc6e8bf06207bbd1dc2c357c236e291d12834e0"
+      "accountId": "0.0.7749370",
+      "type": "ECDSA",
+      "publicKey": "302d300706052b8104000a032200025bffa461ee10aefeeeb8c05953bcb49e77bb80d9c545944565aa241ea7d0e926",
+      "evmAddress": "eedb0283bde08ef082c585a4467a0152e18ebd6b",
+      "solidityAddress": "0000000000000000000000000000000000763efa",
+      "solidityAddressFull": "0x0000000000000000000000000000000000763efa",
+      "privateKey": "3030020100300706052b8104000a0422042009abd13f00f175c8d22ad3bb4de8806b858bad4d2277038fb66696a12f727414"
     },
     "user": {
       "network": "testnet",
       "alias": "user",
-      "accountId": "0.0.7748347",
-      "type": "ED25519",
-      "publicKey": "302a300506032b6570032100ac735d09332ecdc5a44db934619305cf1f55e5c084506377135aeab09440707d",
-      "evmAddress": "",
-      "solidityAddress": "0000000000000000000000000000000000763afb",
-      "solidityAddressFull": "0x0000000000000000000000000000000000763afb",
-      "privateKey": "302e020100300506032b6570042204201734f623b8068893d015640b25a943734e290e78516463cd7af821aa5a2dff58"
+      "accountId": "0.0.7749373",
+      "type": "ECDSA",
+      "publicKey": "302d300706052b8104000a03220002e6bd3d01124feff63b9975aded3077a6b75eabf7ed5844c97493bc3d9f0cc906",
+      "evmAddress": "254b44dbca16e2314df1203128dbe2c762fdb998",
+      "solidityAddress": "0000000000000000000000000000000000763efd",
+      "solidityAddressFull": "0x0000000000000000000000000000000000763efd",
+      "privateKey": "3030020100300706052b8104000a04220420ddd3bfd13cb96f2d731d21e889de37e74224498fb192201fac360e574605149d"
     }
   },
   "tokens": {
-    "0.0.7748349": {
-      "tokenId": "0.0.7748349",
+    "0.0.7749375": {
+      "tokenId": "0.0.7749375",
       "associations": [
         {
           "alias": "user",
-          "accountId": "0.0.7748347"
+          "accountId": "0.0.7749373"
         }
       ],
       "name": "test-token",
       "symbol": "TT",
-      "treasuryId": "0.0.7748343",
-      "treasuryKey": "302e020100300506032b657004220420049007e5e82aa1dfd5ed9581c91d9cce7868dc97736511cf8fe305f1eebbc32b",
+      "treasuryId": "0.0.7749369",
+      "treasuryKey": "3030020100300706052b8104000a04220420fdacbaa53718fa4ef1ea5ce492522a7d453a47d91b9b2e8f2f101f2c0a3f8afe",
       "decimals": 2,
       "initialSupply": 1000,
-      "adminKey": "302e020100300506032b6570042204207caf0c58a28e02149b7ef5e37fc6e8bf06207bbd1dc2c357c236e291d12834e0",
+      "adminKey": "3030020100300706052b8104000a0422042009abd13f00f175c8d22ad3bb4de8806b858bad4d2277038fb66696a12f727414",
       "network": "testnet"
     }
   },

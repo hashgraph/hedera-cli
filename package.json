@@ -16,7 +16,9 @@
     "copy-input": "copyfiles -u 2 src/input/*.json dist/input/",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet",
     "format": "prettier --write 'src/**/*.{js,ts,tsx}'",
-    "test": "jest",
+    "unit-test": "jest -- __tests__/commands/**/*.test.ts",
+    "e2e-test": "jest -- __tests__/e2e.test.ts --runInBand",
+    "test": "npm run unit-test && npm run e2e-test",
     "prepare": "husky"
   },
   "keywords": [
