@@ -28,5 +28,6 @@ commands.backupCommands(program);
 commands.tokenCommands(program);
 commands.hbarCommands(program);
 commands.waitCommands(program);
+commands.topicCommands(program);
 
 program.parseAsync(process.argv);

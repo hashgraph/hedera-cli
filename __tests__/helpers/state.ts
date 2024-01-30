@@ -18,6 +18,7 @@ export const baseState: State = {
   previewnetOperatorKey: "",
   previewnetOperatorId: "",
   tokens: {},
+  topics: {}
 };
 
 /* accounts */
@@ -86,6 +87,11 @@ export const token = {
   },
 };
 
+export const topic = {
+  topicId: "0.0.123",
+  memo: "test",
+};
+
 export const accountState: State = {
   ...baseState,
   accounts: {
@@ -108,6 +114,13 @@ export const tokenState: State = {
   },
 };
 
+export const topicState: State = {
+  ...baseState,
+  topics: {
+    [topic.topicId]: topic,
+  },
+};
+
 export const fullState: State = {
   ...baseState,
   accounts: {
@@ -119,6 +132,9 @@ export const fullState: State = {
   },
   tokens: {
     [token.tokenId]: token,
+  },
+  topics: {
+    [topic.topicId]: topic,
   },
 };
 
