@@ -71,6 +71,7 @@ describe("state clear command", () => {
         // Assert
         expect(saveKeyStateControllerSpy).toHaveBeenCalledWith('accounts', {});
         expect(saveKeyStateControllerSpy).toHaveBeenCalledWith('tokens', {});
+        expect(saveKeyStateControllerSpy).toHaveBeenCalledWith('topics', {});
         expect(stateController.getAll()).toEqual(scriptState);
     });
 
