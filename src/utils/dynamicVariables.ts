@@ -158,7 +158,8 @@ const commandOutputs: CommandOutputs = {
   topicCreate: {
     adminKey: 'adminKey',
     submitKey: 'submitKey',
-  }
+    topicId: 'topicId',
+  },
 };
 
 const dynamicVariables = {

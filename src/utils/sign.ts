@@ -66,7 +66,7 @@ const signingRequirements: Record<string, Record<string, string[]>> = {
   },
   topicCreate: {
     sign: ['adminKey', 'submitKey'],
-  }
+  },
 };
 
 const signUtils = {

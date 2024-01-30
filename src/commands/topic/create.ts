@@ -23,6 +23,13 @@ export default (program: any) => {
     .option('-a, --admin-key <adminKey>', 'The admin key')
     .option('-s, --submit-key <submitKey>', 'The submit key')
     .option('--memo <memo>', 'The memo')
+    .option(
+      '--args <args>',
+      'Store arguments for scripts',
+      (value: string, previous: string) =>
+        previous ? previous.concat(value) : [value],
+      [],
+    )
     .action(async (options: CreateTopicOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for admin-key and submit-key
       logger.verbose('Creating topic');
@@ -33,7 +40,7 @@ export default (program: any) => {
       try {
         const topicCreateTx = await new TopicCreateTransaction();
         if (options.memo) {
-          console.log("memo")
+          console.log('memo');
           topicCreateTx.setTopicMemo(options.memo);
         }
         if (options.adminKey) {
@@ -86,7 +93,11 @@ export default (program: any) => {
       logger.verbose(`Saved topic to state: ${topicId.toString()}`);
 
       client.close();
-      return topic;
+      dynamicVariablesUtils.storeArgs(
+        options.args,
+        dynamicVariablesUtils.commandActions.topic.create.action,
+        topic,
+      );
     });
 };
 
@@ -94,4 +105,5 @@ interface CreateTopicOptions {
   adminKey: string;
   submitKey: string;
   memo: string;
+  args: string[];
 }
