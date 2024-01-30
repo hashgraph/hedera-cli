@@ -2,91 +2,28 @@
   "network": "testnet",
   "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
+  "testnetOperatorKey": "",
+  "testnetOperatorId": "",
+  "mainnetOperatorKey": "",
+  "mainnetOperatorId": "",
+  "previewnetOperatorId": "",
+  "previewnetOperatorKey": "",
   "recording": 0,
   "recordingScriptName": "",
   "scriptExecution": 0,
   "scriptExecutionName": "",
-  "accounts": {
-    "testnet-operator": {
-      "accountId": "0.0.458179",
-      "privateKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
-      "network": "testnet",
-      "alias": "testnet-operator",
-      "type": "ed25519",
-      "publicKey": "302a300506032b6570032100f2f4fc538b9b2fd8ce2dba228b109e534d198c40a09df8cbcb96446f7884d27c",
-      "evmAddress": "",
-      "solidityAddress": "000000000000000000000000000000000006fdc3",
-      "solidityAddressFull": "0x000000000000000000000000000000000006fdc3"
-    },
-    "preview-operator": {
-      "accountId": "0.0.2225",
-      "privateKey": "3030020100300706052b8104000a042204208d7eea780354f14dc9a3ef6d97daf9966051dc8fc44cbb533e32111f7058494b",
-      "network": "previewnet",
-      "alias": "preview-operator",
-      "type": "ecdsa",
-      "publicKey": "302d300706052b8104000a0322000393be0a979355e2249c813dceea855dbe91fa6c914e3e3dcb752b4f3444a047d1",
-      "evmAddress": "f2ad3082c76a6318dd2c8e281bd2e64dca6d01df",
-      "solidityAddress": "00000000000000000000000000000000000008b1",
-      "solidityAddressFull": "0x00000000000000000000000000000000000008b1"
-    },
-    "treasury": {
-      "network": "testnet",
-      "alias": "treasury",
-      "accountId": "0.0.7749369",
-      "type": "ECDSA",
-      "publicKey": "302d300706052b8104000a032200026f7f3a1705bb8e908c7732a9dc03fda1d3a3ac99dd1fada4faf316b0354d172a",
-      "evmAddress": "7079164b30da815e2c22b8cd2b20628a3f49bf2d",
-      "solidityAddress": "0000000000000000000000000000000000763ef9",
-      "solidityAddressFull": "0x0000000000000000000000000000000000763ef9",
-      "privateKey": "3030020100300706052b8104000a04220420fdacbaa53718fa4ef1ea5ce492522a7d453a47d91b9b2e8f2f101f2c0a3f8afe"
-    },
-    "admin": {
-      "network": "testnet",
-      "alias": "admin",
-      "accountId": "0.0.7749370",
-      "type": "ECDSA",
-      "publicKey": "302d300706052b8104000a032200025bffa461ee10aefeeeb8c05953bcb49e77bb80d9c545944565aa241ea7d0e926",
-      "evmAddress": "eedb0283bde08ef082c585a4467a0152e18ebd6b",
-      "solidityAddress": "0000000000000000000000000000000000763efa",
-      "solidityAddressFull": "0x0000000000000000000000000000000000763efa",
-      "privateKey": "3030020100300706052b8104000a0422042009abd13f00f175c8d22ad3bb4de8806b858bad4d2277038fb66696a12f727414"
-    },
-    "user": {
-      "network": "testnet",
-      "alias": "user",
-      "accountId": "0.0.7749373",
-      "type": "ECDSA",
-      "publicKey": "302d300706052b8104000a03220002e6bd3d01124feff63b9975aded3077a6b75eabf7ed5844c97493bc3d9f0cc906",
-      "evmAddress": "254b44dbca16e2314df1203128dbe2c762fdb998",
-      "solidityAddress": "0000000000000000000000000000000000763efd",
-      "solidityAddressFull": "0x0000000000000000000000000000000000763efd",
-      "privateKey": "3030020100300706052b8104000a04220420ddd3bfd13cb96f2d731d21e889de37e74224498fb192201fac360e574605149d"
+  "accounts": {},
+  "scripts": {
+    "script-init": {
+      "name": "init",
+      "commands": [
+        "network use testnet",
+        "account create -a alice -b 1000000000 --type ecdsa",
+        "account create -a bob -b 1000000000 --type ecdsa",
+        "account create -a clarice -b 1000000000 --type ecdsa",
+        "state download --url https://raw.githubusercontent.com/hashgraph/hedera-cli/main/src/commands/script/examples.json --merge"
+      ]
     }
   },
-  "tokens": {
-    "0.0.7749375": {
-      "tokenId": "0.0.7749375",
-      "associations": [
-        {
-          "alias": "user",
-          "accountId": "0.0.7749373"
-        }
-      ],
-      "name": "test-token",
-      "symbol": "TT",
-      "treasuryId": "0.0.7749369",
-      "treasuryKey": "3030020100300706052b8104000a04220420fdacbaa53718fa4ef1ea5ce492522a7d453a47d91b9b2e8f2f101f2c0a3f8afe",
-      "decimals": 2,
-      "initialSupply": 1000,
-      "adminKey": "3030020100300706052b8104000a0422042009abd13f00f175c8d22ad3bb4de8806b858bad4d2277038fb66696a12f727414",
-      "network": "testnet"
-    }
-  },
-  "scripts": {},
-  "previewnetOperatorId": "0.0.2225",
-  "previewnetOperatorKey": "3030020100300706052b8104000a042204208d7eea780354f14dc9a3ef6d97daf9966051dc8fc44cbb533e32111f7058494b",
-  "testnetOperatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
-  "testnetOperatorId": "0.0.458179",
-  "mainnetOperatorKey": "",
-  "mainnetOperatorId": ""
+  "tokens": {}
 }
