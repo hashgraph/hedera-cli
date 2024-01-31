@@ -4,7 +4,6 @@ import {
   downloadState,
   script_basic,
   accountState,
-  token,
 } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';

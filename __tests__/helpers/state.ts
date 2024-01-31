@@ -149,6 +149,9 @@ export const downloadState: object = {
   tokens: {
     [token.tokenId]: token,
   },
+  topics: {
+    [topic.topicId]: topic,
+  },
 }
 
 export const testnetOperatorKey = '302e020100300506032b6570042204202ef1cb430150535aa15bdcc6609ff2ef4ec843eb35f1d0cc655a4cad2130b796'; // dummy account

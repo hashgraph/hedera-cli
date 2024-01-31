@@ -22,7 +22,12 @@ export default (program: any) => {
     .option('-t, --skip-topics', 'Skip resetting topics', false)
     .action((options: ResetOptions) => {
       logger.verbose('Clearing state');
-      clear(options.skipAccounts, options.skipTokens, options.skipScripts, options.skipTopics);
+      clear(
+        options.skipAccounts,
+        options.skipTokens,
+        options.skipScripts,
+        options.skipTopics,
+      );
     });
 };
 
