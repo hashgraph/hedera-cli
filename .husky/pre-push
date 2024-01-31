@@ -1,2 +1,2 @@
 npm run test
-node clear-state.js
+node clear-state.js && git add -A .
