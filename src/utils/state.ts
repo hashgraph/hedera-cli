@@ -204,6 +204,7 @@ function clearState(): void {
   state.accounts = {};
   state.tokens = {};
   state.scripts = {};
+  state.topics = {};
   state.scriptExecution = 0;
   state.scriptExecutionName = '';
   state.recording = 0;

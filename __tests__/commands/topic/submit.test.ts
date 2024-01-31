@@ -7,7 +7,7 @@ import commands from "../../../src/commands";
 import stateController from "../../../src/state/stateController";
 import hbarUtils from "../../../src/utils/hbar";
 
-jest.mock("../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
+jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("topic message command", () => {
   // const hbarUtilsSpy = jest.spyOn(hbarUtils, 'transfer').mockResolvedValue()
