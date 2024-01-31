@@ -90,6 +90,8 @@ export const token = {
 export const topic = {
   topicId: "0.0.123",
   memo: "test",
+  adminKey: "",
+  submitKey: "",
 };
 
 export const accountState: State = {

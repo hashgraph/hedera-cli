@@ -24,7 +24,7 @@ describe("account balance command", () => {
       commands.accountCommands(program);
 
       // Act
-      await program.parse(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--only-hbar"]);
+      await program.parseAsync(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--only-hbar"]);
 
       // Assert
       expect(getAccountBalanceSpy).toHaveBeenCalledWith(accountResponse.account, true, undefined);
@@ -40,7 +40,7 @@ describe("account balance command", () => {
       commands.accountCommands(program);
 
       // Act
-      await program.parse(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--token-id", accountResponse.balance.tokens[0].token_id]);
+      await program.parseAsync(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--token-id", accountResponse.balance.tokens[0].token_id]);
 
       // Assert
       expect(getAccountBalanceSpy).toHaveBeenCalledWith(accountResponse.account, undefined, accountResponse.balance.tokens[0].token_id);

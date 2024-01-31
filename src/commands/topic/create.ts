@@ -38,9 +38,8 @@ export default (program: any) => {
 
       let topicId;
       try {
-        const topicCreateTx = await new TopicCreateTransaction();
+        const topicCreateTx = new TopicCreateTransaction();
         if (options.memo) {
-          console.log('memo');
           topicCreateTx.setTopicMemo(options.memo);
         }
         if (options.adminKey) {
