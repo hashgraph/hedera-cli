@@ -345,9 +345,7 @@ function addTopics(importedTopics: Topic[], merge: boolean) {
 
     topics[topic.topicId] = topic;
     stateController.saveKey('topics', topics);
-    logger.log(
-      `Topic ${topic.topicId} added successfully`,
-    );
+    logger.log(`Topic ${topic.topicId} added successfully`);
   });
 }
 
