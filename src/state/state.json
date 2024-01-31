@@ -6,14 +6,66 @@
   "recordingScriptName": "",
   "scriptExecution": 0,
   "scriptExecutionName": "",
-  "accounts": {},
+  "accounts": {
+    "testnet-operator": {
+      "accountId": "0.0.458179",
+      "privateKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+      "network": "testnet",
+      "alias": "testnet-operator",
+      "type": "ed25519",
+      "publicKey": "302a300506032b6570032100f2f4fc538b9b2fd8ce2dba228b109e534d198c40a09df8cbcb96446f7884d27c",
+      "evmAddress": "",
+      "solidityAddress": "000000000000000000000000000000000006fdc3",
+      "solidityAddressFull": "0x000000000000000000000000000000000006fdc3"
+    },
+    "preview-operator": {
+      "accountId": "0.0.2225",
+      "privateKey": "3030020100300706052b8104000a042204208d7eea780354f14dc9a3ef6d97daf9966051dc8fc44cbb533e32111f7058494b",
+      "network": "previewnet",
+      "alias": "preview-operator",
+      "type": "ecdsa",
+      "publicKey": "302d300706052b8104000a0322000393be0a979355e2249c813dceea855dbe91fa6c914e3e3dcb752b4f3444a047d1",
+      "evmAddress": "f2ad3082c76a6318dd2c8e281bd2e64dca6d01df",
+      "solidityAddress": "00000000000000000000000000000000000008b1",
+      "solidityAddressFull": "0x00000000000000000000000000000000000008b1"
+    },
+    "admin": {
+      "network": "testnet",
+      "alias": "admin",
+      "accountId": "0.0.7760942",
+      "type": "ED25519",
+      "publicKey": "302a300506032b657003210046b0cca7a2f77e15e2ee04beed7c809de11ca80b14cf919bfe4e6c1a261a6a0f",
+      "evmAddress": "",
+      "solidityAddress": "0000000000000000000000000000000000766c2e",
+      "solidityAddressFull": "0x0000000000000000000000000000000000766c2e",
+      "privateKey": "302e020100300506032b6570042204200806a715713f49ad82f21c77fad389b4cbf3ca23ae7a4214316042cc6dbdf948"
+    },
+    "submit": {
+      "network": "testnet",
+      "alias": "submit",
+      "accountId": "0.0.7760943",
+      "type": "ED25519",
+      "publicKey": "302a300506032b657003210070dc37a1f1e6437623047811dfb3dd2b0b17e4503f6b261650e74df84af19a58",
+      "evmAddress": "",
+      "solidityAddress": "0000000000000000000000000000000000766c2f",
+      "solidityAddressFull": "0x0000000000000000000000000000000000766c2f",
+      "privateKey": "302e020100300506032b6570042204205e6f469f2d5d8379d2cd4c645020d11e26631950dbd0f9e81e8d8381ad581f52"
+    }
+  },
+  "tokens": {},
   "scripts": {},
+  "topics": {
+    "0.0.7760944": {
+      "topicId": "0.0.7760944",
+      "adminKey": "302e020100300506032b6570042204200806a715713f49ad82f21c77fad389b4cbf3ca23ae7a4214316042cc6dbdf948",
+      "submitKey": "302e020100300506032b6570042204205e6f469f2d5d8379d2cd4c645020d11e26631950dbd0f9e81e8d8381ad581f52",
+      "memo": "test-topic"
+    }
+  },
+  "previewnetOperatorId": "0.0.2225",
+  "previewnetOperatorKey": "3030020100300706052b8104000a042204208d7eea780354f14dc9a3ef6d97daf9966051dc8fc44cbb533e32111f7058494b",
   "testnetOperatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
   "testnetOperatorId": "0.0.458179",
   "mainnetOperatorKey": "",
-  "mainnetOperatorId": "",
-  "previewnetOperatorKey": "",
-  "previewnetOperatorId": "",
-  "tokens": {},
-  "topics": {}
+  "mainnetOperatorId": ""
 }
