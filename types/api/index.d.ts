@@ -10,3 +10,4 @@ export type APIResponse<T extends APIResponseTypes = APIResponseTypes> = {
 export type * from './account.d.ts';
 export type * from './token.d.ts';
 export type * from './topic.d.ts';
+export type * from './shared.d.ts';

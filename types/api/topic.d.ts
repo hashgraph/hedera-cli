@@ -1,4 +1,4 @@
-export type TopicResponse = {
+export type TopicMessageResponse = {
     chunk_info: {
         initial_transaction_id: {
             account_id: string;
@@ -17,3 +17,10 @@ export type TopicResponse = {
     sequence_number: number;
     topic_id: string;
 };
+
+export interface TopicMessagesResponse {
+    messages: TopicResponse[];
+    links: {
+        next: string | null;
+    };
+}

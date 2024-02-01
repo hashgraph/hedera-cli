@@ -1,7 +1,7 @@
-import { TopicResponse, APIResponse } from '../../../types';
+import { TopicMessageResponse, APIResponse, TopicMessagesResponse } from '../../../types';
 import { topic } from '../../helpers/state'
 
-export const topicResponse: TopicResponse = {
+export const topicMessageResponse: TopicMessageResponse = {
   chunk_info: {
     initial_transaction_id: {
       account_id: '0.0.458179',
@@ -22,6 +22,28 @@ export const topicResponse: TopicResponse = {
   topic_id: topic.topicId,
 };
 
+export const topicMessagesResponse: TopicMessagesResponse = {
+  messages: [
+    createMessage(1),
+    createMessage(2),
+    createMessage(3),
+  ],
+  links: {
+    next: null,
+  },
+}
+
 export const findMessageResponseMock: APIResponse = {
-  data: topicResponse,
+  data: topicMessageResponse,
 };
+
+export const findMessagesResponseMock: APIResponse = {
+  data: topicMessagesResponse,
+};
+
+function createMessage(sequenceNumber: number): TopicMessageResponse {
+  return {
+    ...topicMessageResponse,
+    sequence_number: sequenceNumber,
+  };
+}
