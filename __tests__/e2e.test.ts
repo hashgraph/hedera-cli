@@ -6,10 +6,16 @@ import { program } from 'commander';
 import commands from '../src/commands';
 import stateController from '../src/state/stateController';
 import api from '../src/api';
+import { Logger } from '../src/utils/logger';
+
 
 import { Token } from '../types';
 
+const logger = Logger.getInstance();
+
 describe('End to end tests', () => {
+  const logSpy = jest.spyOn(logger, 'log');
+
   beforeEach(() => {
     stateController.saveState(baseState); // reset state to base state for each test
   });
@@ -32,6 +38,7 @@ describe('End to end tests', () => {
 
   afterAll(() => {
     stateController.saveState(baseState);
+    logSpy.mockClear();
   });
 
   /**
@@ -429,7 +436,7 @@ describe('End to end tests', () => {
    * - Submit a message to topic (submit key should sign)
    * - Find the message and verify it is correct
    */
-  test.only('✅ Topic features', async () => {
+  test('✅ Topic features', async () => {
     // Arrange: Setup init
     commands.setupCommands(program);
 
@@ -518,5 +525,27 @@ describe('End to end tests', () => {
       response.data.message,
       'base64',
     ).toString('ascii')).toEqual(message); // decode buffer
+
+    // Arrange: Find the message and verify it is correct
+    // Act
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'topic',
+      'message',
+      'find',
+      '-t',
+      Object.keys(topics)[0],
+      '-s',
+      '1',
+    ]);
+
+    // Assert
+    expect(logSpy).toHaveBeenCalledWith(
+      `Message found: "${Buffer.from(
+        response.data.message,
+        'base64',
+      ).toString('ascii')}"`
+    );
   });
 });

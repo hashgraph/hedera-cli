@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-import type { APIResponse, TopicMessageResponse, TopicMessagesResponse, Filter } from '../../types';
+import type {
+  APIResponse,
+  TopicMessageResponse,
+  TopicMessagesResponse,
+  Filter,
+} from '../../types';
 import stateUtils from '../utils/state';
 import apiUtils from '../utils/api';
 import { Logger } from '../utils/logger';

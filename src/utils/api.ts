@@ -1,4 +1,4 @@
-import { Filter } from "../../types/api/shared";
+import { Filter } from '../../types/api/shared';
 
 /**
  * Constructs the query part of the URL based on provided filters.
