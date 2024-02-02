@@ -1,13 +1,13 @@
-import { alice, bob, baseState } from "../../helpers/state";
-import { Command } from "commander";
-import commands from "../../../src/commands";
-import stateController from "../../../src/state/stateController";
+import { alice, bob, baseState } from '../../helpers/state';
+import { Command } from 'commander';
+import commands from '../../../src/commands';
+import stateController from '../../../src/state/stateController';
 
-import { TokenId } from "@hashgraph/sdk";
-import { Token } from "../../../types";
+import { TokenId } from '@hashgraph/sdk';
+import { Token } from '../../../types';
 
 let tokenId = '0.0.1234';
-jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
+jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 
@@ -27,16 +27,18 @@ jest.mock('@hashgraph/sdk', () => {
       execute: jest.fn().mockResolvedValue({
         getReceipt: jest.fn().mockResolvedValue({
           tokenId: TokenId.fromString(tokenId),
-        })
+        }),
       }),
     })),
   };
 });
 
-describe("token create command", () => {
-  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation(((code) => { 
-    throw new Error(`Process.exit(${code})`); // Forces the code to throw instead of exit
-  }));
+describe('token create command', () => {
+  const mockProcessExit = jest
+    .spyOn(process, 'exit')
+    .mockImplementation((code) => {
+      throw new Error(`Process.exit(${code})`); // Forces the code to throw instead of exit
+    });
 
   const saveKeyStateControllerSpy = jest.spyOn(stateController, 'saveKey');
 
@@ -50,44 +52,40 @@ describe("token create command", () => {
     saveKeyStateControllerSpy.mockClear();
   });
 
-  describe("token create - success path", () => {
-    test("✅ ", async () => {
+  describe('token create - success path', () => {
+    test('✅ ', async () => {
       // Arrange
       const program = new Command();
       commands.tokenCommands(program);
-      const tokenName = "test-token";
-      const tokenSymbol = "TST";
-      const tokenSupplyType = "infinite";
+      const tokenName = 'test-token';
+      const tokenSymbol = 'TST';
+      const tokenSupplyType = 'infinite';
       const totalSupply = 1000;
       const decimals = 2;
 
       // Act
-      try {
-        await program.parseAsync([
-            "node",
-            "hedera-cli.ts",
-            "token",
-            "create",
-            "-t",
-            alice.accountId,
-            "-k",
-            alice.privateKey,
-            "-n",
-            tokenName,
-            "-s",
-            tokenSymbol,
-            "-d",
-            decimals.toString(),
-            "-i",
-            totalSupply.toString(),
-            "--supply-type",
-            tokenSupplyType,
-            "-a",
-            bob.privateKey
-        ]);
-      } catch (error) {
-        expect(error).toEqual(Error(`Process.exit(1)`));
-      }
+      await program.parseAsync([
+        'node',
+        'hedera-cli.ts',
+        'token',
+        'create',
+        '-t',
+        alice.accountId,
+        '-k',
+        alice.privateKey,
+        '-n',
+        tokenName,
+        '-s',
+        tokenSymbol,
+        '-d',
+        decimals.toString(),
+        '-i',
+        totalSupply.toString(),
+        '--supply-type',
+        tokenSupplyType,
+        '-a',
+        bob.privateKey,
+      ]);
 
       // Assert
       const tokens = stateController.get('tokens');
@@ -111,11 +109,13 @@ describe("token create command", () => {
           freezeKey: '',
           pauseKey: '',
           feeScheduleKey: '',
-
         },
-        network: "testnet"
+        network: 'testnet',
       } as Token);
-      expect(saveKeyStateControllerSpy).toHaveBeenCalledWith('tokens', expect.any(Object));
+      expect(saveKeyStateControllerSpy).toHaveBeenCalledWith(
+        'tokens',
+        expect.any(Object),
+      );
     });
   });
 });
