@@ -106,7 +106,7 @@ alias hcli="node /Users/myUser/hedera-cli/dist/hedera-cli.js"
 
 **7. Optional: Download Example Scripts**
 
-You can download example scripts from the [examples file](./src/commands/script/examples.json]) and add them to your state. This allows you to quickly test the CLI tool and see how scripting functionality works. You can download the example scripts using the following command:
+You can download example scripts from the [examples file](./src/commands/script/examples.json) and add them to your state. This allows you to quickly test the CLI tool and see how scripting functionality works. You can download the example scripts using the following command:
 
 ```sh
 node dist/hedera-cli.js state download --url https://raw.githubusercontent.com/hashgraph/hedera-cli/main/src/commands/script/examples.json --merge
