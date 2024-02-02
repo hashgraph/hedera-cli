@@ -3,8 +3,26 @@ import { Command } from "commander";
 import commands from "../../../src/commands";
 import accountUtils from "../../../src/utils/account";
 import stateController from "../../../src/state/stateController";
+import { AccountId } from "@hashgraph/sdk";
 
 jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
+jest.mock('@hashgraph/sdk', () => {
+  const originalModule = jest.requireActual('@hashgraph/sdk');
+
+  return {
+    ...originalModule,
+    AccountCreateTransaction: jest.fn().mockImplementation(() => ({
+      setKey: jest.fn().mockReturnThis(),
+      setInitialBalance: jest.fn().mockReturnThis(),
+      setMaxAutomaticTokenAssociations: jest.fn().mockReturnThis(),
+      execute: jest.fn().mockResolvedValue({
+        getReceipt: jest.fn().mockResolvedValue({
+          accountId: AccountId.fromString('0.0.1234'),
+        })
+      }),
+    })),
+  };
+});
 
 describe("account create command", () => {
   beforeEach(() => {
