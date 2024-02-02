@@ -4,12 +4,20 @@ import accountUtils from "../../../src/utils/account";
 import api from "../../../src/api";
 
 import { accountResponse, getAccountInfoResponseMock } from "../../helpers/api/apiAccountHelper";
+import { baseState } from "../../helpers/state";
+import stateController from "../../../src/state/stateController";
+
+jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("account balance command", () => {
   const logSpy = jest.spyOn(console, 'log');
   const getAccountBalanceSpy = jest.spyOn(accountUtils, "getAccountBalance");
 
   describe("account balance - success path", () => {
+    beforeEach(() => {
+      stateController.saveState(baseState);
+    });
+
     afterEach(() => {
       // Spy cleanup
       logSpy.mockClear();
