@@ -1,38 +1,47 @@
-import { alice, tokenState } from '../../helpers/state';
+import { alice, bob, tokenState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
 import stateController from '../../../src/state/stateController';
+import { TransactionId } from '@hashgraph/sdk';
+import { Logger } from "../../../src/utils/logger";
 
-import { TokenId } from '@hashgraph/sdk';
-import { Token, Association } from '../../../types';
+const logger = Logger.getInstance();
 
 let tokenId = Object.keys(tokenState.tokens)[0];
+const txId = "0.0.14288@1706880903.830877722";
 jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 
   return {
     ...originalModule,
-    TokenAssociateTransaction: jest.fn().mockImplementation(() => ({
-      setAccountId: jest.fn().mockReturnThis(),
-      setTokenIds: jest.fn().mockReturnThis(),
+    TransferTransaction: jest.fn().mockImplementation(() => ({
+      addTokenTransfer: jest.fn().mockReturnThis(),
       sign: jest.fn().mockReturnThis(),
       freezeWith: jest.fn().mockReturnThis(),
       execute: jest.fn().mockResolvedValue({
-        getReceipt: jest.fn().mockResolvedValue({}),
+        transactionId: TransactionId.fromString(txId),
+        getReceipt: jest.fn().mockResolvedValue({
+            status: {
+                _code: 22,
+                message: 'Success',
+            },
+            
+        }),
       }),
     })),
   };
 });
 
-describe('token associate command', () => {
-  const saveKeyStateControllerSpy = jest.spyOn(stateController, 'saveKey');
+describe('token transfer command', () => {
+  const logSpy = jest.spyOn(logger, 'log');
 
   beforeEach(() => {
     const tokenStateWithAlice = {
         ...tokenState,
         accounts: {
             [alice.alias]: alice,
+            [bob.alias]: bob,
         },
     };
     stateController.saveState(tokenStateWithAlice);
@@ -40,35 +49,34 @@ describe('token associate command', () => {
 
   afterEach(() => {
     // Spy cleanup
-    saveKeyStateControllerSpy.mockClear();
+    logSpy.mockClear();
   });
 
-  describe('token associate - success path', () => {
+  describe('token transfer - success path', () => {
     test('✅ ', async () => {
       // Arrange
       const program = new Command();
       commands.tokenCommands(program);
+      const balance = 10;
 
       // Act
       await program.parseAsync([
         'node',
         'hedera-cli.ts',
         'token',
-        'associate',
-        '-a',
-        alice.accountId,
+        'transfer',
         '-t',
         tokenId,
+        '--to',
+        bob.alias,
+        '--from',
+        alice.alias,
+        '-b',
+        balance.toString()
       ]);
 
       // Assert
-      const tokens = stateController.get('tokens');
-      expect(tokens[tokenId].associations).toEqual([
-        {
-          alias: alice.alias,
-          accountId: alice.accountId,
-        },
-      ]);
+      expect(logSpy).toHaveBeenCalledWith(`Transfer successful with tx ID: ${txId}`);
     });
   });
 });

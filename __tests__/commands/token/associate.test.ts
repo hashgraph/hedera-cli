@@ -3,9 +3,6 @@ import { Command } from 'commander';
 import commands from '../../../src/commands';
 import stateController from '../../../src/state/stateController';
 
-import { TokenId } from '@hashgraph/sdk';
-import { Token, Association } from '../../../types';
-
 let tokenId = Object.keys(tokenState.tokens)[0];
 jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('@hashgraph/sdk', () => {
@@ -26,8 +23,6 @@ jest.mock('@hashgraph/sdk', () => {
 });
 
 describe('token associate command', () => {
-  const saveKeyStateControllerSpy = jest.spyOn(stateController, 'saveKey');
-
   beforeEach(() => {
     const tokenStateWithAlice = {
         ...tokenState,
@@ -36,11 +31,6 @@ describe('token associate command', () => {
         },
     };
     stateController.saveState(tokenStateWithAlice);
-  });
-
-  afterEach(() => {
-    // Spy cleanup
-    saveKeyStateControllerSpy.mockClear();
   });
 
   describe('token associate - success path', () => {
