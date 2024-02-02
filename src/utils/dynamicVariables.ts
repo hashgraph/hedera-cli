@@ -105,6 +105,11 @@ const commandActions: CommandActions = {
       action: 'tokenCreateFromFile',
     },
   },
+  topic: {
+    create: {
+      action: 'topicCreate',
+    },
+  },
 };
 
 interface CommandOutputs {
@@ -149,6 +154,11 @@ const commandOutputs: CommandOutputs = {
     supplyKey: 'supplyKey',
     feeScheduleKey: 'feeScheduleKey',
     treasuryKey: 'treasuryKey',
+  },
+  topicCreate: {
+    adminKey: 'adminKey',
+    submitKey: 'submitKey',
+    topicId: 'topicId',
   },
 };
 

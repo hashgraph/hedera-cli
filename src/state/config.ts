@@ -9,6 +9,7 @@ export default {
   accounts: {},
   tokens: {},
   scripts: {},
+  topics: {},
   previewnetOperatorId: '',
   previewnetOperatorKey: '',
   testnetOperatorKey: '',

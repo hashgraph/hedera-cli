@@ -2,6 +2,13 @@ import {
   TokenSupplyType,
 } from "@hashgraph/sdk";
 
+export type Topic = {
+  topicId: string;
+  memo?: string;
+  adminKey?: string;
+  submitKey?: string;
+}
+
 export type Account = {
   network: string;
   alias: string;
@@ -62,6 +69,7 @@ export interface State {
   accounts: Record<string, Account>;
   scripts: Record<string, Script>;
   tokens: Record<string, Token>;
+  topics: Record<string, Topic>;
   previewnetOperatorKey: string;
   previewnetOperatorId: string;
   testnetOperatorKey: string;

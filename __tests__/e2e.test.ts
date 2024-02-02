@@ -6,10 +6,16 @@ import { program } from 'commander';
 import commands from '../src/commands';
 import stateController from '../src/state/stateController';
 import api from '../src/api';
+import { Logger } from '../src/utils/logger';
+
 
 import { Token } from '../types';
 
+const logger = Logger.getInstance();
+
 describe('End to end tests', () => {
+  const logSpy = jest.spyOn(logger, 'log');
+
   beforeEach(() => {
     stateController.saveState(baseState); // reset state to base state for each test
   });
@@ -32,6 +38,7 @@ describe('End to end tests', () => {
 
   afterAll(() => {
     stateController.saveState(baseState);
+    logSpy.mockClear();
   });
 
   /**
@@ -421,5 +428,124 @@ describe('End to end tests', () => {
     expect(data.data.balances).toEqual([
       { account: accounts[accountAliasUser].accountId, balance: 1 },
     ]);
+  });
+
+  /**
+   * E2E testing flow for topics:
+   * - Create a topic with admin key and submit key
+   * - Submit a message to topic (submit key should sign)
+   * - Find the message and verify it is correct
+   */
+  test('✅ Topic features', async () => {
+    // Arrange: Setup init
+    commands.setupCommands(program);
+
+    // Act
+    await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
+
+    // Assert
+    let accounts = stateController.get('accounts');
+    expect(accounts['testnet-operator']).toBeDefined();
+
+    // Arrange: Create 2 accounts
+    commands.accountCommands(program);
+    const accountAliasAdmin = 'admin';
+    const accountAliasSubmit = 'submit';
+
+    // Act
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'account',
+      'create',
+      '-a',
+      accountAliasAdmin,
+      '-b',
+      '300000000',
+    ]);
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'account',
+      'create',
+      '-a',
+      accountAliasSubmit,
+      '-b',
+      '300000000',
+    ]);
+
+    // Assert
+    accounts = stateController.get('accounts');
+    expect(accounts[accountAliasAdmin]).toBeDefined();
+    expect(accounts[accountAliasSubmit]).toBeDefined();
+
+    // Arrange: Create a topic with admin key and submit key
+    commands.topicCommands(program);
+    const topicMemo = 'test-topic';
+
+    // Act
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'topic',
+      'create',
+      '--memo',
+      topicMemo,
+      '-a',
+      accounts[accountAliasAdmin].privateKey,
+      '-s',
+      accounts[accountAliasSubmit].privateKey,
+    ]);
+
+    // Assert
+    let topics = stateController.get('topics');
+    expect(Object.keys(topics).length).toBe(1);
+    expect(topics[Object.keys(topics)[0]].memo).toEqual(topicMemo);
+
+    // Arrange: Submit a message to topic (submit key should sign)
+    const message = 'Hello world!';
+
+    // Act
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'topic',
+      'message',
+      'submit',
+      '-m',
+      message,
+      '-t',
+      Object.keys(topics)[0],
+    ]);
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    // Assert
+    const response = await api.topic.findMessage(Object.keys(topics)[0], 1); // first message
+    expect(Buffer.from(
+      response.data.message,
+      'base64',
+    ).toString('ascii')).toEqual(message); // decode buffer
+
+    // Arrange: Find the message and verify it is correct
+    // Act
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'topic',
+      'message',
+      'find',
+      '-t',
+      Object.keys(topics)[0],
+      '-s',
+      '1',
+    ]);
+
+    // Assert
+    expect(logSpy).toHaveBeenCalledWith(
+      `Message found: "${Buffer.from(
+        response.data.message,
+        'base64',
+      ).toString('ascii')}"`
+    );
   });
 });

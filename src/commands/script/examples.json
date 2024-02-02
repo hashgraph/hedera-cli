@@ -33,6 +33,17 @@
           "wait 5"
         ],
         "args": {}
+      },
+      "script-topic-create": {
+        "name": "topic-create",
+        "creation": 1697103669402,
+        "commands": [
+          "network use testnet",
+          "account create -a random --args privateKey,privKeyAdmin",
+          "account create -a random --args privateKey,privKeySubmit",
+          "topic create --admin-key {{privKeyAdmin}} --submit-key {{privKeySubmit}} --args topicId,topicId"
+        ],
+        "args": {}
       }
     }
   }

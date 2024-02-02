@@ -19,6 +19,7 @@
     "unit-test": "jest -- __tests__/commands/**/*.test.ts",
     "e2e-test": "jest -- __tests__/e2e.test.ts --runInBand",
     "test": "npm run unit-test && npm run e2e-test",
+    "single-test": "jest",
     "prepare": "husky"
   },
   "keywords": [

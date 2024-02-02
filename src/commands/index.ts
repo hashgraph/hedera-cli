@@ -7,6 +7,7 @@ import setupCommands from './setup';
 import stateCommands from './state';
 import recordCommands from './record';
 import scriptCommands from './script';
+import topicCommands from './topic';
 import waitCommands from './wait';
 
 const commands = {
@@ -19,6 +20,7 @@ const commands = {
   stateCommands,
   recordCommands,
   scriptCommands,
+  topicCommands,
   waitCommands,
 };
 

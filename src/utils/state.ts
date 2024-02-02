@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Logger } from '../utils/logger';
 import stateController from '../state/stateController';
 
-import type { Account, Script, Token } from '../../types';
+import type { Account, Script, Token, Topic } from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -204,6 +204,7 @@ function clearState(): void {
   state.accounts = {};
   state.tokens = {};
   state.scripts = {};
+  state.topics = {};
   state.scriptExecution = 0;
   state.scriptExecutionName = '';
   state.recording = 0;
@@ -234,6 +235,7 @@ function importState(data: any, overwrite: boolean, merge: boolean) {
     stateController.saveKey('accounts', data.accounts || {});
     stateController.saveKey('tokens', data.tokens || {});
     stateController.saveKey('scripts', data.scripts || {});
+    stateController.saveKey('topics', data.topics || {});
     logger.log('State overwritten successfully');
     process.exit(0);
   }
@@ -248,6 +250,10 @@ function importState(data: any, overwrite: boolean, merge: boolean) {
 
   if (data.scripts && Object.entries(data.scripts).length > 0) {
     addScripts(data.scripts, merge);
+  }
+
+  if (data.topics && Object.entries(data.topics).length > 0) {
+    addTopics(data.topics, merge);
   }
 }
 
@@ -321,6 +327,26 @@ function addTokens(importedTokens: Token[], merge: boolean) {
     logger.log(
       `Token ${token.tokenId} with name "${token.name}" added successfully`,
     );
+  });
+}
+
+function addTopics(importedTopics: Topic[], merge: boolean) {
+  const topics: Record<string, Topic> = stateController.get('topics');
+  Object.values(importedTopics).forEach((topic: Topic) => {
+    const existingTopic = topics[topic.topicId];
+
+    if (!merge && existingTopic) {
+      logger.error(`Topic with ID ${topic.topicId} already exists`);
+      process.exit(1);
+    }
+
+    if (merge && existingTopic) {
+      logger.log(`Topic ${topic.topicId} already exists, overwriting it`);
+    }
+
+    topics[topic.topicId] = topic;
+    stateController.saveKey('topics', topics);
+    logger.log(`Topic ${topic.topicId} added successfully`);
   });
 }
 

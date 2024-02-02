@@ -138,7 +138,7 @@ async function createFungibleToken(
   // Store new token in state
   logger.verbose(`Storing new token with ID ${tokenId} in state`);
   const tokens: Record<string, Token> = stateController.get('tokens');
-  const updatedTokens = {
+  const updatedTokens: Record<string, Token> = {
     ...tokens,
     [tokenId.toString()]: {
       tokenId: tokenId.toString(),
@@ -146,10 +146,20 @@ async function createFungibleToken(
       name,
       symbol,
       treasuryId,
-      treasuryKey,
       decimals,
+      supplyType: supplyType.toUpperCase(),
+      maxSupply: supplyType.toUpperCase() === 'FINITE' ? initialSupply : 0,
       initialSupply,
-      adminKey,
+      keys: {
+        treasuryKey,
+        adminKey,
+        supplyKey: '',
+        wipeKey: '',
+        kycKey: '',
+        freezeKey: '',
+        pauseKey: '',
+        feeScheduleKey: '',
+      },
       network: stateUtils.getNetwork(),
     },
   };

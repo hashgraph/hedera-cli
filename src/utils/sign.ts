@@ -64,6 +64,9 @@ const signingRequirements: Record<string, Record<string, string[]>> = {
   tokenCreate: {
     sign: ['treasuryKey', 'adminKey'],
   },
+  topicCreate: {
+    sign: ['adminKey', 'submitKey'],
+  },
 };
 
 const signUtils = {

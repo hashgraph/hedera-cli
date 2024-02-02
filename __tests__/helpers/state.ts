@@ -10,14 +10,14 @@ export const baseState: State = {
   scriptExecutionName: "",
   accounts: {},
   scripts: {},
-  testnetOperatorKey:
-    "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
-  testnetOperatorId: "0.0.458179",
+  testnetOperatorKey: "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+  testnetOperatorId: "0.0.2221463",
   mainnetOperatorKey: "",
   mainnetOperatorId: "",
   previewnetOperatorKey: "",
   previewnetOperatorId: "",
   tokens: {},
+  topics: {}
 };
 
 /* accounts */
@@ -86,6 +86,13 @@ export const token = {
   },
 };
 
+export const topic = {
+  topicId: "0.0.123",
+  memo: "test",
+  adminKey: "",
+  submitKey: "",
+};
+
 export const accountState: State = {
   ...baseState,
   accounts: {
@@ -108,6 +115,13 @@ export const tokenState: State = {
   },
 };
 
+export const topicState: State = {
+  ...baseState,
+  topics: {
+    [topic.topicId]: topic,
+  },
+};
+
 export const fullState: State = {
   ...baseState,
   accounts: {
@@ -119,6 +133,9 @@ export const fullState: State = {
   },
   tokens: {
     [token.tokenId]: token,
+  },
+  topics: {
+    [topic.topicId]: topic,
   },
 };
 
@@ -132,6 +149,9 @@ export const downloadState: object = {
   },
   tokens: {
     [token.tokenId]: token,
+  },
+  topics: {
+    [topic.topicId]: topic,
   },
 }
 

@@ -19,9 +19,15 @@ export default (program: any) => {
     .option('-a, --skip-accounts', 'Skip resetting accounts', false)
     .option('-t, --skip-tokens', 'Skip resetting tokens', false)
     .option('-s, --skip-scripts', 'Skip resetting scripts', false)
+    .option('-t, --skip-topics', 'Skip resetting topics', false)
     .action((options: ResetOptions) => {
       logger.verbose('Clearing state');
-      clear(options.skipAccounts, options.skipTokens, options.skipScripts);
+      clear(
+        options.skipAccounts,
+        options.skipTokens,
+        options.skipScripts,
+        options.skipTopics,
+      );
     });
 };
 
@@ -29,8 +35,9 @@ function clear(
   skipAccounts: boolean,
   skipTokens: boolean,
   skipScripts: boolean,
+  skipTopics: boolean,
 ): void {
-  if (!skipAccounts && !skipTokens && !skipScripts) {
+  if (!skipAccounts && !skipTokens && !skipScripts && !skipTopics) {
     stateUtils.clearState();
     return;
   }
@@ -38,6 +45,7 @@ function clear(
   if (!skipAccounts) stateController.saveKey('accounts', {});
   if (!skipTokens) stateController.saveKey('tokens', {});
   if (!skipScripts) stateController.saveKey('scripts', {});
+  if (!skipTopics) stateController.saveKey('topics', {});
   logger.log('State cleared successfully');
 }
 
@@ -45,4 +53,5 @@ interface ResetOptions {
   skipAccounts: boolean;
   skipTokens: boolean;
   skipScripts: boolean;
+  skipTopics: boolean;
 }

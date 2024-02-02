@@ -4,12 +4,20 @@ import accountUtils from "../../../src/utils/account";
 import api from "../../../src/api";
 
 import { accountResponse, getAccountInfoResponseMock } from "../../helpers/api/apiAccountHelper";
+import { baseState } from "../../helpers/state";
+import stateController from "../../../src/state/stateController";
+
+jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("account balance command", () => {
   const logSpy = jest.spyOn(console, 'log');
   const getAccountBalanceSpy = jest.spyOn(accountUtils, "getAccountBalance");
 
   describe("account balance - success path", () => {
+    beforeEach(() => {
+      stateController.saveState(baseState);
+    });
+
     afterEach(() => {
       // Spy cleanup
       logSpy.mockClear();
@@ -24,7 +32,7 @@ describe("account balance command", () => {
       commands.accountCommands(program);
 
       // Act
-      await program.parse(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--only-hbar"]);
+      await program.parseAsync(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--only-hbar"]);
 
       // Assert
       expect(getAccountBalanceSpy).toHaveBeenCalledWith(accountResponse.account, true, undefined);
@@ -40,7 +48,7 @@ describe("account balance command", () => {
       commands.accountCommands(program);
 
       // Act
-      await program.parse(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--token-id", accountResponse.balance.tokens[0].token_id]);
+      await program.parseAsync(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--token-id", accountResponse.balance.tokens[0].token_id]);
 
       // Assert
       expect(getAccountBalanceSpy).toHaveBeenCalledWith(accountResponse.account, undefined, accountResponse.balance.tokens[0].token_id);

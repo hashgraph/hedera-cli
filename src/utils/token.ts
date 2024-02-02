@@ -1,6 +1,5 @@
 import {
   TokenAssociateTransaction,
-  PrivateKey,
   TokenSupplyType,
   TransferTransaction,
 } from '@hashgraph/sdk';
