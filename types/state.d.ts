@@ -3,6 +3,7 @@ import {
 } from "@hashgraph/sdk";
 
 export type Topic = {
+  network: string;
   topicId: string;
   memo?: string;
   adminKey?: string;
@@ -60,6 +61,8 @@ export interface Association {
 
 export interface State {
   network: string;
+  mirrorNodeLocalnet: string;
+  mirrorNodePreviewnet: string;
   mirrorNodeTestnet: string;
   mirrorNodeMainnet: string;
   recording: number;
@@ -70,10 +73,22 @@ export interface State {
   scripts: Record<string, Script>;
   tokens: Record<string, Token>;
   topics: Record<string, Topic>;
+  localnetOperatorKey: string;
+  localnetOperatorId: string;
+  localNodeAddress: string;
+  localNodeAccountId: string;
+  localNodeMirrorAddressGRPC: string;
   previewnetOperatorKey: string;
   previewnetOperatorId: string;
   testnetOperatorKey: string;
   testnetOperatorId: string;
   mainnetOperatorKey: string;
   mainnetOperatorId: string;
+}
+
+export interface DownloadState {
+  accounts: Record<string, Account>, 
+  scripts: Record<string, Script>, 
+  tokens: Record<string, Token>, 
+  topics: Record<string, Topic>
 }

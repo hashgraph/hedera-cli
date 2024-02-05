@@ -1,5 +1,7 @@
 export default {
   network: 'testnet',
+  mirrorNodeLocalnet: 'http://localhost:5551/api/v1',
+  mirrorNodePreviewnet: 'https://previewnet.mirrornode.hedera.com/api/v1',
   mirrorNodeTestnet: 'https://testnet.mirrornode.hedera.com/api/v1',
   mirrorNodeMainnet: 'https://mainnet.mirrornode.hedera.com/api/v1',
   recording: 0,
@@ -16,4 +18,9 @@ export default {
   testnetOperatorId: '',
   mainnetOperatorKey: '',
   mainnetOperatorId: '',
+  localnetOperatorKey: '',
+  localnetOperatorId: '',
+  localNodeAddress: '127.0.0.1:50211',
+  localNodeAccountId: '0.0.3',
+  localNodeMirrorAddressGRPC: '127.0.0.1:5600',
 };

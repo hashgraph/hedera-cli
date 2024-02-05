@@ -95,6 +95,8 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
     MAINNET_OPERATOR_ID,
     PREVIEWNET_OPERATOR_ID,
     PREVIEWNET_OPERATOR_KEY,
+    LOCALNET_OPERATOR_ID,
+    LOCALNET_OPERATOR_KEY,
   } = process.env;
 
   let mainnetOperatorId = MAINNET_OPERATOR_ID || '';
@@ -103,6 +105,8 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
   let testnetOperatorKey = TESTNET_OPERATOR_KEY || '';
   let previewnetOperatorId = PREVIEWNET_OPERATOR_ID || '';
   let previewnetOperatorKey = PREVIEWNET_OPERATOR_KEY || '';
+  let localnetOperatorId = LOCALNET_OPERATOR_ID || '';
+  let localnetOperatorKey = LOCALNET_OPERATOR_KEY || '';
 
   // Validate operator key and ID pairs for previewnet, testnet, and mainnet
   if (
@@ -135,11 +139,22 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
     process.exit(1);
   }
 
+  if (
+    (LOCALNET_OPERATOR_KEY && !LOCALNET_OPERATOR_ID) ||
+    (!LOCALNET_OPERATOR_KEY && LOCALNET_OPERATOR_ID)
+  ) {
+    logger.error(
+      'Both LOCALNET_OPERATOR_KEY and LOCALNET_OPERATOR_ID must be defined together in the .env file.',
+    );
+    process.exit(1);
+  }
+
   // Only write a fresh state file if the user is running the init command
   if (action === 'init') {
     setupState();
   }
 
+  await verifyOperatorBalance(localnetOperatorId);
   await verifyOperatorBalance(previewnetOperatorId);
   await verifyOperatorBalance(testnetOperatorId);
   await verifyOperatorBalance(mainnetOperatorId);
@@ -151,6 +166,8 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
     mainnetOperatorKey,
     previewnetOperatorId,
     previewnetOperatorKey,
+    localnetOperatorId,
+    localnetOperatorKey,
   );
 }
 

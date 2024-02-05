@@ -8,6 +8,26 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
 
 > **🎯 Feature requests** can be submitted on the Hedera CLI repository as an issue. Please check the [issues](https://github.com/hashgraph/hedera-cli/issues) before submitting a new one and tag it with the `Feature Request` label.
 
+## Table of Contents
+
+- [Prequisites](#prerequisites)
+- [Installation](#installation)
+- [Connecting the CLI tool with your Local Hedera Network](#connecting-the-cli-tool-with-your-local-hedera-network)
+- [Video Guide](#video-guide)
+- [Commands](#commands)
+  - [Setup Commands](#setup-commands)
+  - [Network Commands](#network-commands)
+  - [Wait Commmand](#wait-command)
+  - [Account Commands](#account-commands)
+  - [Token Commands](#token-commands)
+  - [Topic Commands](#topic-commands)
+  - [Hbar Command](#hbar-command)
+  - [Backup Commands](#backup-commands)
+  - [Record Commands](#record-commands)
+  - [State Commands](#state-commands)
+  - [Script Commands](#script-commands)
+    - [Dynamic Variables in Scripts](#dynamic-variables-in-scripts)
+
 ## Prerequisites
 
 Before proceeding with the installation and setup of the Hedera CLI Tool, ensure the following prerequisites are met:
@@ -67,6 +87,8 @@ TESTNET_OPERATOR_KEY=302e0201003005060[...]
 TESTNET_OPERATOR_ID=0.0.12345
 MAINNET_OPERATOR_KEY=
 MAINNET_OPERATOR_ID=
+LOCALNET_OPERATOR_ID=
+LOCALNET_OPERATOR_KEY=
 ```
 
 Next, set up the CLI tool with the command:
@@ -90,7 +112,7 @@ node dist/hedera-cli.js account list
 
 **5. Set Network**
 
-When first using the network, the CLI tool will use the `testnet` network. You can switch to the `mainnet` (or `previewnet`) network using the following command:
+When first using the network, the CLI tool will use the `testnet` network. You can switch to the `mainnet` or other networks like `previewnet` or `localnet` using the following command:
 
 ```sh
 node dist/hedera-cli.js network use mainnet
@@ -110,6 +132,27 @@ You can download example scripts from the [examples file](./src/commands/script/
 
 ```sh
 node dist/hedera-cli.js state download --url https://raw.githubusercontent.com/hashgraph/hedera-cli/main/src/commands/script/examples.json --merge
+```
+
+# Connecting the CLI tool with your Local Hedera Network
+
+The Hedera CLI tool can be used to interact with a local Hedera network. This is useful for testing and development purposes. To connect the CLI tool with your local Hedera network, you need to set up a local Hedera network. You can follow the instructions in the [Hedera documentation](https://docs.hedera.com/hedera/tutorials/more-tutorials/how-to-set-up-a-hedera-local-node) to set up a local Hedera network.
+
+By default, the `src/state/config.ts` file contains the default configuration for the localnet. You can change the configuration to match your local network by editing the `src/state/config.ts` file and then setting the operator key and ID using the `setup init` command. The default configuration for the localnet is:
+
+```json
+{
+  "localNodeAddress": "127.0.0.1:50211",
+  "localNodeAccountId": "0.0.3",
+  "localNodeMirrorAddressGRPC": "127.0.0.1:5600"
+}
+```
+
+The `localnet` network can be configured in your `.env` file, so you can use the `setup init` command to add the localnet operator key and ID to your state. The default values for the localnet operator key and ID are:
+
+```sh
+LOCALNET_OPERATOR_ID=0.0.2
+LOCALNET_OPERATOR_KEY=302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137
 ```
 
 # Video Guide
@@ -168,10 +211,10 @@ hcli setup init [--path <path>]
 When executed, the setup command performs several key functions:
 
 **Environment Variable Validation:**
-It checks if the HOME environment variable is defined and reads `PREVIEWNET_OPERATOR_KEY`, `PREVIEWNET_OPERATOR_KEY`, `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID` from the `~/.hedera/.env` file.
+It checks if the HOME environment variable is defined and reads `PREVIEWNET_OPERATOR_KEY`, `PREVIEWNET_OPERATOR_KEY`, `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID`, `LOCALNET_OPERATOR_ID`, and `LOCALNET_OPERATOR_KEY` from the `~/.hedera/.env` file.
 
 **State Update:**
-Once the previewnet, testnet, and mainnet operator key and ID are validated, these credentials are used to update the `dist/state/state.json` file, which holds the configuration state of the CLI tool. The command will also add the operator accounts to your address book.
+Once the localnet, previewnet, testnet, and mainnet operator key and ID are validated, these credentials are used to update the `dist/state/state.json` file, which holds the configuration state of the CLI tool. The command will also add the operator accounts to your address book.
 
 **2. Reload Operator Key and Id:**
 
@@ -205,7 +248,7 @@ This command switches the current network context to the specified network.
 hcli network use <name>
 ```
 
-Replace `<name>` with the name of the network you wish to switch to (`mainnet`, `testnet`, or `previewnet`).
+Replace `<name>` with the name of the network you wish to switch to (`mainnet`, `testnet`, `previewnet`, or `localnet` running the [Hedera network locally](https://docs.hedera.com/hedera/tutorials/more-tutorials/how-to-set-up-a-hedera-local-node)).
 
 **2. Listing Available Networks:**
 
@@ -213,7 +256,7 @@ This command lists all available networks that the CLI tool can interact with. I
 
 ```sh
 hcli network list
-// Available networks: mainnet, testnet, previewnet
+// Available networks: mainnet, testnet, previewnet, localnet
 ```
 
 #### Description
@@ -221,7 +264,7 @@ hcli network list
 The network command includes a catch-all for unknown subcommands. If an unrecognized command is entered, it triggers an error message and displays the help text for the network command.
 
 ```sh
-// Invalid network name. Available networks: mainnet, testnet, previewnet
+// Invalid network name. Available networks: mainnet, testnet, previewnet, and localnet
 ```
 
 ## Wait Commmand
@@ -683,6 +726,15 @@ Format for remote script files:
         "feeScheduleKey": "",
         "treasuryKey": "302e02010030[...]"
       }
+    }
+  },
+  "topics": {
+    "0.0.7426199": {
+      "network": "testnet",
+      "topicId": "0.0.7426199",
+      "memo": "Test topic",
+      "submitKey": "302a300506032b6570032100[...]",
+      "adminKey": "302a300506032b6570032100[...]"
     }
   }
 }

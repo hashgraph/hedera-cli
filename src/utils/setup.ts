@@ -12,6 +12,8 @@ function setupOperatorAccounts(
   mainnetOperatorKey: string,
   previewnetOperatorId: string,
   previewnetOperatorKey: string,
+  localnetOperatorId: string,
+  localnetOperatorKey: string,
 ): void {
   const state = stateController.getAll();
   let newState = { ...state };
@@ -21,6 +23,8 @@ function setupOperatorAccounts(
   newState.mainnetOperatorId = mainnetOperatorId;
   newState.previewnetOperatorId = previewnetOperatorId;
   newState.previewnetOperatorKey = previewnetOperatorKey;
+  newState.localnetOperatorKey = localnetOperatorKey;
+  newState.localnetOperatorId = localnetOperatorId;
 
   if (testnetOperatorId) {
     const privateKeyObject =
@@ -88,6 +92,29 @@ function setupOperatorAccounts(
       ).toSolidityAddress()}`,
       solidityAddressFull: `0x${AccountId.fromString(
         mainnetOperatorId,
+      ).toSolidityAddress()}`,
+    };
+  }
+
+  if (localnetOperatorId) {
+    const privateKeyObject =
+      accountUtils.getPrivateKeyObject(localnetOperatorKey);
+    const type = accountUtils.getKeyType(localnetOperatorKey);
+
+    newState.accounts['localnet-operator'] = {
+      accountId: localnetOperatorId,
+      privateKey: localnetOperatorKey,
+      network: 'localnet',
+      alias: 'localnet-operator',
+      type,
+      publicKey: privateKeyObject.publicKey.toStringDer(),
+      evmAddress:
+        type === 'ed25519' ? '' : privateKeyObject.publicKey.toEvmAddress(),
+      solidityAddress: `${AccountId.fromString(
+        localnetOperatorId,
+      ).toSolidityAddress()}`,
+      solidityAddressFull: `0x${AccountId.fromString(
+        localnetOperatorId,
       ).toSolidityAddress()}`,
     };
   }

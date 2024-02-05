@@ -79,7 +79,8 @@ export default (program: any) => {
 
       logger.log(`Created new topic: ${topicId.toString()}`);
 
-      const topic = {
+      const topic: Topic = {
+        network: stateUtils.getNetwork(),
         topicId: topicId.toString(),
         adminKey: options.adminKey || '',
         submitKey: options.submitKey || '',

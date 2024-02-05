@@ -1,7 +1,9 @@
-import { Account, State, Script } from "../../types";
+import { Account, State, Script, Topic, Token, DownloadState } from "../../types";
 
 export const baseState: State = {
   network: "testnet",
+  mirrorNodeLocalnet: "http://localhost:5551/api/v1",
+  mirrorNodePreviewnet: "https://previewnet.mirrornode.hedera.com/api/v1",
   mirrorNodeTestnet: "https://testnet.mirrornode.hedera.com/api/v1",
   mirrorNodeMainnet: "https://mainnet.mirrornode.hedera.com/api/v1",
   recording: 0,
@@ -10,14 +12,19 @@ export const baseState: State = {
   scriptExecutionName: "",
   accounts: {},
   scripts: {},
+  tokens: {},
+  topics: {},
   testnetOperatorKey: "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
   testnetOperatorId: "0.0.2221463",
   mainnetOperatorKey: "",
   mainnetOperatorId: "",
   previewnetOperatorKey: "",
   previewnetOperatorId: "",
-  tokens: {},
-  topics: {}
+  localnetOperatorKey: '',
+  localnetOperatorId: '',
+  localNodeAddress: '',
+  localNodeAccountId: '',
+  localNodeMirrorAddressGRPC: '',
 };
 
 /* accounts */
@@ -60,7 +67,7 @@ export const script_basic: Script = {
   args: {}
 };
 
-export const token = {
+export const token: Token = {
   network: "testnet",
   associations: [],
   tokenId: "0.0.6025124",
@@ -86,7 +93,8 @@ export const token = {
   },
 };
 
-export const topic = {
+export const topic: Topic = {
+  network: "testnet",
   topicId: "0.0.123",
   memo: "test",
   adminKey: "",
@@ -139,7 +147,7 @@ export const fullState: State = {
   },
 };
 
-export const downloadState: object = {
+export const downloadState: DownloadState = {
   accounts: {
     [alice.alias]: alice,
     [bob.alias]: bob,
@@ -158,7 +166,7 @@ export const downloadState: object = {
 export const testnetOperatorKey = '302e020100300506032b6570042204202ef1cb430150535aa15bdcc6609ff2ef4ec843eb35f1d0cc655a4cad2130b796'; // dummy account
 export const testnetOperatorId = '0.0.7699836';
 
-export const testnetOperatorAccount = {
+export const testnetOperatorAccount: Record<string, Account> = {
   "testnet-operator": {
     accountId: "0.0.7699836",
     alias: "testnet-operator",

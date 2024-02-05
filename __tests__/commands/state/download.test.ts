@@ -15,7 +15,7 @@ jest.mock('../../../src/state/state'); // Mock the original module -> looks for 
 describe('state download command', () => {
   const stateUtilsDownloadStateSpy = jest
     .spyOn(stateUtils, 'downloadState')
-    .mockReturnValue(downloadState as Promise<any>);
+    .mockResolvedValue(downloadState);
 
   const consoleErrorSpy = jest.spyOn(console, 'error');
 
