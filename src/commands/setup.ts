@@ -167,7 +167,7 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
     previewnetOperatorId,
     previewnetOperatorKey,
     localnetOperatorId,
-    localnetOperatorKey
+    localnetOperatorKey,
   );
 }
 

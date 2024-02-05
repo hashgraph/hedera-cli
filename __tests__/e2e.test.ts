@@ -90,7 +90,7 @@ describe('End to end tests', () => {
       '--auto-associations',
       '1',
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 7000));
 
     // Assert
     let state = stateController.get('accounts');
@@ -517,7 +517,7 @@ describe('End to end tests', () => {
       '-t',
       Object.keys(topics)[0],
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 7000));
 
     // Assert
     const response = await api.topic.findMessage(Object.keys(topics)[0], 1); // first message

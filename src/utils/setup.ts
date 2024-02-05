@@ -13,7 +13,7 @@ function setupOperatorAccounts(
   previewnetOperatorId: string,
   previewnetOperatorKey: string,
   localnetOperatorId: string,
-  localnetOperatorKey: string
+  localnetOperatorKey: string,
 ): void {
   const state = stateController.getAll();
   let newState = { ...state };

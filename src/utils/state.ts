@@ -22,7 +22,7 @@ function recordCommand(command: string[]): void {
 
 function getMirrorNodeURL(): string {
   const network = stateController.get('network');
-  let mirrorNodeURL = stateController.get('mirrorNodeTestnet')
+  let mirrorNodeURL = stateController.get('mirrorNodeTestnet');
   switch (network) {
     case 'testnet':
       mirrorNodeURL = stateController.get('mirrorNodeTestnet');
@@ -65,8 +65,14 @@ function getHederaClient(): Client {
       operatorKey = state.previewnetOperatorKey;
       break;
     case 'localnet':
-      const node = { [state.localNodeAddress]: AccountId.fromString(state.localNodeAccountId) };
-      client = Client.forNetwork(node).setMirrorNetwork(state.localNodeMirrorAddressGRPC);
+      const node = {
+        [state.localNodeAddress]: AccountId.fromString(
+          state.localNodeAccountId,
+        ),
+      };
+      client = Client.forNetwork(node).setMirrorNetwork(
+        state.localNodeMirrorAddressGRPC,
+      );
       operatorId = state.localnetOperatorId;
       operatorKey = state.localnetOperatorKey;
       break;

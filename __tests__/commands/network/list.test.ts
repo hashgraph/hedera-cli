@@ -19,7 +19,7 @@ describe("network list command", () => {
         await program.parse(["node", "hedera-cli.ts", "network", "list"]);
   
         // Assert
-        expect(logSpy).toHaveBeenCalledWith(`Available networks: mainnet, testnet, previewnet`);
+        expect(logSpy).toHaveBeenCalledWith(`Available networks: mainnet, testnet, previewnet, localnet`);
       });
   });
 });
