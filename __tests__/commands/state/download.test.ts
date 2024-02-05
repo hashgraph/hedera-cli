@@ -40,7 +40,7 @@ describe('state download command', () => {
       stateController.saveState(baseState);
       const program = new Command();
       commands.stateCommands(program);
-      const url = 'https://hedera-cli.s3.amazonaws.com/state.json';
+      const url = 'https://dummy.url/state.json';
 
       // Act
       await program.parseAsync([
@@ -72,7 +72,7 @@ describe('state download command', () => {
       stateController.saveState(accountState);
       const program = new Command();
       commands.stateCommands(program);
-      const url = 'https://hedera-cli.s3.amazonaws.com/state.json';
+      const url = 'https://dummy.url/state.json';
 
       // Act
       try {
