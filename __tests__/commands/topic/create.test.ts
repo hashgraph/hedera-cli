@@ -40,14 +40,18 @@ describe('topic create command', () => {
       // Arrange
       const program = new Command();
       commands.topicCommands(program);
+      const customTopic = {
+        ...topic,
+        memo: 'my custom memo',
+      }
 
       // Act
-      await program.parseAsync(['node', 'hedera-cli.ts', 'topic', 'create', '--memo', topic.memo]);
+      await program.parseAsync(['node', 'hedera-cli.ts', 'topic', 'create', '--memo', customTopic.memo]);
 
       // Assert
       const topics = stateController.get('topics');
       expect(Object.keys(topics).length).toEqual(1);
-      expect(topics[topic.topicId]).toEqual(topic);
+      expect(topics[topic.topicId]).toEqual(customTopic);
       expect(logSpy).toHaveBeenCalledWith(`Created new topic: ${topic.topicId}`);
     });
   });

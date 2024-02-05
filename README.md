@@ -727,6 +727,15 @@ Format for remote script files:
         "treasuryKey": "302e02010030[...]"
       }
     }
+  },
+  "topics": {
+    "0.0.7426199": {
+      "network": "testnet",
+      "topicId": "0.0.7426199",
+      "memo": "Test topic",
+      "submitKey": "302a300506032b6570032100[...]",
+      "adminKey": "302a300506032b6570032100[...]"
+    }
   }
 }
 ```

@@ -3,6 +3,7 @@ import {
 } from "@hashgraph/sdk";
 
 export type Topic = {
+  network: string;
   topicId: string;
   memo?: string;
   adminKey?: string;
@@ -83,4 +84,11 @@ export interface State {
   testnetOperatorId: string;
   mainnetOperatorKey: string;
   mainnetOperatorId: string;
+}
+
+export interface DownloadState {
+  accounts: Record<string, Account>, 
+  scripts: Record<string, Script>, 
+  tokens: Record<string, Token>, 
+  topics: Record<string, Topic>
 }

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Logger } from '../utils/logger';
 import stateController from '../state/stateController';
 
-import type { Account, Script, Token, Topic } from '../../types';
+import type { Account, DownloadState, Script, Token, Topic } from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -247,7 +247,7 @@ function clearState(): void {
   stateController.saveState(state);
 }
 
-async function downloadState(url: string): Promise<any> {
+async function downloadState(url: string): Promise<DownloadState> {
   let data;
   try {
     const response = await axios.get(url);
