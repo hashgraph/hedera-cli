@@ -2,6 +2,8 @@ import { Account, State, Script } from "../../types";
 
 export const baseState: State = {
   network: "testnet",
+  mirrorNodeLocalnet: "http://localhost:5551/api/v1",
+  mirrorNodePreviewnet: "https://previewnet.mirrornode.hedera.com/api/v1",
   mirrorNodeTestnet: "https://testnet.mirrornode.hedera.com/api/v1",
   mirrorNodeMainnet: "https://mainnet.mirrornode.hedera.com/api/v1",
   recording: 0,
@@ -10,14 +12,19 @@ export const baseState: State = {
   scriptExecutionName: "",
   accounts: {},
   scripts: {},
+  tokens: {},
+  topics: {},
   testnetOperatorKey: "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
   testnetOperatorId: "0.0.2221463",
   mainnetOperatorKey: "",
   mainnetOperatorId: "",
   previewnetOperatorKey: "",
   previewnetOperatorId: "",
-  tokens: {},
-  topics: {}
+  localnetOperatorKey: '',
+  localnetOperatorId: '',
+  localNodeAddress: '',
+  localNodeAccountId: '',
+  localNodeMirrorAddressGRPC: '',
 };
 
 /* accounts */

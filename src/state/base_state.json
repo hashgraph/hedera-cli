@@ -1,5 +1,7 @@
 {
   "network": "testnet",
+  "mirrorNodeLocalnet": "http://localhost:5551/api/v1",
+  "mirrorNodePreviewnet": "https://previewnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
   "testnetOperatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
@@ -8,11 +10,15 @@
   "mainnetOperatorId": "",
   "previewnetOperatorId": "",
   "previewnetOperatorKey": "",
+  "localnetOperatorKey": "",
+  "localnetOperatorId": "",
   "recording": 0,
   "recordingScriptName": "",
   "scriptExecution": 0,
   "scriptExecutionName": "",
   "accounts": {},
+  "tokens": {},
+  "topics": {},
   "scripts": {
     "script-init": {
       "name": "init",
@@ -25,6 +31,7 @@
       ]
     }
   },
-  "tokens": {},
-  "topics": {}
+  "localNodeAddress": "127.0.0.1:50211",
+  "localNodeAccountId": "0.0.3",
+  "localNodeMirrorAddressGRPC": "127.0.0.1:5600"
 }

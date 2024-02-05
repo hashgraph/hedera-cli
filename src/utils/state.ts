@@ -22,10 +22,24 @@ function recordCommand(command: string[]): void {
 
 function getMirrorNodeURL(): string {
   const network = stateController.get('network');
-  const mirrorNodeURL =
-    network === 'testnet'
-      ? stateController.get('mirrorNodeTestnet')
-      : stateController.get('mirrorNodeMainnet');
+  let mirrorNodeURL = stateController.get('mirrorNodeTestnet')
+  switch (network) {
+    case 'testnet':
+      mirrorNodeURL = stateController.get('mirrorNodeTestnet');
+      break;
+    case 'mainnet':
+      mirrorNodeURL = stateController.get('mirrorNodeMainnet');
+      break;
+    case 'previewnet':
+      mirrorNodeURL = stateController.get('mirrorNodePreviewnet');
+      break;
+    case 'localnet':
+      mirrorNodeURL = stateController.get('mirrorNodeLocalnet');
+      break;
+    default:
+      logger.error('Invalid network name');
+      process.exit(1);
+  }
   return mirrorNodeURL;
 }
 
@@ -49,6 +63,12 @@ function getHederaClient(): Client {
       client = Client.forPreviewnet();
       operatorId = state.previewnetOperatorId;
       operatorKey = state.previewnetOperatorKey;
+      break;
+    case 'localnet':
+      const node = { [state.localNodeAddress]: AccountId.fromString(state.localNodeAccountId) };
+      client = Client.forNetwork(node).setMirrorNetwork(state.localNodeMirrorAddressGRPC);
+      operatorId = state.localnetOperatorId;
+      operatorKey = state.localnetOperatorKey;
       break;
     default:
       logger.error('Invalid network name');
@@ -91,6 +111,10 @@ function getOperator(): { operatorId: string; operatorKey: string } {
       operatorId = state.previewnetOperatorId;
       operatorKey = state.previewnetOperatorKey;
       break;
+    case 'localnet':
+      operatorId = state.localnetOperatorId;
+      operatorKey = state.localnetOperatorKey;
+      break;
     default:
       logger.error('Invalid network name');
       process.exit(1);
@@ -108,9 +132,9 @@ function getOperator(): { operatorId: string; operatorKey: string } {
 }
 
 function switchNetwork(name: string) {
-  if (!['mainnet', 'testnet', 'previewnet'].includes(name)) {
+  if (!['mainnet', 'testnet', 'previewnet', 'localnet'].includes(name)) {
     logger.error(
-      'Invalid network name. Available networks: mainnet, testnet, previewnet',
+      'Invalid network name. Available networks: mainnet, testnet, previewnet, and localnet',
     );
     process.exit(1);
   }
@@ -129,6 +153,10 @@ function switchNetwork(name: string) {
     case 'previewnet':
       operatorId = state.previewnetOperatorId;
       operatorKey = state.previewnetOperatorKey;
+      break;
+    case 'localnet':
+      operatorId = state.localnetOperatorId;
+      operatorKey = state.localnetOperatorKey;
       break;
   }
 
