@@ -117,7 +117,7 @@ describe('End to end tests', () => {
       '-t',
       'testnet-operator',
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 7000));
 
     // Assert
     data = await api.account.getAccountInfo(state[accountAlias].accountId);
@@ -418,7 +418,7 @@ describe('End to end tests', () => {
       '--to',
       accountAliasUser,
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 7000));
 
     // Assert
     const data = await api.token.getTokenBalance(
