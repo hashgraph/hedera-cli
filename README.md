@@ -45,24 +45,25 @@ You will need an account on the Hedera network to interact with the ledger. Foll
 
 Make sure to securely store your DER encoded private key and account ID, as they are crucial for accessing and managing your Hedera account.
 
-**3. Clone the repository:**
+## Installation
+
+**1. Clone the repository:**
+
+Make sure to clone the repository. You can do this by running the following command in your terminal:
 
 ```sh
 git clone https://github.com/hashgraph/hedera-cli.git
 ```
 
-## Installation
+**2. Install Depencencies:**
 
-**1. Install Depencencies:**
-
-Go into the repository folder and install the necessary packages using npm. This sets up everything you need to get started with the Hedera CLI Tool.
+Navigate to the repository folder and install the necessary packages using `npm`. This sets up everything you need to get started with the Hedera CLI Tool.
 
 ```sh
-cd hedera-cli
-npm install
+cd hedera-cli && npm install
 ```
 
-**2. Build the Package:**
+**3. Build the Package:**
 
 Compile the package to ensure all components are ready for use.
 
@@ -70,7 +71,7 @@ Compile the package to ensure all components are ready for use.
 npm run build
 ```
 
-**3. Set Up Operator Credentials**
+**4. Set Up Operator Credentials**
 
 Create a `.hedera` folder in your user's home directory. This folder will store your configuration files.
 
@@ -108,7 +109,7 @@ node dist/hedera-cli.js setup init
 
 The `setup init` command will also create the different operator accounts in your address book (`dist/state/state.json` file) so you can use them in your commands.
 
-**4. Verify Installation:**
+**5. Verify Installation:**
 
 You can verify the installation by listing all accounts in your address book. If you haven't added any accounts yet, you should see the following output:
 
@@ -117,7 +118,7 @@ node dist/hedera-cli.js account list
 // No accounts found.
 ```
 
-**5. Set Network**
+**6. Set Network**
 
 When first using the network, the CLI tool will use the `testnet` network. You can switch to the `mainnet` or other networks like `previewnet` or `localnet` using the following command:
 
@@ -125,7 +126,7 @@ When first using the network, the CLI tool will use the `testnet` network. You c
 node dist/hedera-cli.js network use mainnet
 ```
 
-**6. Optional: Setting Up an Alias**
+**7. Optional: Setting Up an Alias**
 
 To avoid typing the full command each time, you can set an alias in your shell profile. For example, in bash or Zshell, you can add the following line to your `.bashrc`/`.bash_profile` or `.zshrc`. Replace the path with the absolute path to your `hedera-cli` installation path.
 
@@ -133,7 +134,7 @@ To avoid typing the full command each time, you can set an alias in your shell p
 alias hcli="node /Users/myUser/hedera-cli/dist/hedera-cli.js"
 ```
 
-Make sure you reload your shell.
+Make sure you reload your shell, whether it's `bashrc`, `zshrc`, or another shell profile.
 
 ```sh
 source ~/.bashrc
@@ -145,9 +146,9 @@ You can verify the alias by listing all accounts in your address book.
 hcli account list
 ```
 
-If you haven't added any accounts yet, you should see the same output like in step 4.
+If you haven't added any accounts yet, you should see the same output like in step 5.
 
-**7. Optional: Download Example Scripts**
+**8. Optional: Download Example Scripts**
 
 You can download example scripts from the [examples file](./src/commands/script/examples.json) and add them to your state. This allows you to quickly test the CLI tool and see how scripting functionality works. You can download the example scripts using the following command:
 
