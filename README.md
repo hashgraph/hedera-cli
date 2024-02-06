@@ -10,7 +10,7 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
 
 ## Table of Contents
 
-- [Prequisites](#prerequisites)
+- [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Connecting the CLI tool with your Local Hedera Network](#connecting-the-cli-tool-with-your-local-hedera-network)
 - [Video Guide](#video-guide)
@@ -45,13 +45,20 @@ You will need an account on the Hedera network to interact with the ledger. Foll
 
 Make sure to securely store your DER encoded private key and account ID, as they are crucial for accessing and managing your Hedera account.
 
+**3. Clone the repository:**
+
+```sh
+git clone https://github.com/hashgraph/hedera-cli.git
+```
+
 ## Installation
 
 **1. Install Depencencies:**
 
-Install necessary packages using npm. This sets up everything you need to get started with the Hedera CLI Tool.
+Go into the repository folder and install the necessary packages using npm. This sets up everything you need to get started with the Hedera CLI Tool.
 
 ```sh
+cd hedera-cli
 npm install
 ```
 
@@ -125,6 +132,20 @@ To avoid typing the full command each time, you can set an alias in your shell p
 ```sh
 alias hcli="node /Users/myUser/hedera-cli/dist/hedera-cli.js"
 ```
+
+Make sure you reload your shell.
+
+```sh
+source ~/.bashrc
+```
+
+You can verify the alias by listing all accounts in your address book.
+
+```sh
+hcli account list
+```
+
+If you haven't added any accounts yet, you should see the same output like in step 4.
 
 **7. Optional: Download Example Scripts**
 
