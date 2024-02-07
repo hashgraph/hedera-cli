@@ -5,6 +5,10 @@ import type { Command } from '../../types';
 
 const logger = Logger.getInstance();
 
+async function wait(seconds: number) {
+  await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}
+
 export default (program: any) => {
   program
     .command('wait <seconds>')
@@ -21,7 +25,3 @@ export default (program: any) => {
       await wait(Number(seconds));
     });
 };
-
-async function wait(seconds: number) {
-  await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-}

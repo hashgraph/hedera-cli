@@ -17,7 +17,7 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
 - [Commands](#commands)
   - [Setup Commands](#setup-commands)
   - [Network Commands](#network-commands)
-  - [Wait Commmand](#wait-command)
+  - [Wait Command](#wait-command)
   - [Account Commands](#account-commands)
   - [Token Commands](#token-commands)
   - [Topic Commands](#topic-commands)
@@ -32,11 +32,11 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
 
 Before proceeding with the installation and setup of the Hedera CLI Tool, ensure the following prerequisites are met:
 
-**1. Node.js Installation:**
+### 1. Node.js Installation
 
 The Hedera CLI Tool requires Node.js (version LTS 16.20.2 or higher). You can check your current version by running `node -v` in your terminal. If you do not have Node.js installed, you can download it from [Node.js official website](https://nodejs.org/en).
 
-**2. Hedera Account Setup:**
+### 2. Hedera Account Setup
 
 You will need an account on the Hedera network to interact with the ledger. Follow these steps to set up your account:
 
@@ -47,7 +47,7 @@ Make sure to securely store your DER encoded private key and account ID, as they
 
 ## Installation
 
-**1. Clone the repository:**
+### 1. Clone the repository
 
 Make sure to clone the repository. You can do this by running the following command in your terminal:
 
@@ -55,7 +55,7 @@ Make sure to clone the repository. You can do this by running the following comm
 git clone https://github.com/hashgraph/hedera-cli.git
 ```
 
-**2. Install Depencencies:**
+### 2. Install Dependencies
 
 Navigate to the repository folder and install the necessary packages using `npm`. This sets up everything you need to get started with the Hedera CLI Tool.
 
@@ -63,7 +63,7 @@ Navigate to the repository folder and install the necessary packages using `npm`
 cd hedera-cli && npm install
 ```
 
-**3. Build the Package:**
+### 3. Build the Package
 
 Compile the package to ensure all components are ready for use.
 
@@ -71,7 +71,7 @@ Compile the package to ensure all components are ready for use.
 npm run build
 ```
 
-**4. Set Up Operator Credentials**
+### 4. Set Up Operator Credentials
 
 Create a `.hedera` folder in your user's home directory. This folder will store your configuration files.
 
@@ -105,11 +105,11 @@ Next, set up the CLI tool with the command:
 node dist/hedera-cli.js setup init
 ```
 
-> **Note:** You can set a custom absolute path for your `.env` file by using the `--path` flag. For example, `node dist/hedera-cli.js setup init --path /Users/myUser/projects/cli/.env`. More information can be found in the [setup command](#setup-commands) section below.
+> **Note.** You can set a custom absolute path for your `.env` file by using the `--path` flag. For example, `node dist/hedera-cli.js setup init --path /Users/myUser/projects/cli/.env`. More information can be found in the [setup command](#setup-commands) section below.
 
 The `setup init` command will also create the different operator accounts in your address book (`dist/state/state.json` file) so you can use them in your commands.
 
-**5. Verify Installation:**
+### 5. Verify Installation
 
 You can verify the installation by listing all accounts in your address book. If you haven't added any accounts yet, you should see the following output:
 
@@ -118,7 +118,7 @@ node dist/hedera-cli.js account list
 // No accounts found.
 ```
 
-**6. Set Network**
+### 6. Set Network
 
 When first using the network, the CLI tool will use the `testnet` network. You can switch to the `mainnet` or other networks like `previewnet` or `localnet` using the following command:
 
@@ -126,9 +126,9 @@ When first using the network, the CLI tool will use the `testnet` network. You c
 node dist/hedera-cli.js network use mainnet
 ```
 
-**7. Optional: Setting Up an Alias**
+### 7. Optional: Setting Up an Alias
 
-To avoid typing the full command each time, you can set an alias in your shell profile. For example, in bash or Zshell, you can add the following line to your `.bashrc`/`.bash_profile` or `.zshrc`. Replace the path with the absolute path to your `hedera-cli` installation path.
+To avoid typing the full command each time, you can set an alias in your shell profile. For example, in bash or Z shell, you can add the following line to your `.bashrc`/`.bash_profile` or `.zshrc`. Replace the path with the absolute path to your `hedera-cli` installation path.
 
 ```sh
 alias hcli="node /Users/myUser/hedera-cli/dist/hedera-cli.js"
@@ -148,7 +148,7 @@ hcli account list
 
 If you haven't added any accounts yet, you should see the same output like in step 5.
 
-**8. Optional: Download Example Scripts**
+### 8. Optional: Download Example Scripts
 
 You can download example scripts from the [examples file](./src/commands/script/examples.json) and add them to your state. This allows you to quickly test the CLI tool and see how scripting functionality works. You can download the example scripts using the following command:
 
@@ -156,7 +156,7 @@ You can download example scripts from the [examples file](./src/commands/script/
 node dist/hedera-cli.js state download --url https://raw.githubusercontent.com/hashgraph/hedera-cli/main/src/commands/script/examples.json --merge
 ```
 
-# Connecting the CLI tool with your Local Hedera Network
+## Connecting the CLI tool with your Local Hedera Network
 
 The Hedera CLI tool can be used to interact with a local Hedera network. This is useful for testing and development purposes. To connect the CLI tool with your local Hedera network, you need to set up a local Hedera network. You can follow the instructions in the [Hedera documentation](https://docs.hedera.com/hedera/tutorials/more-tutorials/how-to-set-up-a-hedera-local-node) to set up a local Hedera network.
 
@@ -177,31 +177,30 @@ LOCALNET_OPERATOR_ID=0.0.2
 LOCALNET_OPERATOR_KEY=302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137
 ```
 
-# Video Guide
+## Video Guide
 
 Learn how to use the Hedera CLI Tool by watching the video below.
 
 [![Thumbnail video guide](https://img.youtube.com/vi/3XCkdtMzR14/0.jpg)](https://www.youtube.com/watch?v=3XCkdtMzR14 "Learn how to use the Hedera CLI")
 
-# Commands
+## Commands
 
 Let's explore the different commands, their options, and outputs.
 
 - [Setup Commands](#setup-commands): Instantiate or reset the Hedera CLI tool
 - [Network Commands](#network-commands): Switch Hedera networks
-- [Wait Commmand](#wait-command): Wait for a specified amount of seconds
+- [Wait Command](#wait-command): Wait for a specified amount of seconds
 - [Account Commands](#account-commands): Create and manage accounts
 - [Token Commands](#token-commands): Create and manage tokens
 - [Topic Commands](#topic-commands): Create and manage topics
-- [Hbar Command](#hbar-command): Transfer Hbars between accounts
+- [Hbar Command](#hbar-command): Transfer hbars between accounts
 - [Backup Commands](#backup-commands): Create a backup of your state
 - [Record Commands](#record-commands): Record CLI interactions and store it in scripts
 - [State Commands](#state-commands): Manage the state of the CLI tool
 - [Script Commands](#script-commands): Replay and manage scripts containing recorded CLI interactions
   - [Dynamic Variables in Scripts](#dynamic-variables-in-scripts): Use dynamic variables in scripts
 
-
-> Each of the commands can be run with the `--help` flag to display the command's options and usage. 
+> Each of the commands can be run with the `--help` flag to display the command's options and usage.
 >
 > Use the `--quiet` flag to suppress the output of the command or the `--verbose` flag to display more information.
 
@@ -227,7 +226,8 @@ Sets up the CLI with the operator key and ID.
 hcli setup init [--path <path>]
 ```
 
-**Flags:**
+Flags:
+
 - **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
 
 When executed, the setup command performs several key functions:
@@ -246,7 +246,8 @@ Reload the operator key and ID from the `.env` file. This command is useful when
 hcli setup reload [--path <path>]
 ```
 
-**Flags:**
+Flags:
+
 - **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
 
 ## Network Commands
@@ -255,7 +256,7 @@ hcli setup reload [--path <path>]
 
 The network command in the Hedera CLI tool is designed to manage and interact with different Hedera networks. It allows users to switch between networks and list available networks. This flexibility is crucial for developers who need to test their applications in different network environments.
 
-```
+```sh
 network use
 network list
 ```
@@ -264,7 +265,7 @@ network list
 
 **1. Switching Networks:**
 
-This command switches the current network context to the specified network. 
+This command switches the current network context to the specified network.
 
 ```sh
 hcli network use <name>
@@ -289,7 +290,7 @@ The network command includes a catch-all for unknown subcommands. If an unrecogn
 // Invalid network name. Available networks: mainnet, testnet, previewnet, and localnet
 ```
 
-## Wait Commmand
+## Wait Command
 
 ### Overview
 
@@ -310,7 +311,7 @@ The `wait` command is used in the [examples section](#other-examples) below.
 
 The `account` command in the Hedera CLI tool encompasses a suite of subcommands designed for managing Hedera accounts. These subcommands provide functionalities for creating new accounts, retrieving account balances, listing accounts in the address book, importing existing accounts, and clearing the address book.
 
-```
+```sh
 account create
 account balance
 account list
@@ -330,7 +331,8 @@ hcli account create -a,--alias <alias> [-b,--balance <balance>] [-t,--type <type
 ```
 
 Flags:
-- **Alias:** (required) A unique identifier for the new account. 
+
+- **Alias:** (required) A unique identifier for the new account.
 - **Balance:** (optional) Initial balance in tinybars. Defaults to 1000.
 - **Type:** (optional) The account type (`ECDSA` or `ED25519`). Defaults to `ED25519`.
 
@@ -345,7 +347,7 @@ hcli account balance <accountIdOrAlias> [-h,--only-hbar] [-t,--token-id <tokenId
 
 // Output
 Balance for account 0.0.5892294:
-1000 Hbars
+1000 hbars
 
 Token balances:
 0.0.5892308: 2
@@ -379,6 +381,7 @@ hcli account import -a alice -i 0.0.12450
 ```
 
 Flags:
+
 - **Alias:** (required) Alias for the imported account.
 - **Id:** (required) Account ID.
 - **Key:** (optional) Private key.
@@ -400,9 +403,9 @@ hcli account delete -a,--alias <alias> -i,--id <id>
 ```
 
 Flags:
+
 - **-a, --alias:** (optional) Alias of the account to delete.
 - **-i, --id:** (optional) Account ID of the account to delete.
-
 
 ## Token Commands
 
@@ -410,7 +413,7 @@ Flags:
 
 The `token` command in the Hedera CLI tool provides functionality for creating, associating, and transferring tokens on the Hedera network. It includes subcommands for creating fungible tokens, associating tokens, and transferring tokens between accounts.
 
-```
+```sh
 token create-from-file
 token create
 token associate
@@ -421,13 +424,14 @@ token transfer
 
 **1. Create Token from File:**
 
-This command allows users to create a new token by specifying a JSON file that contains the token's configuration. Files are stored in the `dist/input` folder of the project using the format `token.<filename>.json`. Replace `<filename>` with your desired filename. 
+This command allows users to create a new token by specifying a JSON file that contains the token's configuration. Files are stored in the `dist/input` folder of the project using the format `token.<filename>.json`. Replace `<filename>` with your desired filename.
 
 ```sh
 hcli token create-from-file -f,--file <filename>
 ```
 
 Flags:
+
 - **File:** (required) Filename containing the token information in JSON format.
 
 A token input file looks like below. You can define all properties you would normally define when using using the SDK to create a token. All of the properties are required. If you don't need a key, leave it as an empty string.
@@ -455,8 +459,8 @@ A token input file looks like below. You can define all properties you would nor
 }
 ```
 
-> **Note:** that you can use placeholders for all keys on a token. The format `<alias:bob>` refers to an account with alias `bob` in your address book. It will use Bob's key. 
-> 
+> **Note:** that you can use placeholders for all keys on a token. The format `<alias:bob>` refers to an account with alias `bob` in your address book. It will use Bob's key.
+>
 > You can also tell the CLI tool to create a new account with an account type (`ecdsa` or `ed25519`) and an initial balance in TinyBars. The `<newkey:ecdsa:10000>` placeholder creates a new ECDSA account with 10,000 TinyBars and uses its key for the admin key.
 
 **2. Create Fungible Token:**
@@ -464,10 +468,11 @@ A token input file looks like below. You can define all properties you would nor
 Creates a new fungible token with specified properties like name, symbol, treasury ID, treasury key, decimals, initial supply, and admin key.
 
 ```sh
-hcli token create --treasury-id <treasuryId> --treasury-key <treasuryKey> --name <name> --symbol <symbol> --decimals <decimals> --suply-type <supplyType> --initial-supply <initialSupply> --admin-key <adminKey>
+hcli token create --treasury-id <treasuryId> --treasury-key <treasuryKey> --name <name> --symbol <symbol> --decimals <decimals> --supply-type <supplyType> --initial-supply <initialSupply> --admin-key <adminKey>
 ```
 
 Flags:
+
 - **Treasury ID:** (required) Treasury ID for the fungible token.
 - **Treasury Key:** (required) Treasury key for the fungible token.
 - **Name:** (required) Name of the fungible token.
@@ -491,6 +496,7 @@ hcli token associate -a bob -t 0.0.5892309
 ```
 
 Flags:
+
 - Account ID: (required) Account ID or alias to associate with the token.
 - Token ID: (required) Token ID to be associated with the account.
 
@@ -503,6 +509,7 @@ hcli token transfer -t,--token-id <tokenId> --to <to> --from <from> -b,--balance
 ```
 
 Flags:
+
 - **Token ID:** (required) Token ID to transfer.
 - **To:** (required) Account ID to transfer the token to.
 - **From:** (required) Account ID to transfer the token from.
@@ -514,7 +521,7 @@ Flags:
 
 The `topic` command in the Hedera CLI tool provides functionality for creating topics and retrieving information about topics on the Hedera network.
 
-```
+```sh
 topic create
 topic list
 topic message submit
@@ -532,6 +539,7 @@ hcli topic create [-s, --submit-key <submitKey>] [-a, --admin-key <adminKey>] [-
 ```
 
 Flags:
+
 - **Submit Key:** (optional) Submit key for the topic.
 - **Admin Key:** (optional) Admin key for the topic.
 - **Memo:** (optional) Memo for the topic (100 bytes).
@@ -553,6 +561,7 @@ hcli topic message submit -t,--topic-id <topicId> -m,--message <message>
 ```
 
 Flags:
+
 - **Topic ID:** (required) Topic ID to submit the message to.
 - **Message:** (required) Message to submit to the topic.
 
@@ -565,6 +574,7 @@ hcli topic message find -t,--topic-id <topicId> -s,--sequence-number <sequenceNu
 ```
 
 Flags:
+
 - **Topic ID:** (required) Topic ID to find the message for.
 - **Sequence Number:** (required) Sequence number of the message you want to find.
 
@@ -572,7 +582,7 @@ Flags:
 
 ### Overview
 
-The `hbar` command in the Hedera CLI tool is designed for transferring Hbars between accounts.
+The `hbar` command in the Hedera CLI tool is designed for transferring hbars between accounts.
 
 ```sh
 hcli hbar transfer -b,--balance <balance> [-f,--from <from>] [-t,--to <to>]
@@ -583,9 +593,10 @@ hcli hbar transfer -f alice -t 0.0.12345 -b 1000
 ```
 
 Flags:
-- **Balance:** (required) Amount of Hbars to transfer.
-- **From:** (optional) Account ID or alias to transfer the Hbars from.
-- **To:** (optional) Account ID or alias to transfer the Hbars to.
+
+- **Balance:** (required) Amount of hbars to transfer.
+- **From:** (optional) Account ID or alias to transfer the hbars from.
+- **To:** (optional) Account ID or alias to transfer the hbars to.
 
 > **Note:** If you don't specify a `from` or `to` account, the CLI tool will prompt you to select an account from your address book, listed by alias.
 
@@ -595,7 +606,7 @@ Flags:
 
 The `backup` command in the Hedera CLI tool is designed for creating backups of the `state.json` file, which contains configuration and state information.
 
-```
+```sh
 backup create
 backup restore
 ```
@@ -616,6 +627,7 @@ hcli backup create --name myBackup
 ```
 
 Flags:
+
 - **Name:** (optional) Filename of the backup file. Defaults to `state.backup.<timestamp>.json`.
 - **Accounts:** (optional) Creates a backup of the accounts section of the state. The backup file is named `accounts.backup.<timestamp>.json`.
 - **Safe:** (optional) Removes private information from the backup like token keys, account keys, and operator key/ID. It does not remove the private keys in scripts' commands.
@@ -629,6 +641,7 @@ hcli backup restore -f,--file <filename> [--restore-accounts] [--restore-tokens]
 ```
 
 Flags:
+
 - **File:** (optional) Filename of the backup file to restore.
 - **Restore Accounts:** (optional) Restores the accounts section of the state.
 - **Restore Tokens:** (optional) Restores the tokens section of the state.
@@ -642,14 +655,13 @@ hcli backup restore -f state.backup.1704321015228.json --restore-accounts --rest
 
 > **Note: If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.** You can still use the flags to restore only certain parts of the state.
 
-
 ## Record Commands
 
 ### Overview
 
 The `record` command in the Hedera CLI tool is designed for recording sequences of commands executed in the CLI. This feature is particularly useful for automating network operations or setting up testing environments by replaying recorded scripts containing commands.
 
-```
+```sh
 record start
 record stop
 ```
@@ -680,7 +692,7 @@ hcli record stop
 
 The `state` command in the Hedera CLI tool is designed for managing the state of the CLI tool. It allows users to view the current state, clear the state, and download a new state via a remote URL.
 
-```
+```sh
 state download
 state view
 state clear
@@ -697,11 +709,13 @@ hcli state download --url <url> [--overwrite] [--merge]
 ```
 
 Flags:
+
 - **URL:** (required) URL to download the state file from.
 - **Overwrite:** (optional) Overwrites the current state file with the contents of the downloaded file.
 - **Merge:** (optional) Merges the downloaded state file with the current state file. It won't fail when the state file contains duplicate keys.
 
 Format for remote script files:
+
 ```json
 {
   "accounts": {
@@ -777,6 +791,7 @@ hcli state view [--accounts] [--tokens] [--scripts] [--account-alias <account-al
 ```
 
 Flags:
+
 - **Accounts:** (optional) Displays the accounts section of the state.
 - **Tokens:** (optional) Displays the tokens section of the state.
 - **Scripts:** (optional) Displays the scripts section of the state.
@@ -793,6 +808,7 @@ hcli state clear [-a, --skip-accounts] [-t, --skip-tokens] [-s, --skip-scripts]
 ```
 
 Flags:
+
 - **-a, --skip-accounts**: (optional) Skips clearing accounts.
 - **-t, --skip-tokens:** (optional) Skips clearing tokens.
 - **-s, --skip-scripts:** (optional) Skips clearing scripts.
@@ -803,7 +819,7 @@ Flags:
 
 The `script` command in the Hedera CLI tool allows users to load and execute previously recorded scripts. This command is particularly useful for automating repetitive tasks or for quickly setting up specific states or environments that have been captured in a script.
 
-```
+```sh
 script load
 script list
 script delete
@@ -983,9 +999,11 @@ Here's an example state:
 }
 ```
 
-# Contributing Tips
+## Contributing
 
-## Development Mode
+Contributions are welcome. Please see the [contributing guide](https://github.com/hashgraph/.github/blob/main/CONTRIBUTING.md) to see how you can get involved in the Hedera Hashgraph repositories. Below you can find some tips specific for this repository.
+
+### Development Mode
 
 You can run the application in development mode. It will watch for changes in the `src` folder and automatically recompile the application while maintaining the `dist/state.json` file.
 
@@ -1011,7 +1029,7 @@ npm run lint
 npm run format
 ```
 
-## Config
+### Config
 
 **How to handle config?**
 
@@ -1067,11 +1085,11 @@ describe("network commands", () => {
 });
 ```
 
-## Dynamic Variables
+### Dynamic Variables
 
-[Dynamic variables](#dynamic-variables-in-scripts) are variables that are stored in the state and can be used in scripts. They are useful for storing information that is generated during script execution and can be used in other commands within the script. 
+[Dynamic variables](#dynamic-variables-in-scripts) are variables that are stored in the state and can be used in scripts. They are useful for storing information that is generated during script execution and can be used in other commands within the script.
 
-### How to allow processing of dynamic variables in a command?
+#### How to allow processing of dynamic variables in a command?
 
 To allow processing of dynamic variables in a command, you need to add a single line of code converting the dynamic variables in your `options` to their actual values. Don't forget to import the `dynamicVariablesUtils` which holds the `replaceOptions` function.
 
@@ -1086,9 +1104,9 @@ program
     })
 ```
 
-### How to allow storing variables in the state?
+#### How to allow storing variables in the state?
 
-To allow dynamic variables in a command, you need to add the `--args` flag to the command. The `--args` flag takes a list of arguments that are allowed to be dynamic variables. 
+To allow dynamic variables in a command, you need to add the `--args` flag to the command. The `--args` flag takes a list of arguments that are allowed to be dynamic variables.
 
 ```js
 program
@@ -1103,7 +1121,7 @@ program
     )
 ```
 
-Further, for each command you want to allow the user to store variables, you need to define a command action. Command actions define the mapping between script commands and the corresponding actions. You can specify actions for different commands and use them when storing variables. 
+Further, for each command you want to allow the user to store variables, you need to define a command action. Command actions define the mapping between script commands and the corresponding actions. You can specify actions for different commands and use them when storing variables.
 
 ```js
 const commandActions: CommandActions = {
@@ -1168,20 +1186,20 @@ Make sure that each property you define exists in the output for the command. He
 });
 ```
 
-The `storeArgs` function takes the `options.args` and the `commandAction` as arguments. It then stores the output variables in the state according to the user's instructions. 
+The `storeArgs` function takes the `options.args` and the `commandAction` as arguments. It then stores the output variables in the state according to the user's instructions.
 
 Whenever changing the `commandActions` or `commandOutputs` objects, make sure to update the documentation as well.
 
-## Logging
+### Logging
 
-You can use the `logger` object to log messages to the console. The logger object is defined in `src/utils/logger.ts`. It is defined as a singleton which you can import in your files. 
+You can use the `logger` object to log messages to the console. The logger object is defined in `src/utils/logger.ts`. It is defined as a singleton which you can import in your files.
 
 ```js
 import { Logger } from '../../utils/logger';
 const logger = Logger.getInstance();
 ```
 
-- Regular output messages are logged using the `logger.log` function. 
+- Regular output messages are logged using the `logger.log` function.
 - Verbose output messages are logged using the `logger.verbose` function.
 - Error messages are logged using the `logger.error` function which has an overload signature
   - `logger.error(error: Error | string)`: Log a single object or string
@@ -1190,10 +1208,6 @@ const logger = Logger.getInstance();
 ## Support
 
 If you have a question on how to use the product, please see our [support guide](https://github.com/hashgraph/.github/blob/main/SUPPORT.md).
-
-## Contributing
-
-Contributions are welcome. Please see the [contributing guide](https://github.com/hashgraph/.github/blob/main/CONTRIBUTING.md) to see how you can get involved.
 
 ## Code of Conduct
 

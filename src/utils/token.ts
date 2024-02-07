@@ -96,15 +96,15 @@ const transfer = async (
 
     const transferTxSign = await signUtils.sign(transferTx, fromPrivateKey);
 
-    const transfer = await transferTxSign.execute(client);
-    const receipt = await transfer.getReceipt(client);
+    const submittedTransfer = await transferTxSign.execute(client);
+    const receipt = await submittedTransfer.getReceipt(client);
     if (receipt.status._code === 22) {
       logger.log(
-        `Transfer successful with tx ID: ${transfer.transactionId.toString()}`,
+        `Transfer successful with tx ID: ${submittedTransfer.transactionId.toString()}`,
       );
     } else {
       logger.error(
-        `Transfer failed with tx ID: ${transfer.transactionId.toString()}`,
+        `Transfer failed with tx ID: ${submittedTransfer.transactionId.toString()}`,
       );
       process.exit(1);
     }

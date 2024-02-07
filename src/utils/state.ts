@@ -190,7 +190,7 @@ function addTokenAssociation(
 function getAccountById(accountId: string): Account | undefined {
   const accounts: Record<string, Account> = stateController.get('accounts');
   const account = Object.values(accounts).find(
-    (account: Account) => account.accountId === accountId,
+    (el: Account) => el.accountId === accountId,
   );
   return account;
 }
@@ -264,60 +264,6 @@ async function downloadState(url: string): Promise<DownloadState> {
   return data;
 }
 
-function importState(data: any, overwrite: boolean, merge: boolean) {
-  if (overwrite) {
-    stateController.saveKey('accounts', data.accounts || {});
-    stateController.saveKey('tokens', data.tokens || {});
-    stateController.saveKey('scripts', data.scripts || {});
-    stateController.saveKey('topics', data.topics || {});
-    logger.log('State overwritten successfully');
-    process.exit(0);
-  }
-
-  if (data.accounts && Object.entries(data.accounts).length > 0) {
-    addAccounts(data.accounts, merge);
-  }
-
-  if (data.tokens && Object.entries(data.tokens).length > 0) {
-    addTokens(data.tokens, merge);
-  }
-
-  if (data.scripts && Object.entries(data.scripts).length > 0) {
-    addScripts(data.scripts, merge);
-  }
-
-  if (data.topics && Object.entries(data.topics).length > 0) {
-    addTopics(data.topics, merge);
-  }
-}
-
-function addScripts(importedScripts: Script[], merge: boolean) {
-  const scripts: Record<string, Script> = stateController.get('scripts');
-  Object.values(importedScripts).forEach((script: Script) => {
-    const scriptName = `script-${script.name}`;
-    const existingScript = scripts[scriptName];
-
-    if (!merge && existingScript) {
-      logger.error(`Script with name ${scriptName} already exists`);
-      process.exit(1);
-    }
-
-    if (merge && existingScript) {
-      // continue to add values to existing state (merging)
-      logger.log(`Script "${script.name}" already exists, overwriting it`);
-    }
-
-    scripts[scriptName] = {
-      name: script.name,
-      creation: Date.now(),
-      commands: script.commands,
-      args: {},
-    };
-    stateController.saveKey('scripts', scripts);
-    logger.log(`Script "${script.name}" added successfully`);
-  });
-}
-
 function addAccounts(importedAccounts: Account[], merge: boolean) {
   const accounts: Record<string, Account> = stateController.get('accounts');
   Object.values(importedAccounts).forEach((account: Account) => {
@@ -382,6 +328,60 @@ function addTopics(importedTopics: Topic[], merge: boolean) {
     stateController.saveKey('topics', topics);
     logger.log(`Topic ${topic.topicId} added successfully`);
   });
+}
+
+function addScripts(importedScripts: Script[], merge: boolean) {
+  const scripts: Record<string, Script> = stateController.get('scripts');
+  Object.values(importedScripts).forEach((script: Script) => {
+    const scriptName = `script-${script.name}`;
+    const existingScript = scripts[scriptName];
+
+    if (!merge && existingScript) {
+      logger.error(`Script with name ${scriptName} already exists`);
+      process.exit(1);
+    }
+
+    if (merge && existingScript) {
+      // continue to add values to existing state (merging)
+      logger.log(`Script "${script.name}" already exists, overwriting it`);
+    }
+
+    scripts[scriptName] = {
+      name: script.name,
+      creation: Date.now(),
+      commands: script.commands,
+      args: {},
+    };
+    stateController.saveKey('scripts', scripts);
+    logger.log(`Script "${script.name}" added successfully`);
+  });
+}
+
+function importState(data: any, overwrite: boolean, merge: boolean) {
+  if (overwrite) {
+    stateController.saveKey('accounts', data.accounts || {});
+    stateController.saveKey('tokens', data.tokens || {});
+    stateController.saveKey('scripts', data.scripts || {});
+    stateController.saveKey('topics', data.topics || {});
+    logger.log('State overwritten successfully');
+    process.exit(0);
+  }
+
+  if (data.accounts && Object.entries(data.accounts).length > 0) {
+    addAccounts(data.accounts, merge);
+  }
+
+  if (data.tokens && Object.entries(data.tokens).length > 0) {
+    addTokens(data.tokens, merge);
+  }
+
+  if (data.scripts && Object.entries(data.scripts).length > 0) {
+    addScripts(data.scripts, merge);
+  }
+
+  if (data.topics && Object.entries(data.topics).length > 0) {
+    addTopics(data.topics, merge);
+  }
 }
 
 const stateUtils = {

@@ -4,6 +4,15 @@ import { Logger } from './logger';
 
 const logger = Logger.getInstance();
 
+const signingRequirements: Record<string, Record<string, string[]>> = {
+  tokenCreate: {
+    sign: ['treasuryKey', 'adminKey'],
+  },
+  topicCreate: {
+    sign: ['adminKey', 'submitKey'],
+  },
+};
+
 /**
  * The sign module is responsible for signing transactions
  * @namespace sign
@@ -59,15 +68,6 @@ async function signByType(
 
   return signedTx;
 }
-
-const signingRequirements: Record<string, Record<string, string[]>> = {
-  tokenCreate: {
-    sign: ['treasuryKey', 'adminKey'],
-  },
-  topicCreate: {
-    sign: ['adminKey', 'submitKey'],
-  },
-};
 
 const signUtils = {
   sign,

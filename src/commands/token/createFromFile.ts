@@ -13,58 +13,42 @@ import signUtils from '../../utils/sign';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
-  program
-    .command('create-from-file')
-    .hook('preAction', (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      stateUtils.recordCommand(command);
-    })
-    .description('Create a new token from a file')
-    .requiredOption(
-      '-f, --file <filename>',
-      'Filename containing the token information',
-    )
-    .option(
-      '--args <args>',
-      'Store arguments for scripts',
-      (value: string, previous: string) =>
-        previous ? previous.concat(value) : [value],
-      [],
-    )
-    .action(createToken);
-};
+interface CreateTokenFromFileOptions {
+  file: string;
+  args: string[];
+}
 
-async function createToken(options: CreateTokenFromFileOptions) {
-  logger.verbose(`Creating token from template with name: ${options.file}`);
-  options = dynamicVariablesUtils.replaceOptions(options);
+interface TokenInput {
+  name: string;
+  symbol: string;
+  decimals: number;
+  supplyType: 'finite' | 'infinite';
+  initialSupply: number;
+  keys: Keys;
+  maxSupply: number;
+  treasuryId?: string;
+  treasuryKey: string;
+  customFees: [];
+  memo: string;
+}
 
-  const filepath = resolveTokenFilePath(options.file);
-  const tokenDefinition = require(filepath);
-  const token = await createTokenFromFile(tokenDefinition);
+function getTreasuryIdByTreasuryKey(treasuryKey: string): string {
+  const account = accountUtils.findAccountByPrivateKey(treasuryKey);
+  if (!account) {
+    logger.error('Treasury account not found');
+    process.exit(1);
+  }
+  return account.accountId;
+}
 
-  // Store dynamic script variables
-  dynamicVariablesUtils.storeArgs(
-    options.args,
-    dynamicVariablesUtils.commandActions.token.createFromFile.action,
-    {
-      tokenId: token.tokenId,
-      name: token.name,
-      symbol: token.symbol,
-      treasuryId: token.treasuryId,
-      adminKey: token.keys.adminKey,
-      pauseKey: token.keys.pauseKey,
-      kycKey: token.keys.kycKey,
-      wipeKey: token.keys.wipeKey,
-      freezeKey: token.keys.freezeKey,
-      supplyKey: token.keys.supplyKey,
-      feeScheduleKey: token.keys.feeScheduleKey,
-      treasuryKey: token.keys.treasuryKey,
-    },
-  );
+async function createAccountForToken(
+  key: string,
+  initialBalance: number,
+  type: string,
+  alias: string,
+): Promise<{ key: string; account: Account }> {
+  const account = await accountUtils.createAccount(initialBalance, type, alias);
+  return { key, account };
 }
 
 function resolveTokenFilePath(filename: string): string {
@@ -96,131 +80,6 @@ function initializeToken(tokenInput: TokenInput): Token {
   };
 
   return token;
-}
-
-async function prepareTokenCreation(
-  token: Token,
-  tokenInput: TokenInput,
-): Promise<Token> {
-  token.supplyType = tokenInput.supplyType;
-  token = await replaceKeysForToken(token);
-
-  if (token.treasuryId === '') {
-    token.treasuryId = getTreasuryIdByTreasuryKey(token.keys.treasuryKey);
-  }
-
-  return token;
-}
-
-async function createTokenOnNetwork(token: Token) {
-  const client = stateUtils.getHederaClient();
-
-  try {
-    const tokenCreateTx = new TokenCreateTransaction()
-      .setTokenName(token.name)
-      .setTokenSymbol(token.symbol)
-      .setDecimals(token.decimals)
-      .setInitialSupply(token.initialSupply)
-      .setTokenType(TokenType.FungibleCommon)
-      .setSupplyType(tokenUtils.getSupplyType(token.supplyType))
-      .setTreasuryAccountId(token.treasuryId);
-
-    if (token.supplyType === 'finite') {
-      tokenCreateTx.setMaxSupply(token.maxSupply);
-    }
-
-    // Add keys
-    addKeysToTokenCreateTx(tokenCreateTx, token);
-
-    // Signing
-    tokenCreateTx.freezeWith(client);
-    const signedTokenCreateTx = await signUtils.signByType(
-      tokenCreateTx,
-      'tokenCreate',
-      {
-        adminKey: token.keys.adminKey,
-        treasuryKey: token.keys.treasuryKey,
-      },
-    );
-
-    // Execute
-    let tokenCreateSubmit = await signedTokenCreateTx.execute(client);
-    let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
-
-    if (tokenCreateRx.tokenId == null) {
-      logger.error('Token was not created');
-      client.close();
-      process.exit(1);
-    }
-
-    token.tokenId = tokenCreateRx.tokenId.toString();
-    logger.log(`Token ID: ${token.tokenId}`);
-    client.close();
-  } catch (error) {
-    logger.error(error as object);
-    client.close();
-    process.exit(1);
-  }
-}
-
-function addKeysToTokenCreateTx(
-  tokenCreateTx: TokenCreateTransaction,
-  token: Token,
-) {
-  // Mapping key names to their corresponding setter methods
-  const keySetters = {
-    adminKey: tokenCreateTx.setAdminKey,
-    pauseKey: tokenCreateTx.setPauseKey,
-    kycKey: tokenCreateTx.setKycKey,
-    wipeKey: tokenCreateTx.setWipeKey,
-    freezeKey: tokenCreateTx.setFreezeKey,
-    supplyKey: tokenCreateTx.setSupplyKey,
-    feeScheduleKey: tokenCreateTx.setFeeScheduleKey,
-  };
-
-  Object.entries(keySetters).forEach(([key, setter]) => {
-    const keyValue = token.keys[key as keyof typeof token.keys];
-    if (keyValue && keyValue !== '') {
-      setter.call(tokenCreateTx, PrivateKey.fromStringDer(keyValue).publicKey);
-    }
-  });
-}
-
-async function createTokenFromFile(tokenInput: TokenInput): Promise<Token> {
-  try {
-    let token = initializeToken(tokenInput);
-    token = await prepareTokenCreation(token, tokenInput);
-    await createTokenOnNetwork(token);
-    updateTokenState(token);
-    return token;
-  } catch (error) {
-    logger.error(error as object);
-    stateUtils.getHederaClient().close();
-    process.exit(1);
-  }
-}
-
-function updateTokenState(token: Token) {
-  const tokens: Record<string, Token> = stateController.get('tokens');
-  const updatedTokens = {
-    ...tokens,
-    [token.tokenId]: token,
-  };
-
-  stateController.saveKey('tokens', updatedTokens);
-  stateUtils.getHederaClient().close();
-}
-
-async function replaceKeysForToken(token: Token): Promise<Token> {
-  let newToken = { ...token };
-
-  // Look for alias pattern in keys on token
-  newToken.keys = replaceAliasPattern(newToken.keys);
-
-  // Look for `newkey` pattern in keys on token
-  newToken.keys = await handleNewKeyPattern(newToken.keys);
-
-  return newToken;
 }
 
 /**
@@ -305,40 +164,181 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
   return newKeys;
 }
 
-function getTreasuryIdByTreasuryKey(treasuryKey: string): string {
-  const account = accountUtils.findAccountByPrivateKey(treasuryKey);
-  if (!account) {
-    logger.error('Treasury account not found');
+async function replaceKeysForToken(token: Token): Promise<Token> {
+  let newToken = { ...token };
+
+  // Look for alias pattern in keys on token
+  newToken.keys = replaceAliasPattern(newToken.keys);
+
+  // Look for `newkey` pattern in keys on token
+  newToken.keys = await handleNewKeyPattern(newToken.keys);
+
+  return newToken;
+}
+
+async function prepareTokenCreation(
+  token: Token,
+  tokenInput: TokenInput,
+): Promise<Token> {
+  token.supplyType = tokenInput.supplyType;
+  token = await replaceKeysForToken(token);
+
+  if (token.treasuryId === '') {
+    token.treasuryId = getTreasuryIdByTreasuryKey(token.keys.treasuryKey);
+  }
+
+  return token;
+}
+
+function addKeysToTokenCreateTx(
+  tokenCreateTx: TokenCreateTransaction,
+  token: Token,
+) {
+  // Mapping key names to their corresponding setter methods
+  const keySetters = {
+    adminKey: tokenCreateTx.setAdminKey,
+    pauseKey: tokenCreateTx.setPauseKey,
+    kycKey: tokenCreateTx.setKycKey,
+    wipeKey: tokenCreateTx.setWipeKey,
+    freezeKey: tokenCreateTx.setFreezeKey,
+    supplyKey: tokenCreateTx.setSupplyKey,
+    feeScheduleKey: tokenCreateTx.setFeeScheduleKey,
+  };
+
+  Object.entries(keySetters).forEach(([key, setter]) => {
+    const keyValue = token.keys[key as keyof typeof token.keys];
+    if (keyValue && keyValue !== '') {
+      setter.call(tokenCreateTx, PrivateKey.fromStringDer(keyValue).publicKey);
+    }
+  });
+}
+
+async function createTokenOnNetwork(token: Token) {
+  const client = stateUtils.getHederaClient();
+
+  try {
+    const tokenCreateTx = new TokenCreateTransaction()
+      .setTokenName(token.name)
+      .setTokenSymbol(token.symbol)
+      .setDecimals(token.decimals)
+      .setInitialSupply(token.initialSupply)
+      .setTokenType(TokenType.FungibleCommon)
+      .setSupplyType(tokenUtils.getSupplyType(token.supplyType))
+      .setTreasuryAccountId(token.treasuryId);
+
+    if (token.supplyType === 'finite') {
+      tokenCreateTx.setMaxSupply(token.maxSupply);
+    }
+
+    // Add keys
+    addKeysToTokenCreateTx(tokenCreateTx, token);
+
+    // Signing
+    tokenCreateTx.freezeWith(client);
+    const signedTokenCreateTx = await signUtils.signByType(
+      tokenCreateTx,
+      'tokenCreate',
+      {
+        adminKey: token.keys.adminKey,
+        treasuryKey: token.keys.treasuryKey,
+      },
+    );
+
+    // Execute
+    let tokenCreateSubmit = await signedTokenCreateTx.execute(client);
+    let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
+
+    if (tokenCreateRx.tokenId == null) {
+      logger.error('Token was not created');
+      client.close();
+      process.exit(1);
+    }
+
+    token.tokenId = tokenCreateRx.tokenId.toString();
+    logger.log(`Token ID: ${token.tokenId}`);
+    client.close();
+  } catch (error) {
+    logger.error(error as object);
+    client.close();
     process.exit(1);
   }
-  return account.accountId;
 }
 
-async function createAccountForToken(
-  key: string,
-  initialBalance: number,
-  type: string,
-  alias: string,
-): Promise<{ key: string; account: Account }> {
-  const account = await accountUtils.createAccount(initialBalance, type, alias);
-  return { key, account };
+function updateTokenState(token: Token) {
+  const tokens: Record<string, Token> = stateController.get('tokens');
+  const updatedTokens = {
+    ...tokens,
+    [token.tokenId]: token,
+  };
+
+  stateController.saveKey('tokens', updatedTokens);
+  stateUtils.getHederaClient().close();
 }
 
-interface CreateTokenFromFileOptions {
-  file: string;
-  args: string[];
+async function createTokenFromFile(tokenInput: TokenInput): Promise<Token> {
+  try {
+    let token = initializeToken(tokenInput);
+    token = await prepareTokenCreation(token, tokenInput);
+    await createTokenOnNetwork(token);
+    updateTokenState(token);
+    return token;
+  } catch (error) {
+    logger.error(error as object);
+    stateUtils.getHederaClient().close();
+    process.exit(1);
+  }
 }
 
-interface TokenInput {
-  name: string;
-  symbol: string;
-  decimals: number;
-  supplyType: 'finite' | 'infinite';
-  initialSupply: number;
-  keys: Keys;
-  maxSupply: number;
-  treasuryId?: string;
-  treasuryKey: string;
-  customFees: [];
-  memo: string;
+async function createToken(options: CreateTokenFromFileOptions) {
+  logger.verbose(`Creating token from template with name: ${options.file}`);
+  options = dynamicVariablesUtils.replaceOptions(options);
+
+  const filepath = resolveTokenFilePath(options.file);
+  const tokenDefinition = require(filepath);
+  const token = await createTokenFromFile(tokenDefinition);
+
+  // Store dynamic script variables
+  dynamicVariablesUtils.storeArgs(
+    options.args,
+    dynamicVariablesUtils.commandActions.token.createFromFile.action,
+    {
+      tokenId: token.tokenId,
+      name: token.name,
+      symbol: token.symbol,
+      treasuryId: token.treasuryId,
+      adminKey: token.keys.adminKey,
+      pauseKey: token.keys.pauseKey,
+      kycKey: token.keys.kycKey,
+      wipeKey: token.keys.wipeKey,
+      freezeKey: token.keys.freezeKey,
+      supplyKey: token.keys.supplyKey,
+      feeScheduleKey: token.keys.feeScheduleKey,
+      treasuryKey: token.keys.treasuryKey,
+    },
+  );
 }
+
+export default (program: any) => {
+  program
+    .command('create-from-file')
+    .hook('preAction', (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      stateUtils.recordCommand(command);
+    })
+    .description('Create a new token from a file')
+    .requiredOption(
+      '-f, --file <filename>',
+      'Filename containing the token information',
+    )
+    .option(
+      '--args <args>',
+      'Store arguments for scripts',
+      (value: string, previous: string) =>
+        previous ? previous.concat(value) : [value],
+      [],
+    )
+    .action(createToken);
+};

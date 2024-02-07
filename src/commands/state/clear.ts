@@ -5,6 +5,31 @@ import stateController from '../../state/stateController';
 
 const logger = Logger.getInstance();
 
+interface ResetOptions {
+  skipAccounts: boolean;
+  skipTokens: boolean;
+  skipScripts: boolean;
+  skipTopics: boolean;
+}
+
+function clear(
+  skipAccounts: boolean,
+  skipTokens: boolean,
+  skipScripts: boolean,
+  skipTopics: boolean,
+): void {
+  if (!skipAccounts && !skipTokens && !skipScripts && !skipTopics) {
+    stateUtils.clearState();
+    return;
+  }
+
+  if (!skipAccounts) stateController.saveKey('accounts', {});
+  if (!skipTokens) stateController.saveKey('tokens', {});
+  if (!skipScripts) stateController.saveKey('scripts', {});
+  if (!skipTopics) stateController.saveKey('topics', {});
+  logger.log('State cleared successfully');
+}
+
 export default (program: any) => {
   program
     .command('clear')
@@ -30,28 +55,3 @@ export default (program: any) => {
       );
     });
 };
-
-function clear(
-  skipAccounts: boolean,
-  skipTokens: boolean,
-  skipScripts: boolean,
-  skipTopics: boolean,
-): void {
-  if (!skipAccounts && !skipTokens && !skipScripts && !skipTopics) {
-    stateUtils.clearState();
-    return;
-  }
-
-  if (!skipAccounts) stateController.saveKey('accounts', {});
-  if (!skipTokens) stateController.saveKey('tokens', {});
-  if (!skipScripts) stateController.saveKey('scripts', {});
-  if (!skipTopics) stateController.saveKey('topics', {});
-  logger.log('State cleared successfully');
-}
-
-interface ResetOptions {
-  skipAccounts: boolean;
-  skipTokens: boolean;
-  skipScripts: boolean;
-  skipTopics: boolean;
-}
