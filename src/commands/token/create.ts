@@ -12,79 +12,17 @@ import signUtils from '../../utils/sign';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
-  program
-    .command('create')
-    .hook('preAction', (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      stateUtils.recordCommand(command);
-    })
-    .description('Create a new fungible token')
-    .requiredOption(
-      '-t, --treasury-id <treasuryId>',
-      'Treasury of the fungible token',
-    )
-    .requiredOption(
-      '-k, --treasury-key <treasuryKey>',
-      'Treasury of the fungible token',
-    )
-    .requiredOption('-n, --name <name>', 'Name of the fungible token')
-    .requiredOption('-s, --symbol <symbol>', 'Symbol of the fungible token')
-    .requiredOption(
-      '-d, --decimals <decimals>',
-      'Decimals of the fungible token',
-      myParseInt,
-    )
-    .requiredOption(
-      '-i, --initial-supply <initialSupply>',
-      'Initial supply of the fungible token',
-      myParseInt,
-    )
-    .requiredOption(
-      '--supply-type <supplyType>',
-      'Supply type of the token: finite or infinite',
-    )
-    .requiredOption(
-      '-a, --admin-key <adminKey>',
-      'Admin key of the fungible token',
-    )
-    .option(
-      '--args <args>',
-      'Store arguments for scripts',
-      (value: string, previous: string) =>
-        previous ? previous.concat(value) : [value],
-      [],
-    )
-    .action(async (options: CreateOptions) => {
-      logger.verbose('Creating new token');
-      options = dynamicVariablesUtils.replaceOptions(options);
-      const tokenId = await createFungibleToken(
-        options.name,
-        options.symbol,
-        options.treasuryId,
-        options.treasuryKey,
-        options.decimals,
-        options.initialSupply,
-        options.supplyType,
-        options.adminKey,
-      );
-
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.token.create.action,
-        {
-          tokenId: tokenId.toString(),
-          name: options.name,
-          symbol: options.symbol,
-          treasuryId: options.treasuryId,
-          adminKey: options.adminKey,
-        },
-      );
-    });
-};
+interface CreateOptions {
+  name: string;
+  symbol: string;
+  treasuryId: string;
+  treasuryKey: string;
+  decimals: number;
+  initialSupply: number;
+  supplyType: 'finite' | 'infinite';
+  adminKey: string;
+  args: string[];
+}
 
 async function createFungibleToken(
   name: string,
@@ -170,14 +108,76 @@ async function createFungibleToken(
   return tokenId.toString();
 }
 
-interface CreateOptions {
-  name: string;
-  symbol: string;
-  treasuryId: string;
-  treasuryKey: string;
-  decimals: number;
-  initialSupply: number;
-  supplyType: 'finite' | 'infinite';
-  adminKey: string;
-  args: string[];
-}
+export default (program: any) => {
+  program
+    .command('create')
+    .hook('preAction', (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      stateUtils.recordCommand(command);
+    })
+    .description('Create a new fungible token')
+    .requiredOption(
+      '-t, --treasury-id <treasuryId>',
+      'Treasury of the fungible token',
+    )
+    .requiredOption(
+      '-k, --treasury-key <treasuryKey>',
+      'Treasury of the fungible token',
+    )
+    .requiredOption('-n, --name <name>', 'Name of the fungible token')
+    .requiredOption('-s, --symbol <symbol>', 'Symbol of the fungible token')
+    .requiredOption(
+      '-d, --decimals <decimals>',
+      'Decimals of the fungible token',
+      myParseInt,
+    )
+    .requiredOption(
+      '-i, --initial-supply <initialSupply>',
+      'Initial supply of the fungible token',
+      myParseInt,
+    )
+    .requiredOption(
+      '--supply-type <supplyType>',
+      'Supply type of the token: finite or infinite',
+    )
+    .requiredOption(
+      '-a, --admin-key <adminKey>',
+      'Admin key of the fungible token',
+    )
+    .option(
+      '--args <args>',
+      'Store arguments for scripts',
+      (value: string, previous: string) =>
+        previous ? previous.concat(value) : [value],
+      [],
+    )
+    .action(async (options: CreateOptions) => {
+      logger.verbose('Creating new token');
+      options = dynamicVariablesUtils.replaceOptions(options);
+      const tokenId = await createFungibleToken(
+        options.name,
+        options.symbol,
+        options.treasuryId,
+        options.treasuryKey,
+        options.decimals,
+        options.initialSupply,
+        options.supplyType,
+        options.adminKey,
+      );
+
+      dynamicVariablesUtils.storeArgs(
+        options.args,
+        dynamicVariablesUtils.commandActions.token.create.action,
+        {
+          tokenId: tokenId.toString(),
+          name: options.name,
+          symbol: options.symbol,
+          treasuryId: options.treasuryId,
+          adminKey: options.adminKey,
+        },
+      );
+    });
+};

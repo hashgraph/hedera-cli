@@ -1,8 +1,7 @@
 export class Logger {
   private static instance: Logger;
-  level: 'verbose' | 'quiet' | 'normal' = 'normal';
 
-  private constructor() {}
+  level: 'verbose' | 'quiet' | 'normal' = 'normal';
 
   public static getInstance(): Logger {
     if (!Logger.instance) {

@@ -1,6 +1,23 @@
-import { Account } from '../../types';
 import stateController from '../state/stateController';
 import { Logger } from './logger';
+
+interface CommandAction {
+  action: string;
+}
+
+interface CommandActions {
+  [key: string]: {
+    [key: string]: CommandAction;
+  };
+}
+
+interface CommandOutputs {
+  [key: string]: CommandOutput;
+}
+
+interface CommandOutput {
+  [key: string]: string;
+}
 
 const logger = Logger.getInstance();
 
@@ -37,46 +54,6 @@ function replaceOptions<T extends Record<string, any>>(options: T): T {
   return options;
 }
 
-function storeArgs(
-  args: string[],
-  action: string,
-  output: Record<string, any>,
-) {
-  const state = stateController.getAll();
-  if (state.scriptExecution === 0) return;
-
-  // return if action doesn't have output
-  if (action === '' || !action) return;
-
-  let stateArgs: Record<string, string> = {};
-
-  args.forEach((arg) => {
-    const splittedArg = arg.split(',');
-    const commandOutputName = splittedArg[0];
-    const variableName = splittedArg[1];
-    const outputVar = commandOutputs[action][commandOutputName];
-    stateArgs[variableName] = output[outputVar];
-  });
-
-  const newScripts = { ...state.scripts };
-  const newArgs = {
-    ...newScripts[`script-${state.scriptExecutionName}`].args,
-    ...stateArgs,
-  };
-  newScripts[`script-${state.scriptExecutionName}`].args = newArgs;
-  stateController.saveKey('scripts', newScripts);
-}
-
-interface CommandAction {
-  action: string;
-}
-
-interface CommandActions {
-  [key: string]: {
-    [key: string]: CommandAction;
-  };
-}
-
 const commandActions: CommandActions = {
   // network
   // script
@@ -111,14 +88,6 @@ const commandActions: CommandActions = {
     },
   },
 };
-
-interface CommandOutputs {
-  [key: string]: CommandOutput;
-}
-
-interface CommandOutput {
-  [key: string]: string;
-}
 
 const accountOutput: Record<string, string> = {
   alias: 'alias',
@@ -161,6 +130,36 @@ const commandOutputs: CommandOutputs = {
     topicId: 'topicId',
   },
 };
+
+function storeArgs(
+  args: string[],
+  action: string,
+  output: Record<string, any>,
+) {
+  const state = stateController.getAll();
+  if (state.scriptExecution === 0) return;
+
+  // return if action doesn't have output
+  if (action === '' || !action) return;
+
+  let stateArgs: Record<string, string> = {};
+
+  args.forEach((arg) => {
+    const splittedArg = arg.split(',');
+    const commandOutputName = splittedArg[0];
+    const variableName = splittedArg[1];
+    const outputVar = commandOutputs[action][commandOutputName];
+    stateArgs[variableName] = output[outputVar];
+  });
+
+  const newScripts = { ...state.scripts };
+  const newArgs = {
+    ...newScripts[`script-${state.scriptExecutionName}`].args,
+    ...stateArgs,
+  };
+  newScripts[`script-${state.scriptExecutionName}`].args = newArgs;
+  stateController.saveKey('scripts', newScripts);
+}
 
 const dynamicVariables = {
   storeArgs,

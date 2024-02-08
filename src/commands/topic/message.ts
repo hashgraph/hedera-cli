@@ -9,6 +9,72 @@ import type { Command, Filter } from '../../../types';
 
 const logger = Logger.getInstance();
 
+interface SubmitMessageOptions {
+  message: string;
+  topicId: string;
+}
+
+interface FindMessageOptions {
+  sequenceNumber: string;
+  sequenceNumberGt: string;
+  sequenceNumberGte: string;
+  sequenceNumberLt: string;
+  sequenceNumberLte: string;
+  sequenceNumberEq: string;
+  sequenceNumberNe: string;
+  topicId: string;
+}
+
+/**
+ * Format the filters based on the options provided.
+ * @param filters The filters to populate.
+ * @param options The options provided.
+ */
+function formatFilters(filters: Filter[], options: FindMessageOptions) {
+  if (options.sequenceNumberGt) {
+    filters.push({
+      field: 'sequencenumber',
+      operation: 'gt',
+      value: Number(options.sequenceNumberGt),
+    });
+  }
+  if (options.sequenceNumberLt) {
+    filters.push({
+      field: 'sequencenumber',
+      operation: 'lt',
+      value: Number(options.sequenceNumberLt),
+    });
+  }
+  if (options.sequenceNumberGte) {
+    filters.push({
+      field: 'sequencenumber',
+      operation: 'gte',
+      value: Number(options.sequenceNumberGte),
+    });
+  }
+  if (options.sequenceNumberLte) {
+    filters.push({
+      field: 'sequencenumber',
+      operation: 'lte',
+      value: Number(options.sequenceNumberLte),
+    });
+  }
+  if (options.sequenceNumberEq) {
+    filters.push({
+      field: 'sequencenumber',
+      operation: 'eq',
+      value: Number(options.sequenceNumberEq),
+    });
+  }
+  if (options.sequenceNumberNe) {
+    filters.push({
+      field: 'sequencenumber',
+      operation: 'ne',
+      value: Number(options.sequenceNumberNe),
+    });
+  }
+}
+
 export default (program: any) => {
   const message = program.command('message');
 
@@ -153,79 +219,13 @@ export default (program: any) => {
         return;
       }
 
-      response.data.messages.forEach((message) => {
+      response.data.messages.forEach((el) => {
         logger.log(
-          `Message ${message.sequence_number}: "${Buffer.from(
-            message.message,
+          `Message ${el.sequence_number}: "${Buffer.from(
+            el.message,
             'base64',
           ).toString('ascii')}"`,
         );
       });
     });
 };
-
-/**
- * Format the filters based on the options provided.
- * @param filters The filters to populate.
- * @param options The options provided.
- */
-function formatFilters(filters: Filter[], options: FindMessageOptions) {
-  if (options.sequenceNumberGt) {
-    filters.push({
-      field: 'sequencenumber',
-      operation: 'gt',
-      value: Number(options.sequenceNumberGt),
-    });
-  }
-  if (options.sequenceNumberLt) {
-    filters.push({
-      field: 'sequencenumber',
-      operation: 'lt',
-      value: Number(options.sequenceNumberLt),
-    });
-  }
-  if (options.sequenceNumberGte) {
-    filters.push({
-      field: 'sequencenumber',
-      operation: 'gte',
-      value: Number(options.sequenceNumberGte),
-    });
-  }
-  if (options.sequenceNumberLte) {
-    filters.push({
-      field: 'sequencenumber',
-      operation: 'lte',
-      value: Number(options.sequenceNumberLte),
-    });
-  }
-  if (options.sequenceNumberEq) {
-    filters.push({
-      field: 'sequencenumber',
-      operation: 'eq',
-      value: Number(options.sequenceNumberEq),
-    });
-  }
-  if (options.sequenceNumberNe) {
-    filters.push({
-      field: 'sequencenumber',
-      operation: 'ne',
-      value: Number(options.sequenceNumberNe),
-    });
-  }
-}
-
-interface SubmitMessageOptions {
-  message: string;
-  topicId: string;
-}
-
-interface FindMessageOptions {
-  sequenceNumber: string;
-  sequenceNumberGt: string;
-  sequenceNumberGte: string;
-  sequenceNumberLt: string;
-  sequenceNumberLte: string;
-  sequenceNumberEq: string;
-  sequenceNumberNe: string;
-  topicId: string;
-}

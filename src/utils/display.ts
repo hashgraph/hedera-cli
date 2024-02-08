@@ -11,19 +11,6 @@ const logger = Logger.getInstance();
 
 type DisplayFunction = (response: APIResponse, options?: any) => void;
 
-const displayFunctions: Record<string, DisplayFunction> = {
-  displayBalance: displayBalance,
-};
-
-// -- main display function -- //
-function display(
-  displayFunctionName: string,
-  response: APIResponse,
-  options: DisplayOptions,
-): void {
-  displayFunctions[displayFunctionName](response, options);
-}
-
 // -- display balance functions -- //
 function displayHbarBalance(accountId: string, hbars: number): void {
   logger.log(`Hbar balance for account ${accountId}:`);
@@ -82,6 +69,19 @@ function displayBalance(
   }
 
   return displayAllBalances(accountId, hbars, tokens);
+}
+
+const displayFunctions: Record<string, DisplayFunction> = {
+  displayBalance: displayBalance,
+};
+
+// -- main display function -- //
+function display(
+  displayFunctionName: string,
+  response: APIResponse,
+  options: DisplayOptions,
+): void {
+  displayFunctions[displayFunctionName](response, options);
 }
 
 export { display };

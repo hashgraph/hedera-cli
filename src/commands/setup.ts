@@ -13,45 +13,37 @@ import type { Command } from '../../types';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
-  const setup = program.command('setup').description('Setup Hedera CLI');
+interface SetupOptions {
+  path: string;
+}
 
-  setup
-    .command('init')
-    .hook('preAction', (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      stateUtils.recordCommand(command);
-    })
-    .description('Setup the CLI with operator key and ID')
-    .option('--path <path>', 'Specify a custom path for the .env file')
-    .action(async (options: SetupOptions) => {
-      logger.verbose(
-        'Initializing the CLI tool with the config and operator key and ID for different networks',
-      );
-      await setupCLI('init', options.path);
-    });
+/**
+ * @description Setup the state file with the init config
+ */
+function setupState(): void {
+  const newState = {
+    ...config,
+  };
 
-  setup
-    .command('reload')
-    .hook('preAction', (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      stateUtils.recordCommand(command);
-    })
-    .description('Reload the CLI with operator key and ID')
-    .option('--path <path>', 'Specify a custom path for the .env file')
-    .action(async () => {
-      logger.verbose(
-        'Reloading the CLI tool with operator key and ID for different networks',
+  stateController.saveState(newState);
+}
+
+/**
+ * @description Verify that the operator account has enough balance to pay for transactions (at least 1 Hbar)
+ * @param operatorId Operator ID to check balance for
+ */
+async function verifyOperatorBalance(operatorId: string): Promise<void> {
+  // Skip if operator ID is not defined
+  if (operatorId) {
+    const balance = await accountUtils.getAccountHbarBalance(operatorId);
+    if (balance < 100000000) {
+      logger.error(
+        `The operator account ${operatorId} does not have enough balance to pay for transactions (less than 1 Hbar). Please add more balance to the account.`,
       );
-      await setupCLI('reload');
-    });
-};
+      process.exit(1);
+    }
+  }
+}
 
 /**
  * @description Setup the CLI with operator key and ID for different networks
@@ -171,34 +163,42 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
   );
 }
 
-/**
- * @description Verify that the operator account has enough balance to pay for transactions (at least 1 Hbar)
- * @param operatorId Operator ID to check balance for
- */
-async function verifyOperatorBalance(operatorId: string): Promise<void> {
-  // Skip if operator ID is not defined
-  if (operatorId) {
-    const balance = await accountUtils.getAccountHbarBalance(operatorId);
-    if (balance < 100000000) {
-      logger.error(
-        `The operator account ${operatorId} does not have enough balance to pay for transactions (less than 1 Hbar). Please add more balance to the account.`,
+export default (program: any) => {
+  const setup = program.command('setup').description('Setup Hedera CLI');
+
+  setup
+    .command('init')
+    .hook('preAction', (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      stateUtils.recordCommand(command);
+    })
+    .description('Setup the CLI with operator key and ID')
+    .option('--path <path>', 'Specify a custom path for the .env file')
+    .action(async (options: SetupOptions) => {
+      logger.verbose(
+        'Initializing the CLI tool with the config and operator key and ID for different networks',
       );
-      process.exit(1);
-    }
-  }
-}
+      await setupCLI('init', options.path);
+    });
 
-/**
- * @description Setup the state file with the init config
- */
-function setupState(): void {
-  const newState = {
-    ...config,
-  };
-
-  stateController.saveState(newState);
-}
-
-interface SetupOptions {
-  path: string;
-}
+  setup
+    .command('reload')
+    .hook('preAction', (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      stateUtils.recordCommand(command);
+    })
+    .description('Reload the CLI with operator key and ID')
+    .option('--path <path>', 'Specify a custom path for the .env file')
+    .action(async () => {
+      logger.verbose(
+        'Reloading the CLI tool with operator key and ID for different networks',
+      );
+      await setupCLI('reload');
+    });
+};

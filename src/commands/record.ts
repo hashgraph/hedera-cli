@@ -3,6 +3,24 @@ import { Logger } from '../utils/logger';
 
 const logger = Logger.getInstance();
 
+function startRecording(scriptName: string) {
+  const state = stateController.getAll();
+  state.recording = 1;
+  state.recordingScriptName = `script-${scriptName}`;
+  state.scripts[state.recordingScriptName] = {
+    name: scriptName,
+    creation: Date.now(),
+    commands: [],
+    args: {},
+  };
+  stateController.saveState(state);
+}
+
+function stopRecording(): void {
+  stateController.saveKey('recording', 0);
+  stateController.saveKey('recordingScriptName', '');
+}
+
 export default (program: any) => {
   program
     .command('record <action> [name]')
@@ -27,21 +45,3 @@ export default (program: any) => {
       }
     });
 };
-
-function startRecording(scriptName: string) {
-  const state = stateController.getAll();
-  state.recording = 1;
-  state.recordingScriptName = `script-${scriptName}`;
-  state.scripts[state.recordingScriptName] = {
-    name: scriptName,
-    creation: Date.now(),
-    commands: [],
-    args: {},
-  };
-  stateController.saveState(state);
-}
-
-function stopRecording(): void {
-  stateController.saveKey('recording', 0);
-  stateController.saveKey('recordingScriptName', '');
-}

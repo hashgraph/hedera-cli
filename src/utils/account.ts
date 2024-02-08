@@ -33,6 +33,17 @@ function deleteAccount(accountIdOrAlias: string): void {
   stateController.saveKey('accounts', accounts);
 }
 
+function generateRandomAlias(): string {
+  const length = 20; // Define the length of the random string
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}
+
 async function createAccount(
   balance: number,
   type: string,
@@ -162,6 +173,29 @@ function listAccounts(showPrivateKeys: boolean = false): void {
   }
 }
 
+/**
+ * @description Returns the type of a private key
+ * @param privateKey Input private key
+ * @returns {string} key type {ed25519, ecdsa, Unknown key type}
+ */
+function getKeyType(privateKey: string): string {
+  try {
+    PrivateKey.fromStringED25519(privateKey);
+    return 'ed25519';
+  } catch (e) {
+    // Not an Ed25519 private key
+  }
+
+  try {
+    PrivateKey.fromStringECDSA(privateKey);
+    return 'ecdsa';
+  } catch (e) {
+    // Not an ECDSA private key
+  }
+
+  return 'Unknown key type';
+}
+
 function importAccount(id: string, key: string, alias: string): Account {
   const accounts = stateController.get('accounts');
 
@@ -285,7 +319,7 @@ function findAccountByPrivateKey(privateKey: string): Account {
   }
 
   let matchingAccount: Account | null = null;
-  for (const [alias, account] of Object.entries(accounts)) {
+  for (const [, account] of Object.entries(accounts)) {
     if (account.privateKey === privateKey) {
       matchingAccount = account;
       break; // Exit the loop once a matching account is found
@@ -308,7 +342,7 @@ function findAccountByAlias(inputAlias: string): Account {
   }
 
   let matchingAccount: Account | null = null;
-  for (const [alias, account] of Object.entries(accounts)) {
+  for (const [, account] of Object.entries(accounts)) {
     if (account.alias === inputAlias) {
       matchingAccount = account;
       break; // Exit the loop once a matching account is found
@@ -321,29 +355,6 @@ function findAccountByAlias(inputAlias: string): Account {
   }
 
   return matchingAccount;
-}
-
-/**
- * @description Returns the type of a private key
- * @param privateKey Input private key
- * @returns {string} key type {ed25519, ecdsa, Unknown key type}
- */
-function getKeyType(privateKey: string): string {
-  try {
-    PrivateKey.fromStringED25519(privateKey);
-    return 'ed25519';
-  } catch (e) {
-    // Not an Ed25519 private key
-  }
-
-  try {
-    PrivateKey.fromStringECDSA(privateKey);
-    return 'ecdsa';
-  } catch (e) {
-    // Not an ECDSA private key
-  }
-
-  return 'Unknown key type';
 }
 
 function getPublicKeyFromPrivateKey(privateKey: string): string {
@@ -374,17 +385,6 @@ function getPrivateKeyObject(privateKey: string): PrivateKey {
 
   logger.error('Invalid private key');
   process.exit(1);
-}
-
-function generateRandomAlias(): string {
-  const length = 20; // Define the length of the random string
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
 }
 
 const accountUtils = {

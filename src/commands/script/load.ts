@@ -1,5 +1,3 @@
-const axios = require('axios');
-
 import stateController from '../../state/stateController';
 import stateUtils from '../../utils/state';
 import { execSync } from 'child_process';
@@ -9,23 +7,9 @@ import type { Command, Script } from '../../../types';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
-  program
-    .command('load')
-    .hook('preAction', (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      stateUtils.recordCommand(command);
-    })
-    .description('Load and execute a script')
-    .requiredOption('-n, --name <name>', 'Name of script to load and execute')
-    .action((options: ScriptLoadOptions) => {
-      logger.verbose(`Loading script ${options.name}`);
-      loadScript(options.name);
-    });
-};
+interface ScriptLoadOptions {
+  name: string;
+}
 
 function loadScript(name: string) {
   stateUtils.startScriptExecution(name);
@@ -59,6 +43,20 @@ function loadScript(name: string) {
   logger.log(`\nScript ${script.name} executed successfully`);
 }
 
-interface ScriptLoadOptions {
-  name: string;
-}
+export default (program: any) => {
+  program
+    .command('load')
+    .hook('preAction', (thisCommand: Command) => {
+      const command = [
+        thisCommand.parent.action().name(),
+        ...thisCommand.parent.args,
+      ];
+      stateUtils.recordCommand(command);
+    })
+    .description('Load and execute a script')
+    .requiredOption('-n, --name <name>', 'Name of script to load and execute')
+    .action((options: ScriptLoadOptions) => {
+      logger.verbose(`Loading script ${options.name}`);
+      loadScript(options.name);
+    });
+};
