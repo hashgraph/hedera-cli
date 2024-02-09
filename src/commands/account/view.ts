@@ -1,5 +1,4 @@
 import stateUtils from '../../utils/state';
-import accountUtils from '../../utils/account';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
 
@@ -32,8 +31,12 @@ export default (program: any) => {
         logger.log(`Balance Tinybars: ${response.data.balance.balance}`);
         logger.log(`Deleted: ${response.data.deleted}`);
         logger.log(`EVM Address: ${response.data.evm_address}`);
-        logger.log(`Key type: ${response.data.key._type} - Key: ${response.data.key.key}`);
-        logger.log(`Max automatic token associations: ${response.data.max_automatic_token_associations}`);
+        logger.log(
+          `Key type: ${response.data.key._type} - Key: ${response.data.key.key}`,
+        );
+        logger.log(
+          `Max automatic token associations: ${response.data.max_automatic_token_associations}`,
+        );
       } catch (error) {
         logger.error('Failed to get account info:', error as object);
       }
@@ -41,5 +44,5 @@ export default (program: any) => {
 };
 
 interface ViewAccountOptions {
-    id: string;
+  id: string;
 }
