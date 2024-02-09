@@ -318,6 +318,7 @@ account list
 account import
 account clear
 account delete
+account view
 ```
 
 #### Usage
@@ -406,6 +407,19 @@ Flags:
 
 - **-a, --alias:** (optional) Alias of the account to delete.
 - **-i, --id:** (optional) Account ID of the account to delete.
+
+**7. View Account Information:**
+
+Displays detailed information about a specified account by its ID. The account can be in the CLI's state or on the Hedera network.
+
+```sh
+hcli account view -i,--id <id>
+```
+
+Flags:
+
+- **-i, --id:** (required) Account ID to view.
+
 
 ## Token Commands
 
