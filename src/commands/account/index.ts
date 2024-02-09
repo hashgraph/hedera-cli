@@ -4,6 +4,7 @@ import createCommand from './create';
 import importCommand from './import';
 import listCommand from './list';
 import clearCommand from './clear';
+import viewCommand from './view';
 
 export default (program: any) => {
   const account = program.command('account');
@@ -14,4 +15,5 @@ export default (program: any) => {
   importCommand(account);
   listCommand(account);
   clearCommand(account);
+  viewCommand(account);
 };
