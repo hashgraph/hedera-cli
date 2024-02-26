@@ -115,8 +115,6 @@ const transfer = async (
   client.close();
 };
 
-
-
 const tokenUtils = {
   getSupplyType,
   isTokenAssociated,

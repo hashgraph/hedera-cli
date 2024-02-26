@@ -1,5 +1,10 @@
 import * as path from 'path';
-import { TokenCreateTransaction, TokenType, PrivateKey, CustomFee } from '@hashgraph/sdk';
+import {
+  TokenCreateTransaction,
+  TokenType,
+  PrivateKey,
+  CustomFee,
+} from '@hashgraph/sdk';
 
 import accountUtils from '../../utils/account';
 import tokenUtils from '../../utils/token';
@@ -9,7 +14,15 @@ import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
-import type { Account, Command, Token, Keys, CustomFeeInput, FixedFee, FractionalFee } from '../../../types';
+import type {
+  Account,
+  Command,
+  Token,
+  Keys,
+  CustomFeeInput,
+  FixedFee,
+  FractionalFee,
+} from '../../../types';
 import signUtils from '../../utils/sign';
 
 const logger = Logger.getInstance();
@@ -236,7 +249,7 @@ async function createTokenOnNetwork(token: Token) {
     addKeysToTokenCreateTx(tokenCreateTx, token);
 
     // Add custom fees
-    let fees: CustomFee[] = token.customFees.map(fee => {
+    let fees: CustomFee[] = token.customFees.map((fee) => {
       switch (fee.type) {
         case 'fixed':
           return feeUtils.createCustomFixedFee(fee as FixedFee);

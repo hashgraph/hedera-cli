@@ -67,8 +67,8 @@ function createCustomFractionalFee(fee: FractionalFee): CustomFee {
 }
 
 const tokenUtils = {
-    createCustomFixedFee,
-    createCustomFractionalFee,
+  createCustomFixedFee,
+  createCustomFractionalFee,
 };
 
 export default tokenUtils;
