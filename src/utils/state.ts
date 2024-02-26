@@ -181,8 +181,10 @@ function addTokenAssociation(
 ) {
   const tokens = stateController.get('tokens');
 
-  if (!tokens[tokenId]) { 
-    logger.log(`Token ${tokenId} not found in state. Skipping storing the token associations.`);
+  if (!tokens[tokenId]) {
+    logger.log(
+      `Token ${tokenId} not found in state. Skipping storing the token associations.`,
+    );
     return;
   }
   const token: Token = tokens[tokenId];
