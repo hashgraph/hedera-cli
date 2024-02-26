@@ -15,6 +15,14 @@
     "pauseKey": "",
     "kycKey": ""
   },
-  "customFees": [],
+  "customFees": [
+    {
+      "amount": 100,
+      "unitType": "hbar",
+      "type": "fixed",
+      "exempt": true,
+      "collectorId": "0.0.2221463"
+    }
+  ],
   "memo": "Test token"
 }

@@ -29,6 +29,28 @@ export type Script = {
   args: Record<string, string>;
 }
 
+interface Fee {
+  collectorId?: string;
+  exempt?: boolean;
+}
+
+export interface FixedFee extends Fee {
+  type: string;
+  unitType: string;
+  amount: number;
+  denom?: string;
+}
+
+export interface FractionalFee extends Fee {
+  type: string;
+  numerator: number;
+  denominator: number;
+  min?: number;
+  max?: number;
+}
+
+export type CustomFeeInput = FixedFee | FractionalFee;
+
 export type Token = {
   associations: Association[];
   tokenId: string;
@@ -41,6 +63,7 @@ export type Token = {
   maxSupply: number;
   keys: Keys;
   network: string;
+  customFees: CustomFeeInput[];
 }
 
 export interface Keys {

@@ -99,6 +99,7 @@ async function createFungibleToken(
         feeScheduleKey: '',
       },
       network: stateUtils.getNetwork(),
+      customFees: [],
     },
   };
 
