@@ -180,6 +180,13 @@ function addTokenAssociation(
   alias: string,
 ) {
   const tokens = stateController.get('tokens');
+
+  if (!tokens[tokenId]) {
+    logger.log(
+      `Token ${tokenId} not found in state. Skipping storing the token associations.`,
+    );
+    return;
+  }
   const token: Token = tokens[tokenId];
   token.associations.push({ alias, accountId });
   tokens[tokenId] = token;
