@@ -1,14 +1,28 @@
 import * as path from 'path';
-import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
+import {
+  TokenCreateTransaction,
+  TokenType,
+  PrivateKey,
+  CustomFee,
+} from '@hashgraph/sdk';
 
 import accountUtils from '../../utils/account';
 import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
+import feeUtils from '../../utils/fees';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
-import type { Account, Command, Token, Keys } from '../../../types';
+import type {
+  Account,
+  Command,
+  Token,
+  Keys,
+  CustomFeeInput,
+  FixedFee,
+  FractionalFee,
+} from '../../../types';
 import signUtils from '../../utils/sign';
 
 const logger = Logger.getInstance();
@@ -28,7 +42,7 @@ interface TokenInput {
   maxSupply: number;
   treasuryId?: string;
   treasuryKey: string;
-  customFees: [];
+  customFees: CustomFeeInput[];
   memo: string;
 }
 
@@ -77,6 +91,7 @@ function initializeToken(tokenInput: TokenInput): Token {
       feeScheduleKey: tokenInput.keys.feeScheduleKey,
       treasuryKey: tokenInput.keys.treasuryKey,
     },
+    customFees: tokenInput.customFees,
   };
 
   return token;
@@ -232,6 +247,21 @@ async function createTokenOnNetwork(token: Token) {
 
     // Add keys
     addKeysToTokenCreateTx(tokenCreateTx, token);
+
+    // Add custom fees
+    let fees: CustomFee[] = token.customFees.map((fee) => {
+      switch (fee.type) {
+        case 'fixed':
+          return feeUtils.createCustomFixedFee(fee as FixedFee);
+        case 'fractional':
+          return feeUtils.createCustomFractionalFee(fee as FractionalFee);
+        default:
+          logger.error(`Unsupported fee type: ${fee.type}`);
+          client.close();
+          process.exit(1);
+      }
+    });
+    tokenCreateTx.setCustomFees(fees);
 
     // Signing
     tokenCreateTx.freezeWith(client);

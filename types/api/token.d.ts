@@ -5,7 +5,7 @@ export type TokenResponse = {
   auto_renew_account: string;
   auto_renew_period: number;
   created_timestamp: string;
-  custom_fees: CustomFees;
+  custom_fees: APICustomFees;
   decimals: string;
   deleted: boolean;
   expiry_timestamp: number;
@@ -30,19 +30,19 @@ export type TokenResponse = {
   wipe_key: Key;
 };
 
-interface CustomFees {
+interface APICustomFees {
   created_timestamp: string;
-  fixed_fees: FixedFee[];
-  fractional_fees: FractionalFee[];
+  fixed_fees: APIFixedFee[];
+  fractional_fees: APIFractionalFee[];
 }
 
-type FixedFee = {
+type APIFixedFee = {
   amount: number;
   collector_account_id: string;
   denominating_token_id: string;
 };
 
-type FractionalFee = {
+type APIFractionalFee = {
   amount: Fraction;
   collector_account_id: string;
   denominating_token_id: string;

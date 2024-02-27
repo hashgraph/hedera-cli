@@ -448,7 +448,7 @@ Flags:
 
 - **File:** (required) Filename containing the token information in JSON format.
 
-A token input file looks like below. You can define all properties you would normally define when using using the SDK to create a token. All of the properties are required. If you don't need a key, leave it as an empty string.
+A token input file looks like below. You can define all properties you would normally define when using using the SDK to create a token. All of the properties are required except for the min/max values for custom fractional fees. If you don't need a key, leave it as an empty string.
 
 ```json
 {
@@ -468,7 +468,23 @@ A token input file looks like below. You can define all properties you would nor
     "pauseKey": "",
     "kycKey": ""
   },
-  "customFees": [],
+  "customFees": [
+    {
+      "type": "fixed",
+      "unitType": "token",
+      "amount": 1,
+      "denom": "0.0.3609946",
+      "exempt": true,
+      "collectorId": "0.0.2221463"
+    },
+    {
+      "type": "fractional",
+      "numerator": 1,
+      "denominator": 100,
+      "exempt": true,
+      "collectorId": "0.0.2221463"
+    }
+  ],
   "memo": "Test token"
 }
 ```
@@ -476,6 +492,30 @@ A token input file looks like below. You can define all properties you would nor
 > **Note:** that you can use placeholders for all keys on a token. The format `<alias:bob>` refers to an account with alias `bob` in your address book. It will use Bob's key.
 >
 > You can also tell the CLI tool to create a new account with an account type (`ecdsa` or `ed25519`) and an initial balance in TinyBars. The `<newkey:ecdsa:10000>` placeholder creates a new ECDSA account with 10,000 TinyBars and uses its key for the admin key.
+
+Here's how custom fees are defined in the token input file:
+
+```json
+"customFees": [
+  {
+    "type": "fixed", // Indicates a fixed fee
+    "unitType": "token", // Indicates the denomination of the fee: "token", "hbar", or "tinybar"
+    "amount": 1, // Amount of the fee
+    "denom": "0.0.3609946", // If the unit type is "token", then you need to set a denominating token ID to collect the fees in
+    "exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
+    "collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
+  },
+  {
+    "type": "fractional", // Indicates a fractional fee
+    "numerator": 1, // Numerator of the fractional fee
+    "denominator": 100, // Denominator of the fractional fee: 1/100 = 1% fee on the transfer
+    "min": 1, // Optional: Minimum fee user has to pay
+    "max": 100, // Optional: Maximum fee user has to pay because fractional fees can become very costly
+    "exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
+    "collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
+  }
+]
+```
 
 **2. Create Fungible Token:**
 

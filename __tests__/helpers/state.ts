@@ -91,6 +91,7 @@ export const token: Token = {
     treasuryKey:
       "302e020100300506032b657004220420ece0b15b20e555f66d5f4cd83187567af9613276629d7e15161b0c929ea07697",
   },
+  customFees: [],
 };
 
 export const topic: Topic = {
