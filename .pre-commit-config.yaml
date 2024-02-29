@@ -7,14 +7,15 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
+      - id: check-shebang-scripts-are-executable
       - id: check-merge-conflict
       - id: detect-private-key
-      - id: forbid-new-submodules
+      - id: forbid-submodules
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v2.4.0
     hooks:
       - id: conventional-pre-commit
-        stages: [ commit-msg ]
+        stages: [commit-msg]
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
