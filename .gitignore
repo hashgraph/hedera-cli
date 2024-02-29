@@ -117,3 +117,9 @@ dist
 
 # Visual Studio Code files
 .vscode/
+
+# JUnit test result output
+junit*.xml
+
+# Exclude E2E/Unit test generated state files
+src/state/state.json

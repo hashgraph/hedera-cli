@@ -147,7 +147,7 @@ function switchNetwork(name: string) {
 
   const state = stateController.getAll();
   let operatorId, operatorKey;
-  switch (state.network) {
+  switch (name) {
     case 'mainnet':
       operatorId = state.mainnetOperatorId;
       operatorKey = state.mainnetOperatorKey;
@@ -167,7 +167,7 @@ function switchNetwork(name: string) {
   }
 
   if (operatorId === '' || operatorKey === '') {
-    logger.error(`operator key and ID not set for ${state.network}`);
+    logger.error(`operator key and ID not set for ${name}`);
     process.exit(1);
   }
 

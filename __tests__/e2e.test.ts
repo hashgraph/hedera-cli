@@ -8,8 +8,8 @@ import stateController from '../src/state/stateController';
 import api from '../src/api';
 import { Logger } from '../src/utils/logger';
 
-
 import { Token } from '../types';
+import stateUtils from '../src/utils/state';
 
 const logger = Logger.getInstance();
 
@@ -44,7 +44,7 @@ describe('End to end tests', () => {
   /**
    * E2E testing flow:
    * - Setup init
-   * - Switch to testnet
+   * - Switch to localnet
    * - Create a new account with specific balance, type, and network and verify it is created
    * - Transfer part of the balance back to the operator account and verify the balance is correct
    * - Create a backup of the state file and verify it is created
@@ -60,17 +60,17 @@ describe('End to end tests', () => {
 
     // Assert
     const accounts = stateController.get('accounts');
-    expect(accounts['testnet-operator']).toBeDefined();
+    expect(accounts['localnet-operator']).toBeDefined();
 
-    // Arrange: Change network to testnet
+    // Arrange: Change network to localnet
     commands.networkCommands(program);
 
     // Act
-    program.parse(['node', 'hedera-cli.ts', 'network', 'use', 'testnet']);
+    program.parse(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
 
     // Assert
     const network = stateController.get('network');
-    expect(network).toEqual('testnet');
+    expect(network).toEqual('localnet');
 
     // Arrange: Create a new account with specific balance, type, and network and verify it is created
     commands.accountCommands(program);
@@ -115,7 +115,7 @@ describe('End to end tests', () => {
       '-f',
       accountAlias,
       '-t',
-      'testnet-operator',
+      'localnet-operator',
     ]);
     await new Promise((resolve) => setTimeout(resolve, 7000));
 
@@ -183,7 +183,7 @@ describe('End to end tests', () => {
     for (const backup of backups) {
       fs.unlinkSync(path.join(__dirname, '..', 'src', 'state', backup));
     }
-  });
+  }, 60000);
 
   /**
    * E2E testing flow for scripts:
@@ -192,20 +192,10 @@ describe('End to end tests', () => {
    * - Delete script and verify it is deleted in state file
    */
   test('✅ Script features', async () => {
-    // Arrange: Setup init
-    commands.setupCommands(program);
-
-    // Act
-    await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
-
-    // Assert
-    let accounts = stateController.get('accounts');
-    expect(accounts['testnet-operator']).toBeDefined();
-
     // Arrange: Download a script from the internet
     commands.stateCommands(program);
     const scriptURL =
-      'https://raw.githubusercontent.com/hashgraph/hedera-cli/main/src/commands/script/examples.json';
+      'https://raw.githubusercontent.com/hashgraph/hedera-cli/0e724e64f3c95c41ec4a8765e3a58733891328ea/src/commands/script/examples.json';
 
     // Act
     await program.parseAsync([
@@ -279,16 +269,6 @@ describe('End to end tests', () => {
    * - Verify balance by looking up the token balance of account 3 via API
    */
   test('✅ Token features', async () => {
-    // Arrange: Setup init
-    commands.setupCommands(program);
-
-    // Act
-    await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
-
-    // Assert
-    let accounts = stateController.get('accounts');
-    expect(accounts['testnet-operator']).toBeDefined();
-
     // Arrange: Create 3 accounts
     commands.accountCommands(program);
     const accountAliasTreasury = 'treasury';
@@ -328,7 +308,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    accounts = stateController.get('accounts');
+    const accounts = stateController.get('accounts');
     expect(accounts[accountAliasTreasury]).toBeDefined();
     expect(accounts[accountAliasAdmin]).toBeDefined();
     expect(accounts[accountAliasUser]).toBeDefined();
@@ -426,7 +406,11 @@ describe('End to end tests', () => {
       accounts[accountAliasUser].accountId,
     );
     expect(data.data.balances).toEqual([
-      { account: accounts[accountAliasUser].accountId, balance: 1 },
+      {
+        account: accounts[accountAliasUser].accountId,
+        balance: 1,
+        decimals: 2,
+      },
     ]);
   });
 
@@ -445,7 +429,17 @@ describe('End to end tests', () => {
 
     // Assert
     let accounts = stateController.get('accounts');
-    expect(accounts['testnet-operator']).toBeDefined();
+    expect(accounts['localnet-operator']).toBeDefined();
+
+    // Arrange: Change network to localnet
+    commands.networkCommands(program);
+
+    // Act
+    program.parse(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
+
+    // Assert
+    const network = stateController.get('network');
+    expect(network).toEqual('localnet');
 
     // Arrange: Create 2 accounts
     commands.accountCommands(program);
@@ -521,10 +515,9 @@ describe('End to end tests', () => {
 
     // Assert
     const response = await api.topic.findMessage(Object.keys(topics)[0], 1); // first message
-    expect(Buffer.from(
-      response.data.message,
-      'base64',
-    ).toString('ascii')).toEqual(message); // decode buffer
+    expect(
+      Buffer.from(response.data.message, 'base64').toString('ascii'),
+    ).toEqual(message); // decode buffer
 
     // Arrange: Find the message and verify it is correct
     // Act
@@ -542,10 +535,9 @@ describe('End to end tests', () => {
 
     // Assert
     expect(logSpy).toHaveBeenCalledWith(
-      `Message found: "${Buffer.from(
-        response.data.message,
-        'base64',
-      ).toString('ascii')}"`
+      `Message found: "${Buffer.from(response.data.message, 'base64').toString(
+        'ascii',
+      )}"`,
     );
   });
 });
