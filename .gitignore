@@ -123,3 +123,6 @@ junit*.xml
 
 # Exclude E2E/Unit test generated state files
 src/state/state.json
+
+# Exclude semantic-release version info
+VERSION
