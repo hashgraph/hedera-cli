@@ -22,13 +22,7 @@
   "scripts": {
     "script-init": {
       "name": "init",
-      "commands": [
-        "network use testnet",
-        "account create -a alice -b 1000000000 --type ecdsa",
-        "account create -a bob -b 1000000000 --type ecdsa",
-        "account create -a clarice -b 1000000000 --type ecdsa",
-        "state download --url https://raw.githubusercontent.com/hashgraph/hedera-cli/main/src/commands/script/examples.json --merge"
-      ]
+      "commands": []
     }
   },
   "localNodeAddress": "127.0.0.1:50211",

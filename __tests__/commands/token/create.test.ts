@@ -110,7 +110,7 @@ describe('token create command', () => {
           pauseKey: '',
           feeScheduleKey: '',
         },
-        network: 'testnet',
+        network: 'localnet',
         customFees: [],
       } as Token);
       expect(saveKeyStateControllerSpy).toHaveBeenCalledWith(

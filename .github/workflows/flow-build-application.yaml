@@ -1,0 +1,91 @@
+##
+# Copyright (C) 2022-2023 Hedera Hashgraph, LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+##
+
+name: 'Build Application'
+on:
+  workflow_dispatch:
+    inputs:
+      enable-unit-tests:
+        description: 'Unit Testing Enabled'
+        type: boolean
+        required: false
+        default: true
+      enable-e2e-tests:
+        description: 'E2E Testing Enabled'
+        type: boolean
+        required: false
+        default: false
+      enable-snyk-scan:
+        description: 'Snyk Scan Enabled'
+        type: boolean
+        required: false
+        default: false
+  push:
+    branches:
+      - main
+      - 'release/*'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  code:
+    name: Code
+    uses: ./.github/workflows/zxc-compile-code.yaml
+
+  code-style:
+    name: Code Style
+    uses: ./.github/workflows/zxc-compile-code.yaml
+    needs:
+      - code
+    with:
+      custom-job-label: Check
+      enable-code-style-check: true
+
+  unit-tests:
+    name: Unit Tests
+    uses: ./.github/workflows/zxc-compile-code.yaml
+    if: ${{ github.event_name == 'push' || github.event.inputs.enable-unit-tests == 'true' }}
+    with:
+      custom-job-label: Standard
+      enable-unit-tests: true
+
+  e2e-tests:
+    name: E2E Tests
+    uses: ./.github/workflows/zxc-compile-code.yaml
+    if: ${{ github.event_name == 'push' || github.event.inputs.enable-e2e-tests == 'true' }}
+    with:
+      custom-job-label: Standard
+      enable-e2e-tests: true
+
+  analyze:
+    name: Analyze
+    uses: ./.github/workflows/zxc-code-analysis.yaml
+    needs:
+      - unit-tests
+      - e2e-tests
+    if: ${{ (github.event_name == 'push' || github.event.inputs.enable-unit-tests == 'true' || github.event.inputs.enable-e2e-tests == 'true') && !failure() && !cancelled() }}
+    with:
+      custom-job-label: Source Code
+      #enable-snyk-scan: ${{ github.event_name == 'push' || github.event.inputs.enable-snyk-scan == 'true' }}
+      enable-codecov-analysis: true
+      enable-codacy-coverage: true
+      enable-e2e-coverage-report: ${{ github.event_name == 'push' || github.event.inputs.enable-e2e-tests == 'true' }}
+    secrets:
+      snyk-token: ${{ secrets.SNYK_TOKEN }}
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
+      codacy-project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
