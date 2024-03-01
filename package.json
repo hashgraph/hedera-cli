@@ -31,7 +31,7 @@
   "author": "Michiel Mulders",
   "license": "Apache-2.0",
   "dependencies": {
-    "@hashgraph/sdk": "^2.35.0",
+    "@hashgraph/sdk": "^2.42.0",
     "axios": "^1.5.1",
     "commander": "^11.0.0",
     "dotenv": "^16.3.1",
