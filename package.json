@@ -5,6 +5,9 @@
   "main": "hedera-cli.js",
   "target": "esnext",
   "module": "esnext",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "npm run format && rimraf --glob 'dist/' && tsc && npm run copy-state && npm run rename-base-state && npm run copy-input",
     "clean": "rm -rf dist/ && rm -rf coverage/ && rm -rf junit.xml && rm -rf junit-e2e.xml",
