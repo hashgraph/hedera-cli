@@ -8,6 +8,12 @@
   "publishConfig": {
     "access": "public"
   },
+  "bin": {
+    "hedera-cli": "./dist/hedera-cli.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "npm run format && rimraf --glob 'dist/' && tsc && npm run copy-state && npm run rename-base-state && npm run copy-input",
     "clean": "rm -rf dist/ && rm -rf coverage/ && rm -rf junit.xml && rm -rf junit-e2e.xml",
