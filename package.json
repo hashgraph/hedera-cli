@@ -9,7 +9,7 @@
     "access": "public"
   },
   "bin": {
-    "hedera-cli": "./dist/hedera-cli.js"
+    "hedera-cli": "node ./dist/hedera-cli.js"
   },
   "engines": {
     "node": ">=18.0.0"
