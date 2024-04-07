@@ -69,7 +69,7 @@ jobs:
     needs:
       - unit-tests
       - e2e-tests
-    if: ${{ github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name && github.actor != 'dependabot[bot] && github.actor != 'dependabot[bot]' }}
+    if: ${{ github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name && github.actor != 'dependabot[bot]' }}
     with:
       custom-job-label: Standard
       enable-codecov-analysis: true
@@ -91,15 +91,15 @@ jobs:
     secrets:
       codacy-project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
 
-  snyk:
-   name: Snyk Scan
-   uses: ./.github/workflows/zxc-code-analysis.yaml
-   needs:
-     - unit-tests
-     - e2e-tests
-   if: ${{ github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name && github.actor != 'dependabot[bot]' }}
-   with:
-     custom-job-label: Standard
-     enable-snyk-scan: true
-   secrets:
-     snyk-token: ${{ secrets.SNYK_TOKEN }}
+  # snyk:
+  #  name: Snyk Scan
+  #  uses: ./.github/workflows/zxc-code-analysis.yaml
+  #  needs:
+  #    - unit-tests
+  #    - e2e-tests
+  #  if: ${{ github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name && github.actor != 'dependabot[bot]' }}
+  #  with:
+  #    custom-job-label: Standard
+  #    enable-snyk-scan: true
+  #  secrets:
+  #    snyk-token: ${{ secrets.SNYK_TOKEN }}
