@@ -38,7 +38,7 @@ concurrency:
 
 jobs:
   title-check:
-    name: Title Check
+    name: Title Check 1
     runs-on: [self-hosted, Linux, medium, ephemeral]
     steps:
       - name: Check PR Title
