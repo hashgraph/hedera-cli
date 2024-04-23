@@ -94,14 +94,14 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Download Unit Test Coverage Report
-        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        uses: actions/download-artifact@9c19ed7fe5d278cd354c7dfd5d3b88589c7e2395 # v4.1.6
         if: ${{ (inputs.enable-codecov-analysis || inputs.enable-codacy-coverage) && !cancelled() && !failure() }}
         with:
           name: Unit Test Coverage Report
           path: 'coverage/unit'
 
       - name: Download E2E Coverage Report
-        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        uses: actions/download-artifact@9c19ed7fe5d278cd354c7dfd5d3b88589c7e2395 # v4.1.6
         if: ${{ (inputs.enable-codecov-analysis || inputs.enable-codacy-coverage) && inputs.enable-e2e-coverage-report && !cancelled() && !failure() }}
         with:
           name: E2E Coverage Report
