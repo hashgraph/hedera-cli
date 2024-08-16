@@ -19,30 +19,31 @@
 # NOTE: Must be placed last to ensure enforcement over all other rules
 
 # Protection Rules for Github Configuration Files and Actions Workflows
-/.github/                                       @hashgraph/release-engineering-managers
+/.github/                                       @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers
+/.github/workflows/                             @hashgraph/devops-ci @hashgraph/devops-ci-committers
 
 # NodeJS project files
-package.json                                    @michielmulders
-package-lock.json                               @michielmulders
-jest.config.mjs                                 @michielmulders
+package.json                                    @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
+package-lock.json                               @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
+jest.config.mjs                                 @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
 
 # Codacy Tool Configurations
-/config/                                        @michielmulders
-.remarkrc                                       @michielmulders
+/config/                                        @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
+.remarkrc                                       @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
 
 # Semantic Release Configuration
-.releaserc                                      @hashgraph/release-engineering-managers
+.releaserc                                      @hashgraph/devops-ci @hashgraph/devops-ci-committers
 
 # Self-protection for root CODEOWNERS files (this file should not exist and should definitely require approval)
 /CODEOWNERS                                     @hashgraph/release-engineering-managers
 
 # Protect the repository root files
-/README.md                                      @michielmulders
-**/LICENSE                                      @hashgraph/release-engineering @hashgraph/release-engineering-managers
+/README.md                                      @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers @michielmulders
+**/LICENSE                                      @hashgraph/release-engineering-managers
 
 # CodeCov configuration
-**/codecov.yml                                  @hashgraph/release-engineering @hashgraph/release-engineering-managers
+**/codecov.yml                                  @hashgraph/devops-ci @hashgraph/devops-ci-committers
 
 # Git Ignore definitions
-**/.gitignore                                   @hashgraph/release-engineering @hashgraph/release-engineering-managers
-**/.gitignore.*                                 @hashgraph/release-engineering @hashgraph/release-engineering-managers
+**/.gitignore                                   @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers
+**/.gitignore.*                                 @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers

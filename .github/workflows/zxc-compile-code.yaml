@@ -64,7 +64,7 @@ permissions:
 jobs:
   compile:
     name: ${{ inputs.custom-job-label || 'Compiles' }}
-    runs-on: [self-hosted, Linux, medium, ephemeral]
+    runs-on: transaction-tools-linux-medium
     steps:
       - name: Checkout Code
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
@@ -105,6 +105,12 @@ jobs:
           name: Unit Test Coverage Report
           path: 'coverage/unit'
 
+      - name: Install Docker Compose Plugin
+        if: ${{ inputs.enable-e2e-tests && !cancelled() && !failure() }}
+        run: |
+          sudo curl -fLo /usr/local/lib/docker/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64
+          sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
       - name: Install Local Node (E2E Tests)
         if: ${{ inputs.enable-e2e-tests && !cancelled() && !failure() }}
         run: npm install -g @hashgraph/hedera-local
@@ -112,7 +118,7 @@ jobs:
       - name: Setup Local Node (E2E Tests)
         id: setup-local-node
         if: ${{ inputs.enable-e2e-tests && !cancelled() && !failure() }}
-        run: hedera start --verbose --detached --full
+        run: hedera start --verbose=trace --detached --full
 
       - name: Configure E2E Tests
         if: ${{ inputs.enable-e2e-tests && !cancelled() && !failure() }}
