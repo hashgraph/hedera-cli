@@ -113,7 +113,7 @@ jobs:
 
       - name: Install Local Node (E2E Tests)
         if: ${{ inputs.enable-e2e-tests && !cancelled() && !failure() }}
-        run: npm install -g @hashgraph/hedera-local@2.28.1
+        run: npm install -g @hashgraph/hedera-local@2.27.1
 
       - name: Setup Local Node (E2E Tests)
         id: setup-local-node
