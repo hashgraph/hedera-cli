@@ -118,7 +118,7 @@ jobs:
       - name: Setup Local Node (E2E Tests)
         id: setup-local-node
         if: ${{ inputs.enable-e2e-tests && !cancelled() && !failure() }}
-        run: hedera start --verbose --detached --full
+        run: hedera start --verbose=trace --detached --full --network-tag 0.51.5
 
       - name: Configure E2E Tests
         if: ${{ inputs.enable-e2e-tests && !cancelled() && !failure() }}
