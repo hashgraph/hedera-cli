@@ -89,7 +89,7 @@ jobs:
 
       - name: Run Unit Tests
         if: ${{ inputs.enable-unit-tests && !cancelled() && !failure() }}
-        run: npm run unit-test
+        run: npm run unit-test -- --maxWorkers=2
 
       - name: Publish Unit Test Report
         uses: EnricoMi/publish-unit-test-result-action@170bf24d20d201b842d7a52403b73ed297e6645b # v2.18.0
