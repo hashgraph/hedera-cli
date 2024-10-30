@@ -73,7 +73,7 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ inputs.node-version }}
-          cache: npm
+          #cache: npm
 
       - name: Install Dependencies
         id: npm-deps
@@ -92,7 +92,7 @@ jobs:
         run: npm run unit-test
 
       - name: Publish Unit Test Report
-        uses: EnricoMi/publish-unit-test-result-action@567cc7f8dcea3eba5da355f6ebc95663310d8a07 # v2.17.0
+        uses: EnricoMi/publish-unit-test-result-action@170bf24d20d201b842d7a52403b73ed297e6645b # v2.18.0
         if: ${{ inputs.enable-unit-tests && steps.npm-deps.conclusion == 'success' && !cancelled() }}
         with:
           check_name: 'Unit Test Results'
@@ -146,7 +146,7 @@ jobs:
         run: hedera stop
 
       - name: Publish E2E Test Report
-        uses: EnricoMi/publish-unit-test-result-action@567cc7f8dcea3eba5da355f6ebc95663310d8a07 # v2.17.0
+        uses: EnricoMi/publish-unit-test-result-action@170bf24d20d201b842d7a52403b73ed297e6645b # v2.18.0
         if: ${{ inputs.enable-e2e-tests && steps.npm-deps.conclusion == 'success' && !cancelled() }}
         with:
           check_name: 'E2E Test Results'
