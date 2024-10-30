@@ -26,7 +26,7 @@
     "copy-input": "copyfiles -u 2 src/input/*.json dist/input/",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet",
     "format": "prettier --write 'src/**/*.{js,ts,tsx}'",
-    "unit-test": "JEST_SUITE_NAME='Unit Tests' JEST_JUNIT_OUTPUT_NAME='junit.xml' jest --coverage --coverageDirectory='coverage/unit' -- __tests__/commands/**/*.test.ts",
+    "unit-test": "JEST_SUITE_NAME='Unit Tests' JEST_JUNIT_OUTPUT_NAME='junit.xml' jest --maxWorkers=50% --coverage --coverageDirectory='coverage/unit' -- __tests__/commands/**/*.test.ts",
     "e2e-test": "JEST_SUITE_NAME='E2E Tests' JEST_JUNIT_OUTPUT_NAME='junit-e2e.xml' jest --coverage --coverageDirectory='coverage/e2e' -- __tests__/e2e.test.ts --runInBand",
     "test": "npm run unit-test && npm run e2e-test",
     "single-test": "jest"
