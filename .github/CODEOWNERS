@@ -20,7 +20,7 @@
 
 # Protection Rules for Github Configuration Files and Actions Workflows
 /.github/                                       @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers
-/.github/workflows/                             @hashgraph/devops-ci @hashgraph/devops-ci-committers
+/.github/workflows/                             @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
 
 # NodeJS project files
 package.json                                    @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
@@ -32,7 +32,7 @@ jest.config.mjs                                 @hashgraph/devops-ci @hashgraph/
 .remarkrc                                       @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
 
 # Semantic Release Configuration
-.releaserc                                      @hashgraph/devops-ci @hashgraph/devops-ci-committers
+.releaserc                                      @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
 
 # Self-protection for root CODEOWNERS files (this file should not exist and should definitely require approval)
 /CODEOWNERS                                     @hashgraph/release-engineering-managers
