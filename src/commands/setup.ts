@@ -32,10 +32,16 @@ function setupState(): void {
  * @description Verify that the operator account has enough balance to pay for transactions (at least 1 Hbar)
  * @param operatorId Operator ID to check balance for
  */
-async function verifyOperatorBalance(operatorId: string): Promise<void> {
+async function verifyOperatorBalance(
+  operatorId: string,
+  network: string,
+): Promise<void> {
   // Skip if operator ID is not defined
   if (operatorId) {
-    const balance = await accountUtils.getAccountHbarBalance(operatorId);
+    const balance = await accountUtils.getAccountHbarBalanceByNetwork(
+      operatorId,
+      network,
+    );
     if (balance < 100000000) {
       logger.error(
         `The operator account ${operatorId} does not have enough balance to pay for transactions (less than 1 Hbar). Please add more balance to the account.`,
@@ -146,10 +152,10 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
     setupState();
   }
 
-  await verifyOperatorBalance(localnetOperatorId);
-  await verifyOperatorBalance(previewnetOperatorId);
-  await verifyOperatorBalance(testnetOperatorId);
-  await verifyOperatorBalance(mainnetOperatorId);
+  await verifyOperatorBalance(localnetOperatorId, 'localnet');
+  await verifyOperatorBalance(previewnetOperatorId, 'previewnet');
+  await verifyOperatorBalance(testnetOperatorId, 'testnet');
+  await verifyOperatorBalance(mainnetOperatorId, 'mainnet');
 
   setupUtils.setupOperatorAccounts(
     testnetOperatorId,
