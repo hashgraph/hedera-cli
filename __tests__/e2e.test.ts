@@ -409,6 +409,7 @@ describe('End to end tests', () => {
       {
         account: accounts[accountAliasUser].accountId,
         balance: 1,
+        decimals: 2,
       },
     ]);
   });
