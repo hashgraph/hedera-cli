@@ -1139,6 +1139,10 @@ describe("network commands", () => {
 });
 ```
 
+## E2E Testing
+
+The E2E tests run on localnet and use the state from the `dist/state/state.json` file.
+
 ### Dynamic Variables
 
 [Dynamic variables](#dynamic-variables-in-scripts) are variables that are stored in the state and can be used in scripts. They are useful for storing information that is generated during script execution and can be used in other commands within the script.
