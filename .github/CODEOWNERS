@@ -2,14 +2,14 @@
 ##### Global Protection Rule ######
 ###################################
 # NOTE: This rule is overriden by the more specific rules below. This is the catch-all rule for all files not covered by the more specific rules below.
-*                                               @michielmulders
+*                                               @hashgraph/developer-relations
 
 ############################
 #####  Project Files  ######
 ############################
 
-/src/**                                         @michielmulders
-/__tests__/**                                   @michielmulders
+/src/**                                         @hashgraph/developer-relations
+/__tests__/**                                   @hashgraph/developer-relations
 
 
 #########################
@@ -20,25 +20,25 @@
 
 # Protection Rules for Github Configuration Files and Actions Workflows
 /.github/                                       @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers
-/.github/workflows/                             @hashgraph/devops-ci @hashgraph/devops-ci-committers
+/.github/workflows/                             @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
 
 # NodeJS project files
-package.json                                    @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
-package-lock.json                               @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
-jest.config.mjs                                 @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
+package.json                                    @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
+package-lock.json                               @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
+jest.config.mjs                                 @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
 
 # Codacy Tool Configurations
-/config/                                        @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
-.remarkrc                                       @hashgraph/devops-ci @hashgraph/devops-ci-committers @michielmulders
+/config/                                        @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
+.remarkrc                                       @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
 
 # Semantic Release Configuration
-.releaserc                                      @hashgraph/devops-ci @hashgraph/devops-ci-committers
+.releaserc                                      @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/developer-relations
 
 # Self-protection for root CODEOWNERS files (this file should not exist and should definitely require approval)
 /CODEOWNERS                                     @hashgraph/release-engineering-managers
 
 # Protect the repository root files
-/README.md                                      @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers @michielmulders
+/README.md                                      @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers @hashgraph/developer-relations
 **/LICENSE                                      @hashgraph/release-engineering-managers
 
 # CodeCov configuration
