@@ -300,6 +300,23 @@ async function getAccountBalance(
   return;
 }
 
+async function getAccountHbarBalanceByNetwork(
+  accountId: string,
+  network: string,
+): Promise<number> {
+  const response = await api.account.getAccountInfoByNetwork(
+    accountId,
+    network,
+  );
+
+  if (!response) {
+    logger.error('Error getting account balance');
+    process.exit(1);
+  }
+
+  return response.data.balance.balance;
+}
+
 async function getAccountHbarBalance(accountId: string): Promise<number> {
   const response = await api.account.getAccountInfo(accountId);
 
@@ -394,6 +411,7 @@ const accountUtils = {
   importAccountId,
   getAccountBalance,
   getAccountHbarBalance,
+  getAccountHbarBalanceByNetwork,
   getKeyType,
   getPublicKeyFromPrivateKey,
   getPrivateKeyObject,

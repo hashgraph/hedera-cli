@@ -43,6 +43,28 @@ function getMirrorNodeURL(): string {
   return mirrorNodeURL;
 }
 
+function getMirrorNodeURLByNetwork(network: string): string {
+  let mirrorNodeURL = stateController.get('mirrorNodeTestnet');
+  switch (network) {
+    case 'testnet':
+      mirrorNodeURL = stateController.get('mirrorNodeTestnet');
+      break;
+    case 'mainnet':
+      mirrorNodeURL = stateController.get('mirrorNodeMainnet');
+      break;
+    case 'previewnet':
+      mirrorNodeURL = stateController.get('mirrorNodePreviewnet');
+      break;
+    case 'localnet':
+      mirrorNodeURL = stateController.get('mirrorNodeLocalnet');
+      break;
+    default:
+      logger.error('Invalid network name');
+      process.exit(1);
+  }
+  return mirrorNodeURL;
+}
+
 function getHederaClient(): Client {
   const state = stateController.getAll();
   let client: Client;
@@ -393,6 +415,7 @@ function importState(data: any, overwrite: boolean, merge: boolean) {
 
 const stateUtils = {
   getMirrorNodeURL,
+  getMirrorNodeURLByNetwork,
   getHederaClient,
   getOperator,
   recordCommand,
