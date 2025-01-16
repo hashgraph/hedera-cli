@@ -275,7 +275,7 @@ Replace `<name>` with the name of the network you wish to switch to (`mainnet`, 
 
 **2. Listing Available Networks:**
 
-This command lists all available networks that the CLI tool can interact with. It's useful for confirming the network options and ensuring correct network names are used when switching networks.
+This command lists all available networks you've configured for the CLI tool. It's useful for confirming the network options and ensuring correct network names are used when switching networks.
 
 ```sh
 hcli network list
