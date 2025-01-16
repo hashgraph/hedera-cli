@@ -160,9 +160,10 @@ function getOperator(): { operatorId: string; operatorKey: string } {
 }
 
 function switchNetwork(name: string) {
-  if (!['mainnet', 'testnet', 'previewnet', 'localnet'].includes(name)) {
+  const networks = getAvailableNetworks();
+  if (!networks.includes(name)) {
     logger.error(
-      'Invalid network name. Available networks: mainnet, testnet, previewnet, and localnet',
+      'Invalid network name. Available networks: ' + networks.join(', '),
     );
     process.exit(1);
   }
@@ -413,6 +414,29 @@ function importState(data: any, overwrite: boolean, merge: boolean) {
   }
 }
 
+function getAvailableNetworks(): string[] {
+  const mainnet = stateController.get('mainnetOperatorKey');
+  const testnet = stateController.get('testnetOperatorKey');
+  const previewnet = stateController.get('previewnetOperatorKey');
+  const localnet = stateController.get('localnetOperatorKey');
+
+  const networks = [];
+  if (mainnet) {
+    networks.push('mainnet');
+  }
+  if (testnet) {
+    networks.push('testnet');
+  }
+  if (previewnet) {
+    networks.push('previewnet');
+  }
+  if (localnet) {
+    networks.push('localnet');
+  }
+
+  return networks;
+}
+
 const stateUtils = {
   getMirrorNodeURL,
   getMirrorNodeURLByNetwork,
@@ -430,6 +454,7 @@ const stateUtils = {
   clearState,
   downloadState,
   importState,
+  getAvailableNetworks,
 };
 
 export default stateUtils;
