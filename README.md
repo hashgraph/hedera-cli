@@ -117,6 +117,7 @@ You can verify the installation by listing all accounts in your address book. Wh
 node dist/hedera-cli.js account list
 testnet-operator, 0.0.2224463, ED25519
 preview-operator, 0.0.1110, ECDSA
+[...]
 ```
 
 ### 6. Set Network
