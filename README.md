@@ -346,7 +346,7 @@ Flags:
 Displays the balance of a specified account. Users can choose to view only the Hbar balance or the balance of a specific token. It's not possible to use both options at once.
 
 ```sh
-hcli account balance <accountIdOrAlias> [-h,--only-hbar] [-t,--token-id <tokenId>]
+hcli account balance -a,--account-id-or-alias <accountIdOrAlias> [-h,--only-hbar] [-t,--token-id <tokenId>]
 
 // Output
 Balance for account 0.0.5892294:
