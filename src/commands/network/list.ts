@@ -18,6 +18,9 @@ export default (program: any) => {
     .description('List all available networks')
     .action(() => {
       logger.verbose('Listing networks');
-      logger.log('Available networks: mainnet, testnet, previewnet, localnet');
+      logger.log('Available networks:');
+      stateUtils.getAvailableNetworks().forEach((network) => {
+        logger.log(`- ${network}`);
+      });
     });
 };
