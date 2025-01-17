@@ -20,7 +20,7 @@ export default (program: any) => {
     .description('Retrieve the balance for an account ID or alias')
     .requiredOption(
       '-a, --account-id-or-alias <accountIdOrAlias>',
-      'Account ID or account alias to retrieve balance for',
+      '(Required) Account ID or account alias to retrieve balance for',
     )
     .option('-h, --only-hbar', 'Show only Hbar balance')
     .option('-t, --token-id <tokenId>', 'Show balance for a specific token ID')
