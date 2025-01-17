@@ -43,6 +43,29 @@ function getMirrorNodeURL(): string {
   return mirrorNodeURL;
 }
 
+function getAvailableNetworks(): string[] {
+  const mainnet = stateController.get('mainnetOperatorKey');
+  const testnet = stateController.get('testnetOperatorKey');
+  const previewnet = stateController.get('previewnetOperatorKey');
+  const localnet = stateController.get('localnetOperatorKey');
+
+  const networks = [];
+  if (mainnet) {
+    networks.push('mainnet');
+  }
+  if (testnet) {
+    networks.push('testnet');
+  }
+  if (previewnet) {
+    networks.push('previewnet');
+  }
+  if (localnet) {
+    networks.push('localnet');
+  }
+
+  return networks;
+}
+
 function getMirrorNodeURLByNetwork(network: string): string {
   let mirrorNodeURL = stateController.get('mirrorNodeTestnet');
   switch (network) {
@@ -412,29 +435,6 @@ function importState(data: any, overwrite: boolean, merge: boolean) {
   if (data.topics && Object.entries(data.topics).length > 0) {
     addTopics(data.topics, merge);
   }
-}
-
-function getAvailableNetworks(): string[] {
-  const mainnet = stateController.get('mainnetOperatorKey');
-  const testnet = stateController.get('testnetOperatorKey');
-  const previewnet = stateController.get('previewnetOperatorKey');
-  const localnet = stateController.get('localnetOperatorKey');
-
-  const networks = [];
-  if (mainnet) {
-    networks.push('mainnet');
-  }
-  if (testnet) {
-    networks.push('testnet');
-  }
-  if (previewnet) {
-    networks.push('previewnet');
-  }
-  if (localnet) {
-    networks.push('localnet');
-  }
-
-  return networks;
 }
 
 const stateUtils = {
