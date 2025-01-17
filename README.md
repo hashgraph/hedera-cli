@@ -111,11 +111,13 @@ The `setup init` command will also create the different operator accounts in you
 
 ### 5. Verify Installation
 
-You can verify the installation by listing all accounts in your address book. If you haven't added any accounts yet, you should see the following output:
+You can verify the installation by listing all accounts in your address book. When you first run this command, you'll see the operator keys you've defined.
 
 ```sh
 node dist/hedera-cli.js account list
-// No accounts found.
+testnet-operator, 0.0.2224463, ED25519
+preview-operator, 0.0.1110, ECDSA
+[...]
 ```
 
 ### 6. Set Network
