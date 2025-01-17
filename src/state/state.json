@@ -1,30 +1,71 @@
 {
-  "network": "testnet",
+  "network": "localnet",
   "mirrorNodeLocalnet": "http://localhost:5551/api/v1",
   "mirrorNodePreviewnet": "https://previewnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
+  "recording": 0,
+  "recordingScriptName": "",
+  "scriptExecution": 1,
+  "scriptExecutionName": "account-create-simple",
+  "accounts": {},
+  "scripts": {
+    "script-token": {
+      "name": "token",
+      "creation": 1737051452976,
+      "commands": [
+        "account create -a random --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "account create -a random --args privateKey,privKeyAcc2 --args alias,aliasAcc2 --args accountId,idAcc2",
+        "account create -a random --args privateKey,privKeyAcc3 --args alias,aliasAcc3 --args accountId,idAcc3",
+        "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId,tokenId",
+        "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
+        "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}",
+        "wait 3",
+        "account balance --account-id-or-alias {{aliasAcc3}} --token-id {{tokenId}}",
+        "state view --token-id {{tokenId}}"
+      ],
+      "args": {}
+    },
+    "script-account-create": {
+      "name": "account-create",
+      "creation": 1737051452983,
+      "commands": [
+        "account create -a random -b 10000000 --type ecdsa --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "wait 5",
+        "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
+      ],
+      "args": {}
+    },
+    "script-account-create-simple": {
+      "name": "account-create-simple",
+      "creation": 1737051452984,
+      "commands": [
+        "account create -a random -b 10000000 --type ecdsa --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "wait 5"
+      ],
+      "args": {}
+    },
+    "script-topic-create": {
+      "name": "topic-create",
+      "creation": 1737051452984,
+      "commands": [
+        "account create -a random --args privateKey,privKeyAdmin",
+        "account create -a random --args privateKey,privKeySubmit",
+        "topic create --admin-key {{privKeyAdmin}} --submit-key {{privKeySubmit}} --args topicId,topicId"
+      ],
+      "args": {}
+    }
+  },
+  "tokens": {},
+  "topics": {},
   "testnetOperatorKey": "",
   "testnetOperatorId": "",
   "mainnetOperatorKey": "",
   "mainnetOperatorId": "",
-  "previewnetOperatorId": "",
   "previewnetOperatorKey": "",
-  "localnetOperatorKey": "",
-  "localnetOperatorId": "",
-  "recording": 0,
-  "recordingScriptName": "",
-  "scriptExecution": 0,
-  "scriptExecutionName": "",
-  "accounts": {},
-  "tokens": {},
-  "topics": {},
-  "scripts": {
-    "script-init": {
-      "name": "init",
-      "commands": []
-    }
-  },
+  "previewnetOperatorId": "",
+  "localnetOperatorKey": "302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137",
+  "localnetOperatorId": "0.0.2",
   "localNodeAddress": "127.0.0.1:50211",
   "localNodeAccountId": "0.0.3",
   "localNodeMirrorAddressGRPC": "127.0.0.1:5600"
