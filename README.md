@@ -679,15 +679,17 @@ backup restore
 
 **1. Creating Backup:**
 
-This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`. It's possible to provide a custom name for the backup file: `state.backup.<name>.json`.
+This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`. It's possible to provide a custom name for the backup file: `state.backup.<name>.json`. 
+
+Further, you can also provide a custom path for your backup, which is useful if you want to export a clean testing state in another application that can be used to run E2E tests.
 
 ```sh
-hcli backup create [--name <name>] [--accounts] [--safe]
+hcli backup create [--path <path>] [--name <name>] [--accounts] [--safe]
 
 // Example
+hcli backup create --name e2e --path /Users/myUser/projects/xyz/
 hcli backup create --accounts --safe
 hcli backup create --safe
-hcli backup create --name myBackup
 ```
 
 Flags:
