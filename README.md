@@ -416,6 +416,14 @@ Displays detailed information about a specified account by its ID. The account c
 
 ```sh
 hcli account view -i,--id <id>
+
+// Output
+Account: 0.0.5401160
+Balance Tinybars: 1000000000
+Deleted: false
+EVM Address: 0x0000000000000000000000000000000000526a48
+Key type: ED25519 - Key: 4832f1d396ff123e4e[...]
+Max automatic token associations: 0
 ```
 
 Flags:
@@ -569,7 +577,7 @@ Flags:
 - **Token ID:** (required) Token ID to transfer.
 - **To:** (required) Account ID to transfer the token to.
 - **From:** (required) Account ID to transfer the token from.
-- **Balance:** (required) Amount of token to transfer.
+- **Balance:** (required) Amount of token to transfer. For example, if the token has 2 decimals, you need to transfer 100 to transfer 1 token.
 
 ## Topic Commands
 
