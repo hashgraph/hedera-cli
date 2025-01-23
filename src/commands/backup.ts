@@ -91,11 +91,11 @@ function backupState(
     data = data.accounts;
   }
 
+  console.log(storagePath);
   const backupPath =
     storagePath !== ''
-      ? path.join(path.normalize(storagePath), backupFilename) // custom path
+      ? path.join(storagePath, backupFilename) // custom path
       : path.join(__dirname, '..', 'state', backupFilename); // default path
-  console.log(backupPath);
 
   try {
     fs.writeFileSync(backupPath, JSON.stringify(data, null, 2), 'utf8');
@@ -166,7 +166,12 @@ export default (program: any) => {
     .option('--path <path>', 'Specify a custom path to store the backup')
     .action((options: BackupOptions) => {
       logger.verbose('Creating backup of state');
-      backupState(options.name, options.accounts, options.safe, options.path);
+      backupState(
+        options.name,
+        options.accounts,
+        options.safe,
+        options.path || '',
+      );
     });
 
   network
