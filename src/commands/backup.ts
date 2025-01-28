@@ -91,7 +91,10 @@ function backupState(
     data = data.accounts;
   }
 
-  console.log(storagePath);
+  if (storagePath !== '' && !path.isAbsolute(storagePath)) {
+    throw new Error('Invalid storage path: Must be an absolute path');
+  }
+
   const backupPath =
     storagePath !== ''
       ? path.join(storagePath, backupFilename) // custom path
