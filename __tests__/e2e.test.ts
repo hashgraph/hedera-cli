@@ -9,7 +9,6 @@ import api from '../src/api';
 import { Logger } from '../src/utils/logger';
 
 import { Token } from '../types';
-import stateUtils from '../src/utils/state';
 
 const logger = Logger.getInstance();
 

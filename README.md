@@ -416,6 +416,14 @@ Displays detailed information about a specified account by its ID. The account c
 
 ```sh
 hcli account view -i,--id <id>
+
+// Output
+Account: 0.0.5401160
+Balance Tinybars: 1000000000
+Deleted: false
+EVM Address: 0x0000000000000000000000000000000000526a48
+Key type: ED25519 - Key: 4832f1d396ff123e4e[...]
+Max automatic token associations: 0
 ```
 
 Flags:
@@ -569,7 +577,7 @@ Flags:
 - **Token ID:** (required) Token ID to transfer.
 - **To:** (required) Account ID to transfer the token to.
 - **From:** (required) Account ID to transfer the token from.
-- **Balance:** (required) Amount of token to transfer.
+- **Balance:** (required) Amount of token to transfer. For example, if the token has 2 decimals, you need to transfer 100 to transfer 1 token.
 
 ## Topic Commands
 
@@ -671,15 +679,17 @@ backup restore
 
 **1. Creating Backup:**
 
-This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`. It's possible to provide a custom name for the backup file: `state.backup.<name>.json`.
+This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`. It's possible to provide a custom name for the backup file: `state.backup.<name>.json`. 
+
+Further, you can also provide a custom path for your backup, which is useful if you want to export a clean testing state in another application that can be used to run E2E tests.
 
 ```sh
-hcli backup create [--name <name>] [--accounts] [--safe]
+hcli backup create [--path <path>] [--name <name>] [--accounts] [--safe]
 
 // Example
+hcli backup create --name e2e --path /Users/myUser/projects/xyz/
 hcli backup create --accounts --safe
 hcli backup create --safe
-hcli backup create --name myBackup
 ```
 
 Flags:

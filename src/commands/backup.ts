@@ -53,11 +53,19 @@ function filterState(data: State) {
 /**
  * Create a backup of the state file
  *
+ * @parm name Name of the backup file
  * @param backupAccounts Only backup the accounts from state
  * @param safe Remove the private keys from the backup file
+ * @param storagePath Custom path to store the backup (useful for adding it to a testing suite)
  */
-function backupState(name: string, backupAccounts: boolean, safe: boolean) {
+function backupState(
+  name: string,
+  backupAccounts: boolean,
+  safe: boolean,
+  storagePath: string,
+) {
   let data;
+
   try {
     const statePath = path.join(__dirname, '..', 'state', 'state.json');
     data = JSON.parse(fs.readFileSync(statePath, 'utf8')) as State;
@@ -82,7 +90,15 @@ function backupState(name: string, backupAccounts: boolean, safe: boolean) {
     backupFilename = `accounts.backup.${timestamp}.json`;
     data = data.accounts;
   }
-  const backupPath = path.join(__dirname, '..', 'state', backupFilename);
+
+  if (storagePath !== '' && !path.isAbsolute(storagePath)) {
+    throw new Error('Invalid storage path: Must be an absolute path');
+  }
+
+  const backupPath =
+    storagePath !== ''
+      ? path.join(storagePath, backupFilename) // custom path
+      : path.join(__dirname, '..', 'state', backupFilename); // default path
 
   try {
     fs.writeFileSync(backupPath, JSON.stringify(data, null, 2), 'utf8');
@@ -150,9 +166,15 @@ export default (program: any) => {
     .option('--accounts', 'Backup the accounts')
     .option('--safe', 'Remove the private keys from the backup')
     .option('--name <name>', 'Name of the backup file')
+    .option('--path <path>', 'Specify a custom path to store the backup')
     .action((options: BackupOptions) => {
       logger.verbose('Creating backup of state');
-      backupState(options.name, options.accounts, options.safe);
+      backupState(
+        options.name,
+        options.accounts,
+        options.safe,
+        options.path || '',
+      );
     });
 
   network
@@ -209,6 +231,7 @@ interface BackupOptions {
   accounts: boolean;
   safe: boolean;
   name: string;
+  path: string;
 }
 
 interface RestoreOptions {
