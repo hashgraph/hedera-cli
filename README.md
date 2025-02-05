@@ -16,6 +16,7 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
 - [Video Guide](#video-guide)
 - [Commands](#commands)
   - [Setup Commands](#setup-commands)
+  - [Telemetry Commands](#telemetry-commands)
   - [Network Commands](#network-commands)
   - [Wait Command](#wait-command)
   - [Account Commands](#account-commands)
@@ -190,6 +191,7 @@ Learn how to use the Hedera CLI Tool by watching the video below.
 Let's explore the different commands, their options, and outputs.
 
 - [Setup Commands](#setup-commands): Instantiate or reset the Hedera CLI tool
+- [Telemetry Commands](#telemetry-commands): Enable or disable telemetry
 - [Network Commands](#network-commands): Switch Hedera networks
 - [Wait Command](#wait-command): Wait for a specified amount of seconds
 - [Account Commands](#account-commands): Create and manage accounts
@@ -251,6 +253,35 @@ hcli setup reload [--path <path>]
 Flags:
 
 - **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
+
+## Telemetry Commands
+
+### Overview
+
+The telemetry command in the Hedera CLI tool is designed to enable or disable telemetry. This feature allows users to opt-in or opt-out of telemetry data collection. Hedera **anonymizes data** and only records the command name, not the parameters or any other sensitive information. For example, it records `account create` but not the account alias or ID. The data is used to improve the CLI tool and provide better features and functionality, by trying to understand how users use the CLI.
+
+```sh
+telemetry enable
+telemetry disable
+```
+
+#### Usage
+
+**1. Enable telemetry:**
+
+This command enables telemetry and sets the `telemetry` variable in the state to `1`.
+
+```sh
+hcli telemetry enable
+```
+
+**2. Disable telemetry:**
+
+This command disables telemetry and sets the `telemetry` variable in the state to `0`.
+
+```sh
+hcli telemetry disable
+```
 
 ## Network Commands
 
