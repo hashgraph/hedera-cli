@@ -1,6 +1,7 @@
 import stateUtils from '../../utils/state';
 import accountUtils from '../../utils/account';
 import { Logger } from '../../utils/logger';
+import telemetryUtils from '../../utils/telemetry';
 
 import type { Command } from '../../../types';
 
@@ -14,6 +15,9 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('List all accounts in the address book')
