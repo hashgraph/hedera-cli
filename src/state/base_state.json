@@ -12,6 +12,7 @@
   "previewnetOperatorKey": "",
   "localnetOperatorKey": "",
   "localnetOperatorId": "",
+  "telemetry": 0,
   "recording": 0,
   "recordingScriptName": "",
   "scriptExecution": 0,
