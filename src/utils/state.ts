@@ -25,8 +25,8 @@ function recordCommand(command: string[]): void {
  * @returns {boolean} telemetry
  */
 function isTelemetryEnabled(): boolean {
-  const state = stateController.get('telemetry');
-  return state.telemetry === 1;
+  const telemetry = stateController.get('telemetry');
+  return telemetry === 1;
 }
 
 function getMirrorNodeURL(): string {
