@@ -100,10 +100,10 @@ LOCALNET_OPERATOR_ID=
 LOCALNET_OPERATOR_KEY=
 ```
 
-Next, set up the CLI tool with the command:
+Next, set up the CLI tool with the command. **The `--telemetry` flag is optional and enables telemetry. By default, telemetry is disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information. If you don't want us to collect telemetry data, run the command without the `--telemetry` flag.**
 
 ```sh
-node dist/hedera-cli.js setup init
+node dist/hedera-cli.js setup init --telemetry
 ```
 
 > **Note.** You can set a custom absolute path for your `.env` file by using the `--path` flag. For example, `node dist/hedera-cli.js setup init --path /Users/myUser/projects/cli/.env`. More information can be found in the [setup command](#setup-commands) section below.
@@ -227,11 +227,12 @@ setup reload
 Sets up the CLI with the operator key and ID.
 
 ```sh
-hcli setup init [--path <path>]
+hcli setup init [--telemetry] [--path <path>]
 ```
 
 Flags:
 
+- **Telemetry:** (optional) Enables telemetry. By default disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information.
 - **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
 
 When executed, the setup command performs several key functions:
@@ -247,12 +248,12 @@ Once the localnet, previewnet, testnet, and mainnet operator key and ID are vali
 Reload the operator key and ID from the `.env` file. This command is useful when you add new networks to your `.env` file and want to update the state, so you can use the new networks.
 
 ```sh
-hcli setup reload [--path <path>]
+hcli setup reload [--telemetry]
 ```
 
 Flags:
 
-- **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
+- **Telemetry:** (optional) Enables telemetry. By default disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information.
 
 ## Telemetry Commands
 
