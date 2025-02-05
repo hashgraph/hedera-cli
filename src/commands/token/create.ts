@@ -3,6 +3,7 @@ import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
 import { myParseInt } from '../../utils/verification';
 import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
+import telemetryUtils from '../../utils/telemetry';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
 
@@ -117,6 +118,9 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Create a new fungible token')

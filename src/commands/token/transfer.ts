@@ -1,5 +1,6 @@
 import { myParseInt } from '../../utils/verification';
 import stateUtils from '../../utils/state';
+import telemetryUtils from '../../utils/telemetry';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
 
@@ -16,6 +17,9 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Transfer a fungible token')

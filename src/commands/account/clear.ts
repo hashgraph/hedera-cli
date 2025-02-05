@@ -1,5 +1,5 @@
 import stateUtils from '../../utils/state';
-
+import telemetryUtils from '../../utils/telemetry';
 import accountUtils from '../../utils/account';
 import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
@@ -14,6 +14,9 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Clear all accounts from the address book')

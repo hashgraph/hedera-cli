@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import * as os from 'os';
 
 import stateUtils from '../utils/state';
+import telemetryUtils from '../utils/telemetry';
 import config from '../state/config';
 import { Logger } from '../utils/logger';
 import accountUtils from '../utils/account';
@@ -179,6 +180,9 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Setup the CLI with operator key and ID')
@@ -197,6 +201,9 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Reload the CLI with operator key and ID')

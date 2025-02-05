@@ -1,5 +1,6 @@
 import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
+import telemetryUtils from '../../utils/telemetry';
 import { Logger } from '../../utils/logger';
 
 import type { Command } from '../../../types';
@@ -15,6 +16,9 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Associate a token with an account')

@@ -1,5 +1,6 @@
 import stateUtils from '../../utils/state';
 import scriptUtils from '../../utils/script';
+import telemetryUtils from '../../utils/telemetry';
 import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
 
@@ -13,6 +14,9 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('List all scripts')

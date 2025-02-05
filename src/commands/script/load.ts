@@ -1,5 +1,6 @@
 import stateController from '../../state/stateController';
 import stateUtils from '../../utils/state';
+import telemetryUtils from '../../utils/telemetry';
 import { execSync } from 'child_process';
 import { Logger } from '../../utils/logger';
 
@@ -51,6 +52,9 @@ export default (program: any) => {
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Load and execute a script')
