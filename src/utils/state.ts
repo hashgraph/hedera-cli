@@ -24,7 +24,7 @@ function recordCommand(command: string[]): void {
  * Returns the current telemetry setting
  * @returns {boolean} telemetry
  */
-function getTelemetry(): boolean {
+function isTelemetryEnabled(): boolean {
   const state = stateController.get('telemetry');
   return state.telemetry === 1;
 }
@@ -447,7 +447,7 @@ function importState(data: any, overwrite: boolean, merge: boolean) {
 }
 
 const stateUtils = {
-  getTelemetry,
+  isTelemetryEnabled,
   getMirrorNodeURL,
   getMirrorNodeURLByNetwork,
   getHederaClient,
