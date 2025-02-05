@@ -16,6 +16,11 @@ const logger = Logger.getInstance();
 
 interface SetupOptions {
   path: string;
+  telemetry: boolean;
+}
+
+interface ReloadOptions {
+  telemetry: boolean;
 }
 
 /**
@@ -57,7 +62,11 @@ async function verifyOperatorBalance(
  * @param action Action to perform (init or reload)
  * @param envPath Path to the .env file
  */
-async function setupCLI(action: string, envPath: string = ''): Promise<void> {
+async function setupCLI(
+  action: string,
+  telemetry: boolean = false,
+  envPath: string = '',
+): Promise<void> {
   let finalPath = '';
   if (envPath !== '') {
     finalPath = path.normalize(envPath);
@@ -187,11 +196,15 @@ export default (program: any) => {
     })
     .description('Setup the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
+    .option(
+      '--telemetry',
+      'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
+    )
     .action(async (options: SetupOptions) => {
       logger.verbose(
         'Initializing the CLI tool with the config and operator key and ID for different networks',
       );
-      await setupCLI('init', options.path);
+      await setupCLI('init', options.telemetry, options.path);
     });
 
   setup
@@ -208,10 +221,14 @@ export default (program: any) => {
     })
     .description('Reload the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
-    .action(async () => {
+    .option(
+      '--telemetry',
+      'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
+    )
+    .action(async (options: ReloadOptions) => {
       logger.verbose(
         'Reloading the CLI tool with operator key and ID for different networks',
       );
-      await setupCLI('reload');
+      await setupCLI('reload', options.telemetry);
     });
 };
