@@ -8,7 +8,7 @@ async function recordCommand(command: string) {
   try {
     // TODO: Replace with actual telemetry endpoint.
     // If .env contains a TELEMETRY_URL, use that instead otherwise use the default URL.
-    await fetch('http://localhost:3000/track', {
+    await fetch('http://localhost:3001/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
