@@ -1,8 +1,10 @@
+const { version } = require('../../package.json');
+
 async function recordCommand(command: string) {
-  console.log(`Command: ${command} was executed`);
   const payload = {
     command: command,
     timestamp: new Date().toISOString(),
+    version,
   };
 
   try {
