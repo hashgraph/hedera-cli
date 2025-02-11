@@ -4,6 +4,7 @@
   "mirrorNodePreviewnet": "https://previewnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
+  "telemetryServer": "http://localhost:3000/track",
   "testnetOperatorKey": "",
   "testnetOperatorId": "",
   "mainnetOperatorKey": "",

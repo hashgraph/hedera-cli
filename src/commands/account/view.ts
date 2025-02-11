@@ -11,13 +11,13 @@ const logger = Logger.getInstance();
 export default (program: any) => {
   program
     .command('view')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
       if (stateUtils.isTelemetryEnabled()) {
-        telemetryUtils.recordCommand(command.join(' '));
+        await telemetryUtils.recordCommand(command.join(' '));
       }
       stateUtils.recordCommand(command);
     })

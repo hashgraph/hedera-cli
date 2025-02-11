@@ -81,13 +81,13 @@ export default (program: any) => {
 
   message
     .command('submit')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
       if (stateUtils.isTelemetryEnabled()) {
-        telemetryUtils.recordCommand(command.join(' '));
+        await telemetryUtils.recordCommand(command.join(' '));
       }
       stateUtils.recordCommand(command);
     })
@@ -131,11 +131,14 @@ export default (program: any) => {
 
   message
     .command('find')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Find a message by sequence number')

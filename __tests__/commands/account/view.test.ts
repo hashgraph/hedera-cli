@@ -32,7 +32,7 @@ describe("account view command", () => {
       commands.accountCommands(program);
 
       // Act
-      await program.parse([
+      await program.parseAsync([
         "node",
         "hedera-cli.ts",
         "account",

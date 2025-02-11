@@ -35,7 +35,7 @@ describe('network use command', () => {
       commands.networkCommands(program);
 
       // Act
-      program.parse(['node', 'hedera-cli.ts', 'network', 'use', 'mainnet']);
+      await program.parseAsync(['node', 'hedera-cli.ts', 'network', 'use', 'mainnet']);
 
       // Assert
       expect(stateControllerSpy).toHaveBeenCalledWith('network', 'mainnet');
