@@ -259,7 +259,7 @@ Flags:
 
 ### Overview
 
-The telemetry command in the Hedera CLI tool is designed to enable or disable telemetry. This feature allows users to opt-in or opt-out of telemetry data collection. Hedera **anonymizes data** and only records the command name, not the parameters or any other sensitive information. For example, it records `account create` but not the account alias or ID. The data is used to improve the CLI tool and provide better features and functionality, by trying to understand how users use the CLI.
+The telemetry command in the Hedera CLI tool is designed to enable or disable telemetry. This feature allows users to opt-in or opt-out of telemetry data collection. Hedera **anonymizes data** and only records the command name, not the parameters or any other sensitive information. For example, it records `account create` but not the account alias or ID. The data is used to improve the CLI tool and provide better features and functionality, by trying to understand how users use the CLI. However, the CLI tool uses a UUID to identify the user, so no personal information is collected. This allows us to better understand how users interact with the CLI tool.
 
 ```sh
 telemetry enable
@@ -1052,6 +1052,7 @@ Here's an example state:
   "recordingScriptName": "",
   "scriptExecution": 0,
   "scriptExecutionName": "",
+  "uuid": "",
   "accounts": {
     "bob": {
       "network": "testnet",
