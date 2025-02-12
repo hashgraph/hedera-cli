@@ -108,6 +108,7 @@ export interface State {
   testnetOperatorId: string;
   mainnetOperatorKey: string;
   mainnetOperatorId: string;
+  uuid: string;
 }
 
 export interface DownloadState {

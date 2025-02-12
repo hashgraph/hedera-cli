@@ -205,6 +205,7 @@ export default (program: any) => {
         'Initializing the CLI tool with the config and operator key and ID for different networks',
       );
       await setupCLI('init', options.telemetry, options.path);
+      stateUtils.createUUID(); // Create a new UUID for the user if doesn't exist
     });
 
   setup

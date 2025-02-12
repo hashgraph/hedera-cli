@@ -1,3 +1,4 @@
+import stateController from '../state/stateController';
 const { version } = require('../../package.json');
 
 async function recordCommand(command: string) {
@@ -12,7 +13,11 @@ async function recordCommand(command: string) {
     // If .env contains a TELEMETRY_URL, use that instead otherwise use the default URL.
     await fetch('http://localhost:3001/track', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Telemetry-Token':
+          stateController.get('uuid') || 'facade00-0000-4000-a000-000000000000', // Default user ID
+      },
       body: JSON.stringify(payload),
     });
   } catch (err) {
