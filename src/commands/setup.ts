@@ -183,6 +183,9 @@ async function setupCLI(
   let telemetryServer =
     TELEMETRY_URL || 'https://hedera-cli-telemetry.onrender.com/track';
   stateController.saveKey('telemetryServer', telemetryServer);
+  if (telemetry === true) {
+    stateController.saveKey('telemetry', 1);
+  }
 }
 
 export default (program: any) => {
