@@ -1,5 +1,6 @@
 import stateUtils from '../../utils/state';
 import scriptUtils from '../../utils/script';
+import telemetryUtils from '../../utils/telemetry';
 import { Logger } from '../../utils/logger';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
@@ -10,11 +11,14 @@ const logger = Logger.getInstance();
 export default (program: any) => {
   program
     .command('delete')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Delete a script')

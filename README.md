@@ -16,6 +16,7 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
 - [Video Guide](#video-guide)
 - [Commands](#commands)
   - [Setup Commands](#setup-commands)
+  - [Telemetry Commands](#telemetry-commands)
   - [Network Commands](#network-commands)
   - [Wait Command](#wait-command)
   - [Account Commands](#account-commands)
@@ -99,10 +100,10 @@ LOCALNET_OPERATOR_ID=
 LOCALNET_OPERATOR_KEY=
 ```
 
-Next, set up the CLI tool with the command:
+Next, set up the CLI tool with the command. **The `--telemetry` flag is optional and enables telemetry. By default, telemetry is disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information. If you don't want us to collect telemetry data, run the command without the `--telemetry` flag.**
 
 ```sh
-node dist/hedera-cli.js setup init
+node dist/hedera-cli.js setup init --telemetry
 ```
 
 > **Note.** You can set a custom absolute path for your `.env` file by using the `--path` flag. For example, `node dist/hedera-cli.js setup init --path /Users/myUser/projects/cli/.env`. More information can be found in the [setup command](#setup-commands) section below.
@@ -190,6 +191,7 @@ Learn how to use the Hedera CLI Tool by watching the video below.
 Let's explore the different commands, their options, and outputs.
 
 - [Setup Commands](#setup-commands): Instantiate or reset the Hedera CLI tool
+- [Telemetry Commands](#telemetry-commands): Enable or disable telemetry
 - [Network Commands](#network-commands): Switch Hedera networks
 - [Wait Command](#wait-command): Wait for a specified amount of seconds
 - [Account Commands](#account-commands): Create and manage accounts
@@ -225,11 +227,12 @@ setup reload
 Sets up the CLI with the operator key and ID.
 
 ```sh
-hcli setup init [--path <path>]
+hcli setup init [--telemetry] [--path <path>]
 ```
 
 Flags:
 
+- **Telemetry:** (optional) Enables telemetry. By default disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information.
 - **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
 
 When executed, the setup command performs several key functions:
@@ -245,12 +248,41 @@ Once the localnet, previewnet, testnet, and mainnet operator key and ID are vali
 Reload the operator key and ID from the `.env` file. This command is useful when you add new networks to your `.env` file and want to update the state, so you can use the new networks.
 
 ```sh
-hcli setup reload [--path <path>]
+hcli setup reload [--telemetry]
 ```
 
 Flags:
 
-- **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
+- **Telemetry:** (optional) Enables telemetry. By default disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information.
+
+## Telemetry Commands
+
+### Overview
+
+The telemetry command in the Hedera CLI tool is designed to enable or disable telemetry. This feature allows users to opt-in or opt-out of telemetry data collection. Hedera **anonymizes data** and only records the command name, not the parameters or any other sensitive information. For example, it records `account create` but not the account alias or ID. The data is used to improve the CLI tool and provide better features and functionality, by trying to understand how users use the CLI. However, the CLI tool uses a UUID to identify the user, so no personal information is collected. This allows us to better understand how users interact with the CLI tool.
+
+```sh
+telemetry enable
+telemetry disable
+```
+
+#### Usage
+
+**1. Enable telemetry:**
+
+This command enables telemetry and sets the `telemetry` variable in the state to `1`.
+
+```sh
+hcli telemetry enable
+```
+
+**2. Disable telemetry:**
+
+This command disables telemetry and sets the `telemetry` variable in the state to `0`.
+
+```sh
+hcli telemetry disable
+```
 
 ## Network Commands
 
@@ -1001,18 +1033,26 @@ Here's an example state:
 ```json
 {
   "network": "testnet",
+  "mirrorNodeLocalnet": "http://localhost:5551/api/v1",
+  "mirrorNodePreviewnet": "https://previewnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
+  "telemetryServer": "http://localhost:3000/track",
+  "localNodeAddress": "127.0.0.1:50211",
+  "localNodeAccountId": "0.0.3",
+  "localNodeMirrorAddressGRPC": "127.0.0.1:5600",
   "testnetOperatorKey": "",
   "testnetOperatorId": "",
   "mainnetOperatorKey": "",
   "mainnetOperatorId": "",
   "previewnetOperatorId": "",
   "previewnetOperatorKey": "",
+  "telemetry": 0,
   "recording": 0,
   "recordingScriptName": "",
   "scriptExecution": 0,
   "scriptExecutionName": "",
+  "uuid": "",
   "accounts": {
     "bob": {
       "network": "testnet",

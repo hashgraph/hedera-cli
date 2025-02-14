@@ -23,6 +23,7 @@ commands.setupCommands(program);
 commands.networkCommands(program);
 commands.accountCommands(program);
 commands.recordCommands(program);
+commands.telemetryCommands(program);
 commands.scriptCommands(program);
 commands.backupCommands(program);
 commands.tokenCommands(program);

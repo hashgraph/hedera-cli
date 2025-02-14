@@ -1,5 +1,6 @@
 import { Client, AccountId, PrivateKey } from '@hashgraph/sdk';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Logger } from '../utils/logger';
 import stateController from '../state/stateController';
@@ -18,6 +19,26 @@ function recordCommand(command: string[]): void {
 
     stateController.saveState(state);
   }
+}
+
+/**
+ * Generates a UUID when it doesn't exist
+ */
+function createUUID() {
+  const uuid = stateController.get('uuid');
+  if (uuid === '' || !uuid) {
+    const newUUID = uuidv4();
+    stateController.saveKey('uuid', newUUID);
+  }
+}
+
+/**
+ * Returns the current telemetry setting
+ * @returns {boolean} telemetry
+ */
+function isTelemetryEnabled(): boolean {
+  const telemetry = stateController.get('telemetry');
+  return telemetry === 1;
 }
 
 function getMirrorNodeURL(): string {
@@ -438,6 +459,8 @@ function importState(data: any, overwrite: boolean, merge: boolean) {
 }
 
 const stateUtils = {
+  createUUID,
+  isTelemetryEnabled,
   getMirrorNodeURL,
   getMirrorNodeURLByNetwork,
   getHederaClient,

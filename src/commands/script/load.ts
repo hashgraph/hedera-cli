@@ -1,5 +1,6 @@
 import stateController from '../../state/stateController';
 import stateUtils from '../../utils/state';
+import telemetryUtils from '../../utils/telemetry';
 import { execSync } from 'child_process';
 import { Logger } from '../../utils/logger';
 
@@ -46,11 +47,14 @@ function loadScript(name: string) {
 export default (program: any) => {
   program
     .command('load')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Load and execute a script')

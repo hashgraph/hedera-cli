@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import stateUtils from '../utils/state';
+import telemetryUtils from '../utils/telemetry';
 import enquirerUtils from '../utils/enquirer';
 import stateController from '../state/stateController';
 import { Logger } from '../utils/logger';
@@ -155,11 +156,14 @@ export default (program: any) => {
 
   network
     .command('create')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Create a backup of the state.json file')
@@ -179,11 +183,14 @@ export default (program: any) => {
 
   network
     .command('restore')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Restore a backup of the full state')

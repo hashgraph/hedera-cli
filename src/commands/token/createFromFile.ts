@@ -9,6 +9,7 @@ import {
 import accountUtils from '../../utils/account';
 import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
+import telemetryUtils from '../../utils/telemetry';
 import feeUtils from '../../utils/fees';
 import { Logger } from '../../utils/logger';
 import stateController from '../../state/stateController';
@@ -351,11 +352,14 @@ async function createToken(options: CreateTokenFromFileOptions) {
 export default (program: any) => {
   program
     .command('create-from-file')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Create a new token from a file')

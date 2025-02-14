@@ -4,6 +4,8 @@ export default {
   mirrorNodePreviewnet: 'https://previewnet.mirrornode.hedera.com/api/v1',
   mirrorNodeTestnet: 'https://testnet.mirrornode.hedera.com/api/v1',
   mirrorNodeMainnet: 'https://mainnet.mirrornode.hedera.com/api/v1',
+  telemetryServer: 'https://hedera-cli-telemetry.onrender.com/track',
+  telemetry: 0,
   recording: 0,
   recordingScriptName: '',
   scriptExecution: 0,
@@ -24,4 +26,5 @@ export default {
   localNodeAddress: '127.0.0.1:50211',
   localNodeAccountId: '0.0.3',
   localNodeMirrorAddressGRPC: '127.0.0.1:5600',
+  uuid: '',
 };

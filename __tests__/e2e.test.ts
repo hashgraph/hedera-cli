@@ -65,7 +65,7 @@ describe('End to end tests', () => {
     commands.networkCommands(program);
 
     // Act
-    program.parse(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
+    await program.parseAsync(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
 
     // Assert
     const network = stateController.get('network');
@@ -127,7 +127,7 @@ describe('End to end tests', () => {
     const backupName = 'e2e';
 
     // Act
-    program.parse([
+    await program.parseAsync([
       'node',
       'hedera-cli.ts',
       'backup',
@@ -144,7 +144,7 @@ describe('End to end tests', () => {
     commands.accountCommands(program);
 
     // Act
-    program.parse([
+    await program.parseAsync([
       'node',
       'hedera-cli.ts',
       'account',
@@ -161,7 +161,7 @@ describe('End to end tests', () => {
     commands.backupCommands(program);
 
     // Act
-    program.parse([
+    await program.parseAsync([
       'node',
       'hedera-cli.ts',
       'backup',
@@ -244,7 +244,7 @@ describe('End to end tests', () => {
 
     // Arrange: Delete script and verify it is deleted in state file
     // Act
-    program.parse([
+    await program.parseAsync([
       'node',
       'hedera-cli.ts',
       'script',
@@ -434,7 +434,7 @@ describe('End to end tests', () => {
     commands.networkCommands(program);
 
     // Act
-    program.parse(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
+    await program.parseAsync(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
 
     // Assert
     const network = stateController.get('network');

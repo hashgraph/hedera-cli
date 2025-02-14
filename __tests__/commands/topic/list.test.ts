@@ -24,7 +24,7 @@ describe("topic list command", () => {
         commands.topicCommands(program);
 
         // Act
-        program.parse(["node", "hedera-cli.ts", "topic", "list"]);
+        await program.parseAsync(["node", "hedera-cli.ts", "topic", "list"]);
 
         // Assert
         expect(logSpy).toHaveBeenCalledWith(`Topics:`);

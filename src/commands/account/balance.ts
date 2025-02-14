@@ -2,6 +2,7 @@ import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import accountUtils from '../../utils/account';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import telemetryUtils from '../../utils/telemetry';
 
 import type { Command } from '../../../types';
 
@@ -10,11 +11,14 @@ const logger = Logger.getInstance();
 export default (program: any) => {
   program
     .command('balance')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Retrieve the balance for an account ID or alias')

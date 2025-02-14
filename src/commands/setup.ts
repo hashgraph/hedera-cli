@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import * as os from 'os';
 
 import stateUtils from '../utils/state';
+import telemetryUtils from '../utils/telemetry';
 import config from '../state/config';
 import { Logger } from '../utils/logger';
 import accountUtils from '../utils/account';
@@ -15,6 +16,11 @@ const logger = Logger.getInstance();
 
 interface SetupOptions {
   path: string;
+  telemetry: boolean;
+}
+
+interface ReloadOptions {
+  telemetry: boolean;
 }
 
 /**
@@ -56,7 +62,11 @@ async function verifyOperatorBalance(
  * @param action Action to perform (init or reload)
  * @param envPath Path to the .env file
  */
-async function setupCLI(action: string, envPath: string = ''): Promise<void> {
+async function setupCLI(
+  action: string,
+  telemetry: boolean = false,
+  envPath: string = '',
+): Promise<void> {
   let finalPath = '';
   if (envPath !== '') {
     finalPath = path.normalize(envPath);
@@ -95,6 +105,7 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
     PREVIEWNET_OPERATOR_KEY,
     LOCALNET_OPERATOR_ID,
     LOCALNET_OPERATOR_KEY,
+    TELEMETRY_URL,
   } = process.env;
 
   let mainnetOperatorId = MAINNET_OPERATOR_ID || '';
@@ -167,6 +178,14 @@ async function setupCLI(action: string, envPath: string = ''): Promise<void> {
     localnetOperatorId,
     localnetOperatorKey,
   );
+
+  // Set telemetry server URL
+  let telemetryServer =
+    TELEMETRY_URL || 'https://hedera-cli-telemetry.onrender.com/track';
+  stateController.saveKey('telemetryServer', telemetryServer);
+  if (telemetry === true) {
+    stateController.saveKey('telemetry', 1);
+  }
 }
 
 export default (program: any) => {
@@ -174,37 +193,52 @@ export default (program: any) => {
 
   setup
     .command('init')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Setup the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
+    .option(
+      '--telemetry',
+      'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
+    )
     .action(async (options: SetupOptions) => {
       logger.verbose(
         'Initializing the CLI tool with the config and operator key and ID for different networks',
       );
-      await setupCLI('init', options.path);
+      await setupCLI('init', options.telemetry, options.path);
+      stateUtils.createUUID(); // Create a new UUID for the user if doesn't exist
     });
 
   setup
     .command('reload')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description('Reload the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
-    .action(async () => {
+    .option(
+      '--telemetry',
+      'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
+    )
+    .action(async (options: ReloadOptions) => {
       logger.verbose(
         'Reloading the CLI tool with operator key and ID for different networks',
       );
-      await setupCLI('reload');
+      await setupCLI('reload', options.telemetry);
     });
 };

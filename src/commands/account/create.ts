@@ -3,6 +3,7 @@ import { Logger } from '../../utils/logger';
 import { myParseInt } from '../../utils/verification';
 
 import accountUtils from '../../utils/account';
+import telemetryUtils from '../../utils/telemetry';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 import type { Command } from '../../../types';
@@ -12,11 +13,14 @@ const logger = Logger.getInstance();
 export default (program: any) => {
   program
     .command('create')
-    .hook('preAction', (thisCommand: Command) => {
+    .hook('preAction', async (thisCommand: Command) => {
       const command = [
         thisCommand.parent.action().name(),
         ...thisCommand.parent.args,
       ];
+      if (stateUtils.isTelemetryEnabled()) {
+        await telemetryUtils.recordCommand(command.join(' '));
+      }
       stateUtils.recordCommand(command);
     })
     .description(
