@@ -88,6 +88,7 @@ export interface State {
   mirrorNodePreviewnet: string;
   mirrorNodeTestnet: string;
   mirrorNodeMainnet: string;
+  telemetryServer: string;
   telemetry: number;
   recording: number;
   recordingScriptName: string;

@@ -105,6 +105,7 @@ async function setupCLI(
     PREVIEWNET_OPERATOR_KEY,
     LOCALNET_OPERATOR_ID,
     LOCALNET_OPERATOR_KEY,
+    TELEMETRY_URL,
   } = process.env;
 
   let mainnetOperatorId = MAINNET_OPERATOR_ID || '';
@@ -177,6 +178,11 @@ async function setupCLI(
     localnetOperatorId,
     localnetOperatorKey,
   );
+
+  // Set telemetry server URL
+  let telemetryServer =
+    TELEMETRY_URL || 'https://hedera-cli-telemetry.onrender.com/track';
+  stateController.saveKey('telemetryServer', telemetryServer);
 }
 
 export default (program: any) => {

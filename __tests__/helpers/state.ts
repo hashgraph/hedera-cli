@@ -13,6 +13,7 @@ export const baseState: State = {
   mirrorNodePreviewnet: 'https://previewnet.mirrornode.hedera.com/api/v1',
   mirrorNodeTestnet: 'https://testnet.mirrornode.hedera.com/api/v1',
   mirrorNodeMainnet: 'https://mainnet.mirrornode.hedera.com/api/v1',
+  telemetryServer: "https://hedera-cli-telemetry.onrender.com/track",
   telemetry: 0,
   recording: 0,
   recordingScriptName: '',

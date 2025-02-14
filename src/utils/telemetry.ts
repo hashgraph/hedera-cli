@@ -11,7 +11,10 @@ async function recordCommand(command: string) {
   try {
     // TODO: Replace with actual telemetry endpoint.
     // If .env contains a TELEMETRY_URL, use that instead otherwise use the default URL.
-    await fetch('http://localhost:3001/track', {
+    const telemetryUrl =
+      stateController.get('telemetryServer') ||
+      'https://hedera-cli-telemetry.onrender.com/track';
+    await fetch(telemetryUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
