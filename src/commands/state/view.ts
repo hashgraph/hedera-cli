@@ -18,7 +18,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('View state')
     .option('--accounts', 'View accounts', false)

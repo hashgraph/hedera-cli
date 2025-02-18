@@ -201,7 +201,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Setup the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
@@ -227,7 +226,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Reload the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')

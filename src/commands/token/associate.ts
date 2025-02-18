@@ -19,7 +19,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Associate a token with an account')
     .requiredOption(

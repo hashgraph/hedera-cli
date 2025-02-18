@@ -89,7 +89,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Create a new topic')
     .requiredOption('-m, --message <message>', 'Submit a message to the topic')
@@ -139,7 +138,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Find a message by sequence number')
     .option('-s, --sequence-number <sequenceNumber>', 'The sequence number')

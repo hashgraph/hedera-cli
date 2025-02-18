@@ -55,7 +55,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Load and execute a script')
     .requiredOption('-n, --name <name>', 'Name of script to load and execute')

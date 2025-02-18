@@ -19,7 +19,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Delete a script')
     .requiredOption('-n, --name <name>', 'Name of script to delete')

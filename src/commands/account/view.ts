@@ -19,7 +19,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description(
       'View the detials of an account by accound ID. The account can be in the state or external.',

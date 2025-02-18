@@ -24,7 +24,6 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
   - [Topic Commands](#topic-commands)
   - [Hbar Command](#hbar-command)
   - [Backup Commands](#backup-commands)
-  - [Record Commands](#record-commands)
   - [State Commands](#state-commands)
   - [Script Commands](#script-commands)
     - [Dynamic Variables in Scripts](#dynamic-variables-in-scripts)
@@ -184,7 +183,7 @@ LOCALNET_OPERATOR_KEY=302e020100300506032b65700422042091132178e72057a1d752802595
 
 Learn how to use the Hedera CLI Tool by watching the video below.
 
-[![Thumbnail video guide](https://img.youtube.com/vi/3XCkdtMzR14/0.jpg)](https://www.youtube.com/watch?v=3XCkdtMzR14 "Learn how to use the Hedera CLI")
+> Video coming soon ⚠️
 
 ## Commands
 
@@ -199,9 +198,8 @@ Let's explore the different commands, their options, and outputs.
 - [Topic Commands](#topic-commands): Create and manage topics
 - [Hbar Command](#hbar-command): Transfer hbars between accounts
 - [Backup Commands](#backup-commands): Create a backup of your state
-- [Record Commands](#record-commands): Record CLI interactions and store it in scripts
 - [State Commands](#state-commands): Manage the state of the CLI tool
-- [Script Commands](#script-commands): Replay and manage scripts containing recorded CLI interactions
+- [Script Commands](#script-commands): Replay and manage script blocks containing CLI commands
   - [Dynamic Variables in Scripts](#dynamic-variables-in-scripts): Use dynamic variables in scripts
 
 > Each of the commands can be run with the `--help` flag to display the command's options and usage.
@@ -753,37 +751,6 @@ hcli backup restore -f state.backup.1704321015228.json --restore-accounts --rest
 
 > **Note: If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.** You can still use the flags to restore only certain parts of the state.
 
-## Record Commands
-
-### Overview
-
-The `record` command in the Hedera CLI tool is designed for recording sequences of commands executed in the CLI. This feature is particularly useful for automating network operations or setting up testing environments by replaying recorded scripts containing commands.
-
-```sh
-record start
-record stop
-```
-
-#### Usage
-
-**1. Start Recording:**
-
-Initiates the recording of commands under a new script tag in your `dist/state.json` file. A unique script name must be provided to start recording. It also sets the `recording` variable in your state to `1` to indicate a recording is active.
-
-```sh
-hcli record start <script_name>
-```
-
-> **Note:** You can load other scripts (see "Script Commands" below) within your script. This allows you to combine different script blocks to build complex sequences.
-
-**2. Stop Recording:**
-
-Ends the current recording session. The recorded commands are saved under the script tag initiated with `start`.
-
-```sh
-hcli record stop
-```
-
 ## State Commands
 
 ### Overview
@@ -915,7 +882,7 @@ Flags:
 
 ### Overview
 
-The `script` command in the Hedera CLI tool allows users to load and execute previously recorded scripts. This command is particularly useful for automating repetitive tasks or for quickly setting up specific states or environments that have been captured in a script.
+The `script` command in the Hedera CLI tool allows users to load and execute script blocks. This command is particularly useful for automating repetitive tasks or for quickly setting up specific states or environments that have been captured in a script.
 
 ```sh
 script load
@@ -925,7 +892,7 @@ script delete
 
 #### Usage
 
-**1. Load and Execute Recorded Script:**
+**1. Load and Execute Script Blocks:**
 
 Loads a script by name from state and sequentially executes each command in the script.
 
@@ -1048,8 +1015,6 @@ Here's an example state:
   "previewnetOperatorId": "",
   "previewnetOperatorKey": "",
   "telemetry": 0,
-  "recording": 0,
-  "recordingScriptName": "",
   "scriptExecution": 0,
   "scriptExecutionName": "",
   "uuid": "",

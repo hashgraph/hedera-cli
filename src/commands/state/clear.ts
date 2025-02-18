@@ -42,7 +42,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Clear all state and reset to default')
     .option('-a, --skip-accounts', 'Skip resetting accounts', false)

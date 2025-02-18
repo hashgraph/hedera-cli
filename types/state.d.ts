@@ -90,8 +90,6 @@ export interface State {
   mirrorNodeMainnet: string;
   telemetryServer: string;
   telemetry: number;
-  recording: number;
-  recordingScriptName: string;
   scriptExecution: number;
   scriptExecutionName: string;
   accounts: Record<string, Account>;

@@ -20,7 +20,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Delete an account from the address book')
     .option('-a, --alias <alias>', 'account must have an alias')
