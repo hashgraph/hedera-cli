@@ -164,7 +164,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Create a backup of the state.json file')
     .option('--accounts', 'Backup the accounts')
@@ -191,7 +190,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Restore a backup of the full state')
     .option('-f, --file <filename>', 'Filename containing the state backup')

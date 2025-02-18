@@ -21,7 +21,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Wait for a specified number of seconds')
     .action(async (seconds: string) => {

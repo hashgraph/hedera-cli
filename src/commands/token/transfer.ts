@@ -20,7 +20,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Transfer a fungible token')
     .requiredOption('-t, --token-id <tokenId>', 'Token ID to transfer')

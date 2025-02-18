@@ -6,8 +6,6 @@ export default {
   mirrorNodeMainnet: 'https://mainnet.mirrornode.hedera.com/api/v1',
   telemetryServer: 'https://hedera-cli-telemetry.onrender.com/track',
   telemetry: 0,
-  recording: 0,
-  recordingScriptName: '',
   scriptExecution: 0,
   scriptExecutionName: '',
   accounts: {},

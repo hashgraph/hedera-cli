@@ -21,7 +21,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Create a new topic')
     .option('-a, --admin-key <adminKey>', 'The admin key')

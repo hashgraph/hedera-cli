@@ -201,7 +201,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Setup the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
@@ -213,6 +212,11 @@ export default (program: any) => {
       logger.verbose(
         'Initializing the CLI tool with the config and operator key and ID for different networks',
       );
+      if (!options.telemetry) {
+        logger.log(
+          'You don\'t have telmetry enabled. You can enable it by running "hcli setup init --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
+        );
+      }
       await setupCLI('init', options.telemetry, options.path);
       stateUtils.createUUID(); // Create a new UUID for the user if doesn't exist
     });
@@ -227,7 +231,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Reload the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
@@ -239,6 +242,11 @@ export default (program: any) => {
       logger.verbose(
         'Reloading the CLI tool with operator key and ID for different networks',
       );
+      if (!options.telemetry) {
+        logger.log(
+          'You don\'t have telmetry enabled. You can enable it by running "hcli setup reload --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
+        );
+      }
       await setupCLI('reload', options.telemetry);
     });
 };

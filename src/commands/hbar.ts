@@ -23,7 +23,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description('Transfer tinybars between accounts')
     .requiredOption('-b, --balance <balance>', 'Amount of tinybars to transfer')

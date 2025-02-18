@@ -19,7 +19,6 @@ export default (program: any) => {
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
-      stateUtils.recordCommand(command);
     })
     .description(
       'Import an existing account using an account ID, alias, type, and optional private key.',

@@ -9,18 +9,6 @@ import type { Account, DownloadState, Script, Token, Topic } from '../../types';
 
 const logger = Logger.getInstance();
 
-/** hook (middleware)
- * @example command ['account', 'create', '-b', '1000', '-t', 'ed25519']
- */
-function recordCommand(command: string[]): void {
-  const state = stateController.getAll();
-  if (state.recording === 1) {
-    state.scripts[state.recordingScriptName].commands.push(command.join(' '));
-
-    stateController.saveState(state);
-  }
-}
-
 /**
  * Generates a UUID when it doesn't exist
  */
@@ -315,8 +303,6 @@ function clearState(): void {
   state.topics = {};
   state.scriptExecution = 0;
   state.scriptExecutionName = '';
-  state.recording = 0;
-  state.recordingScriptName = '';
 
   stateController.saveState(state);
 }
@@ -465,7 +451,6 @@ const stateUtils = {
   getMirrorNodeURLByNetwork,
   getHederaClient,
   getOperator,
-  recordCommand,
   switchNetwork,
   getNetwork,
   addTokenAssociation,
