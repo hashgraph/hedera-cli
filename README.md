@@ -432,7 +432,7 @@ hcli account clear
 Deletes an account from the address book.
 
 ```sh
-hcli account delete -a,--alias <alias> -i,--id <id>
+hcli account delete [-a,--alias <alias>] [-i,--id <id>]
 ```
 
 Flags:
