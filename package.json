@@ -41,7 +41,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@hashgraph/sdk": "^2.59.0",
-    "axios": "^1.8.1",
+    "axios": "^1.8.2",
     "commander": "^11.0.0",
     "dotenv": "^16.4.7",
     "enquirer": "^2.4.1",
