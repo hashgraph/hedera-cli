@@ -181,9 +181,7 @@ export default (program: any) => {
     )
     .action(async (options: FindMessageOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id and sequence-number
-      logger.verbose(
-        `Finding message for topic: ${options.topicId}`,
-      );
+      logger.verbose(`Finding message for topic: ${options.topicId}`);
 
       // Define the keys of options we are interested in
       const sequenceNumberOptions: string[] = [

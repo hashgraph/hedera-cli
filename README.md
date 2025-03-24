@@ -998,6 +998,7 @@ Not each command exposes the same variables. Here's a list of commands and the v
 | --- | --- |
 | `account create` | `alias`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
 | `account import` | `alias`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
+| `account view` | `accountId`, `balance`, `evmAddress`, `type`, `maxAutomaticTokenAssociations` |
 | `token create` | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey` |
 | `token create-from-file` | `tokenId`, `name`, `symbol`, `treasuryId`, `treasuryKey`, `adminKey`, `pauseKey`, `kycKey`, `wipeKey`, `freezeKey`, `supplyKey`, `feeScheduleKey` |
 | `topic create` | `topicId`, `adminKey`, `submitKey` |
