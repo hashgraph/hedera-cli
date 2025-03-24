@@ -86,6 +86,9 @@ const commandActions: CommandActions = {
     create: {
       action: 'topicCreate',
     },
+    messageSubmit: {
+      action: 'topicMessageSubmit',
+    },
   },
 };
 
@@ -128,6 +131,9 @@ const commandOutputs: CommandOutputs = {
     adminKey: 'adminKey',
     submitKey: 'submitKey',
     topicId: 'topicId',
+  },
+  topicMessageSubmit: {
+    sequenceNumber: 'sequenceNumber',
   },
 };
 
