@@ -180,9 +180,9 @@ export default (program: any) => {
       'The sequence number not equal to',
     )
     .action(async (options: FindMessageOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for admin-key and submit-key
+      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id and sequence-number
       logger.verbose(
-        `Finding message for topic: ${options.topicId} and sequence number: ${options.sequenceNumber}`,
+        `Finding message for topic: ${options.topicId}`,
       );
 
       // Define the keys of options we are interested in
