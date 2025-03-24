@@ -433,7 +433,7 @@ hcli account clear
 
 **6. Delete an Account:**
 
-Deletes an account from the address book by its alias or ID. If you don't provide an alias or ID, the CLI tool will prompt you to select an account from your address book.
+Deletes an account from the address book by its alias or ID, don't use both at the same time. **If you don't provide an alias or ID, the CLI tool will prompt you to select an account from your address book.**
 
 ```sh
 hcli account delete [-a,--alias <alias>] [-i,--id <id>]
