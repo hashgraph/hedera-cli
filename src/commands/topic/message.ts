@@ -13,6 +13,7 @@ const logger = Logger.getInstance();
 interface SubmitMessageOptions {
   message: string;
   topicId: string;
+  args: string[];
 }
 
 interface FindMessageOptions {
@@ -90,11 +91,18 @@ export default (program: any) => {
         await telemetryUtils.recordCommand(command.join(' '));
       }
     })
-    .description('Create a new topic')
+    .description('Submit a message to a topic')
     .requiredOption('-m, --message <message>', 'Submit a message to the topic')
     .requiredOption('-t, --topic-id <topicId>', 'The topic ID')
+    .option(
+      '--args <args>',
+      'Store arguments for scripts',
+      (value: string, previous: string) =>
+        previous ? previous.concat(value) : [value],
+      [],
+    )
     .action(async (options: SubmitMessageOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for admin-key and submit-key
+      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id
       logger.verbose(`Submitting message to topic: ${options.topicId}`);
 
       const client = stateUtils.getHederaClient();
@@ -106,9 +114,9 @@ export default (program: any) => {
           message: options.message,
         }).freezeWith(client);
 
-        // Signing if submit key is set
+        // Signing if submit key is set (if it exists in the state - otherwise skip this step)
         const topics = stateController.get('topics');
-        if (topics[options.topicId].submitKey) {
+        if (topics[options.topicId] && topics[options.topicId].submitKey) {
           const submitKey = PrivateKey.fromStringDer(
             topics[options.topicId].submitKey,
           );
@@ -126,6 +134,11 @@ export default (program: any) => {
 
       logger.log(`Message submitted with sequence number: ${sequenceNumber}`);
       client.close();
+      dynamicVariablesUtils.storeArgs(
+        options.args,
+        dynamicVariablesUtils.commandActions.topic.messageSubmit.action,
+        { sequenceNumber: sequenceNumber.toString() },
+      );
     });
 
   message
@@ -167,10 +180,8 @@ export default (program: any) => {
       'The sequence number not equal to',
     )
     .action(async (options: FindMessageOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for admin-key and submit-key
-      logger.verbose(
-        `Finding message for topic: ${options.topicId} and sequence number: ${options.sequenceNumber}`,
-      );
+      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id and sequence-number
+      logger.verbose(`Finding message for topic: ${options.topicId}`);
 
       // Define the keys of options we are interested in
       const sequenceNumberOptions: string[] = [

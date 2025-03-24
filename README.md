@@ -357,17 +357,21 @@ account view
 
 **1. Create a New Account:**
 
-Initializes a new Hedera account with a specified alias, balance, and type. The balance and type are optional and have defaults if not specified.
+Initializes a new Hedera account with a specified alias, balance, and type. The balance and type are optional and have defaults if not specified. If you set the `--alias random` flag, the CLI tool will generate a random 20-character long alias.
 
 ```sh
 hcli account create -a,--alias <alias> [-b,--balance <balance>] [-t,--type <type>]
+
+// Example
+hcli account create -a alice -b 100000000 -t ECDSA
+hcli account create -a random
 ```
 
 Flags:
 
-- **Alias:** (required) A unique identifier for the new account.
-- **Balance:** (optional) Initial balance in tinybars. Defaults to 1000.
-- **Type:** (optional) The account type (`ECDSA` or `ED25519`). Defaults to `ED25519`.
+- **-a, --alias:** (required) A unique identifier for the new account. If you set the alias to `random`, the CLI tool will generate a random 20-character long alias.
+- **-b, --balance:** (optional) Initial balance in tinybars. Defaults to 1000.
+- **-t, --type:** (optional) The account type (`ECDSA` or `ED25519`). Defaults to `ED25519`.
 
 > **Note:** Setting the **`<alias>` to `random`** will generate a random 20-char long alias. This is useful for scripting functionality to avoid running into non-unique alias errors. It's not allowed to use the word **operator** as an alias or as part of an alias because it's reserved for the operator accounts.
 
@@ -393,13 +397,17 @@ Lists all accounts stored in the address book. An optional flag allows displayin
 ```sh
 hcli account list [-p,--private]
 
-// Output with -p flag
+// Example output with -p flag
 Accounts:
 - Alias: bob
   Account ID: 0.0.4536938
   Type: ECDSA
   Private Key: 30300201[...]
 ```
+
+Flags:
+
+- **-p, --private:** (optional) Displays private keys for each account.
 
 **4. Import an Existing Account:**
 
@@ -415,9 +423,9 @@ hcli account import -a alice -i 0.0.12450
 
 Flags:
 
-- **Alias:** (required) Alias for the imported account.
-- **Id:** (required) Account ID.
-- **Key:** (optional) Private key.
+- **-a, --alias:** (required) Set the alias for the imported account.
+- **-i, --id:** (required) Provide the account ID.
+- **-k, --key:** (optional) Provide private key for imported account.
 
 **5. Clear All Accounts:**
 
@@ -429,7 +437,7 @@ hcli account clear
 
 **6. Delete an Account:**
 
-Deletes an account from the address book.
+Deletes an account from the address book by its alias or ID, don't use both at the same time. **If you don't provide an alias or ID, the CLI tool will prompt you to select an account from your address book.**
 
 ```sh
 hcli account delete [-a,--alias <alias>] [-i,--id <id>]
@@ -605,8 +613,8 @@ hcli token transfer -t,--token-id <tokenId> --to <to> --from <from> -b,--balance
 Flags:
 
 - **Token ID:** (required) Token ID to transfer.
-- **To:** (required) Account ID to transfer the token to.
-- **From:** (required) Account ID to transfer the token from.
+- **To:** (required) Account ID to transfer the token to (Can be an alias or account ID).
+- **From:** (required) Account ID to transfer the token from (Can be an alias or account ID).
 - **Balance:** (required) Amount of token to transfer. For example, if the token has 2 decimals, you need to transfer 100 to transfer 1 token.
 
 ## Topic Commands
@@ -629,7 +637,7 @@ topic message find
 Creates a new topic with a specified memo, submit key, and admin key. If you don't provide any options, a public topic will be generated. Setting the submit key creates a private topic. If you don't set an admin key, the topic is immutable.
 
 ```sh
-hcli topic create [-s, --submit-key <submitKey>] [-a, --admin-key <adminKey>] [--memo <memo>]
+hcli topic create [-s,--submit-key <submitKey>] [-a,--admin-key <adminKey>] [--memo <memo>]
 ```
 
 Flags:
@@ -730,7 +738,7 @@ Flags:
 
 **2. Restoring Backup:**
 
-This command restores a backup of the `state.json` file stored in the same `dist/state` directory. It only restores state files with the format `state.backup.<timestamp>.json`.
+This command restores a backup of the `state.json` file stored in the same `dist/state` directory, it can't detect backups stored elsewhere. It only restores state files with the format `state.backup.<timestamp>.json`. If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.
 
 ```sh
 hcli backup restore -f,--file <filename> [--restore-accounts] [--restore-tokens] [--restore-scripts]
@@ -738,12 +746,12 @@ hcli backup restore -f,--file <filename> [--restore-accounts] [--restore-tokens]
 
 Flags:
 
-- **File:** (optional) Filename of the backup file to restore.
+- **File:** (optional) Filename of the backup file to restore. If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.
 - **Restore Accounts:** (optional) Restores the accounts section of the state.
 - **Restore Tokens:** (optional) Restores the tokens section of the state.
 - **Restore Scripts:** (optional) Restores the scripts section of the state.
 
-You can combine the flags to restore only certain parts of the state. For example, you can restore only the accounts and tokens section of the state by using the following command:
+Example: You can combine the flags to restore only certain parts of the state. For example, you can restore only the accounts and tokens section of the state by using the following command:
 
 ```sh
 hcli backup restore -f state.backup.1704321015228.json --restore-accounts --restore-tokens
@@ -869,7 +877,7 @@ Flags:
 Clears the state of the CLI tool. This command is useful for resetting the state to its initial state. Depending on the flags provided, it resets the entire state or skips certain parts of the state, such as the accounts, tokens, or scripts sections in your state. For example, this might be useful when you want to reset your state but keep your address book (`state.accounts`).
 
 ```sh
-hcli state clear [-a, --skip-accounts] [-t, --skip-tokens] [-s, --skip-scripts]
+hcli state clear [-a,--skip-accounts] [-t,--skip-tokens] [-s,--skip-scripts]
 ```
 
 Flags:
@@ -921,6 +929,8 @@ hcli script delete -n,--name <name>
 ### Dynamic Variables in Scripts
 
 The dynamic variables feature in our script execution command (`script load`) allows you to store variables during script execution and reference them in other commands within the script. This feature enhances script flexibility and reusability by enabling you to replace options with arguments or state variables, and store and retrieve variables as needed.
+
+**Here's a [list of all commands and the variables](#mapping-dynamic-variables-to-commands) they expose, which you can use in your scripts.**
 
 #### Example
 
@@ -988,8 +998,11 @@ Not each command exposes the same variables. Here's a list of commands and the v
 | --- | --- |
 | `account create` | `alias`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
 | `account import` | `alias`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
+| `account view` | `accountId`, `balance`, `evmAddress`, `type`, `maxAutomaticTokenAssociations` |
 | `token create` | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey` |
 | `token create-from-file` | `tokenId`, `name`, `symbol`, `treasuryId`, `treasuryKey`, `adminKey`, `pauseKey`, `kycKey`, `wipeKey`, `freezeKey`, `supplyKey`, `feeScheduleKey` |
+| `topic create` | `topicId`, `adminKey`, `submitKey` |
+| `topic message submit` | `sequenceNumber` |
 
 # CLI State
 

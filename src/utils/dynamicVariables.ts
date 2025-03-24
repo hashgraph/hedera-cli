@@ -71,6 +71,9 @@ const commandActions: CommandActions = {
     import: {
       action: 'accountImport',
     },
+    view: {
+      action: 'accountView',
+    },
   },
   token: {
     // associate
@@ -85,6 +88,9 @@ const commandActions: CommandActions = {
   topic: {
     create: {
       action: 'topicCreate',
+    },
+    messageSubmit: {
+      action: 'topicMessageSubmit',
     },
   },
 };
@@ -103,6 +109,13 @@ const accountOutput: Record<string, string> = {
 const commandOutputs: CommandOutputs = {
   accountCreate: accountOutput,
   accountImport: accountOutput,
+  accountView: {
+    accountId: 'accountId',
+    balance: 'balance',
+    evmAddress: 'evmAddress',
+    type: 'type',
+    maxAutomaticTokenAssociations: 'maxAutomaticTokenAssociations',
+  },
   tokenCreate: {
     tokenId: 'tokenId',
     name: 'name',
@@ -128,6 +141,9 @@ const commandOutputs: CommandOutputs = {
     adminKey: 'adminKey',
     submitKey: 'submitKey',
     topicId: 'topicId',
+  },
+  topicMessageSubmit: {
+    sequenceNumber: 'sequenceNumber',
   },
 };
 
