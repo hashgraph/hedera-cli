@@ -930,6 +930,8 @@ hcli script delete -n,--name <name>
 
 The dynamic variables feature in our script execution command (`script load`) allows you to store variables during script execution and reference them in other commands within the script. This feature enhances script flexibility and reusability by enabling you to replace options with arguments or state variables, and store and retrieve variables as needed.
 
+**Here's a [list of all commands and the variables](#mapping-dynamic-variables-to-commands) they expose, which you can use in your scripts.**
+
 #### Example
 
 Let's look at an example of how dynamic variables work. In this example, we'll create a script that creates a random account and stores the privateKey in a variable called `tokenMichielAdminKey` and the account alias in a variable called `accountAlias`. We'll then use these variables to create a new token. Funnily, we are using the `accountAlias` variable to set the token name.
@@ -998,6 +1000,7 @@ Not each command exposes the same variables. Here's a list of commands and the v
 | `account import` | `alias`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
 | `token create` | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey` |
 | `token create-from-file` | `tokenId`, `name`, `symbol`, `treasuryId`, `treasuryKey`, `adminKey`, `pauseKey`, `kycKey`, `wipeKey`, `freezeKey`, `supplyKey`, `feeScheduleKey` |
+| `topic create` | `topicId`, `adminKey`, `submitKey` |
 
 # CLI State
 
