@@ -613,8 +613,8 @@ hcli token transfer -t,--token-id <tokenId> --to <to> --from <from> -b,--balance
 Flags:
 
 - **Token ID:** (required) Token ID to transfer.
-- **To:** (required) Account ID to transfer the token to.
-- **From:** (required) Account ID to transfer the token from.
+- **To:** (required) Account ID to transfer the token to (Can be an alias or account ID).
+- **From:** (required) Account ID to transfer the token from (Can be an alias or account ID).
 - **Balance:** (required) Amount of token to transfer. For example, if the token has 2 decimals, you need to transfer 100 to transfer 1 token.
 
 ## Topic Commands
@@ -637,7 +637,7 @@ topic message find
 Creates a new topic with a specified memo, submit key, and admin key. If you don't provide any options, a public topic will be generated. Setting the submit key creates a private topic. If you don't set an admin key, the topic is immutable.
 
 ```sh
-hcli topic create [-s, --submit-key <submitKey>] [-a, --admin-key <adminKey>] [--memo <memo>]
+hcli topic create [-s,--submit-key <submitKey>] [-a,--admin-key <adminKey>] [--memo <memo>]
 ```
 
 Flags:
@@ -738,7 +738,7 @@ Flags:
 
 **2. Restoring Backup:**
 
-This command restores a backup of the `state.json` file stored in the same `dist/state` directory. It only restores state files with the format `state.backup.<timestamp>.json`.
+This command restores a backup of the `state.json` file stored in the same `dist/state` directory, it can't detect backups stored elsewhere. It only restores state files with the format `state.backup.<timestamp>.json`. If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.
 
 ```sh
 hcli backup restore -f,--file <filename> [--restore-accounts] [--restore-tokens] [--restore-scripts]
@@ -746,12 +746,12 @@ hcli backup restore -f,--file <filename> [--restore-accounts] [--restore-tokens]
 
 Flags:
 
-- **File:** (optional) Filename of the backup file to restore.
+- **File:** (optional) Filename of the backup file to restore. If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.
 - **Restore Accounts:** (optional) Restores the accounts section of the state.
 - **Restore Tokens:** (optional) Restores the tokens section of the state.
 - **Restore Scripts:** (optional) Restores the scripts section of the state.
 
-You can combine the flags to restore only certain parts of the state. For example, you can restore only the accounts and tokens section of the state by using the following command:
+Example: You can combine the flags to restore only certain parts of the state. For example, you can restore only the accounts and tokens section of the state by using the following command:
 
 ```sh
 hcli backup restore -f state.backup.1704321015228.json --restore-accounts --restore-tokens
@@ -877,7 +877,7 @@ Flags:
 Clears the state of the CLI tool. This command is useful for resetting the state to its initial state. Depending on the flags provided, it resets the entire state or skips certain parts of the state, such as the accounts, tokens, or scripts sections in your state. For example, this might be useful when you want to reset your state but keep your address book (`state.accounts`).
 
 ```sh
-hcli state clear [-a, --skip-accounts] [-t, --skip-tokens] [-s, --skip-scripts]
+hcli state clear [-a,--skip-accounts] [-t,--skip-tokens] [-s,--skip-scripts]
 ```
 
 Flags:
