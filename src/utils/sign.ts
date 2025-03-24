@@ -4,7 +4,13 @@ import { Logger } from './logger';
 
 const logger = Logger.getInstance();
 
-const signingRequirements: Record<string, Record<string, string[]>> = {
+interface SigningRequirements {
+  [action: string]: {
+    sign: string[];
+  };
+}
+
+const signingRequirements: SigningRequirements = {
   tokenCreate: {
     sign: ['treasuryKey', 'adminKey'],
   },

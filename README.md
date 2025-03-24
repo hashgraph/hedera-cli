@@ -357,15 +357,19 @@ account view
 
 **1. Create a New Account:**
 
-Initializes a new Hedera account with a specified alias, balance, and type. The balance and type are optional and have defaults if not specified.
+Initializes a new Hedera account with a specified alias, balance, and type. The balance and type are optional and have defaults if not specified. If you set the `--alias random` flag, the CLI tool will generate a random 20-character long alias.
 
 ```sh
 hcli account create -a,--alias <alias> [-b,--balance <balance>] [-t,--type <type>]
+
+// Example
+hcli account create -a alice -b 100000000 -t ECDSA
+hcli account create -a random
 ```
 
 Flags:
 
-- **Alias:** (required) A unique identifier for the new account.
+- **Alias:** (required) A unique identifier for the new account. If you set the alias to `random`, the CLI tool will generate a random 20-character long alias.
 - **Balance:** (optional) Initial balance in tinybars. Defaults to 1000.
 - **Type:** (optional) The account type (`ECDSA` or `ED25519`). Defaults to `ED25519`.
 
