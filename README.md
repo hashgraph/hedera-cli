@@ -1001,6 +1001,7 @@ Not each command exposes the same variables. Here's a list of commands and the v
 | `token create` | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey` |
 | `token create-from-file` | `tokenId`, `name`, `symbol`, `treasuryId`, `treasuryKey`, `adminKey`, `pauseKey`, `kycKey`, `wipeKey`, `freezeKey`, `supplyKey`, `feeScheduleKey` |
 | `topic create` | `topicId`, `adminKey`, `submitKey` |
+| `topic message submit` | `sequenceNumber` |
 
 # CLI State
 
