@@ -369,9 +369,9 @@ hcli account create -a random
 
 Flags:
 
-- **Alias:** (required) A unique identifier for the new account. If you set the alias to `random`, the CLI tool will generate a random 20-character long alias.
-- **Balance:** (optional) Initial balance in tinybars. Defaults to 1000.
-- **Type:** (optional) The account type (`ECDSA` or `ED25519`). Defaults to `ED25519`.
+- **-a, --alias:** (required) A unique identifier for the new account. If you set the alias to `random`, the CLI tool will generate a random 20-character long alias.
+- **-b, --balance:** (optional) Initial balance in tinybars. Defaults to 1000.
+- **-t, --type:** (optional) The account type (`ECDSA` or `ED25519`). Defaults to `ED25519`.
 
 > **Note:** Setting the **`<alias>` to `random`** will generate a random 20-char long alias. This is useful for scripting functionality to avoid running into non-unique alias errors. It's not allowed to use the word **operator** as an alias or as part of an alias because it's reserved for the operator accounts.
 
@@ -397,13 +397,17 @@ Lists all accounts stored in the address book. An optional flag allows displayin
 ```sh
 hcli account list [-p,--private]
 
-// Output with -p flag
+// Example output with -p flag
 Accounts:
 - Alias: bob
   Account ID: 0.0.4536938
   Type: ECDSA
   Private Key: 30300201[...]
 ```
+
+Flags:
+
+- **-p, --private:** (optional) Displays private keys for each account.
 
 **4. Import an Existing Account:**
 
@@ -419,9 +423,9 @@ hcli account import -a alice -i 0.0.12450
 
 Flags:
 
-- **Alias:** (required) Alias for the imported account.
-- **Id:** (required) Account ID.
-- **Key:** (optional) Private key.
+- **-a, --alias:** (required) Set the alias for the imported account.
+- **-i, --id:** (required) Provide the account ID.
+- **-k, --key:** (optional) Provide private key for imported account.
 
 **5. Clear All Accounts:**
 
