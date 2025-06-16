@@ -24,7 +24,7 @@ module.exports = {
   networks: {
     /*testnet: {
       url: stateController.default.get('rpcUrlTestnet'),
-      accounts: [stateController.default.get('testnetOperatorKey')],
+      accounts: ["<your-hex-private-key>"],
     },*/
     local: {
       url: 'http://localhost:7546',
