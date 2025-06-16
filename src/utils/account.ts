@@ -163,7 +163,7 @@ function listAccounts(showPrivateKeys: boolean = false): void {
       logger.log(
         `${alias}, ${account.accountId}, ${account.type.toUpperCase()}, ${
           account.privateKey
-        }`
+        }`,
       );
     } else {
       logger.log('Alias, account ID, type\n');
