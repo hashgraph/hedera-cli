@@ -287,11 +287,94 @@ hcli telemetry disable
 
 ### Overview
 
-The smart contract command in the Hedera CLI tool is designed to manage and interact with smart contracts on the Hedera network. It allows users to deploy, call, and view smart contracts, providing a comprehensive set of functionalities for working with smart contracts. The CLI tool uses **Hardhat for all its interactions**.
+The CLI tool uses Hardhat for all smart contract interactions. There are no dedicated commands for smart contracts in the CLI tool. Instead, you can use the Hardhat commands to deploy and interact with smart contracts. 
+
+### Contract Storage
+
+Contracts are stored in the **`src/contracts` folder**. You can create a new contract by adding a new file in this folder. By default, you can find an `erc20.sol` and `erc721.sol` files.
+
+### Hardhat Scripts
+
+To deploy a smart contract and interact with it, you can use the Hardhat scripts. The CLI tool stores the scripts in the **`src/contracts/scripts` folder**. You can create a new script by adding a new file in this folder. By default, you can find a `deploy.js` file that demonstrates how to deploy the `erc20.sol` contract.
+
+### Running Hardhat Commands
+
+Make sure the your `hardhat.config.js` file is configured correctly to interact with one of the Hedera networks. By default, the CLI tool uses the `local` network, which is configured for the Hedera Local Node. You can add the `mainnet`, `testnet`, or `previewnet` networks to the Hardhat configuration file. 
+
+```json
+{ 
+  // ... other Hardhat configuration options
+  defaultNetwork: 'local',
+  networks: {
+    /*testnet: {
+      url: stateController.default.get('rpcUrlTestnet'),
+      accounts: ["<your-hex-private-key>"],
+    },*/
+    local: {
+      url: 'http://localhost:7546',
+      accounts: [
+        '0x105d050185ccb907fba04dd92d8de9e32c18305e097ab41dadda21489a211524',
+        '0x2e1d968b041d84dd120a5860cee60cd83f9374ef527ca86996317ada3d0d03e7'
+      ],
+      chainId: 298,
+    },
+  }
+}
+```
+
+To run a script, make sure to point to the `dist` folder (after running `npm run build`) and use the `hardhat run` command. For example, to deploy the `erc20.sol` contract, you can run the following command in the root of the CLI tool:
 
 ```sh
-smartcontract compile
+npx hardhat run ./dist/contracts/scripts/deploy.js
 ```
+
+### Integrating Hardhat with the CLI Scripts Feature
+
+The script feature let's you execute script blocks. Here's how you can integrate Hardhat commands into the CLI tool's script feature:
+
+```json
+"scripts": {
+    "script-deploy": {
+      "name": "deploy",
+      "creation": 1742830623351,
+      "commands": [
+        "smartcontract compile",
+        "npx hardhat run ./dist/contracts/scripts/deploy.js"
+      ],
+      "args": {}
+    }
+}
+```
+
+Next, it's possible to interact with the CLI state from a Hardhat script. You can use the `stateController` to store variables in the `memory` slot of the CLI tool or load stored variables in other scripts. For example, after deploying a contract, you can store the contract address in the `memory` slot of the CLI tool and later load this variable in another script. Here's how you can do this:
+
+```javascript
+const stateController = require('../../state/stateController.js');
+
+async function main() {
+  const [deployer] = await ethers.getSigners();
+
+  console.log('Deploying contracts with the account:', deployer.address);
+
+  // The deployer will also be the owner of our token contract
+  const MyToken = await ethers.getContractFactory('MyToken', deployer);
+  const contract = await MyToken.deploy(deployer.address);
+
+  console.log('Contract deployed at:', contract.target);
+
+  // Store address in state memory
+  const memory = stateController.default.get('memory');
+  let newMemory = { ...memory };
+  newMemory['erc20address'] = contract.target;
+  stateController.default.saveKey('memory', newMemory);
+}
+
+main().catch(console.error);
+```
+
+In this example, the `erc20address` variable is stored in the `memory` slot of the CLI tool. You can then use this variable in other scripts by loading it from the state (`stateController.default.get('memory')`) and using it in your Hardhat scripts. 
+
+_Don't forget to use the `default` export of the `stateController` module to access the state methods as we are working in the CommonJS module format._
 
 ## Network Commands
 
