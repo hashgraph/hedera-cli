@@ -17,6 +17,7 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
 - [Commands](#commands)
   - [Setup Commands](#setup-commands)
   - [Telemetry Commands](#telemetry-commands)
+  - [Smart Contract Commands](#smart-contract-commands)
   - [Network Commands](#network-commands)
   - [Wait Command](#wait-command)
   - [Account Commands](#account-commands)
@@ -280,6 +281,16 @@ This command disables telemetry and sets the `telemetry` variable in the state t
 
 ```sh
 hcli telemetry disable
+```
+
+## Smart Contract Commands
+
+### Overview
+
+The smart contract command in the Hedera CLI tool is designed to manage and interact with smart contracts on the Hedera network. It allows users to deploy, call, and view smart contracts, providing a comprehensive set of functionalities for working with smart contracts. The CLI tool uses **Hardhat for all its interactions**.
+
+```sh
+smartcontract compile
 ```
 
 ## Network Commands

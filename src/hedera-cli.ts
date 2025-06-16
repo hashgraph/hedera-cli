@@ -29,6 +29,5 @@ commands.tokenCommands(program);
 commands.hbarCommands(program);
 commands.waitCommands(program);
 commands.topicCommands(program);
-commands.smartcontractCommands(program);
 
 program.parseAsync(process.argv);
