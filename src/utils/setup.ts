@@ -1,4 +1,4 @@
-import { AccountId } from '@hashgraph/sdk';
+import { AccountId, PrivateKey } from '@hashgraph/sdk';
 import stateController from '../state/stateController';
 import accountUtils from './account';
 
@@ -27,6 +27,9 @@ function setupOperatorAccounts(
   newState.localnetOperatorId = localnetOperatorId;
 
   if (testnetOperatorId) {
+    const privateTestnetKeyEcdsa = PrivateKey.fromStringDer(testnetOperatorKey);
+    newState.testnetOperatorKeyHex = `0x${privateTestnetKeyEcdsa.toStringRaw()}`;
+
     const privateKeyObject =
       accountUtils.getPrivateKeyObject(testnetOperatorKey);
     const type = accountUtils.getKeyType(testnetOperatorKey);
@@ -50,6 +53,11 @@ function setupOperatorAccounts(
   }
 
   if (previewnetOperatorId) {
+    const privatePreviewnetKeyEcdsa = PrivateKey.fromStringDer(
+      previewnetOperatorKey,
+    );
+    newState.previewnetOperatorKeyHex = `0x${privatePreviewnetKeyEcdsa.toStringRaw()}`;
+
     const privateKeyObject = accountUtils.getPrivateKeyObject(
       previewnetOperatorKey,
     );
@@ -74,6 +82,9 @@ function setupOperatorAccounts(
   }
 
   if (mainnetOperatorId) {
+    const privateMainnetKeyEcdsa = PrivateKey.fromStringDer(mainnetOperatorKey);
+    newState.mainnetOperatorKeyHex = `0x${privateMainnetKeyEcdsa.toStringRaw()}`;
+
     const privateKeyObject =
       accountUtils.getPrivateKeyObject(mainnetOperatorKey);
     const type = accountUtils.getKeyType(mainnetOperatorKey);
@@ -97,6 +108,10 @@ function setupOperatorAccounts(
   }
 
   if (localnetOperatorId) {
+    const privateLocalnetKeyEcdsa =
+      PrivateKey.fromStringDer(localnetOperatorKey);
+    newState.localnetOperatorKeyHex = `0x${privateLocalnetKeyEcdsa.toStringRaw()}`;
+
     const privateKeyObject =
       accountUtils.getPrivateKeyObject(localnetOperatorKey);
     const type = accountUtils.getKeyType(localnetOperatorKey);

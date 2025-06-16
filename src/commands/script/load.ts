@@ -31,6 +31,13 @@ function loadScript(name: string) {
   script.commands.forEach((command) => {
     logger.log(`\nExecuting command: \t${command}`);
 
+    if (command.startsWith('npx ')) {
+      // If the command starts with 'npx', we can execute it directly
+      execSync(command, { stdio: 'inherit' });
+      return;
+    }
+
+    // For other commands, we need to run the hedera-cli.js script
     try {
       execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
     } catch (error: any) {
