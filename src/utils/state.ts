@@ -12,7 +12,7 @@ const logger = Logger.getInstance();
 /**
  * Generates a UUID when it doesn't exist
  */
-function createUUID() {
+function createUUID(): void {
   const uuid = stateController.get('uuid');
   if (uuid === '' || !uuid) {
     const newUUID = uuidv4();

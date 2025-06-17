@@ -11,11 +11,8 @@ async function main() {
 
   console.log('Contract deployed at:', contract.target);
 
-  // Store address in state memory
-  const memory = stateController.default.get('memory');
-  let newMemory = { ...memory };
-  newMemory['erc20address'] = contract.target;
-  stateController.default.saveKey('memory', newMemory);
+  // Store address in state memory as "erc20address"
+  stateController.default.saveToMemory('erc20address', contract.target);
 }
 
 main().catch(console.error);

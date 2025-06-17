@@ -322,6 +322,8 @@ Make sure the your `hardhat.config.js` file is configured correctly to interact 
 }
 ```
 
+_Note: If you configure an account but don't provide a URL or accounts array, the CLI tool will fail upon starting. Make sure to provide a valid URL and accounts array for the network you want to use. If you don't want to use a network, leave it commented out._
+
 To run a script, make sure to point to the `dist` folder (after running `npm run build`) and use the `hardhat run` command. For example, to deploy the `erc20.sol` contract, you can run the following command in the root of the CLI tool:
 
 ```sh
@@ -346,7 +348,7 @@ The script feature let's you execute script blocks. Here's how you can integrate
 }
 ```
 
-Next, it's possible to interact with the CLI state from a Hardhat script. You can use the `stateController` to store variables in the `memory` slot of the CLI tool or load stored variables in other scripts. For example, after deploying a contract, you can store the contract address in the `memory` slot of the CLI tool and later load this variable in another script. Here's how you can do this:
+Next, it's possible to interact with the CLI state from a Hardhat script. You can use the `stateController` to store variables in the `memory` slot of the CLI tool or load stored variables in other scripts. For example, after deploying a contract, you can store the contract address in the memory labeled as `erc20address`. Here's how you can do this:
 
 ```javascript
 const stateController = require('../../state/stateController.js');
@@ -362,11 +364,8 @@ async function main() {
 
   console.log('Contract deployed at:', contract.target);
 
-  // Store address in state memory
-  const memory = stateController.default.get('memory');
-  let newMemory = { ...memory };
-  newMemory['erc20address'] = contract.target;
-  stateController.default.saveKey('memory', newMemory);
+  // Store address in state memory as "erc20address"
+  stateController.default.saveToMemory('erc20address', contract.target);
 }
 
 main().catch(console.error);
