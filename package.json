@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/hedera-cli",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "CLI tool to manage and setup developer environments for Hedera Hashgraph.",
   "main": "hedera-cli.js",
   "target": "esnext",
@@ -41,9 +41,9 @@
   "author": "Michiel Mulders",
   "license": "Apache-2.0",
   "dependencies": {
-    "@hashgraph/sdk": "^2.59.0",
     "@openzeppelin/contracts": "^5.2.0",
-    "axios": "^1.8.1",
+    "@hashgraph/sdk": "^2.62.0",
+    "axios": "^1.8.4",
     "commander": "^11.0.0",
     "dotenv": "^16.4.7",
     "enquirer": "^2.4.1",
@@ -52,21 +52,21 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.15.30",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "copyfiles": "^2.4.1",
     "eslint": "^8.55.0",
     "eslint-config-airbnb-typescript": "^18.0.0",
-    "eslint-config-prettier": "^10.0.2",
-    "eslint-plugin-prettier": "^5.2.3",
     "hardhat": "^2.22.19",
     "hardhat-deploy": "^1.0.3",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
-    "prettier": "^3.5.2",
+    "prettier": "^3.5.3",
     "rimraf": "^5.0.5",
-    "ts-jest": "^29.2.6",
-    "typescript": "^5.7.3"
+    "ts-jest": "^29.3.2",
+    "typescript": "^5.8.3"
   }
 }

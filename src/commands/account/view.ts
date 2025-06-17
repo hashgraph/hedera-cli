@@ -23,9 +23,18 @@ export default (program: any) => {
     .description(
       'View the detials of an account by accound ID. The account can be in the state or external.',
     )
+    // We don't allow an alias here as you can use the state command to view accounts by alias
+    // This command is used to look up external accounts via mirror node
     .requiredOption('-i, --id <id>', 'Account ID')
+    .option(
+      '--args <args>',
+      'Store arguments for scripts',
+      (value: string, previous: string) =>
+        previous ? previous.concat(value) : [value],
+      [],
+    )
     .action(async (options: ViewAccountOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options);
+      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic var for id
       logger.verbose(`Viewing account ${options.id} details`);
 
       try {
@@ -40,6 +49,18 @@ export default (program: any) => {
         logger.log(
           `Max automatic token associations: ${response.data.max_automatic_token_associations}`,
         );
+
+        dynamicVariablesUtils.storeArgs(
+          options.args,
+          dynamicVariablesUtils.commandActions.account.view.action,
+          {
+            accountId: response.data.account,
+            balance: response.data.balance.balance,
+            evmAddress: response.data.evm_address,
+            type: response.data.key._type,
+            maxAutomaticTokenAssociations: response.data.max_automatic_token_associations,
+          },
+        );
       } catch (error) {
         logger.error('Failed to get account info:', error as object);
       }
@@ -48,4 +69,5 @@ export default (program: any) => {
 
 interface ViewAccountOptions {
   id: string;
+  args: string[];
 }
