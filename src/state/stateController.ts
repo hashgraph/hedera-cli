@@ -25,7 +25,7 @@ const saveKey = (key: string, value: any) => {
 const saveToMemory = (key: string, value: any) => {
   const memory = state.get('memory');
   memory[key] = value;
-  stateController.saveKey('memory', memory);
+  saveKey('memory', memory);
 };
 
 const stateController = {
