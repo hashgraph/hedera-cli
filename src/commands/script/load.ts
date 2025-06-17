@@ -1,7 +1,7 @@
 import stateController from '../../state/stateController';
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import { Logger } from '../../utils/logger';
 
 import type { Command, Script } from '../../../types';
@@ -32,7 +32,7 @@ function loadScript(name: string) {
     logger.log(`\nExecuting command: \t${command}`);
 
     // If the command starts with 'npx', we can execute it directly
-    if (command.startsWith('hardhat')) {
+    if (command.startsWith('npx')) {
       // Verify that the command is safe to execute
       if (command.includes('&&') || command.includes(';')) {
         logger.error('Unsafe command detected. Please check the script.');
@@ -41,8 +41,11 @@ function loadScript(name: string) {
       }
 
       try {
-        const executeCommand = `npx ${command}`;
-        execSync(executeCommand, { stdio: 'inherit' });
+        const [cmd, ...args] = command.split(' ');
+        execFileSync(cmd, args, { stdio: 'inherit' });
+
+        //const executeCommand = `npx ${command}`;
+        //execSync(executeCommand, { stdio: 'inherit' });
       } catch (error: any) {
         logger.error('Unable to execute command', error.message || error);
         stateUtils.stopScriptExecution();
