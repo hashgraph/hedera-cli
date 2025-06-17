@@ -1,5 +1,13 @@
 const stateController = require('../../state/stateController.js');
 
+/**
+ * Purpose: Deploys an ERC20 token contract and saves its address in state memory.
+ * 
+ * Storage:
+ *  - erc20address: The address of the deployed ERC20 token contract
+ * 
+ * Read: /
+ */
 async function main() {
   const [deployer] = await ethers.getSigners();
 

@@ -31,7 +31,7 @@ function loadScript(name: string) {
   script.commands.forEach((command) => {
     logger.log(`\nExecuting command: \t${command}`);
 
-    if (command.startsWith('npx hardhat')) {
+    if (command.startsWith('hardhat')) {
       // If the command starts with 'npx', we can execute it directly
 
       // Verify that the command is safe to execute
@@ -42,7 +42,7 @@ function loadScript(name: string) {
       }
 
       try {
-        execSync(`${command}`, { stdio: 'inherit' });
+        execSync(`npx ${command}`, { stdio: 'inherit' });
       } catch (error: any) {
         logger.error('Unable to execute command', error.message || error);
         stateUtils.stopScriptExecution();

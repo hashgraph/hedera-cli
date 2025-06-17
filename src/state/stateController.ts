@@ -28,12 +28,23 @@ const saveToMemory = (key: string, value: any) => {
   saveKey('memory', memory);
 };
 
+/**
+ * Get data from memory
+ * @param {string} key - The key to retrieve the data from
+ * @returns {any} - The value stored under the key, or undefined if not found
+ */
+const getFromMemory = (key: string) => {
+  const memory = state.get('memory');
+  return memory[key];
+};
+
 const stateController = {
   getAll,
   saveState,
   saveKey,
   get,
   saveToMemory,
+  getFromMemory,
 };
 
 export default stateController;
