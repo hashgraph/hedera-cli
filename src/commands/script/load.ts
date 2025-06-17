@@ -31,8 +31,16 @@ function loadScript(name: string) {
   script.commands.forEach((command) => {
     logger.log(`\nExecuting command: \t${command}`);
 
-    if (command.startsWith('npx ')) {
+    if (command.startsWith('npx hardhat')) {
       // If the command starts with 'npx', we can execute it directly
+
+      // Verify that the command is safe to execute
+      if (command.includes('&&') || command.includes(';')) {
+        logger.error('Unsafe command detected. Please check the script.');
+        stateUtils.stopScriptExecution();
+        process.exit(1);
+      }
+
       try {
         execSync(`${command}`, { stdio: 'inherit' });
       } catch (error: any) {
