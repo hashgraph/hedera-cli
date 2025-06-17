@@ -6,8 +6,8 @@ async function main() {
   console.log('Deploying contracts with the account:', deployer.address);
 
   // The deployer will also be the owner of our token contract
-  const MyToken = await ethers.getContractFactory('MyToken', deployer);
-  const contract = await MyToken.deploy(deployer.address);
+  const ERC20Token = await ethers.getContractFactory('ERC20Token', deployer);
+  const contract = await ERC20Token.deploy(deployer.address);
 
   console.log('Contract deployed at:', contract.target);
 

@@ -33,7 +33,13 @@ function loadScript(name: string) {
 
     if (command.startsWith('npx ')) {
       // If the command starts with 'npx', we can execute it directly
-      execSync(command, { stdio: 'inherit' });
+      try {
+        execSync(`${command}`, { stdio: 'inherit' });
+      } catch (error: any) {
+        logger.error('Unable to execute command', error.message || error);
+        stateUtils.stopScriptExecution();
+        process.exit(1);
+      }
       return;
     }
 
