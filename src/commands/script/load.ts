@@ -31,9 +31,8 @@ function loadScript(name: string) {
   script.commands.forEach((command) => {
     logger.log(`\nExecuting command: \t${command}`);
 
-    if (command.startsWith('hardhat')) {
-      // If the command starts with 'npx', we can execute it directly
-
+    // If the command starts with 'npx', we can execute it directly
+    if (!command.startsWith('hardhat')) {
       // Verify that the command is safe to execute
       if (command.includes('&&') || command.includes(';')) {
         logger.error('Unsafe command detected. Please check the script.');
@@ -48,16 +47,15 @@ function loadScript(name: string) {
         stateUtils.stopScriptExecution();
         process.exit(1);
       }
-      return;
-    }
-
-    // For other commands, we need to run the hedera-cli.js script
-    try {
-      execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
-    } catch (error: any) {
-      logger.error('Unable to execute command', error.message || error);
-      stateUtils.stopScriptExecution();
-      process.exit(1);
+    } else {
+      // For other commands, we need to run the hedera-cli.js script
+      try {
+        execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
+      } catch (error: any) {
+        logger.error('Unable to execute command', error.message || error);
+        stateUtils.stopScriptExecution();
+        process.exit(1);
+      }
     }
   });
 
