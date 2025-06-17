@@ -22,9 +22,20 @@ module.exports = {
   },
   defaultNetwork: 'local',
   networks: {
+    /*mainnet: {
+      url: stateController.default.get('rpcUrlMainnet'),
+      accounts: ["<your-hex-private-key>"],
+      chainId: 295,
+    },*/
     /*testnet: {
       url: stateController.default.get('rpcUrlTestnet'),
       accounts: ["<your-hex-private-key>"],
+      chainId: 296,
+    },*/
+    /*previewnet: {
+      url: stateController.default.get('rpcUrlPreviewnet'),
+      accounts: ["<your-hex-private-key>"],
+      chainId: 297,
     },*/
     local: {
       url: 'http://localhost:7546',
