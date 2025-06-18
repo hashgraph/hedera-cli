@@ -4,15 +4,22 @@
   "mirrorNodePreviewnet": "https://previewnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
   "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
+  "rpcUrlMainnet": "https://mainnet.hashio.io/api",
+  "rpcUrlTestnet": "https://testnet.hashio.io/api",
+  "rpcUrlPreviewnet": "https://previewnet.hashio.io/api",
+  "rpcUrlLocalnet": "http://localhost:7546",
   "telemetryServer": "https://hedera-cli-telemetry.onrender.com/track",
   "testnetOperatorKey": "",
+  "testnetOperatorKeyHex": "",
   "testnetOperatorId": "",
   "mainnetOperatorKey": "",
+  "mainnetOperatorKeyHex": "",
   "mainnetOperatorId": "",
   "previewnetOperatorId": "",
   "previewnetOperatorKey": "",
-  "localnetOperatorKey": "",
-  "localnetOperatorId": "",
+  "localnetOperatorKey": "302e020100300506032b65700422042087592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+  "localnetOperatorKeyHex": "0x87592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f",
+  "localnetOperatorId": "0.0.2",
   "telemetry": 0,
   "scriptExecution": 0,
   "scriptExecutionName": "",
@@ -20,13 +27,21 @@
   "tokens": {},
   "topics": {},
   "scripts": {
-    "script-init": {
-      "name": "init",
-      "commands": []
+    "script-erc721": {
+      "name": "erc721",
+      "creation": 1742830623351,
+      "commands": [
+        "npx hardhat compile",
+        "npx hardhat run ./dist/contracts/scripts/deploy.js --network local",
+        "npx hardhat run ./dist/contracts/scripts/mint.js --network local",
+        "npx hardhat run ./dist/contracts/scripts/balance.js --network local"
+      ],
+      "args": {}
     }
   },
   "localNodeAddress": "127.0.0.1:50211",
   "localNodeAccountId": "0.0.3",
   "localNodeMirrorAddressGRPC": "127.0.0.1:5600",
-  "uuid": ""
+  "uuid": "",
+  "memory": {}
 }

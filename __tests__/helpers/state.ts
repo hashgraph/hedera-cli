@@ -13,6 +13,10 @@ export const baseState: State = {
   mirrorNodePreviewnet: 'https://previewnet.mirrornode.hedera.com/api/v1',
   mirrorNodeTestnet: 'https://testnet.mirrornode.hedera.com/api/v1',
   mirrorNodeMainnet: 'https://mainnet.mirrornode.hedera.com/api/v1',
+  rpcUrlMainnet: "https://mainnet.hashio.io/api",
+  rpcUrlTestnet: "https://testnet.hashio.io/api",
+  rpcUrlPreviewnet: "https://previewnet.hashio.io/api",
+  rpcUrlLocalnet: "http://localhost:7546",
   telemetryServer: "https://hedera-cli-telemetry.onrender.com/track",
   telemetry: 0,
   scriptExecution: 0,
@@ -22,11 +26,15 @@ export const baseState: State = {
   tokens: {},
   topics: {},
   testnetOperatorKey: '',
+  testnetOperatorKeyHex: '',
   testnetOperatorId: '',
   mainnetOperatorKey: '',
+  mainnetOperatorKeyHex: '',
   mainnetOperatorId: '',
   previewnetOperatorKey: '',
+  previewnetOperatorKeyHex: '',
   previewnetOperatorId: '',
+  localnetOperatorKeyHex: '0x87592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f',
   localnetOperatorKey:
     '302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137',
   localnetOperatorId: '0.0.2',
@@ -34,6 +42,7 @@ export const baseState: State = {
   localNodeAccountId: '0.0.3',
   localNodeMirrorAddressGRPC: '127.0.0.1:5600',
   uuid: '',
+  "memory": {},
 };
 
 /* accounts */

@@ -58,7 +58,8 @@ export default (program: any) => {
             balance: response.data.balance.balance,
             evmAddress: response.data.evm_address,
             type: response.data.key._type,
-            maxAutomaticTokenAssociations: response.data.max_automatic_token_associations,
+            maxAutomaticTokenAssociations:
+              response.data.max_automatic_token_associations,
           },
         );
       } catch (error) {
