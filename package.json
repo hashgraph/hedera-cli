@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/hedera-cli",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "CLI tool to manage and setup developer environments for Hedera Hashgraph.",
   "main": "hedera-cli.js",
   "target": "esnext",
