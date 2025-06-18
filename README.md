@@ -341,7 +341,8 @@ The script feature let's you execute script blocks. Here's how you can integrate
       "creation": 1742830623351,
       "commands": [
         "smartcontract compile",
-        "npx hardhat run ./dist/contracts/scripts/deploy.js"
+        "npx hardhat run ./dist/contracts/scripts/deploy.js",
+        "npx hardhat run ./dist/contracts/scripts/mint.js"
       ],
       "args": {}
     }
@@ -351,7 +352,7 @@ The script feature let's you execute script blocks. Here's how you can integrate
 Next, it's possible to interact with the CLI state from a Hardhat script. You can use the `stateController` to store variables in the `memory` slot of the CLI tool or load stored variables in other scripts. For example, after deploying a contract, you can store the contract address in the memory labeled as `erc20address`. Here's how you can do this:
 
 ```javascript
-const stateController = require('../../state/stateController.js');
+const stateController = require('../../state/stateController.js').default; // default import
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -365,15 +366,15 @@ async function main() {
   console.log('Contract deployed at:', contract.target);
 
   // Store address in state memory as "erc20address"
-  stateController.default.saveToMemory('erc20address', contract.target);
+  stateController.saveToMemory('erc20address', contract.target);
 }
 
 main().catch(console.error);
 ```
 
-In this example, the `erc20address` variable is stored in the `memory` slot of the CLI tool. You can then use this variable in other scripts by loading it from the state (`stateController.default.get('memory')`) and using it in your Hardhat scripts. 
+In this example, the `erc20address` variable is stored in the `memory` slot of the CLI tool. You can then use this variable in other scripts by loading it from the memory (`stateController.getFromMemory(erc20address)`) and using it in your Hardhat scripts. 
 
-_Don't forget to use the `default` export of the `stateController` module to access the state methods as we are working in the CommonJS module format._
+_Don't forget to use `.default` when importing the `stateController` in your Hardhat scripts, as shown above._
 
 ## Network Commands
 

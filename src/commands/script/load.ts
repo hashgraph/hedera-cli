@@ -1,7 +1,7 @@
 import stateController from '../../state/stateController';
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
-import { execSync, execFileSync } from 'child_process';
+import { execSync } from 'child_process';
 import { Logger } from '../../utils/logger';
 
 import type { Command, Script } from '../../../types';
@@ -31,8 +31,8 @@ function loadScript(name: string) {
   script.commands.forEach((command) => {
     logger.log(`\nExecuting command: \t${command}`);
 
-    // If the command starts with 'npx', we can execute it directly
     if (command.startsWith('npx')) {
+      // If the command starts with 'npx', we can execute it directly
       // Verify that the command is safe to execute
       if (command.includes('&&') || command.includes(';')) {
         logger.error('Unsafe command detected. Please check the script.');
@@ -41,25 +41,22 @@ function loadScript(name: string) {
       }
 
       try {
-        const [cmd, ...args] = command.split(' ');
-        execFileSync(cmd, args, { stdio: 'inherit' });
+        execSync(`npx ${command}`, { stdio: 'inherit' });
+      } catch (error: any) {
+        logger.error('Unable to execute command', error.message || error);
+        stateUtils.stopScriptExecution();
+        process.exit(1);
+      }
+      return;
+    }
 
-        //const executeCommand = `npx ${command}`;
-        //execSync(executeCommand, { stdio: 'inherit' });
-      } catch (error: any) {
-        logger.error('Unable to execute command', error.message || error);
-        stateUtils.stopScriptExecution();
-        process.exit(1);
-      }
-    } else {
-      // For other commands, we need to run the hedera-cli.js script
-      try {
-        execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
-      } catch (error: any) {
-        logger.error('Unable to execute command', error.message || error);
-        stateUtils.stopScriptExecution();
-        process.exit(1);
-      }
+    // For other commands, we need to run the hedera-cli.js script
+    try {
+      execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
+    } catch (error: any) {
+      logger.error('Unable to execute command', error.message || error);
+      stateUtils.stopScriptExecution();
+      process.exit(1);
     }
   });
 

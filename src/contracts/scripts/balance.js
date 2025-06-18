@@ -17,11 +17,10 @@ async function main() {
   const contractAddress = stateController.getFromMemory('erc721address'); // read from memory ERC721 address
   const contract = await ERC721Token.attach(contractAddress);
 
-  // Mint a token to ourselves
-  console.log('Minting token with the account:', deployer.address);
-  const mintTx = await contract.safeMint(deployer.address);
-  await mintTx.wait();
-  console.log('Token minted');
+  // Check the balance of the token
+  console.log('Checking balance of the account:', deployer.address);
+  const balance = await contract.balanceOf(deployer.address);
+  console.log('Balance:', balance.toString(), 'NFT');
 
   // Store address in state memory as "erc721TokenId"
   stateController.saveToMemory('erc721TokenId', 0); // Assuming the first token ID is 0

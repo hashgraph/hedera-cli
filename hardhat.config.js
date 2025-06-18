@@ -27,11 +27,11 @@ module.exports = {
       accounts: ["<your-hex-private-key>"],
       chainId: 295,
     },*/
-    /*testnet: {
+    testnet: {
       url: stateController.default.get('rpcUrlTestnet'),
-      accounts: ["<your-hex-private-key>"],
+      accounts: ["0x9d3d4a4012e84359a4d117b8558696c2d72b0d61118f977394adeb6274de8c59"],
       chainId: 296,
-    },*/
+    },
     /*previewnet: {
       url: stateController.default.get('rpcUrlPreviewnet'),
       accounts: ["<your-hex-private-key>"],
@@ -40,8 +40,7 @@ module.exports = {
     local: {
       url: 'http://localhost:7546',
       accounts: [
-        '0x105d050185ccb907fba04dd92d8de9e32c18305e097ab41dadda21489a211524',
-        '0x2e1d968b041d84dd120a5860cee60cd83f9374ef527ca86996317ada3d0d03e7'
+        '0x105d050185ccb907fba04dd92d8de9e32c18305e097ab41dadda21489a211524'
       ],
       chainId: 298,
     },
