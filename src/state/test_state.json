@@ -28,10 +28,16 @@
   "tokens": {},
   "topics": {},
   "scripts": {
-    "script-init": {
-      "name": "init",
+    "script-erc721": {
+      "name": "erc721",
+      "creation": 1742830623351,
       "commands": [
-      ]
+        "npx hardhat compile",
+        "npx hardhat run ./dist/contracts/scripts/deploy.js --network local",
+        "npx hardhat run ./dist/contracts/scripts/mint.js --network local",
+        "npx hardhat run ./dist/contracts/scripts/balance.js --network local"
+      ],
+      "args": {}
     }
   },
   "localNodeAddress": "127.0.0.1:50211",

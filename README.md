@@ -74,20 +74,13 @@ npm run build
 
 ### 4. Set Up Operator Credentials
 
-Create a `.hedera` folder in your user's home directory. This folder will store your configuration files.
+Make a copy of the `.env.sample` file to create your own `.env` file. This file will store your operator credentials securely.
 
 ```sh
-mkdir -p ~/.hedera
-cd ~/.hedera
+cp .env.sample .env
 ```
 
-Create a `.env` file within the `.hedera` folder to securely store your operator credentials.
-
-```sh
-touch .env
-```
-
-Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for previewnet, testnet, and mainnet. It's **not mandatory** to set keys for all networks. If you only want to use one network, you can leave the other credentials blank. Make sure that each operator account **contains at least 1 Hbar**.
+Add your operator ID and key for previewnet, testnet, and mainnet. It's **not mandatory** to set keys for all networks. If you only want to use one network, you can leave the other credentials blank. Make sure that each operator account **contains at least 1 Hbar**.
 
 ```text
 PREVIEWNET_OPERATOR_KEY=
