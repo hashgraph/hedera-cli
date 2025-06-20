@@ -1,6 +1,4 @@
-import * as path from 'path';
 import * as dotenv from 'dotenv';
-import * as os from 'os';
 
 import stateUtils from '../utils/state';
 import telemetryUtils from '../utils/telemetry';
