@@ -137,7 +137,6 @@ jobs:
           echo "TESTNET_OPERATOR_KEY=" >> ".env"
           echo "MAINNET_OPERATOR_ID=" >> ".env"
           echo "MAINNET_OPERATOR_KEY=" >> ".env"
-          cat .env
           npm run copy-test-state
           npm run rename-test-state
 
