@@ -14,7 +14,7 @@ async function main() {
 
   // Get the ContractFactory for
   const ERC721Token = await ethers.getContractFactory('ERC721Token', deployer);
-  const contractAddress = stateController.getFromMemory('erc721address'); // read from memory ERC721 address
+  const contractAddress = stateController.getScriptArgument('erc721address'); // read from script arguments ERC721 address
   const contract = await ERC721Token.attach(contractAddress);
 
   // Check the balance of the token
@@ -22,8 +22,8 @@ async function main() {
   const balance = await contract.balanceOf(deployer.address);
   console.log('Balance:', balance.toString(), 'NFT');
 
-  // Store address in state memory as "erc721TokenId"
-  stateController.saveToMemory('erc721TokenId', 0); // Assuming the first token ID is 0
+  // Store address in script arguments as "erc721TokenId"
+  stateController.saveScriptArgument('erc721TokenId', 0); // Assuming the first token ID is 0
 }
 
 main().catch(console.error);

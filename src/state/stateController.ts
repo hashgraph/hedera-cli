@@ -40,7 +40,7 @@ const getScriptArgument = (argument: string) => {
   const activeScript = state.get('scriptExecutionName');
   const scripts = state.get('scripts');
   const scriptName = `script-${activeScript}`;
-  return scripts[scriptName]?.arguments?.[argument];
+  return scripts[scriptName]?.args?.[argument];
 };
 
 const stateController = {
