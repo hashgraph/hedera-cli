@@ -1,7 +1,7 @@
 const stateController = require('../../state/stateController.js').default;
 
 /**
- * Purpose: Mint an ERC721 token and save its ID in state memory.
+ * Purpose: Mint an ERC721 token and save its ID in the script arguments.
  *
  * Storage:
  *  - erc721TokenId: The ID of the minted ERC721 token
@@ -14,7 +14,7 @@ async function main() {
 
   // Get the ContractFactory for
   const ERC721Token = await ethers.getContractFactory('ERC721Token', deployer);
-  const contractAddress = stateController.getFromMemory('erc721address'); // read from memory ERC721 address
+  const contractAddress = stateController.getScriptArgument('erc721address'); // read from arguments
   const contract = await ERC721Token.attach(contractAddress);
 
   // Mint a token to ourselves
@@ -23,8 +23,8 @@ async function main() {
   await mintTx.wait();
   console.log('Token minted');
 
-  // Store address in state memory as "erc721TokenId"
-  stateController.saveToMemory('erc721TokenId', 0); // Assuming the first token ID is 0
+  // Store address in script arguments as "erc721TokenId"
+  stateController.saveScriptArgument('erc721TokenId', 0); // Assuming the first token ID is 0
 }
 
 main().catch(console.error);

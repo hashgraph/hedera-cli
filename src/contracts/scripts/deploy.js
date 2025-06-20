@@ -21,8 +21,8 @@ async function main() {
   const contractAddress = await contract.getAddress();
   console.log('ERC721 Token contract deployed at:', contractAddress);
 
-  // Store address in state memory as "erc721address"
-  stateController.saveToMemory('erc721address', contractAddress);
+  // Store address in script arguments as "erc721address"
+  stateController.saveScriptArgument('erc721address', contractAddress);
 }
 
 main().catch(console.error);
