@@ -353,7 +353,7 @@ The script feature let's you execute script blocks. Here's how you can integrate
 }
 ```
 
-Next, it's possible to interact with the CLI state from a Hardhat script. You can use the `stateController` to store variables in the `memory` slot of the CLI tool or load stored variables in other scripts. For example, after deploying a contract, you can store the contract address in the memory labeled as `erc20address`. Here's how you can do this:
+Next, it's possible to store data from Hardhat scripts in the `args` field of the script block you are executing. For example, this allows you to deploy a smart contract and store the contract address in the `args` field. You can then reference it as a varaible in other commands in this script block or use it in other Hardhat scripts.
 
 ```javascript
 const stateController = require('../../state/stateController.js').default; // default import
@@ -371,16 +371,30 @@ async function main() {
   const contractAddress = await contract.getAddress();
   console.log('ERC721 Token contract deployed at:', contractAddress);
 
-  // Store address in state memory as "erc721address"
-  stateController.saveToMemory('erc721address', contractAddress);
+  // Store address in script arguments as "erc721address"
+  stateController.saveScriptArgument('erc721address', contractAddress);
 }
 
 main().catch(console.error);
 ```
 
-In this example, the `erc721address` variable is stored in the `memory` slot of the CLI tool. You can then use this variable in other scripts by loading it from the memory (`stateController.getFromMemory(erc721address)`) and using it in your Hardhat scripts. 
+In this example, the `erc721address` variable is stored in the `args` object of the script you are executing. You can then use this variable in other scripts by retrieving it again (`stateController.getScriptArgument(erc721address)`) and using it in your Hardhat scripts. 
 
 _Don't forget to use `.default` when importing the `stateController` in your Hardhat scripts, as shown above._
+
+As mentioned, you can build interesting script blocks that combine regular CLI command and the execution of Hardhat scripts. This allows you to automate the deployment and interaction with smart contracts directly from the CLI tool.
+
+```json
+{
+  "name": "hardhat-deploy",
+  "commands": [
+    "npx hardhat compile",
+    "npx hardhat run ./dist/contracts/scripts/deploy.js --network local", // stores the contract ID as "erc721address" in the script args
+    "account create -a {{erc721address}}" // Create a new account and set the alias name equal to the contract address (just an example)
+  ],
+  "args": {}
+}
+```
 
 ## Network Commands
 
@@ -1085,6 +1099,20 @@ The below command shows how to create a new account on testnet with 1 hbar and p
     "account create -a random -b 100000000 --type ecdsa --args privateKey-->privKeyAcc1 --args alias-->aliasAcc1 --args accountId-->idAcc1",
     "wait 3",
     "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
+  ],
+  "args": {}
+}
+```
+
+This example shows how to use Hardhat scripts as part of your flow, mixing it with other commands. It creates a random account, waits for 3 seconds, and then runs a Hardhat script to deploy contracts:
+
+```json
+{
+  "name": "hardhat-deploy",
+  "commands": [
+    "account create -a random --args privateKey-->privKeyAcc1 --args alias-->aliasAcc1 --args accountId-->idAcc1",
+    "wait 3",
+    "npx hardhat run ./dist/contracts/scripts/deploy.js --network local"
   ],
   "args": {}
 }
