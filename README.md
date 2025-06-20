@@ -74,30 +74,23 @@ npm run build
 
 ### 4. Set Up Operator Credentials
 
-Create a `.hedera` folder in your user's home directory. This folder will store your configuration files.
+Make a copy of the `.env.sample` file to create your own `.env` file. This file will store your operator credentials securely.
 
 ```sh
-mkdir -p ~/.hedera
-cd ~/.hedera
+cp .env.sample .env
 ```
 
-Create a `.env` file within the `.hedera` folder to securely store your operator credentials.
-
-```sh
-touch .env
-```
-
-Add the following lines to your `~/.hedera/.env` file, replacing the placeholders with your actual operator ID and key for previewnet, testnet, and mainnet. It's **not mandatory** to set keys for all networks. If you only want to use one network, you can leave the other credentials blank. Make sure that each operator account **contains at least 1 Hbar**.
+Add your operator ID and key for previewnet, testnet, and mainnet. It's **not mandatory** to set keys for all networks. If you only want to use one network, you can leave the other credentials blank. Make sure that each operator account **contains at least 1 Hbar**. We've added the default account for the [Hiero Local Node](https://github.com/hashgraph/hedera-local-node).
 
 ```text
 PREVIEWNET_OPERATOR_KEY=
 PREVIEWNET_OPERATOR_ID=
-TESTNET_OPERATOR_KEY=302e0201003005060[...]
-TESTNET_OPERATOR_ID=0.0.12345
+TESTNET_OPERATOR_KEY=
+TESTNET_OPERATOR_ID=
 MAINNET_OPERATOR_KEY=
 MAINNET_OPERATOR_ID=
-LOCALNET_OPERATOR_ID=
-LOCALNET_OPERATOR_KEY=
+LOCALNET_OPERATOR_ID=0.0.2
+LOCALNET_OPERATOR_KEY=302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137
 ```
 
 Next, set up the CLI tool with the command. **The `--telemetry` flag is optional and enables telemetry. By default, telemetry is disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information. If you don't want us to collect telemetry data, run the command without the `--telemetry` flag.**
@@ -105,8 +98,6 @@ Next, set up the CLI tool with the command. **The `--telemetry` flag is optional
 ```sh
 node dist/hedera-cli.js setup init --telemetry
 ```
-
-> **Note.** You can set a custom absolute path for your `.env` file by using the `--path` flag. For example, `node dist/hedera-cli.js setup init --path /Users/myUser/projects/cli/.env`. More information can be found in the [setup command](#setup-commands) section below.
 
 The `setup init` command will also create the different operator accounts in your address book (`dist/state/state.json` file) so you can use them in your commands.
 
@@ -226,18 +217,17 @@ setup reload
 Sets up the CLI with the operator key and ID.
 
 ```sh
-hcli setup init [--telemetry] [--path <path>]
+hcli setup init [--telemetry]
 ```
 
 Flags:
 
 - **Telemetry:** (optional) Enables telemetry. By default disabled. Hedera collects anonymous data to improve the CLI tool. For example, it records the command name, not the parameters or any other sensitive information.
-- **Path:** (optional) Sets a custom absolute path for your `.env` file. Defaults to your homedir, e.g. `~/.hedera/.env`.
 
 When executed, the setup command performs several key functions:
 
 **Environment Variable Validation:**
-It checks if the HOME environment variable is defined and reads `PREVIEWNET_OPERATOR_KEY`, `PREVIEWNET_OPERATOR_KEY`, `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID`, `LOCALNET_OPERATOR_ID`, and `LOCALNET_OPERATOR_KEY` from the `~/.hedera/.env` file.
+It reads the `PREVIEWNET_OPERATOR_KEY`, `PREVIEWNET_OPERATOR_KEY`, `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID`, `LOCALNET_OPERATOR_ID`, and `LOCALNET_OPERATOR_KEY` variables from the `.env` file in the root of the CLI project.
 
 **State Update:**
 Once the localnet, previewnet, testnet, and mainnet operator key and ID are validated, these credentials are used to update the `dist/state/state.json` file, which holds the configuration state of the CLI tool. The command will also add the operator accounts to your address book.
@@ -297,18 +287,30 @@ Contracts are stored in the **`src/contracts` folder**. You can create a new con
 
 To deploy a smart contract and interact with it, you can use the Hardhat scripts. The CLI tool stores the scripts in the **`src/contracts/scripts` folder**. You can create a new script by adding a new file in this folder. By default, you can find a `deploy.js` file that demonstrates how to deploy the `erc20.sol` contract.
 
-### Running Hardhat Commands
+### Configuring Hardhat
 
 Make sure the your `hardhat.config.js` file is configured correctly to interact with one of the Hedera networks. By default, the CLI tool uses the `local` network, which is configured for the Hedera Local Node. You can add the `mainnet`, `testnet`, or `previewnet` networks to the Hardhat configuration file. 
+
+> A sample config is included in the project. If you configure the `mainnet`, `testnet`, or `previewnet` networks, make sure to set the operator key and ID in your `.env` file in the HEX format. You can see the example config reads the operator key from the `.env` file using, for example the `process.env.TESTNET_OPERATOR_KEY_HEX`. Don't forget to set these HEX-based variables in your `.env` file.
 
 ```json
 { 
   // ... other Hardhat configuration options
   defaultNetwork: 'local',
   networks: {
+    /*mainnet: {
+      url: stateController.default.get('rpcUrlMainnet'),
+      accounts: [process.env.MAINNET_OPERATOR_KEY_HEX],
+      chainId: 295,
+    },*/
     /*testnet: {
       url: stateController.default.get('rpcUrlTestnet'),
-      accounts: ["<your-hex-private-key>"],
+      accounts: [process.env.TESTNET_OPERATOR_KEY_HEX],
+    },*/
+    /*previewnet: {
+      url: stateController.default.get('rpcUrlPreviewnet'),
+      accounts: [process.env.PREVIEWNET_OPERATOR_KEY_HEX],
+      chainId: 297,
     },*/
     local: {
       url: 'http://localhost:7546',
@@ -324,7 +326,9 @@ Make sure the your `hardhat.config.js` file is configured correctly to interact 
 
 _Note: If you configure an account but don't provide a URL or accounts array, the CLI tool will fail upon starting. Make sure to provide a valid URL and accounts array for the network you want to use. If you don't want to use a network, leave it commented out._
 
-To run a script, make sure to point to the `dist` folder (after running `npm run build`) and use the `hardhat run` command. For example, to deploy the `erc20.sol` contract, you can run the following command in the root of the CLI tool:
+### Running Hardhat Scripts
+
+To run a script, make sure to point to the `dist` folder (after running `npm run build`) and use the `hardhat run` command. For example, to deploy the `erc721.sol` contract, you can run the following command in the root of the CLI tool:
 
 ```sh
 npx hardhat run ./dist/contracts/scripts/deploy.js
@@ -360,19 +364,21 @@ async function main() {
   console.log('Deploying contracts with the account:', deployer.address);
 
   // The deployer will also be the owner of our token contract
-  const MyToken = await ethers.getContractFactory('MyToken', deployer);
-  const contract = await MyToken.deploy(deployer.address);
+  const ERC721Token = await ethers.getContractFactory('ERC721Token', deployer);
+  const contract = await ERC721Token.deploy(deployer.address);
+  await contract.waitForDeployment();
 
-  console.log('Contract deployed at:', contract.target);
+  const contractAddress = await contract.getAddress();
+  console.log('ERC721 Token contract deployed at:', contractAddress);
 
-  // Store address in state memory as "erc20address"
-  stateController.saveToMemory('erc20address', contract.target);
+  // Store address in state memory as "erc721address"
+  stateController.saveToMemory('erc721address', contractAddress);
 }
 
 main().catch(console.error);
 ```
 
-In this example, the `erc20address` variable is stored in the `memory` slot of the CLI tool. You can then use this variable in other scripts by loading it from the memory (`stateController.getFromMemory(erc20address)`) and using it in your Hardhat scripts. 
+In this example, the `erc721address` variable is stored in the `memory` slot of the CLI tool. You can then use this variable in other scripts by loading it from the memory (`stateController.getFromMemory(erc721address)`) and using it in your Hardhat scripts. 
 
 _Don't forget to use `.default` when importing the `stateController` in your Hardhat scripts, as shown above._
 

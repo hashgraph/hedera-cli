@@ -128,17 +128,15 @@ jobs:
       - name: Configure E2E Tests
         if: ${{ inputs.enable-e2e-tests && !cancelled() && !failure() }}
         run: |
-          mkdir -p "${HOME}/.hedera"
-          touch "${HOME}/.hedera/.env"
-          echo "LOCALNET_OPERATOR_ID=0.0.2" >> "${HOME}/.hedera/.env"
-          echo "LOCALNET_OPERATOR_KEY=302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137" >> "${HOME}/.hedera/.env"
-          echo "PREVIEWNET_OPERATOR_ID=" >> "${HOME}/.hedera/.env"
-          echo "PREVIEWNET_OPERATOR_KEY=" >> "${HOME}/.hedera/.env"
-          echo "TESTNET_OPERATOR_ID=" >> "${HOME}/.hedera/.env"
-          echo "TESTNET_OPERATOR_KEY=" >> "${HOME}/.hedera/.env"
-          echo "MAINNET_OPERATOR_ID=" >> "${HOME}/.hedera/.env"
-          echo "MAINNET_OPERATOR_KEY=" >> "${HOME}/.hedera/.env"
-
+          cp .env.sample .env
+          echo "LOCALNET_OPERATOR_ID=0.0.2" >> ".env"
+          echo "LOCALNET_OPERATOR_KEY=302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137" >> ".env"
+          echo "PREVIEWNET_OPERATOR_ID=" >> ".env"
+          echo "PREVIEWNET_OPERATOR_KEY=" >> ".env"
+          echo "TESTNET_OPERATOR_ID=" >> ".env"
+          echo "TESTNET_OPERATOR_KEY=" >> ".env"
+          echo "MAINNET_OPERATOR_ID=" >> ".env"
+          echo "MAINNET_OPERATOR_KEY=" >> ".env"
           npm run copy-test-state
           npm run rename-test-state
 

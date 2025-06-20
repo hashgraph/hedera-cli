@@ -1,6 +1,4 @@
-import * as path from 'path';
 import * as dotenv from 'dotenv';
-import * as os from 'os';
 
 import stateUtils from '../utils/state';
 import telemetryUtils from '../utils/telemetry';
@@ -15,7 +13,6 @@ import type { Command } from '../../types';
 const logger = Logger.getInstance();
 
 interface SetupOptions {
-  path: string;
   telemetry: boolean;
 }
 
@@ -65,29 +62,9 @@ async function verifyOperatorBalance(
 async function setupCLI(
   action: string,
   telemetry: boolean = false,
-  envPath: string = '',
 ): Promise<void> {
-  let finalPath = '';
-  if (envPath !== '') {
-    finalPath = path.normalize(envPath);
-  } else {
-    try {
-      const homePath = os.homedir();
-      if (!homePath) {
-        logger.error('Can not find home directory');
-        process.exit(1);
-      }
-      finalPath = path.join(homePath, '.hedera/.env');
-    } catch (error) {
-      logger.error('Failed to retrieve home directory');
-      process.exit(1);
-    }
-  }
-
-  // Path to the .env file in the .hedera directory in the user's home directory
-
   // Load environment variables from .env file
-  const envConfig = dotenv.config({ path: finalPath });
+  const envConfig = dotenv.config();
 
   // Check for errors in loading .env file
   if (envConfig.error) {
@@ -203,7 +180,6 @@ export default (program: any) => {
       }
     })
     .description('Setup the CLI with operator key and ID')
-    .option('--path <path>', 'Specify a custom path for the .env file')
     .option(
       '--telemetry',
       'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
@@ -217,7 +193,7 @@ export default (program: any) => {
           'You don\'t have telmetry enabled. You can enable it by running "hcli setup init --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
         );
       }
-      await setupCLI('init', options.telemetry, options.path);
+      await setupCLI('init', options.telemetry);
       stateUtils.createUUID(); // Create a new UUID for the user if doesn't exist
     });
 

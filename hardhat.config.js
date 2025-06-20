@@ -24,17 +24,17 @@ module.exports = {
   networks: {
     /*mainnet: {
       url: stateController.default.get('rpcUrlMainnet'),
-      accounts: ["<your-hex-private-key>"],
+      accounts: [process.env.MAINNET_OPERATOR_KEY_HEX],
       chainId: 295,
     },*/
-    testnet: {
+    /*testnet: {
       url: stateController.default.get('rpcUrlTestnet'),
-      accounts: ["0x9d3d4a4012e84359a4d117b8558696c2d72b0d61118f977394adeb6274de8c59"],
+      accounts: [process.env.TESTNET_OPERATOR_KEY_HEX],
       chainId: 296,
-    },
+    },*/
     /*previewnet: {
       url: stateController.default.get('rpcUrlPreviewnet'),
-      accounts: ["<your-hex-private-key>"],
+      accounts: [process.env.PREVIEWNET_OPERATOR_KEY_HEX],
       chainId: 297,
     },*/
     local: {
