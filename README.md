@@ -328,10 +328,18 @@ _Note: If you configure an account but don't provide a URL or accounts array, th
 
 ### Running Hardhat Scripts
 
+If you have added new Hardhat scripts to `src/contracts/scripts`, you need to compile the contracts first. You can do this by running the following command in the root of the CLI tool:
+
+```sh
+npx hardhat compile
+```
+
+This command compiles the contracts and generates the necessary artifacts in the `dist/contracts` folder. The compiled contracts will be used by the Hardhat scripts to deploy and interact with the contracts.
+
 To run a script, make sure to point to the `dist` folder (after running `npm run build`) and use the `hardhat run` command. For example, to deploy the `erc721.sol` contract, you can run the following command in the root of the CLI tool:
 
 ```sh
-npx hardhat run ./dist/contracts/scripts/deploy.js
+npx hardhat run ./dist/contracts/scripts/deploy.js --network local
 ```
 
 ### Integrating Hardhat with the CLI Scripts Feature
@@ -344,9 +352,9 @@ The script feature let's you execute script blocks. Here's how you can integrate
       "name": "deploy",
       "creation": 1742830623351,
       "commands": [
-        "smartcontract compile",
-        "npx hardhat run ./dist/contracts/scripts/deploy.js",
-        "npx hardhat run ./dist/contracts/scripts/mint.js"
+        "hardhat compile",
+        "hardhat run ./dist/contracts/scripts/deploy.js",
+        "hardhat run ./dist/contracts/scripts/mint.js"
       ],
       "args": {}
     }
@@ -388,8 +396,8 @@ As mentioned, you can build interesting script blocks that combine regular CLI c
 {
   "name": "hardhat-deploy",
   "commands": [
-    "npx hardhat compile",
-    "npx hardhat run ./dist/contracts/scripts/deploy.js --network local", // stores the contract ID as "erc721address" in the script args
+    "hardhat compile",
+    "hardhat run ./dist/contracts/scripts/deploy.js --network local", // stores the contract ID as "erc721address" in the script args
     "account create -a {{erc721address}}" // Create a new account and set the alias name equal to the contract address (just an example)
   ],
   "args": {}
@@ -1112,7 +1120,7 @@ This example shows how to use Hardhat scripts as part of your flow, mixing it wi
   "commands": [
     "account create -a random --args privateKey-->privKeyAcc1 --args alias-->aliasAcc1 --args accountId-->idAcc1",
     "wait 3",
-    "npx hardhat run ./dist/contracts/scripts/deploy.js --network local"
+    "hardhat run ./dist/contracts/scripts/deploy.js --network local"
   ],
   "args": {}
 }

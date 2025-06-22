@@ -31,10 +31,10 @@
       "name": "erc721",
       "creation": 1742830623351,
       "commands": [
-        "npx hardhat compile",
-        "npx hardhat run ./dist/contracts/scripts/deploy.js --network local",
-        "npx hardhat run ./dist/contracts/scripts/mint.js --network local",
-        "npx hardhat run ./dist/contracts/scripts/balance.js --network local"
+        "hardhat compile",
+        "hardhat run ./dist/contracts/scripts/deploy.js --network local",
+        "hardhat run ./dist/contracts/scripts/mint.js --network local",
+        "hardhat run ./dist/contracts/scripts/balance.js --network local"
       ],
       "args": {}
     }
