@@ -328,10 +328,18 @@ _Note: If you configure an account but don't provide a URL or accounts array, th
 
 ### Running Hardhat Scripts
 
+If you have added new Hardhat scripts to `src/contracts/scripts`, you need to compile the contracts first. You can do this by running the following command in the root of the CLI tool:
+
+```sh
+npx hardhat compile
+```
+
+This command compiles the contracts and generates the necessary artifacts in the `dist/contracts` folder. The compiled contracts will be used by the Hardhat scripts to deploy and interact with the contracts.
+
 To run a script, make sure to point to the `dist` folder (after running `npm run build`) and use the `hardhat run` command. For example, to deploy the `erc721.sol` contract, you can run the following command in the root of the CLI tool:
 
 ```sh
-hcli hardhat run ./dist/contracts/scripts/deploy.js
+npx hardhat run ./dist/contracts/scripts/deploy.js --network local
 ```
 
 ### Integrating Hardhat with the CLI Scripts Feature
