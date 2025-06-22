@@ -18,24 +18,29 @@ const saveKey = (key: string, value: any) => {
 };
 
 /**
- * Store data in memory
- * @param {string} key - The key to store the data under
- * @param {any} value - The value to store
+ * Store an argument in the script execution state
+ * @param {string} name - The argument name to store the value for
+ * @param {string} value - The value to store
  */
-const saveToMemory = (key: string, value: any) => {
-  const memory = state.get('memory');
-  memory[key] = value;
-  saveKey('memory', memory);
+const saveScriptArgument = (name: string, value: any) => {
+  const activeScript = state.get('scriptExecutionName');
+  const scripts = state.get('scripts');
+  const scriptName = `script-${activeScript}`;
+  const newScripts = { ...scripts };
+  newScripts[scriptName].args[name] = value;
+  saveKey('scripts', newScripts);
 };
 
 /**
- * Get data from memory
- * @param {string} key - The key to retrieve the data from
- * @returns {any} - The value stored under the key, or undefined if not found
+ * Get argument from the script execution state
+ * @param {string} argument - The argument name to retrieve
+ * @returns {any} - The value stored for the given argument name
  */
-const getFromMemory = (key: string) => {
-  const memory = state.get('memory');
-  return memory[key];
+const getScriptArgument = (argument: string) => {
+  const activeScript = state.get('scriptExecutionName');
+  const scripts = state.get('scripts');
+  const scriptName = `script-${activeScript}`;
+  return scripts[scriptName]?.args?.[argument];
 };
 
 const stateController = {
@@ -43,8 +48,8 @@ const stateController = {
   saveState,
   saveKey,
   get,
-  saveToMemory,
-  getFromMemory,
+  saveScriptArgument,
+  getScriptArgument,
 };
 
 export default stateController;

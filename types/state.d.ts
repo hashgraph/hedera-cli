@@ -116,7 +116,6 @@ export interface State {
   mainnetOperatorKeyHex: string;
   mainnetOperatorId: string;
   uuid: string;
-  memory: Record<string, any>;
 }
 
 export interface DownloadState {
