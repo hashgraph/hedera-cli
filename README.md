@@ -794,13 +794,19 @@ Flags:
 Finds messages for a specified topic by its sequence number.
 
 ```sh
-hcli topic message find -t,--topic-id <topicId> -s,--sequence-number <sequenceNumber>
+hcli topic message find -t,--topic-id <topicId> [-s,--sequence-number <sequenceNumber>] [--sequence-number-gt <sequenceNumberGreaterThan>] [--sequence-number-lt <sequenceNumberLessThan>] [--sequence-number-gte <sequenceNumberGreaterThanOrEqual>] [--sequence-number-lte <sequenceNumberLessThanOrEqual>] [--sequence-number-eq <sequenceNumberEqual>] [--sequence-number-ne <sequenceNumberNotEqual>]
 ```
 
 Flags:
 
 - **Topic ID:** (required) Topic ID to find the message for.
-- **Sequence Number:** (required) Sequence number of the message you want to find.
+- **Sequence Number:** (optional) Sequence number of the message you want to find.
+- **Sequence Number Greater than:** (optional) If you want to find all messages with a sequence number greater than the specified one.
+- **Sequence Number Less than:** (optional) If you want to find all messages with a sequence number less than the specified one.
+- **Sequence Number Greater than or Equal:** (optional) If you want to find all messages with a sequence number greater than or equal to the specified one.
+- **Sequence Number Less than or Equal:** (optional) If you want to find all messages with a sequence number less than or equal to the specified one.
+- **Sequence Number Equal:** (optional) If you want to find all messages with a sequence number equal to the specified one.
+- **Sequence Number Not Equal:** (optional) If you want to find all messages with a sequence number not equal to the specified one.
 
 ## Hbar Command
 
