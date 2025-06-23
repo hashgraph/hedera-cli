@@ -1060,39 +1060,19 @@ The dynamic variables feature in our script execution command (`script load`) al
 
 **Here's a [list of all commands and the variables](#mapping-dynamic-variables-to-commands) they expose, which you can use in your scripts.**
 
-#### Example
+#### Examples
 
-Let's look at an example of how dynamic variables work. In this example, we'll create a script that creates a random account and stores the `privateKey` in a variable called `tokenMichielAdminKey` and the account alias in a variable called `accountAlias`. We'll then use these variables to create a new token. As a fun example, we are using the `accountAlias` variable to set the token name.
-
-```json
-{
-  "name": "test",
-  "commands": [
-    "network use testnet",
-    "account create -a random --args privateKey-->tokenMichielAdminKey --args alias-->accountAlias",
-    "token create -n {{accountAlias}} --symbol rand --decimals 2 --initial-supply 1000 --supply-type infinite --admin-key {{tokenMichielAdminKey}} --treasury-id 0.0.4536940 --treasury-key 302302[...]"
-  ],
-  "args": {}
-}
-```
-
-> Make sure to not use a space between the variable name and the arrow notation (`-->`). Otherwise, the CLI tool will not recognize the variable. `--args privateKey-->tokenMichielAdminKey` is correct, `--args privateKey --> tokenMichielAdminKey` is not.
-
-When a command fails, the script execution stops and the error is displayed.
-
-#### Other Examples
-
-The following example shows how you can use dynamic variables to create a script that creates three accounts, creates a token, associates the token with the third account, and transfers one token from the second account (treasury) to the third account. Then, it displays the token state and the balance of the third account. Often, it will tell you that the third account has a `0` balance because the mirror node hasn't updated yet.
+The following example shows how you can use dynamic variables to create a script that creates three accounts, creates a token, associates the token with the third account, and transfers one token from the second account (treasury) to the third account. Then, it displays the token state and the balance of the third account. Often, it will tell you that the third account has a `0` balance because the mirror node hasn't updated yet. _When a command fails, the script execution stops and the error is displayed._
 
 ```json
 {
   "name": "transfer",
   "commands": [
     "network use testnet",
-    "account create -a random --args privateKey-->privKeyAcc1 --args alias-->aliasAcc1 --args accountId-->idAcc1",
-    "account create -a random --args privateKey-->privKeyAcc2 --args alias-->aliasAcc2 --args accountId-->idAcc2",
-    "account create -a random --args privateKey-->privKeyAcc3 --args alias-->aliasAcc3 --args accountId-->idAcc3",
-    "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId-->tokenId",
+    "account create -a random --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
+    "account create -a random --args privateKey:privKeyAcc2 --args alias:aliasAcc2 --args accountId:idAcc2",
+    "account create -a random --args privateKey:privKeyAcc3 --args alias:aliasAcc3 --args accountId:idAcc3",
+    "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId:tokenId",
     "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
     "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}",
     "wait 3",
@@ -1103,6 +1083,8 @@ The following example shows how you can use dynamic variables to create a script
 }
 ```
 
+> Make sure to not use a space between the variable name and the arrow notation (`:`). Otherwise, the CLI tool will not recognize the variable. `--args alias:aliasAcc1` is correct, `--args alias : aliasAcc1` is not.
+
 The below command shows how to create a new account on testnet with 1 hbar and prints the hbar balance.
 
 ```json
@@ -1110,7 +1092,7 @@ The below command shows how to create a new account on testnet with 1 hbar and p
   "name": "account-create",
   "commands": [
     "network use testnet",
-    "account create -a random -b 100000000 --type ecdsa --args privateKey-->privKeyAcc1 --args alias-->aliasAcc1 --args accountId-->idAcc1",
+    "account create -a random -b 100000000 --type ecdsa --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
     "wait 3",
     "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
   ],
@@ -1124,7 +1106,7 @@ This example shows how to use Hardhat scripts as part of your flow, mixing it wi
 {
   "name": "hardhat-deploy",
   "commands": [
-    "account create -a random --args privateKey-->privKeyAcc1 --args alias-->aliasAcc1 --args accountId-->idAcc1",
+    "account create -a random --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
     "wait 3",
     "hardhat run ./dist/contracts/scripts/deploy.js --network local"
   ],
@@ -1196,7 +1178,7 @@ Here's an example state:
       "creation": 1697103669402,
       "commands": [
         "network use testnet",
-        "account create -a random --args privateKey-->tokenMichielAdminKey --args alias-->accountAlias",
+        "account create -a random --args privateKey:tokenMichielAdminKey --args alias:accountAlias",
         "token create -n {{accountAlias}} -s mm -d 2 -i 1000 --supply-type infinite -a {{tokenMichielAdminKey}} -t 0.0.4536940 -k 302e020100300506032b6568253a539643468dda3128a734c9fcb07a927b3f742719db731f9f50"
       ],
       "args": {}
