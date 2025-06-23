@@ -161,7 +161,7 @@ function storeArgs(
   let stateArgs: Record<string, string> = {};
 
   args.forEach((arg) => {
-    const splittedArg = arg.split('-->');
+    const splittedArg = arg.split(':');
     const commandOutputName = splittedArg[0];
     const variableName = splittedArg[1];
     const outputVar = commandOutputs[action][commandOutputName];

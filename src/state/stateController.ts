@@ -23,6 +23,9 @@ const saveKey = (key: string, value: any) => {
  * @param {string} value - The value to store
  */
 const saveScriptArgument = (name: string, value: any) => {
+  if (state.get('scriptExecution') === 0) {
+    return; // If no script is currently being executed, skip saving the argument
+  }
   const activeScript = state.get('scriptExecutionName');
   const scripts = state.get('scripts');
   const scriptName = `script-${activeScript}`;
@@ -37,6 +40,9 @@ const saveScriptArgument = (name: string, value: any) => {
  * @returns {any} - The value stored for the given argument name
  */
 const getScriptArgument = (argument: string) => {
+  if (state.get('scriptExecution') === 0) {
+    return; // If no script is currently being executed, skip retrieving the argument
+  }
   const activeScript = state.get('scriptExecutionName');
   const scripts = state.get('scripts');
   const scriptName = `script-${activeScript}`;
