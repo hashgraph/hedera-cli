@@ -1,7 +1,7 @@
-const stateController = require('../../state/stateController.js').default;
+const stateController = require('../../../state/stateController.js').default;
 
 /**
- * Purpose: Deploys an ERC721 token contract and saves its address in state memory.
+ * Purpose: Deploys an ERC721 token contract and saves its address in the script arguments.
  *
  * Storage:
  *  - erc721address: The address of the deployed ERC20 token contract

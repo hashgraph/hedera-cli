@@ -37,6 +37,16 @@
         "hardhat run ./dist/contracts/scripts/balance.js --network local"
       ],
       "args": {}
+    },
+    "script-account-storage": {
+      "name": "account-storage",
+      "commands": [
+        "account create -a alice --args accountId:aliceAccId",
+        "hardhat compile",
+        "hardhat run ./dist/contracts/scripts/accountStorage/deploy-acc-storage.js --network local",
+        "hardhat run ./dist/contracts/scripts/accountStorage/add-account-id.js --network local"
+      ],
+      "args": {}
     }
   },
   "localNodeAddress": "127.0.0.1:50211",
