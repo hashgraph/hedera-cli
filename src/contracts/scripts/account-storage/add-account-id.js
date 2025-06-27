@@ -2,6 +2,7 @@ const stateController = require('../../../state/stateController.js').default;
 
 /**
  * Purpose: Store an account ID in the HederaAccountStorage contract.
+ * 
  * Storage: /
  *
  * Read:
@@ -14,7 +15,6 @@ async function main() {
     'accountstorageaddress',
   );
 
-  // The deployer will also be the owner of our token contract
   const HederaAccountStorage = await ethers.getContractFactory(
     'HederaAccountStorage',
   );
