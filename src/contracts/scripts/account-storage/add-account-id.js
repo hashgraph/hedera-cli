@@ -2,7 +2,7 @@ const stateController = require('../../../state/stateController.js').default;
 
 /**
  * Purpose: Store an account ID in the HederaAccountStorage contract.
- * 
+ *
  * Storage: /
  *
  * Read:
