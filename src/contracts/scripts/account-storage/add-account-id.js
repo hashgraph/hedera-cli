@@ -9,7 +9,6 @@ const stateController = require('../../../state/stateController.js').default;
  * - aliceAccId: The account ID to be stored in the contract (from the account create command)
  */
 async function main() {
-  const [deployer] = await ethers.getSigners();
   const accountIdToStore = stateController.getScriptArgument('aliceAccId');
   const contractAddress = stateController.getScriptArgument(
     'accountstorageaddress',

@@ -1,7 +1,7 @@
 const stateController = require('../../../state/stateController.js').default;
 
 /**
- * Purpose: Deploys an ERC721 token contract and saves its address in state memory.
+ * Purpose: Deploys an ERC721 token contract and saves its address in the script arguments.
  *
  * Storage:
  *  - accountstorageaddress: The address of the deployed HederaAccountStorage contract
@@ -9,10 +9,6 @@ const stateController = require('../../../state/stateController.js').default;
  * Read: /
  */
 async function main() {
-  const [deployer] = await ethers.getSigners();
-
-  console.log('Deploying contracts with the account:', deployer.address);
-
   // The deployer will also be the owner of our token contract
   const HederaAccountStorage = await ethers.getContractFactory(
     'HederaAccountStorage',

@@ -339,22 +339,23 @@ This command compiles the contracts and generates the necessary artifacts in the
 To run a script, make sure to point to the `dist` folder (after running `npm run build`) and use the `hardhat run` command. For example, to deploy the `erc721.sol` contract, you can run the following command in the root of the CLI tool:
 
 ```sh
-npx hardhat run ./dist/contracts/scripts/deploy.js --network local
+npx hardhat run ./dist/contracts/scripts/erc721/deploy.js --network local
 ```
 
-### Integrating Hardhat with the CLI Scripts Feature
+### Integrating Hardhat with the CLI Script Blocks Feature
 
 The script feature let's you execute script blocks. Here's how you can integrate Hardhat commands into the CLI tool's script feature:
 
 ```json
 "scripts": {
-    "script-deploy": {
-      "name": "deploy",
+    "script-erc721": {
+      "name": "erc721",
       "creation": 1742830623351,
       "commands": [
         "hardhat compile",
-        "hardhat run ./dist/contracts/scripts/deploy.js",
-        "hardhat run ./dist/contracts/scripts/mint.js"
+        "hardhat run ./dist/contracts/scripts/erc721/deploy.js --network local",
+        "hardhat run ./dist/contracts/scripts/erc721/mint.js --network local",
+        "hardhat run ./dist/contracts/scripts/erc721/balance.js --network local"
       ],
       "args": {}
     }
@@ -364,7 +365,7 @@ The script feature let's you execute script blocks. Here's how you can integrate
 Next, it's possible to store data from Hardhat scripts in the `args` field of the script block you are executing. For example, this allows you to deploy a smart contract and store the contract address in the `args` field. You can then reference it as a varaible in other commands in this script block or use it in other Hardhat scripts.
 
 ```javascript
-const stateController = require('../../state/stateController.js').default; // default import
+const stateController = require('../../../state/stateController.js').default; // default import
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -394,13 +395,14 @@ As mentioned, you can build interesting script blocks that combine regular CLI c
 
 ```json
 {
-  "name": "hardhat-deploy",
-  "commands": [
-    "hardhat compile",
-    "hardhat run ./dist/contracts/scripts/deploy.js --network local", // stores the contract ID as "erc721address" in the script args
-    "account create -a {{erc721address}}" // Create a new account and set the alias name equal to the contract address (just an example)
-  ],
-  "args": {}
+    "name": "account-storage",
+    "commands": [
+      "account create -a alice --args accountId:aliceAccId", // Create account and store account Id
+      "hardhat compile", // Compile contracts
+      "hardhat run ./dist/contracts/scripts/account-storage/deploy-acc-storage.js", // Deploy the contract
+      "hardhat run ./dist/contracts/scripts/account-storage/add-account-id.js" // Add Alice's account ID to the contract
+    ],
+    "args": {}
 }
 ```
 
