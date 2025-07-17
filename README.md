@@ -1037,7 +1037,25 @@ Loads a script by name from state and sequentially executes each command in the 
 hcli script load -n,--name <name>
 ```
 
-Each command is executed via [`execSync`](https://nodejs.org/api/child_process.html), which runs the command in a synchronous child process.
+Each command is executed via [`execSync`](https://nodejs.org/api/child_process.html), which runs the command in a synchronous child process. Scripts are stored in the `dist/state.json` file, in the `scripts` section. 
+
+**Make sure to append each script with `script-` prefix. The name of the script is just the name without the `script-` prefix.** If you want to load this script, you use `hcli script load -n erc721`, without the `script-` prefix.
+
+```
+"scripts": {
+    "script-erc721": {
+      "name": "erc721",
+      "creation": 1742830623351,
+      "commands": [
+        "hardhat compile",
+        "hardhat run ./dist/contracts/scripts/erc721/deploy.js --network local",
+        "hardhat run ./dist/contracts/scripts/erc721/mint.js --network local",
+        "hardhat run ./dist/contracts/scripts/erc721/balance.js --network local"
+      ],
+      "args": {}
+    }
+}
+```
 
 **2. List All Scripts:**
 
