@@ -84,8 +84,6 @@ describe('End to end tests', () => {
       'create',
       '-a',
       accountAlias,
-      '-t',
-      'ECdsA',
       '--auto-associations',
       '1',
     ]);
