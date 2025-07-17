@@ -57,7 +57,10 @@ export default (program: any) => {
             accountId: response.data.account,
             balance: response.data.balance.balance,
             evmAddress: response.data.evm_address,
-            type: response.data.key._type,
+            type:
+              response.data.key._type === 'ECDSA_SECP256K1'
+                ? 'ECDSA'
+                : 'ED25519',
             maxAutomaticTokenAssociations:
               response.data.max_automatic_token_associations,
           },
