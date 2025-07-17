@@ -46,7 +46,11 @@ function filterState(data: State) {
     filteredState.accounts[alias].privateKey = '';
   });
 
-  logger.log('Warning: The private keys were not removed from scripts');
+  // Remove private keys from topics
+  Object.keys(filteredState.topics).forEach((topicId) => {
+    filteredState.topics[topicId].adminKey = '';
+    filteredState.topics[topicId].submitKey = '';
+  }); 
 
   return filteredState;
 }
@@ -89,6 +93,9 @@ function backupState(
   // Only backup accounts if the user specified the --accounts flag
   if (backupAccounts) {
     backupFilename = `accounts.backup.${timestamp}.json`;
+    if (name) {
+      backupFilename = `accounts.backup.${name}.json`;
+    }
     data = data.accounts;
   }
 
@@ -122,12 +129,21 @@ function restoreState(
   restoreScripts: boolean,
 ) {
   let data;
+
   try {
     const backupPath = path.join(__dirname, '..', 'state', filename);
     data = JSON.parse(fs.readFileSync(backupPath, 'utf8')) as State;
   } catch (error) {
     logger.error('Unable to read backup file:', error as object);
     process.exit(1);
+  }
+
+  // If the backup file does not contain a network, we assume it is an account backup
+  if (!data.accounts) {
+    logger.log('Importing account backup');
+    stateController.saveKey('accounts', data || {});
+    logger.log('Account backup restored successfully');
+    return;
   }
 
   if (!restoreAccounts && !restoreTokens && !restoreScripts) {
@@ -203,8 +219,8 @@ export default (program: any) => {
       if (!options.file) {
         const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
 
-        // filter out the pattern state.backup.TIMESTAMP.json
-        const pattern = /^state\.backup\.\d+\.json$/;
+        // filter out the pattern *.backup.*.json like accounts.backup.7-nov-2024.json
+        const pattern = /^.*\.backup\..*\.json$/;
         const backups = files.filter((file) => pattern.test(file));
 
         if (backups.length === 0) {

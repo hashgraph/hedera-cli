@@ -868,7 +868,7 @@ Flags:
 
 **2. Restoring Backup:**
 
-This command restores a backup of the `state.json` file stored in the same `dist/state` directory, it can't detect backups stored elsewhere. It only restores state files with the format `state.backup.<timestamp>.json`. If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.
+This command restores a backup of the `state.json` file stored in the same `dist/state` directory, it can't detect backups stored elsewhere. It only restores state files with the format `*.backup.*.json`. If you don't provide a filename, the CLI tool will list all available backups that match this pattern and ask you to select one.
 
 ```sh
 hcli backup restore -f,--file <filename> [--restore-accounts] [--restore-tokens] [--restore-scripts]
@@ -885,6 +885,12 @@ Example: You can combine the flags to restore only certain parts of the state. F
 
 ```sh
 hcli backup restore -f state.backup.1704321015228.json --restore-accounts --restore-tokens
+```
+
+You can also restore an account backup by using the following command (which restores only the accounts section of the state):
+
+```sh
+hcli backup restore -f accounts.backup.7-nov-2024.json
 ```
 
 > **Note: If you don't provide a filename, the CLI tool will list all available backups and ask you to select one.** You can still use the flags to restore only certain parts of the state.
