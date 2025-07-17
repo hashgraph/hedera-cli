@@ -30,11 +30,10 @@ describe("account create command", () => {
   });
 
   describe("account create - success path", () => {
-    test("✅ should create ED25519 account in state", async () => {
+    test("✅ should create ECDSA account in state", async () => {
       // Arrange
       const balance = 5000;
       const newAccountAlias = "greg";
-      const type = "ED25519";
       const createAccountSpy = jest.spyOn(accountUtils, "createAccount");
 
       const program = new Command();
@@ -50,15 +49,13 @@ describe("account create command", () => {
         newAccountAlias,
         "-b",
         balance.toString(),
-        "-t",
-        type
       ]);
 
       // Assert
       const greg = accountUtils.findAccountByAlias(newAccountAlias);
-      expect(createAccountSpy).toHaveBeenCalledWith(balance, type, newAccountAlias, 0);
+      expect(createAccountSpy).toHaveBeenCalledWith(balance, 'ECDSA', newAccountAlias, 0);
       expect(greg.alias).toBe(newAccountAlias);
-      expect(greg.type).toBe(type);
+      expect(greg.type).toBe('ECDSA');
     });
 
     test("✅ should create ECDSA account in state", async () => {
@@ -81,8 +78,6 @@ describe("account create command", () => {
           newAccountAlias,
           "-b",
           balance.toString(),
-          "-t",
-          type
         ]);
   
         // Assert

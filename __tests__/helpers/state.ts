@@ -48,22 +48,22 @@ export const baseState: State = {
 export const alice: Account = {
   network: 'localnet',
   alias: 'alice',
-  accountId: '0.0.6025067',
-  type: 'ED25519',
+  accountId: '0.0.6366720',
+  type: 'ECDSA',
   publicKey:
-    '302a300506032b6570032100052ff6e06c1610e33c1c631fa44c259ab62c7becb7a97932b3d60094d0a2f8ba',
-  evmAddress: '',
-  solidityAddress: '00000000000000000000000000000000005bef6b',
-  solidityAddressFull: '0x00000000000000000000000000000000005bef6b',
+    '302d300706052b8104000a032200026db3b60d397b16a4adc9a3eed28c0a22643317ca242620ceadff7c141d01e121',
+  evmAddress: '7424aa05e92717bf7523e71bb28465cace4dbef6',
+  solidityAddress: '0000000000000000000000000000000000612600',
+  solidityAddressFull: '0x0000000000000000000000000000000000612600',
   privateKey:
-    '302e020100300506032b657004220420ece0b15b20e555f66d5f4cd83187567af9613276629d7e15161b0c929ea07697',
+    '3030020100300706052b8104000a04220420e58de2c47dee0d68b1b44fff30447c64be005dd8153fa2bc76d8c770051e5ed7',
 };
 
 export const bob: Account = {
   network: 'localnet',
   alias: 'bob',
   accountId: '0.0.6025066',
-  type: 'ED25519',
+  type: 'ECDSA',
   publicKey:
     '302a300506032b65700321009c7c0a15424226860552f0fd859f3995c55ebf64088214b692f87528f2e3d7e6',
   evmAddress: '',
@@ -197,6 +197,6 @@ export const testnetOperatorAccount: Record<string, Account> = {
       '302a300506032b6570032100b5416f8c0c2836904c58082e4e4a4e923db30bcf85aa189b41fa91062eb8e98b',
     solidityAddress: '0000000000000000000000000000000000757d7c',
     solidityAddressFull: '0x0000000000000000000000000000000000757d7c',
-    type: 'ed25519',
+    type: 'ECDSA',
   },
 };
