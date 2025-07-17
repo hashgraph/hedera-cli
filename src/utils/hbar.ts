@@ -10,6 +10,7 @@ async function transfer(
   amount: number,
   from: string,
   to: string,
+  memo: string,
 ): Promise<void> {
   if (from === to) {
     logger.error('Cannot transfer to the same account');
@@ -30,6 +31,7 @@ async function transfer(
     const transferTx = new TransferTransaction()
       .addHbarTransfer(fromId, amount * -1)
       .addHbarTransfer(toId, amount)
+      .setTransactionMemo(memo)
       .freezeWith(client);
 
     const transferTxSign = await signUtils.sign(
