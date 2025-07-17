@@ -28,6 +28,7 @@ export default (program: any) => {
     .requiredOption('-b, --balance <balance>', 'Amount of tinybars to transfer')
     .option('-t, --to <to>', 'Account ID to transfer tinybars to')
     .option('-f, --from <from>', 'Account ID to transfer tinybars from')
+    .option('--memo <memo>', 'Memo for the transfer')
     .action(async (options: HbarTransferOptions) => {
       logger.verbose('Transferring tinybars');
       options = dynamicVariablesUtils.replaceOptions(options);
@@ -84,7 +85,7 @@ export default (program: any) => {
         }
       }
 
-      await hbarUtils.transfer(Number(options.balance), from, to);
+      await hbarUtils.transfer(Number(options.balance), from, to, options.memo);
     });
 };
 
@@ -92,4 +93,5 @@ interface HbarTransferOptions {
   balance: number;
   to: string;
   from: string;
+  memo: string;
 }
