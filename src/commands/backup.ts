@@ -46,6 +46,12 @@ function filterState(data: State) {
     filteredState.accounts[alias].privateKey = '';
   });
 
+  // Remove private keys from topics
+  Object.keys(filteredState.topics).forEach((topicId) => {
+    filteredState.topics[topicId].adminKey = '';
+    filteredState.topics[topicId].submitKey = '';
+  }); 
+
   return filteredState;
 }
 
