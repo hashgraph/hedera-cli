@@ -15,7 +15,7 @@ describe("account delete command", () => {
     test("✅ should delete account by account ID", async () => {
       // Arrange
       const deleteAccountSpy = jest.spyOn(accountUtils, "deleteAccount");
-      stateController.saveKey("accounts", { [bob.alias]: bob });
+      stateController.saveKey("accounts", { [bob.name]: bob });
 
       const program = new Command();
       commands.accountCommands(program);
@@ -35,10 +35,10 @@ describe("account delete command", () => {
       expect(stateController.get("accounts")).toEqual({});
     });
 
-    test("✅ should delete account by alias", async () => {
+    test("✅ should delete account by name", async () => {
       // Arrange
       const deleteAccountSpy = jest.spyOn(accountUtils, "deleteAccount");
-      stateController.saveKey("accounts", { [bob.alias]: bob });
+      stateController.saveKey("accounts", { [bob.name]: bob });
 
       const program = new Command();
       commands.accountCommands(program);
@@ -49,12 +49,12 @@ describe("account delete command", () => {
         "hedera-cli.ts",
         "account",
         "delete",
-        "-a",
-        bob.alias,
+        "-n",
+        bob.name,
       ]);
 
       // Assert
-      expect(deleteAccountSpy).toHaveBeenCalledWith(bob.alias);
+      expect(deleteAccountSpy).toHaveBeenCalledWith(bob.name);
       expect(stateController.get("accounts")).toEqual({});
     });
   });

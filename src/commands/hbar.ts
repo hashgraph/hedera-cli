@@ -52,7 +52,7 @@ export default (program: any) => {
             process.exit(1);
           }
           from = await enquirerUtils.createPrompt(
-            filteredAccounts.map((account) => account.alias),
+            filteredAccounts.map((account) => account.name),
             'Choose account to transfer hbar from:',
           );
         } catch (error) {
@@ -76,7 +76,7 @@ export default (program: any) => {
             process.exit(1);
           }
           to = await enquirerUtils.createPrompt(
-            filteredAccounts.map((account) => account.alias),
+            filteredAccounts.map((account) => account.name),
             'Choose account to transfer hbar to:',
           );
         } catch (error) {

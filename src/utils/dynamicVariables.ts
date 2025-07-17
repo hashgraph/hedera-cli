@@ -96,7 +96,7 @@ const commandActions: CommandActions = {
 };
 
 const accountOutput: Record<string, string> = {
-  alias: 'alias',
+  name: 'name',
   accountId: 'accountId',
   type: 'type',
   publicKey: 'publicKey',

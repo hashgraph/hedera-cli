@@ -19,8 +19,8 @@ function clearAddressBook(): void {
   stateController.saveKey('accounts', {});
 }
 
-function deleteAccount(accountIdOrAlias: string): void {
-  const account = stateUtils.getAccountByIdOrAlias(accountIdOrAlias);
+function deleteAccount(accountIdOrName: string): void {
+  const account = stateUtils.getAccountByIdOrName(accountIdOrName);
 
   if (!account) {
     logger.error('Account not found');
@@ -28,12 +28,12 @@ function deleteAccount(accountIdOrAlias: string): void {
   }
 
   const accounts = stateController.get('accounts');
-  delete accounts[account.alias];
+  delete accounts[account.name];
 
   stateController.saveKey('accounts', accounts);
 }
 
-function generateRandomAlias(): string {
+function generateRandomName(): string {
   const length = 20; // Define the length of the random string
   const characters =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -47,7 +47,7 @@ function generateRandomAlias(): string {
 async function createAccount(
   balance: number,
   type: string,
-  alias: string,
+  name: string,
   setMaxAutomaticTokenAssociations: number = 0,
 ): Promise<Account> {
   // Validate balance
@@ -62,9 +62,9 @@ async function createAccount(
     process.exit(1);
   }
 
-  // Validate alias: Not allowed to use "operator" as an alias or part of an alias
-  if (alias.toLowerCase().includes('operator')) {
-    logger.error('Invalid alias. Alias cannot contain the word "operator".');
+  // Validate name: Not allowed to use "operator" as a name or part of a name
+  if (name.toLowerCase().includes('operator')) {
+    logger.error('Invalid name. Name cannot contain the word "operator".');
     process.exit(1);
   }
 
@@ -72,17 +72,17 @@ async function createAccount(
   const accounts: Record<string, Account> = stateController.get('accounts');
   const client = stateUtils.getHederaClient();
 
-  // Generate random alias if "random" is provided
-  let isRandomAlias = false;
-  if (alias.toLowerCase() === 'random') {
-    isRandomAlias = true;
-    let newAlias = generateRandomAlias();
-    alias = newAlias;
+  // Generate random name if "random" is provided
+  let isRandomName = false;
+  if (name.toLowerCase() === 'random') {
+    isRandomName = true;
+    let newName = generateRandomName();
+    name = newName;
   }
 
   // Check if name is unique
-  if (!isRandomAlias && accounts && accounts[alias]) {
-    logger.error('An account with this alias already exists.');
+  if (!isRandomName && accounts && accounts[name]) {
+    logger.error('An account with this name already exists.');
     client.close();
     process.exit(1);
   }
@@ -117,7 +117,7 @@ async function createAccount(
   // Store the new account in the config
   const newAccountDetails = {
     network: stateUtils.getNetwork(),
-    alias,
+    name,
     accountId: newAccountId.toString(),
     type: 'ECDSA',
     publicKey: newAccountPrivateKey.publicKey.toString(),
@@ -128,11 +128,11 @@ async function createAccount(
   };
 
   // Add the new account to the accounts object in the config
-  const updatedAccounts = { ...accounts, [alias]: newAccountDetails };
+  const updatedAccounts = { ...accounts, [name]: newAccountDetails };
   stateController.saveKey('accounts', updatedAccounts);
 
   // Log the account ID
-  logger.log(`The new account ID is: ${newAccountId}, with alias: ${alias}`);
+  logger.log(`The new account ID is: ${newAccountId}, with name: ${name}`);
   client.close();
 
   return newAccountDetails;
@@ -148,18 +148,18 @@ function listAccounts(showPrivateKeys: boolean = false): void {
   }
 
   // Log details for each account
-  for (const [alias, account] of Object.entries(accounts)) {
+  for (const [name, account] of Object.entries(accounts)) {
     if (showPrivateKeys) {
-      logger.log('Alias, account ID, type, private key (DER)\n');
+      logger.log('Name, account ID, type, private key (DER)\n');
       logger.log(
-        `${alias}, ${account.accountId}, ${account.type.toUpperCase()}, ${
+        `${name}, ${account.accountId}, ${account.type.toUpperCase()}, ${
           account.privateKey
         }`,
       );
     } else {
-      logger.log('Alias, account ID, type\n');
+      logger.log('Name, account ID, type\n');
       logger.log(
-        `${alias}, ${account.accountId}, ${account.type.toUpperCase()}`,
+        `${name}, ${account.accountId}, ${account.type.toUpperCase()}`,
       );
     }
   }
@@ -179,12 +179,19 @@ function isValidECDSAPrivateKey(privateKey: string): boolean {
   }
 }
 
-function importAccount(id: string, key: string, alias: string): Account {
+/**
+ * @description Imports an account by ID, key, and name
+ * @param id Account ID
+ * @param key Private key
+ * @param name Account name
+ * @returns Account
+ */
+function importAccount(id: string, key: string, name: string): Account {
   const accounts = stateController.get('accounts');
 
   // Check if name is unique
-  if (accounts && accounts[alias]) {
-    logger.error('An account with this alias already exists.');
+  if (accounts && accounts[name]) {
+    logger.error('An account with this name already exists.');
     process.exit(1);
   }
 
@@ -200,9 +207,9 @@ function importAccount(id: string, key: string, alias: string): Account {
   }
 
   const updatedAccounts = { ...accounts };
-  updatedAccounts[alias] = {
+  updatedAccounts[name] = {
     network: stateUtils.getNetwork(),
-    alias,
+    name,
     accountId: id,
     type,
     publicKey: privateKey.publicKey.toString(),
@@ -213,23 +220,23 @@ function importAccount(id: string, key: string, alias: string): Account {
   };
 
   stateController.saveKey('accounts', updatedAccounts);
-  return updatedAccounts[alias];
+  return updatedAccounts[name];
 }
 
-function importAccountId(id: string, alias: string): Account {
+function importAccountId(id: string, name: string): Account {
   const accounts = stateController.get('accounts');
 
   // Check if name is unique
-  if (accounts && accounts[alias]) {
-    logger.error('An account with this alias already exists.');
+  if (accounts && accounts[name]) {
+    logger.error('An account with this name already exists.');
     process.exit(1);
   }
 
   const accountId = AccountId.fromString(id);
   const updatedAccounts = { ...accounts };
-  updatedAccounts[alias] = {
+  updatedAccounts[name] = {
     network: stateUtils.getNetwork(),
-    alias,
+    name,
     accountId: id,
     type: '',
     publicKey: '',
@@ -240,11 +247,11 @@ function importAccountId(id: string, alias: string): Account {
   };
 
   stateController.saveKey('accounts', updatedAccounts);
-  return updatedAccounts[alias];
+  return updatedAccounts[name];
 }
 
 async function getAccountBalance(
-  accountIdOrAlias: string,
+  accountIdOrName: string,
   onlyHbar: boolean = false,
   tokenId?: string,
 ): Promise<void> {
@@ -253,14 +260,14 @@ async function getAccountBalance(
 
   let accountId;
 
-  // Check if input is an alias or an account ID
+  // Check if input is an name or an account ID
   const accountIdPattern = /^0\.0\.\d+$/;
-  if (accountIdPattern.test(accountIdOrAlias)) {
-    accountId = accountIdOrAlias;
-  } else if (accounts && accounts[accountIdOrAlias]) {
-    accountId = accounts[accountIdOrAlias].accountId;
+  if (accountIdPattern.test(accountIdOrName)) {
+    accountId = accountIdOrName;
+  } else if (accounts && accounts[accountIdOrName]) {
+    accountId = accounts[accountIdOrName].accountId;
   } else {
-    logger.error('Invalid account ID or alias not found in address book.');
+    logger.error('Invalid account ID or name not found in address book.');
     client.close();
     process.exit(1);
   }
@@ -323,7 +330,7 @@ function findAccountByPrivateKey(privateKey: string): Account {
   return matchingAccount;
 }
 
-function findAccountByAlias(inputAlias: string): Account {
+function findAccountByName(inputName: string): Account {
   const accounts: Record<string, Account> = stateController.get('accounts');
   if (!accounts) {
     logger.error('No accounts found in state');
@@ -332,14 +339,14 @@ function findAccountByAlias(inputAlias: string): Account {
 
   let matchingAccount: Account | null = null;
   for (const [, account] of Object.entries(accounts)) {
-    if (account.alias === inputAlias) {
+    if (account.name === inputName) {
       matchingAccount = account;
       break; // Exit the loop once a matching account is found
     }
   }
 
   if (!matchingAccount) {
-    logger.error('No matching account found for alias');
+    logger.error('No matching account found for name');
     process.exit(1);
   }
 
@@ -372,12 +379,12 @@ const accountUtils = {
   getAccountHbarBalanceByNetwork,
   getPublicKeyFromPrivateKey,
   getPrivateKeyObject,
-  generateRandomAlias,
+  generateRandomName,
   clearAddressBook,
   deleteAccount,
 
   findAccountByPrivateKey,
-  findAccountByAlias,
+  findAccountByName,
 };
 
 export default accountUtils;

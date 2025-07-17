@@ -25,8 +25,8 @@ describe("account import command", () => {
         "hedera-cli.ts",
         "account",
         "import",
-        "-a",
-        alice.alias,
+        "-n",
+        alice.name,
         "-i",
         alice.accountId,
         "-k",
@@ -34,8 +34,8 @@ describe("account import command", () => {
       ]);
 
       // Assert
-      expect(importAccountSpy).toHaveBeenCalledWith(alice.accountId, alice.privateKey, alice.alias);
-      expect(stateController.get("accounts")).toEqual({ [alice.alias]: alice });
+      expect(importAccountSpy).toHaveBeenCalledWith(alice.accountId, alice.privateKey, alice.name);
+      expect(stateController.get("accounts")).toEqual({ [alice.name]: alice });
     });
   });
 });

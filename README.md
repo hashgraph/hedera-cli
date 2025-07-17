@@ -248,7 +248,7 @@ Flags:
 
 ### Overview
 
-The telemetry command in the Hedera CLI tool is designed to enable or disable telemetry. This feature allows users to opt-in or opt-out of telemetry data collection. Hedera **anonymizes data** and only records the command name, not the parameters or any other sensitive information. For example, it records `account create` but not the account alias or ID. The data is used to improve the CLI tool and provide better features and functionality, by trying to understand how users use the CLI. However, the CLI tool uses a UUID to identify the user, so no personal information is collected. This allows us to better understand how users interact with the CLI tool.
+The telemetry command in the Hedera CLI tool is designed to enable or disable telemetry. This feature allows users to opt-in or opt-out of telemetry data collection. Hedera **anonymizes data** and only records the command name, not the parameters or any other sensitive information. For example, it records `account create` but not the account name or ID. The data is used to improve the CLI tool and provide better features and functionality, by trying to understand how users use the CLI. However, the CLI tool uses a UUID to identify the user, so no personal information is collected. This allows us to better understand how users interact with the CLI tool.
 
 ```sh
 telemetry enable
@@ -397,7 +397,7 @@ As mentioned, you can build interesting script blocks that combine regular CLI c
 {
     "name": "account-storage",
     "commands": [
-      "account create -a alice --args accountId:aliceAccId", // Create account and store account Id
+      "account create -n alice --args accountId:aliceAccId", // Create account and store account Id
       "hardhat compile", // Compile contracts
       "hardhat run ./dist/contracts/scripts/account-storage/deploy-acc-storage.js", // Deploy the contract
       "hardhat run ./dist/contracts/scripts/account-storage/add-account-id.js" // Add Alice's account ID to the contract
@@ -481,29 +481,29 @@ account view
 
 **1. Create a New Account:**
 
-Initializes a new Hedera account (the CLI only supports ECDSA keys) with a specified alias (name for internal referencing in the CLI state) and balance. The balance is optional and has a default if not specified. If you set the `--alias random` flag, the CLI tool will generate a random 20-character long alias.
+Initializes a new Hedera account (the CLI only supports ECDSA keys) with a specified name for internal referencing in the CLI state, and balance. The balance is optional and has a default if not specified. If you set the `--name random` flag, the CLI tool will generate a random 20-character long name.
 
 ```sh
-hcli account create -a,--alias <alias> [-b,--balance <balance>]
+hcli account create -n,--name <name> [-b,--balance <balance>]
 
 // Example
-hcli account create -a alice -b 100000000
-hcli account create -a random
+hcli account create -n alice -b 100000000
+hcli account create -n random
 ```
 
 Flags:
 
-- **-a, --alias:** (required) A unique identifier for the new account. If you set the alias to `random`, the CLI tool will generate a random 20-character long alias.
+- **-n, --name:** (required) A unique identifier for the new account. If you set the name to `random`, the CLI tool will generate a random 20-character long name.
 - **-b, --balance:** (optional) Initial balance in tinybars. Defaults to 1000.
 
-> **Note:** Setting the **`<alias>` to `random`** will generate a random 20-char long alias. This is useful for scripting functionality to avoid running into non-unique alias errors. It's not allowed to use the word **operator** as an alias or as part of an alias because it's reserved for the operator accounts.
+> **Note:** Setting the **`<name>` to `random`** will generate a random 20-char long name. This is useful for scripting functionality to avoid running into non-unique name errors. It's not allowed to use the word **operator** as an name or as part of an name because it's reserved for the operator accounts.
 
 **2. Retrieve Account Balance:**
 
 Displays the balance of a specified account. Users can choose to view only the Hbar balance or the balance of a specific token. It's not possible to use both options at once.
 
 ```sh
-hcli account balance -a,--account-id-or-alias <accountIdOrAlias> [-h,--only-hbar] [-t,--token-id <tokenId>]
+hcli account balance -a,--account-id-or-name <accountIdOrName> [-h,--only-hbar] [-t,--token-id <tokenId>]
 
 // Output
 Balance for account 0.0.5892294:
@@ -522,7 +522,7 @@ hcli account list [-p,--private]
 
 // Example output with -p flag
 Accounts:
-- Alias: bob
+- Name: bob
   Account ID: 0.0.4536938
   Type: ECDSA
   Private Key: 30300201[...]
@@ -534,19 +534,19 @@ Flags:
 
 **4. Import an Existing Account:**
 
-Allows users to import an existing account into the CLI tool using the account's alias, ID, type, and optionally private key. You can import accounts without a private key, but you won't be able to sign transactions with them.
+Allows users to import an existing account into the CLI tool using the account's name, ID, type, and optionally private key. You can import accounts without a private key, but you won't be able to sign transactions with them.
 
 ```sh
-hcli account import -a,--alias <alias> -i,--id <id> [-k,--key <key>]
+hcli account import -n,--name <name> -i,--id <id> [-k,--key <key>]
 
 // Example
-hcli account import -a alice -i 0.0.5892294 -k 30300201[...]
-hcli account import -a alice -i 0.0.12450
+hcli account import -n alice -i 0.0.5892294 -k 30300201[...]
+hcli account import -n alice -i 0.0.12450
 ```
 
 Flags:
 
-- **-a, --alias:** (required) Set the alias for the imported account.
+- **-n, --name:** (required) Set the name for the imported account.
 - **-i, --id:** (required) Provide the account ID.
 - **-k, --key:** (optional) Provide private key for imported account.
 
@@ -560,15 +560,15 @@ hcli account clear
 
 **6. Delete an Account:**
 
-Deletes an account from the address book by its alias or ID, don't use both at the same time. **If you don't provide an alias or ID, the CLI tool will prompt you to select an account from your address book.**
+Deletes an account from the address book by its name or ID, don't use both at the same time. **If you don't provide an name or ID, the CLI tool will prompt you to select an account from your address book.**
 
 ```sh
-hcli account delete [-a,--alias <alias>] [-i,--id <id>]
+hcli account delete [-n,--name <name>] [-i,--id <id>]
 ```
 
 Flags:
 
-- **-a, --alias:** (optional) Alias of the account to delete.
+- **-n, --name:** (optional) Name of the account to delete.
 - **-i, --id:** (optional) Account ID of the account to delete.
 
 **7. View Account Information:**
@@ -630,8 +630,8 @@ A token input file looks like below. You can define all properties you would nor
   "initialSupply": 1000,
   "maxSupply": 1000000,
   "keys": {
-    "supplyKey": "<alias:bob>",
-    "treasuryKey": "<alias:alice>",
+    "supplyKey": "<name:bob>",
+    "treasuryKey": "<name:alice>",
     "adminKey": "<newkey:ecdsa:10000>",
     "feeScheduleKey": "",
     "freezeKey": "",
@@ -660,7 +660,7 @@ A token input file looks like below. You can define all properties you would nor
 }
 ```
 
-> **Note:** that you can use placeholders for all keys on a token. The format `<alias:bob>` refers to an account with alias `bob` in your address book. It will use Bob's key.
+> **Note:** that you can use placeholders for all keys on a token. The format `<name:bob>` refers to an account with name `bob` in your address book. It will use Bob's key.
 >
 > You can also tell the CLI tool to create a new account with account type `ecdsa` and an initial balance in TinyBars. The `<newkey:ecdsa:10000>` placeholder creates a new ECDSA account with 10,000 TinyBars and uses its key for the admin key.
 
@@ -711,7 +711,7 @@ Flags:
 
 **3. Associate Token with Account:**
 
-Associates a specified token with an account. Both the token ID and the account ID (or alias) are required.
+Associates a specified token with an account. Both the token ID and the account ID (or name) are required.
 
 ```sh
 hcli token associate -a,--account-id <accountId> -t,--token-id <tokenId>
@@ -722,7 +722,7 @@ hcli token associate -a bob -t 0.0.5892309
 
 Flags:
 
-- Account ID: (required) Account ID or alias to associate with the token.
+- Account ID: (required) Account ID or name to associate with the token.
 - Token ID: (required) Token ID to be associated with the account.
 
 **4. Transfer Fungible Token:**
@@ -736,8 +736,8 @@ hcli token transfer -t,--token-id <tokenId> --to <to> --from <from> -b,--balance
 Flags:
 
 - **Token ID:** (required) Token ID to transfer.
-- **To:** (required) Account ID to transfer the token to (Can be an alias or account ID).
-- **From:** (required) Account ID to transfer the token from (Can be an alias or account ID).
+- **To:** (required) Account ID to transfer the token to (Can be an name or account ID).
+- **From:** (required) Account ID to transfer the token from (Can be an name or account ID).
 - **Balance:** (required) Amount of token to transfer. For example, if the token has 2 decimals, you need to transfer 100 to transfer 1 token.
 
 ## Topic Commands
@@ -826,11 +826,11 @@ hcli hbar transfer -f alice -t 0.0.12345 -b 100000000 --memo "Transfer memo"
 Flags:
 
 - **Balance:** (required) Amount of tinybars to transfer.
-- **From:** (optional) Account ID or alias to transfer the hbars from.
-- **To:** (optional) Account ID or alias to transfer the hbars to.
+- **From:** (optional) Account ID or name to transfer the hbars from.
+- **To:** (optional) Account ID or name to transfer the hbars to.
 - **Memo:** (optional) Memo for the transfer.
 
-> **Note:** If you don't specify a `from` or `to` account, the CLI tool will prompt you to select an account from your address book, listed by alias.
+> **Note:** If you don't specify a `from` or `to` account, the CLI tool will prompt you to select an account from your address book, listed by name.
 
 ## Backup Commands
 
@@ -928,9 +928,9 @@ Format for remote script files:
 ```json
 {
   "accounts": {
-    "myalias": {
+    "myname": {
       "network": "testnet",
-      "alias": "myalias",
+      "name": "myname",
       "accountId": "0.0.7426198",
       "type": "ecdsa",
       "publicKey": "302d300706052b8104000a03220003732a9daae40e2a41ccd10dd35b521cbcafdd4bf906a66e37d0a65512a1d7db23",
@@ -944,8 +944,8 @@ Format for remote script files:
     "script-script1": {
       "name": "script1",
       "commands": [
-        "account create -a alice",
-        "account create -a bob"
+        "account create -n alice",
+        "account create -n bob"
       ]
     }
   },
@@ -996,7 +996,7 @@ hcli state download --url https://gist.githubusercontent.com/michielmulders/f8ae
 Displays the current state of the CLI tool.
 
 ```sh
-hcli state view [--accounts] [--tokens] [--scripts] [--account-alias <account-alias>] [--account-id <account-id>] [--token-id <token-id>]
+hcli state view [--accounts] [--tokens] [--scripts] [--account-name <account-name>] [--account-id <account-id>] [--token-id <token-id>]
 ```
 
 Flags:
@@ -1004,7 +1004,7 @@ Flags:
 - **Accounts:** (optional) Displays the accounts section of the state.
 - **Tokens:** (optional) Displays the tokens section of the state.
 - **Scripts:** (optional) Displays the scripts section of the state.
-- **Account Alias:** (optional) Displays the account with the specified alias.
+- **Account Name:** (optional) Displays the account with the specified name.
 - **Account ID:** (optional) Displays the account with the specified ID.
 - **Token ID:** (optional) Displays the token with the specified ID.
 
@@ -1095,21 +1095,21 @@ The following example shows how you can use dynamic variables to create a script
   "name": "transfer",
   "commands": [
     "network use testnet",
-    "account create -a random --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
-    "account create -a random --args privateKey:privKeyAcc2 --args alias:aliasAcc2 --args accountId:idAcc2",
-    "account create -a random --args privateKey:privKeyAcc3 --args alias:aliasAcc3 --args accountId:idAcc3",
+    "account create -n random --args privateKey:privKeyAcc1 --args name:nameAcc1 --args accountId:idAcc1",
+    "account create -n random --args privateKey:privKeyAcc2 --args name:nameAcc2 --args accountId:idAcc2",
+    "account create -n random --args privateKey:privKeyAcc3 --args name:nameAcc3 --args accountId:idAcc3",
     "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId:tokenId",
     "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
-    "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}",
+    "token transfer -t {{tokenId}} -b 1 --from {{nameAcc2}} --to {{nameAcc3}}",
     "wait 3",
-    "account balance --account-id-or-alias {{aliasAcc3}} --token-id {{tokenId}}",
+    "account balance --account-id-or-name {{nameAcc3}} --token-id {{tokenId}}",
     "state view --token-id {{tokenId}}"
   ],
   "args": {}
 }
 ```
 
-> Make sure to not use a space between the variable name and the arrow notation (`:`). Otherwise, the CLI tool will not recognize the variable. `--args alias:aliasAcc1` is correct, `--args alias : aliasAcc1` is not.
+> Make sure to not use a space between the variable name and the arrow notation (`:`). Otherwise, the CLI tool will not recognize the variable. `--args name:nameAcc1` is correct, `--args name : nameAcc1` is not.
 
 The below command shows how to create a new account on testnet with 1 hbar and prints the hbar balance.
 
@@ -1118,9 +1118,9 @@ The below command shows how to create a new account on testnet with 1 hbar and p
   "name": "account-create",
   "commands": [
     "network use testnet",
-    "account create -a random -b 100000000 --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
+    "account create -n random -b 100000000 --args privateKey:privKeyAcc1 --args name:nameAcc1 --args accountId:idAcc1",
     "wait 3",
-    "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
+    "account balance --account-id-or-name {{idAcc1}} --only-hbar"
   ],
   "args": {}
 }
@@ -1132,7 +1132,7 @@ This example shows how to use Hardhat scripts as part of your flow, mixing it wi
 {
   "name": "hardhat-deploy",
   "commands": [
-    "account create -a random --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
+    "account create -n random --args privateKey:privKeyAcc1 --args name:nameAcc1 --args accountId:idAcc1",
     "wait 3",
     "hardhat run ./dist/contracts/scripts/deploy.js --network local"
   ],
@@ -1146,8 +1146,8 @@ Not each command exposes the same variables. Here's a list of commands and the v
 
 | Command | Variables |
 | --- | --- |
-| `account create` | `alias`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
-| `account import` | `alias`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
+| `account create` | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
+| `account import` | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
 | `account view` | `accountId`, `balance`, `evmAddress`, `type`, `maxAutomaticTokenAssociations` |
 | `token create` | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey` |
 | `token create-from-file` | `tokenId`, `name`, `symbol`, `treasuryId`, `treasuryKey`, `adminKey`, `pauseKey`, `kycKey`, `wipeKey`, `freezeKey`, `supplyKey`, `feeScheduleKey` |
@@ -1188,7 +1188,7 @@ Here's an example state:
   "accounts": {
     "bob": {
       "network": "testnet",
-      "alias": "bob",
+      "name": "bob",
       "accountId": "0.0.7393086",
       "type": "ECDSA",
       "publicKey": "302a300506032b657003210059b9fc2413aa2a1dccda4b6ea0f99a48414db6f6ad6eb28589bab12f578f8697",
@@ -1204,8 +1204,8 @@ Here's an example state:
       "creation": 1697103669402,
       "commands": [
         "network use testnet",
-        "account create -a random --args privateKey:tokenMichielAdminKey --args alias:accountAlias",
-        "token create -n {{accountAlias}} -s mm -d 2 -i 1000 --supply-type infinite -a {{tokenMichielAdminKey}} -t 0.0.4536940 -k 302e020100300506032b6568253a539643468dda3128a734c9fcb07a927b3f742719db731f9f50"
+        "account create -n random --args privateKey:tokenMichielAdminKey --args name:accountName",
+        "token create -n {{accountName}} -s mm -d 2 -i 1000 --supply-type infinite -a {{tokenMichielAdminKey}} -t 0.0.4536940 -k 302e020100300506032b6568253a539643468dda3128a734c9fcb07a927b3f742719db731f9f50"
       ],
       "args": {}
     }
@@ -1391,7 +1391,7 @@ Next, you can define command outputs for your action. Command outputs define the
 ```js
 const commandOutputs: CommandOutputs = {
   accountCreate: {
-    alias: 'alias',
+    name: 'name',
     accountId: 'accountId',
     type: 'type',
     publicKey: 'publicKey',
@@ -1413,7 +1413,7 @@ Make sure that each property you define exists in the output for the command. He
     let accountDetails = await accountUtils.createAccount(
       options.balance,
       options.type,
-      options.alias,
+      options.name,
     );
 
     // Store dynamic variables

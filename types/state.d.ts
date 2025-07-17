@@ -12,7 +12,7 @@ export type Topic = {
 
 export type Account = {
   network: string;
-  alias: string;
+  name: string;
   accountId: string;
   type: string;
   publicKey: string;
@@ -78,7 +78,7 @@ export interface Keys {
 }
 
 export interface Association {
-  alias: string;
+  name: string;
   accountId: string;
 }
 

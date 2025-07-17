@@ -42,7 +42,7 @@ type Transaction = {
 
 export type AccountResponse = {
   account: string;
-  alias: string;
+  name: string;
   auto_renew_period: number;
   balance: Balance;
   created_timestamp: string;

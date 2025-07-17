@@ -48,9 +48,9 @@ const isTokenAssociated = async (
 
 const associateToken = async (
   tokenId: string,
-  accountIdorAlias: string,
+  accountIdorName: string,
 ): Promise<void> => {
-  let account = stateUtils.getAccountByIdOrAlias(accountIdorAlias);
+  let account = stateUtils.getAccountByIdOrName(accountIdorName);
 
   const client = stateUtils.getHederaClient();
   try {
@@ -76,7 +76,7 @@ const associateToken = async (
   }
 
   // Store association in state for token
-  stateUtils.addTokenAssociation(tokenId, account.accountId, account.alias);
+  stateUtils.addTokenAssociation(tokenId, account.accountId, account.name);
   client.close();
 };
 

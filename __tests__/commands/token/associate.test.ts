@@ -27,7 +27,7 @@ describe('token associate command', () => {
     const tokenStateWithAlice = {
         ...tokenState,
         accounts: {
-            [alice.alias]: alice,
+            [alice.name]: alice,
         },
     };
     stateController.saveState(tokenStateWithAlice);
@@ -55,7 +55,7 @@ describe('token associate command', () => {
       const tokens = stateController.get('tokens');
       expect(tokens[tokenId].associations).toEqual([
         {
-          alias: alice.alias,
+          name: alice.name,
           accountId: alice.accountId,
         },
       ]);
