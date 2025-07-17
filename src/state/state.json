@@ -34,7 +34,7 @@
       "name": "account-create",
       "creation": 1752750336719,
       "commands": [
-        "account create -a random -b 10000000 --type ecdsa --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "account create -a random -b 10000000 --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
         "wait 5",
         "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
       ],
@@ -44,7 +44,7 @@
       "name": "account-create-simple",
       "creation": 1752750336720,
       "commands": [
-        "account create -a random -b 10000000 --type ecdsa --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "account create -a random -b 10000000 --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
         "wait 5"
       ],
       "args": {}
@@ -53,9 +53,30 @@
       "name": "topic-create",
       "creation": 1752750336722,
       "commands": [
-        "account create -a random --args privateKey,privKeyAdmin",
-        "account create -a random --args privateKey,privKeySubmit",
-        "topic create --admin-key {{privKeyAdmin}} --submit-key {{privKeySubmit}} --args topicId,topicId"
+        "account create -a random --args privateKey:privKeyAdmin",
+        "account create -a random --args privateKey:privKeySubmit",
+        "topic create --admin-key {{privKeyAdmin}} --submit-key {{privKeySubmit}} --args topicId:topicId"
+      ],
+      "args": {}
+    },
+    "script-erc721": {
+      "name": "erc721",
+      "creation": 1742830623351,
+      "commands": [
+        "hardhat compile",
+        "hardhat run ./dist/contracts/scripts/deploy.js --network local",
+        "hardhat run ./dist/contracts/scripts/mint.js --network local",
+        "hardhat run ./dist/contracts/scripts/balance.js --network local"
+      ],
+      "args": {}
+    },
+    "script-account-storage": {
+      "name": "account-storage",
+      "commands": [
+        "account create -a alice --args accountId:aliceAccId",
+        "hardhat compile",
+        "hardhat run ./dist/contracts/scripts/accountStorage/deploy-acc-storage.js --network local",
+        "hardhat run ./dist/contracts/scripts/accountStorage/add-account-id.js --network local"
       ],
       "args": {}
     }
