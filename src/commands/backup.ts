@@ -50,7 +50,7 @@ function filterState(data: State) {
   Object.keys(filteredState.topics).forEach((topicId) => {
     filteredState.topics[topicId].adminKey = '';
     filteredState.topics[topicId].submitKey = '';
-  }); 
+  });
 
   return filteredState;
 }
