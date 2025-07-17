@@ -46,8 +46,6 @@ function filterState(data: State) {
     filteredState.accounts[alias].privateKey = '';
   });
 
-  logger.log('Warning: The private keys were not removed from scripts');
-
   return filteredState;
 }
 
@@ -89,6 +87,9 @@ function backupState(
   // Only backup accounts if the user specified the --accounts flag
   if (backupAccounts) {
     backupFilename = `accounts.backup.${timestamp}.json`;
+    if (name) {
+      backupFilename = `accounts.backup.${name}.json`;
+    }
     data = data.accounts;
   }
 
@@ -122,6 +123,17 @@ function restoreState(
   restoreScripts: boolean,
 ) {
   let data;
+
+  // Only allow state backups to be restored, not account, token, or script backups (for now)
+  if (
+    filename.includes('accounts') ||
+    filename.includes('tokens') ||
+    filename.includes('scripts')
+  ) {
+    logger.error('Only state backups can be restored');
+    process.exit(1);
+  }
+
   try {
     const backupPath = path.join(__dirname, '..', 'state', filename);
     data = JSON.parse(fs.readFileSync(backupPath, 'utf8')) as State;
