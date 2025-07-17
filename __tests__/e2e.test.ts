@@ -99,7 +99,7 @@ describe('End to end tests', () => {
 
     // Arrange: Transfer part of the balance back to the operator account and verify the balance is correct
     commands.hbarCommands(program);
-    const transferAmount = 0.00001;
+    const transferAmount = 1000;
 
     // Act
     await program.parseAsync([

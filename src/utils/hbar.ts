@@ -1,4 +1,4 @@
-import { TransferTransaction } from '@hashgraph/sdk';
+import { TransferTransaction, Hbar, HbarUnit } from '@hashgraph/sdk';
 
 import stateUtils from './state';
 import { Logger } from '../utils/logger';
@@ -10,6 +10,7 @@ async function transfer(
   amount: number,
   from: string,
   to: string,
+  memo: string,
 ): Promise<void> {
   if (from === to) {
     logger.error('Cannot transfer to the same account');
@@ -28,8 +29,9 @@ async function transfer(
   const client = stateUtils.getHederaClient();
   try {
     const transferTx = new TransferTransaction()
-      .addHbarTransfer(fromId, amount * -1)
-      .addHbarTransfer(toId, amount)
+      .addHbarTransfer(fromId, new Hbar(-amount, HbarUnit.Tinybar))
+      .addHbarTransfer(toId, new Hbar(amount, HbarUnit.Tinybar))
+      .setTransactionMemo(memo)
       .freezeWith(client);
 
     const transferTxSign = await signUtils.sign(

@@ -813,21 +813,22 @@ Flags:
 
 ### Overview
 
-The `hbar` command in the Hedera CLI tool is designed for transferring hbars between accounts.
+The `hbar` command in the Hedera CLI tool is designed for transferring tinybars (1 hbar = 100,000,000 tinybars) between accounts.
 
 ```sh
-hcli hbar transfer -b,--balance <balance> [-f,--from <from>] [-t,--to <to>]
+hcli hbar transfer -b,--balance <balance> [-f,--from <from>] [-t,--to <to>] [--memo <memo>]
 
 // Example
-hcli hbar transfer -f alice -t bob -b 1000
-hcli hbar transfer -f alice -t 0.0.12345 -b 1000
+hcli hbar transfer -f alice -t bob -b 100000000
+hcli hbar transfer -f alice -t 0.0.12345 -b 100000000 --memo "Transfer memo"
 ```
 
 Flags:
 
-- **Balance:** (required) Amount of hbars to transfer.
+- **Balance:** (required) Amount of tinybars to transfer.
 - **From:** (optional) Account ID or alias to transfer the hbars from.
 - **To:** (optional) Account ID or alias to transfer the hbars to.
+- **Memo:** (optional) Memo for the transfer.
 
 > **Note:** If you don't specify a `from` or `to` account, the CLI tool will prompt you to select an account from your address book, listed by alias.
 
