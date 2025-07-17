@@ -16,7 +16,7 @@
   "scripts": {
     "script-token": {
       "name": "token",
-      "creation": 1752750336714,
+      "creation": 1752750463475,
       "commands": [
         "account create -a random --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
         "account create -a random --args privateKey,privKeyAcc2 --args alias,aliasAcc2 --args accountId,idAcc2",
@@ -32,7 +32,7 @@
     },
     "script-account-create": {
       "name": "account-create",
-      "creation": 1752750336719,
+      "creation": 1752750463480,
       "commands": [
         "account create -a random -b 10000000 --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
         "wait 5",
@@ -42,7 +42,7 @@
     },
     "script-account-create-simple": {
       "name": "account-create-simple",
-      "creation": 1752750336720,
+      "creation": 1752750463481,
       "commands": [
         "account create -a random -b 10000000 --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
         "wait 5"
@@ -51,7 +51,7 @@
     },
     "script-topic-create": {
       "name": "topic-create",
-      "creation": 1752750336722,
+      "creation": 1752750463483,
       "commands": [
         "account create -a random --args privateKey:privKeyAdmin",
         "account create -a random --args privateKey:privKeySubmit",
