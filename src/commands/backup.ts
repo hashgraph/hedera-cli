@@ -213,8 +213,8 @@ export default (program: any) => {
       if (!options.file) {
         const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
 
-        // filter out the pattern state.backup.TIMESTAMP.json
-        const pattern = /^state\.backup\.\d+\.json$/;
+        // filter out the pattern *.backup.*.json like accounts.backup.7-nov-2024.json
+        const pattern = /^.*\.backup\..*\.json$/;
         const backups = files.filter((file) => pattern.test(file));
 
         if (backups.length === 0) {
