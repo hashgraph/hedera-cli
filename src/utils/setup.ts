@@ -32,17 +32,15 @@ function setupOperatorAccounts(
 
     const privateKeyObject =
       accountUtils.getPrivateKeyObject(testnetOperatorKey);
-    const type = accountUtils.getKeyType(testnetOperatorKey);
 
     newState.accounts['testnet-operator'] = {
       accountId: testnetOperatorId,
       privateKey: testnetOperatorKey,
       network: 'testnet',
       alias: 'testnet-operator',
-      type,
+      type: 'ECDSA',
       publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress:
-        type === 'ed25519' ? '' : privateKeyObject.publicKey.toEvmAddress(),
+      evmAddress: privateKeyObject.publicKey.toEvmAddress(),
       solidityAddress: `${AccountId.fromString(
         testnetOperatorId,
       ).toSolidityAddress()}`,
@@ -61,17 +59,15 @@ function setupOperatorAccounts(
     const privateKeyObject = accountUtils.getPrivateKeyObject(
       previewnetOperatorKey,
     );
-    const type = accountUtils.getKeyType(previewnetOperatorKey);
 
     newState.accounts['preview-operator'] = {
       accountId: previewnetOperatorId,
       privateKey: previewnetOperatorKey,
       network: 'previewnet',
       alias: 'preview-operator',
-      type,
+      type: 'ECDSA',
       publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress:
-        type === 'ed25519' ? '' : privateKeyObject.publicKey.toEvmAddress(),
+      evmAddress: privateKeyObject.publicKey.toEvmAddress(),
       solidityAddress: `${AccountId.fromString(
         previewnetOperatorId,
       ).toSolidityAddress()}`,
@@ -87,17 +83,15 @@ function setupOperatorAccounts(
 
     const privateKeyObject =
       accountUtils.getPrivateKeyObject(mainnetOperatorKey);
-    const type = accountUtils.getKeyType(mainnetOperatorKey);
 
     newState.accounts['mainnet-operator'] = {
       accountId: mainnetOperatorId,
       privateKey: mainnetOperatorKey,
       network: 'mainnet',
       alias: 'mainnet-operator',
-      type,
+      type: 'ECDSA',
       publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress:
-        type === 'ed25519' ? '' : privateKeyObject.publicKey.toEvmAddress(),
+      evmAddress: privateKeyObject.publicKey.toEvmAddress(),
       solidityAddress: `${AccountId.fromString(
         mainnetOperatorId,
       ).toSolidityAddress()}`,
@@ -114,17 +108,15 @@ function setupOperatorAccounts(
 
     const privateKeyObject =
       accountUtils.getPrivateKeyObject(localnetOperatorKey);
-    const type = accountUtils.getKeyType(localnetOperatorKey);
 
     newState.accounts['localnet-operator'] = {
       accountId: localnetOperatorId,
       privateKey: localnetOperatorKey,
       network: 'localnet',
       alias: 'localnet-operator',
-      type,
+      type: 'ECDSA',
       publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress:
-        type === 'ed25519' ? '' : privateKeyObject.publicKey.toEvmAddress(),
+      evmAddress: privateKeyObject.publicKey.toEvmAddress(),
       solidityAddress: `${AccountId.fromString(
         localnetOperatorId,
       ).toSolidityAddress()}`,

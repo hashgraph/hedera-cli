@@ -107,7 +107,7 @@ You can verify the installation by listing all accounts in your address book. Wh
 
 ```sh
 node dist/hedera-cli.js account list
-testnet-operator, 0.0.2224463, ED25519
+testnet-operator, 0.0.2224463, ECDSA
 preview-operator, 0.0.1110, ECDSA
 [...]
 ```
@@ -339,22 +339,23 @@ This command compiles the contracts and generates the necessary artifacts in the
 To run a script, make sure to point to the `dist` folder (after running `npm run build`) and use the `hardhat run` command. For example, to deploy the `erc721.sol` contract, you can run the following command in the root of the CLI tool:
 
 ```sh
-npx hardhat run ./dist/contracts/scripts/deploy.js --network local
+npx hardhat run ./dist/contracts/scripts/erc721/deploy.js --network local
 ```
 
-### Integrating Hardhat with the CLI Scripts Feature
+### Integrating Hardhat with the CLI Script Blocks Feature
 
 The script feature let's you execute script blocks. Here's how you can integrate Hardhat commands into the CLI tool's script feature:
 
 ```json
 "scripts": {
-    "script-deploy": {
-      "name": "deploy",
+    "script-erc721": {
+      "name": "erc721",
       "creation": 1742830623351,
       "commands": [
         "hardhat compile",
-        "hardhat run ./dist/contracts/scripts/deploy.js",
-        "hardhat run ./dist/contracts/scripts/mint.js"
+        "hardhat run ./dist/contracts/scripts/erc721/deploy.js --network local",
+        "hardhat run ./dist/contracts/scripts/erc721/mint.js --network local",
+        "hardhat run ./dist/contracts/scripts/erc721/balance.js --network local"
       ],
       "args": {}
     }
@@ -364,7 +365,7 @@ The script feature let's you execute script blocks. Here's how you can integrate
 Next, it's possible to store data from Hardhat scripts in the `args` field of the script block you are executing. For example, this allows you to deploy a smart contract and store the contract address in the `args` field. You can then reference it as a varaible in other commands in this script block or use it in other Hardhat scripts.
 
 ```javascript
-const stateController = require('../../state/stateController.js').default; // default import
+const stateController = require('../../../state/stateController.js').default; // default import
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -394,13 +395,14 @@ As mentioned, you can build interesting script blocks that combine regular CLI c
 
 ```json
 {
-  "name": "hardhat-deploy",
-  "commands": [
-    "hardhat compile",
-    "hardhat run ./dist/contracts/scripts/deploy.js --network local", // stores the contract ID as "erc721address" in the script args
-    "account create -a {{erc721address}}" // Create a new account and set the alias name equal to the contract address (just an example)
-  ],
-  "args": {}
+    "name": "account-storage",
+    "commands": [
+      "account create -a alice --args accountId:aliceAccId", // Create account and store account Id
+      "hardhat compile", // Compile contracts
+      "hardhat run ./dist/contracts/scripts/account-storage/deploy-acc-storage.js", // Deploy the contract
+      "hardhat run ./dist/contracts/scripts/account-storage/add-account-id.js" // Add Alice's account ID to the contract
+    ],
+    "args": {}
 }
 ```
 
@@ -479,13 +481,13 @@ account view
 
 **1. Create a New Account:**
 
-Initializes a new Hedera account with a specified alias, balance, and type. The balance and type are optional and have defaults if not specified. If you set the `--alias random` flag, the CLI tool will generate a random 20-character long alias.
+Initializes a new Hedera account (the CLI only supports ECDSA keys) with a specified alias (name for internal referencing in the CLI state) and balance. The balance is optional and has a default if not specified. If you set the `--alias random` flag, the CLI tool will generate a random 20-character long alias.
 
 ```sh
-hcli account create -a,--alias <alias> [-b,--balance <balance>] [-t,--type <type>]
+hcli account create -a,--alias <alias> [-b,--balance <balance>]
 
 // Example
-hcli account create -a alice -b 100000000 -t ECDSA
+hcli account create -a alice -b 100000000
 hcli account create -a random
 ```
 
@@ -493,7 +495,6 @@ Flags:
 
 - **-a, --alias:** (required) A unique identifier for the new account. If you set the alias to `random`, the CLI tool will generate a random 20-character long alias.
 - **-b, --balance:** (optional) Initial balance in tinybars. Defaults to 1000.
-- **-t, --type:** (optional) The account type (`ECDSA` or `ED25519`). Defaults to `ED25519`.
 
 > **Note:** Setting the **`<alias>` to `random`** will generate a random 20-char long alias. This is useful for scripting functionality to avoid running into non-unique alias errors. It's not allowed to use the word **operator** as an alias or as part of an alias because it's reserved for the operator accounts.
 
@@ -582,7 +583,7 @@ Account: 0.0.5401160
 Balance Tinybars: 1000000000
 Deleted: false
 EVM Address: 0x0000000000000000000000000000000000526a48
-Key type: ED25519 - Key: 4832f1d396ff123e4e[...]
+Key type: ECDSA - Key: 4832f1d396ff123e4e[...]
 Max automatic token associations: 0
 ```
 
@@ -661,7 +662,7 @@ A token input file looks like below. You can define all properties you would nor
 
 > **Note:** that you can use placeholders for all keys on a token. The format `<alias:bob>` refers to an account with alias `bob` in your address book. It will use Bob's key.
 >
-> You can also tell the CLI tool to create a new account with an account type (`ecdsa` or `ed25519`) and an initial balance in TinyBars. The `<newkey:ecdsa:10000>` placeholder creates a new ECDSA account with 10,000 TinyBars and uses its key for the admin key.
+> You can also tell the CLI tool to create a new account with account type `ecdsa` and an initial balance in TinyBars. The `<newkey:ecdsa:10000>` placeholder creates a new ECDSA account with 10,000 TinyBars and uses its key for the admin key.
 
 Here's how custom fees are defined in the token input file:
 
@@ -1093,7 +1094,7 @@ The below command shows how to create a new account on testnet with 1 hbar and p
   "name": "account-create",
   "commands": [
     "network use testnet",
-    "account create -a random -b 100000000 --type ecdsa --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
+    "account create -a random -b 100000000 --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
     "wait 3",
     "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
   ],
@@ -1165,7 +1166,7 @@ Here's an example state:
       "network": "testnet",
       "alias": "bob",
       "accountId": "0.0.7393086",
-      "type": "ED25519",
+      "type": "ECDSA",
       "publicKey": "302a300506032b657003210059b9fc2413aa2a1dccda4b6ea0f99a48414db6f6ad6eb28589bab12f578f8697",
       "evmAddress": "",
       "solidityAddress": "000000000000000000000000000000000070cf3e",

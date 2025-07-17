@@ -57,8 +57,8 @@ async function createAccount(
   }
 
   // Validate type
-  if (!['ecdsa', 'ed25519'].includes(type.toLowerCase())) {
-    logger.error('Invalid type. Type must be either "ecdsa" or "ed25519".');
+  if (type.toLowerCase() !== 'ecdsa') {
+    logger.error('Invalid type. Only "ecdsa" is supported.');
     process.exit(1);
   }
 
@@ -77,7 +77,7 @@ async function createAccount(
   if (alias.toLowerCase() === 'random') {
     isRandomAlias = true;
     let newAlias = generateRandomAlias();
-    alias = newAlias; // Implement this function to generate a random string
+    alias = newAlias;
   }
 
   // Check if name is unique
@@ -87,15 +87,9 @@ async function createAccount(
     process.exit(1);
   }
 
-  // Handle different types of account creation
-  let newAccountPrivateKey, newAccountPublicKey;
-  if (type.toLowerCase() === 'ed25519') {
-    newAccountPrivateKey = PrivateKey.generateED25519();
-    newAccountPublicKey = newAccountPrivateKey.publicKey;
-  } else {
-    newAccountPrivateKey = PrivateKey.generateECDSA();
-    newAccountPublicKey = newAccountPrivateKey.publicKey;
-  }
+  // Only ECDSA supported
+  let newAccountPrivateKey = PrivateKey.generateECDSA();
+  let newAccountPublicKey = newAccountPrivateKey.publicKey;
 
   let newAccountId;
   try {
@@ -125,12 +119,9 @@ async function createAccount(
     network: stateUtils.getNetwork(),
     alias,
     accountId: newAccountId.toString(),
-    type: type.toUpperCase(),
+    type: 'ECDSA',
     publicKey: newAccountPrivateKey.publicKey.toString(),
-    evmAddress:
-      type.toLowerCase() === 'ed25519'
-        ? ''
-        : newAccountPrivateKey.publicKey.toEvmAddress(),
+    evmAddress: newAccountPrivateKey.publicKey.toEvmAddress(),
     solidityAddress: `${newAccountId.toSolidityAddress()}`,
     solidityAddressFull: `0x${newAccountId.toSolidityAddress()}`,
     privateKey: newAccountPrivateKey.toString(),
@@ -175,26 +166,17 @@ function listAccounts(showPrivateKeys: boolean = false): void {
 }
 
 /**
- * @description Returns the type of a private key
+ * @description Checks if the private key is a valid ECDSA private key
  * @param privateKey Input private key
- * @returns {string} key type {ed25519, ecdsa, Unknown key type}
+ * @returns {boolean} true if the private key is a valid ECDSA private key, false otherwise
  */
-function getKeyType(privateKey: string): string {
-  try {
-    PrivateKey.fromStringED25519(privateKey);
-    return 'ed25519';
-  } catch (e) {
-    // Not an Ed25519 private key
-  }
-
+function isValidECDSAPrivateKey(privateKey: string): boolean {
   try {
     PrivateKey.fromStringECDSA(privateKey);
-    return 'ecdsa';
+    return true;
   } catch (e) {
-    // Not an ECDSA private key
+    return false;
   }
-
-  return 'Unknown key type';
 }
 
 function importAccount(id: string, key: string, alias: string): Account {
@@ -208,23 +190,15 @@ function importAccount(id: string, key: string, alias: string): Account {
 
   let privateKey, type;
   const accountId = AccountId.fromString(id);
-  switch (getKeyType(key)) {
-    case 'ecdsa':
-      type = 'ECDSA';
-      privateKey = PrivateKey.fromStringECDSA(key);
-      break;
-    case 'ed25519':
-      type = 'ED25519';
-      privateKey = PrivateKey.fromStringED25519(key);
-      break;
-    default:
-      logger.error(
-        'Invalid key type. Only ECDSA and ED25519 keys are supported.',
-      );
-      process.exit(1);
+
+  if (isValidECDSAPrivateKey(key)) {
+    type = 'ECDSA';
+    privateKey = PrivateKey.fromStringECDSA(key);
+  } else {
+    logger.error('Invalid key type. Only ECDSA keys are supported.');
+    process.exit(1);
   }
 
-  // No Solidity and EVM address for ED25519 keys
   const updatedAccounts = { ...accounts };
   updatedAccounts[alias] = {
     network: stateUtils.getNetwork(),
@@ -232,10 +206,7 @@ function importAccount(id: string, key: string, alias: string): Account {
     accountId: id,
     type,
     publicKey: privateKey.publicKey.toString(),
-    evmAddress:
-      type.toLowerCase() === 'ed25519'
-        ? ''
-        : privateKey.publicKey.toEvmAddress(),
+    evmAddress: privateKey.publicKey.toEvmAddress(),
     solidityAddress: `${accountId.toSolidityAddress()}`,
     solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: key,
@@ -376,31 +347,17 @@ function findAccountByAlias(inputAlias: string): Account {
 }
 
 function getPublicKeyFromPrivateKey(privateKey: string): string {
-  const keyType = getKeyType(privateKey);
-
-  if (keyType === 'ed25519') {
-    return PrivateKey.fromStringED25519(privateKey).publicKey.toString();
-  }
-
-  if (keyType === 'ecdsa') {
+  if (isValidECDSAPrivateKey(privateKey)) {
     return PrivateKey.fromStringECDSA(privateKey).publicKey.toString();
   }
-
   logger.error('Invalid private key');
   process.exit(1);
 }
 
 function getPrivateKeyObject(privateKey: string): PrivateKey {
-  const keyType = getKeyType(privateKey);
-
-  if (keyType === 'ed25519') {
-    return PrivateKey.fromStringED25519(privateKey);
-  }
-
-  if (keyType === 'ecdsa') {
+  if (isValidECDSAPrivateKey(privateKey)) {
     return PrivateKey.fromStringECDSA(privateKey);
   }
-
   logger.error('Invalid private key');
   process.exit(1);
 }
@@ -413,7 +370,6 @@ const accountUtils = {
   getAccountBalance,
   getAccountHbarBalance,
   getAccountHbarBalanceByNetwork,
-  getKeyType,
   getPublicKeyFromPrivateKey,
   getPrivateKeyObject,
   generateRandomAlias,

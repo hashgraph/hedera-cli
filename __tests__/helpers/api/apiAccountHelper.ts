@@ -16,7 +16,7 @@ export const accountResponse: AccountResponse = {
   evm_address: "0x000000000000000000000000000000000000045d",
   expiry_timestamp: "1698257295.691012650",
   key: {
-    _type: "ED25519",
+    _type: "ECDSA",
     key: "1c8434c89f76882bdb35e429b02b3eb4ba391c3e1869481b276819dd0e9c7d69",
   },
   max_automatic_token_associations: 0,

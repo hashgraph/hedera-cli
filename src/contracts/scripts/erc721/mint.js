@@ -1,4 +1,4 @@
-const stateController = require('../../state/stateController.js').default;
+const stateController = require('../../../state/stateController.js').default;
 
 /**
  * Purpose: Mint an ERC721 token and save its ID in the script arguments.

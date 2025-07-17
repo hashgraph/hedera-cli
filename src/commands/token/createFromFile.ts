@@ -134,16 +134,23 @@ function findNewKeyPattern(
 ): Promise<{ key: string; account: Account }>[] {
   let newAccountPromises: Promise<{ key: string; account: Account }>[] = [];
 
-  const newKeyPattern = /<newkey:(ecdsa|ECDSA|ed25519|ED25519):(\d+)>/;
+  // Only allow ECDSA
+  const newKeyPattern = /<newkey:(ecdsa|ECDSA):(\d+)>/;
   Object.keys(keys).forEach((key) => {
     const match = keys[key as keyof typeof keys].match(newKeyPattern);
 
     if (match) {
-      const keyType = match[1]; // 'ecdsa' or 'ed25519' (can be capitals)
       const initialBalance = Number(match[2]); // Initial balance in tinybars
       newAccountPromises.push(
-        createAccountForToken(key, initialBalance, keyType, 'random'), // Random alias because you can create an account upfront in scripts and give it an alias to be used in the template
+        createAccountForToken(key, initialBalance, 'ECDSA', 'random'), // Random alias because you can create an account upfront in scripts and give it an alias to be used in the template
       );
+    } else if (
+      /<newkey:(ed25519|ED25519):(\d+)>/.test(keys[key as keyof typeof keys])
+    ) {
+      logger.error(
+        'ED25519 keys are no longer supported. Only ECDSA is allowed.',
+      );
+      process.exit(1);
     }
   });
 
