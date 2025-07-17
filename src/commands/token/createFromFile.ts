@@ -140,7 +140,6 @@ function findNewKeyPattern(
     const match = keys[key as keyof typeof keys].match(newKeyPattern);
 
     if (match) {
-      const keyType = match[1]; // 'ecdsa' (can be capitals)
       const initialBalance = Number(match[2]); // Initial balance in tinybars
       newAccountPromises.push(
         createAccountForToken(key, initialBalance, 'ECDSA', 'random'), // Random alias because you can create an account upfront in scripts and give it an alias to be used in the template
