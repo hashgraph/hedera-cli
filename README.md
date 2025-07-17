@@ -1093,7 +1093,7 @@ The below command shows how to create a new account on testnet with 1 hbar and p
   "name": "account-create",
   "commands": [
     "network use testnet",
-    "account create -a random -b 100000000 --type ecdsa --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
+    "account create -a random -b 100000000 --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
     "wait 3",
     "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
   ],
