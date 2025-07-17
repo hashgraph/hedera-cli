@@ -16,12 +16,12 @@
   "scripts": {
     "script-token": {
       "name": "token",
-      "creation": 1741080338298,
+      "creation": 1752750336714,
       "commands": [
-        "account create -a random --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
-        "account create -a random --args privateKey:privKeyAcc2 --args alias:aliasAcc2 --args accountId:idAcc2",
-        "account create -a random --args privateKey:privKeyAcc3 --args alias:aliasAcc3 --args accountId:idAcc3",
-        "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId:tokenId",
+        "account create -a random --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "account create -a random --args privateKey,privKeyAcc2 --args alias,aliasAcc2 --args accountId,idAcc2",
+        "account create -a random --args privateKey,privKeyAcc3 --args alias,aliasAcc3 --args accountId,idAcc3",
+        "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId,tokenId",
         "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
         "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}",
         "wait 3",
@@ -32,9 +32,9 @@
     },
     "script-account-create": {
       "name": "account-create",
-      "creation": 1741080338308,
+      "creation": 1752750336719,
       "commands": [
-        "account create -a random -b 10000000 --type ecdsa --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
+        "account create -a random -b 10000000 --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
         "wait 5",
         "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
       ],
@@ -42,16 +42,16 @@
     },
     "script-account-create-simple": {
       "name": "account-create-simple",
-      "creation": 1741080338310,
+      "creation": 1752750336720,
       "commands": [
-        "account create -a random -b 10000000 --type ecdsa --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
+        "account create -a random -b 10000000 --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
         "wait 5"
       ],
       "args": {}
     },
     "script-topic-create": {
       "name": "topic-create",
-      "creation": 1741080338313,
+      "creation": 1752750336722,
       "commands": [
         "account create -a random --args privateKey:privKeyAdmin",
         "account create -a random --args privateKey:privKeySubmit",

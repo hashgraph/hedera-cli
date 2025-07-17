@@ -33,11 +33,6 @@ export default (program: any) => {
       10000,
     )
     .option(
-      '-t, --type <type>',
-      'Type of account to create (ECDSA or ED25519)',
-      'ED25519',
-    )
-    .option(
       '--auto-associations <autoAssociations>',
       'Set number of automatic associations',
       0,
@@ -56,7 +51,7 @@ export default (program: any) => {
 
       let accountDetails = await accountUtils.createAccount(
         options.balance,
-        options.type,
+        'ECDSA',
         options.alias,
         Number(options.autoAssociations),
       );
@@ -72,7 +67,7 @@ export default (program: any) => {
 interface CreateAccountOptions {
   alias: string;
   balance: number;
-  type: 'ECDSA' | 'ED25519';
+  type: 'ECDSA';
   autoAssociations: number;
   args: string[];
 }

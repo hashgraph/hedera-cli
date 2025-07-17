@@ -84,8 +84,6 @@ describe('End to end tests', () => {
       'create',
       '-a',
       accountAlias,
-      '-t',
-      'ECdsA',
       '--auto-associations',
       '1',
     ]);
@@ -194,7 +192,7 @@ describe('End to end tests', () => {
     // Arrange: Download a script from the internet
     commands.stateCommands(program);
     const scriptURL =
-      'https://raw.githubusercontent.com/hashgraph/hedera-cli/main/src/commands/script/examples.json';
+      'https://gist.githubusercontent.com/michielmulders/7747a83579c7d9deecbe0c18df9e0bfd/raw/6dd2b618017ce1363c19f1de0808327776dcd36c/examples.json';
 
     // Act
     await program.parseAsync([
