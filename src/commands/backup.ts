@@ -124,22 +124,20 @@ function restoreState(
 ) {
   let data;
 
-  // Only allow state backups to be restored, not account, token, or script backups (for now)
-  if (
-    filename.includes('accounts') ||
-    filename.includes('tokens') ||
-    filename.includes('scripts')
-  ) {
-    logger.error('Only state backups can be restored');
-    process.exit(1);
-  }
-
   try {
     const backupPath = path.join(__dirname, '..', 'state', filename);
     data = JSON.parse(fs.readFileSync(backupPath, 'utf8')) as State;
   } catch (error) {
     logger.error('Unable to read backup file:', error as object);
     process.exit(1);
+  }
+
+  // If the backup file does not contain a network, we assume it is an account backup
+  if (!data.accounts) {
+    logger.log('Importing account backup');
+    stateController.saveKey('accounts', data || {});
+    logger.log('Account backup restored successfully');
+    return;
   }
 
   if (!restoreAccounts && !restoreTokens && !restoreScripts) {
