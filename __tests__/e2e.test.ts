@@ -192,7 +192,7 @@ describe('End to end tests', () => {
     // Arrange: Download a script from the internet
     commands.stateCommands(program);
     const scriptURL =
-      'https://gist.githubusercontent.com/michielmulders/7747a83579c7d9deecbe0c18df9e0bfd/raw/381c6a2b5ebd85f5ed80f0e9a7cefbb38f010465/examples.json';
+      'https://raw.githubusercontent.com/hashgraph/hedera-cli/78e4e0dd4eb1a6d9e0894ae970bf6706142e0252/src/commands/script/examples.json';
 
     // Act
     await program.parseAsync([
