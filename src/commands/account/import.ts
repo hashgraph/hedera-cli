@@ -21,9 +21,9 @@ export default (program: any) => {
       }
     })
     .description(
-      'Import an existing account using an account ID, alias, type, and optional private key.',
+      'Import an existing account using an account ID, name, type, and optional private key.',
     )
-    .requiredOption('-a, --alias <alias>', 'account must have an alias')
+    .requiredOption('-n, --name <name>', 'account must have a name')
     .requiredOption('-i, --id <id>', 'Account ID')
     .option('-k, --key <key>', 'Private key')
     .option(
@@ -35,20 +35,17 @@ export default (program: any) => {
     )
     .action((options: ImportAccountOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options);
-      logger.verbose(`Importing account with alias: ${options.alias}`);
+      logger.verbose(`Importing account with name: ${options.name}`);
 
       let accountDetails;
       if (options.key) {
         accountDetails = accountUtils.importAccount(
           options.id,
           options.key,
-          options.alias,
+          options.name,
         );
       } else {
-        accountDetails = accountUtils.importAccountId(
-          options.id,
-          options.alias,
-        );
+        accountDetails = accountUtils.importAccountId(options.id, options.name);
       }
 
       dynamicVariablesUtils.storeArgs(
@@ -60,7 +57,7 @@ export default (program: any) => {
 };
 
 interface ImportAccountOptions {
-  alias: string;
+  name: string;
   id: string;
   key: string;
   args: string[];

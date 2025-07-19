@@ -6,8 +6,8 @@
   "initialSupply": 1000,
   "maxSupply": 1000000,
   "keys": {
-    "supplyKey": "<alias:bob>",
-    "treasuryKey": "<alias:alice>",
+    "supplyKey": "<name:bob>",
+    "treasuryKey": "<name:alice>",
     "adminKey": "<newkey:ecdsa:10000>",
     "feeScheduleKey": "",
     "freezeKey": "",

@@ -21,13 +21,13 @@ export default (program: any) => {
     })
     .description('View state')
     .option('--accounts', 'View accounts', false)
-    .option('--account-alias <account-alias>', 'View account by alias')
+    .option('--account-name <account-name>', 'View account by name')
     .option('--account-id <account-id>', 'View account by ID')
     .option('--tokens', 'View tokens', false)
     .option('--token-id <token-id>', 'View token by ID')
     .option('--scripts', 'View scripts', false)
     .action((options: ViewStateOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for account-alias, account-id, and token-id
+      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for account-name, account-id, and token-id
       logger.verbose('Viewing state');
 
       const state = stateController.getAll();
@@ -36,7 +36,7 @@ export default (program: any) => {
         !options.accounts &&
         !options.tokens &&
         !options.scripts &&
-        !options.accountAlias &&
+        !options.accountName &&
         !options.accountId &&
         !options.tokenId
       ) {
@@ -52,9 +52,9 @@ export default (program: any) => {
         );
       }
 
-      if (options.accountAlias) {
+      if (options.accountName) {
         logger.log('\nAccount:');
-        logger.log(state.accounts[options.accountAlias] || 'Account not found');
+        logger.log(state.accounts[options.accountName] || 'Account not found');
       }
 
       if (options.tokenId) {
@@ -83,7 +83,7 @@ interface ViewStateOptions {
   accounts: boolean;
   tokens: boolean;
   scripts: boolean;
-  accountAlias: string;
+  accountName: string;
   accountId: string;
   tokenId: string;
 }

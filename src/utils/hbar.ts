@@ -19,11 +19,11 @@ async function transfer(
 
   // Find sender account
   let fromAccount, fromId;
-  fromAccount = stateUtils.getAccountByIdOrAlias(from);
+  fromAccount = stateUtils.getAccountByIdOrName(from);
   fromId = fromAccount.accountId;
 
   // Find receiver account
-  let toAccount = stateUtils.getAccountByIdOrAlias(to);
+  let toAccount = stateUtils.getAccountByIdOrName(to);
   let toId = toAccount.accountId;
 
   const client = stateUtils.getHederaClient();

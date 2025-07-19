@@ -22,8 +22,8 @@ export default (program: any) => {
     })
     .description('Associate a token with an account')
     .requiredOption(
-      '-a, --account-id <accountId>', // alias is also possible for --acount-id
-      'Account ID or account alias to associate with token',
+      '-a, --account-id <accountId>', // name is also possible for --account-id
+      'Account ID or account name to associate with token',
     )
     .requiredOption(
       '-t, --token-id <tokenId>',

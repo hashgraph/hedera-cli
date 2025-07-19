@@ -60,9 +60,9 @@ async function createAccountForToken(
   key: string,
   initialBalance: number,
   type: string,
-  alias: string,
+  name: string,
 ): Promise<{ key: string; account: Account }> {
-  const account = await accountUtils.createAccount(initialBalance, type, alias);
+  const account = await accountUtils.createAccount(initialBalance, type, name);
   return { key, account };
 }
 
@@ -99,22 +99,22 @@ function initializeToken(tokenInput: TokenInput): Token {
 }
 
 /**
- * Find alias pattern in keys on token and replace with private key
+ * Find name pattern in keys on token and replace with private key
  * @param keys
  * @return updated keys
  */
-function replaceAliasPattern(keys: Keys): Keys {
+function replaceNamePattern(keys: Keys): Keys {
   const accounts = stateController.get('accounts');
-  const aliasPattern = /<alias:([a-zA-Z0-9_-]+)>/;
+  const namePattern = /<name:([a-zA-Z0-9_-]+)>/;
   let newKeys = { ...keys };
 
   Object.keys(newKeys).forEach((key) => {
-    const match = newKeys[key as keyof typeof newKeys].match(aliasPattern);
+    const match = newKeys[key as keyof typeof newKeys].match(namePattern);
 
     if (match) {
-      const alias = match[1];
-      if (accounts[alias]) {
-        newKeys[key as keyof typeof newKeys] = accounts[alias].privateKey;
+      const name = match[1];
+      if (accounts[name]) {
+        newKeys[key as keyof typeof newKeys] = accounts[name].privateKey;
       }
     }
   });
@@ -142,7 +142,7 @@ function findNewKeyPattern(
     if (match) {
       const initialBalance = Number(match[2]); // Initial balance in tinybars
       newAccountPromises.push(
-        createAccountForToken(key, initialBalance, 'ECDSA', 'random'), // Random alias because you can create an account upfront in scripts and give it an alias to be used in the template
+        createAccountForToken(key, initialBalance, 'ECDSA', 'random'), // Random name because you can create an account upfront in scripts and give it an name to be used in the template
       );
     } else if (
       /<newkey:(ed25519|ED25519):(\d+)>/.test(keys[key as keyof typeof keys])
@@ -190,8 +190,8 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
 async function replaceKeysForToken(token: Token): Promise<Token> {
   let newToken = { ...token };
 
-  // Look for alias pattern in keys on token
-  newToken.keys = replaceAliasPattern(newToken.keys);
+  // Look for name pattern in keys on token
+  newToken.keys = replaceNamePattern(newToken.keys);
 
   // Look for `newkey` pattern in keys on token
   newToken.keys = await handleNewKeyPattern(newToken.keys);

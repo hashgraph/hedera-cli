@@ -42,8 +42,8 @@ function filterState(data: State) {
   });
 
   // Remove the private keys from the accounts
-  Object.keys(filteredState.accounts).forEach((alias) => {
-    filteredState.accounts[alias].privateKey = '';
+  Object.keys(filteredState.accounts).forEach((name) => {
+    filteredState.accounts[name].privateKey = '';
   });
 
   // Remove private keys from topics

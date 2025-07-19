@@ -34,13 +34,13 @@ describe("state view command", () => {
         expect(logSpy).toHaveBeenCalledWith(fullState);
     });
 
-    test("✅ view specific account with alias", async () => {
+    test("✅ view specific account with name", async () => {
         // Arrange  
         const program = new Command();
         commands.stateCommands(program);
   
         // Act
-        await program.parse(["node", "hedera-cli.ts", "state", "view", "--account-alias", alice.alias]);
+        await program.parse(["node", "hedera-cli.ts", "state", "view", "--account-name", alice.name]);
   
         // Assert
         expect(logSpy).toHaveBeenCalledWith("\nAccount:");

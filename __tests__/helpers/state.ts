@@ -47,7 +47,7 @@ export const baseState: State = {
 /* accounts */
 export const alice: Account = {
   network: 'localnet',
-  alias: 'alice',
+  name: 'alice',
   accountId: '0.0.6366720',
   type: 'ECDSA',
   publicKey:
@@ -61,7 +61,7 @@ export const alice: Account = {
 
 export const bob: Account = {
   network: 'localnet',
-  alias: 'bob',
+  name: 'bob',
   accountId: '0.0.6025066',
   type: 'ECDSA',
   publicKey:
@@ -78,7 +78,7 @@ export const script_basic: Script = {
   creation: 1697103669402,
   commands: [
     'network use testnet',
-    'account create -a random',
+    'account create -n random',
     'token create-ft -n m -s mm -d 2 -i 1000 -a 302e020100300506032b6570042204202a6568253a539643468dda3128a734c9fcb07a927b3f742719a869db731f9f50 -t 0.0.4536940 -k 302e020100300506032b6570042204202a6568253a539643468dda3128a734c9fcb07a927b3f742719a869db731f9f50',
   ],
   args: {},
@@ -122,8 +122,8 @@ export const topic: Topic = {
 export const accountState: State = {
   ...baseState,
   accounts: {
-    [alice.alias]: alice,
-    [bob.alias]: bob,
+    [alice.name]: alice,
+    [bob.name]: bob,
   },
 };
 
@@ -151,8 +151,8 @@ export const topicState: State = {
 export const fullState: State = {
   ...baseState,
   accounts: {
-    [alice.alias]: alice,
-    [bob.alias]: bob,
+    [alice.name]: alice,
+    [bob.name]: bob,
   },
   scripts: {
     [`script-${script_basic.name}`]: script_basic,
@@ -167,8 +167,8 @@ export const fullState: State = {
 
 export const downloadState: DownloadState = {
   accounts: {
-    [alice.alias]: alice,
-    [bob.alias]: bob,
+    [alice.name]: alice,
+    [bob.name]: bob,
   },
   scripts: {
     [`script-${script_basic.name}`]: script_basic,
@@ -188,7 +188,7 @@ export const testnetOperatorId = '0.0.7699836';
 export const testnetOperatorAccount: Record<string, Account> = {
   'testnet-operator': {
     accountId: '0.0.7699836',
-    alias: 'testnet-operator',
+    name: 'testnet-operator',
     evmAddress: '',
     network: 'testnet',
     privateKey:

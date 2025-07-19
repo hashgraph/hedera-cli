@@ -20,15 +20,15 @@ export default (program: any) => {
         await telemetryUtils.recordCommand(command.join(' '));
       }
     })
-    .description('Retrieve the balance for an account ID or alias')
+    .description('Retrieve the balance for an account ID or name')
     .requiredOption(
-      '-a, --account-id-or-alias <accountIdOrAlias>',
-      '(Required) Account ID or account alias to retrieve balance for',
+      '-a, --account-id-or-name <accountIdOrName>',
+      '(Required) Account ID or account name to retrieve balance for',
     )
     .option('-h, --only-hbar', 'Show only Hbar balance')
     .option('-t, --token-id <tokenId>', 'Show balance for a specific token ID')
     .action(async (options: GetAccountBalanceOptions) => {
-      logger.verbose(`Getting balance for ${options.accountIdOrAlias}`);
+      logger.verbose(`Getting balance for ${options.accountIdOrName}`);
       options = dynamicVariablesUtils.replaceOptions(options);
 
       if (options.onlyHbar && options.tokenId) {
@@ -39,7 +39,7 @@ export default (program: any) => {
       }
 
       await accountUtils.getAccountBalance(
-        options.accountIdOrAlias,
+        options.accountIdOrName,
         options.onlyHbar,
         options.tokenId,
       );
@@ -49,5 +49,5 @@ export default (program: any) => {
 interface GetAccountBalanceOptions {
   onlyHbar: boolean;
   tokenId: string;
-  accountIdOrAlias: string;
+  accountIdOrName: string;
 }

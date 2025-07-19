@@ -33,7 +33,7 @@ describe("account create command", () => {
     test("✅ should create ECDSA account in state", async () => {
       // Arrange
       const balance = 5000;
-      const newAccountAlias = "greg";
+      const newAccountName = "greg";
       const createAccountSpy = jest.spyOn(accountUtils, "createAccount");
 
       const program = new Command();
@@ -45,23 +45,23 @@ describe("account create command", () => {
         "hedera-cli.ts",
         "account",
         "create",
-        "-a",
-        newAccountAlias,
+        "-n",
+        newAccountName,
         "-b",
         balance.toString(),
       ]);
 
       // Assert
-      const greg = accountUtils.findAccountByAlias(newAccountAlias);
-      expect(createAccountSpy).toHaveBeenCalledWith(balance, 'ECDSA', newAccountAlias, 0);
-      expect(greg.alias).toBe(newAccountAlias);
+      const greg = accountUtils.findAccountByName(newAccountName);
+      expect(createAccountSpy).toHaveBeenCalledWith(balance, 'ECDSA', newAccountName, 0);
+      expect(greg.name).toBe(newAccountName);
       expect(greg.type).toBe('ECDSA');
     });
 
     test("✅ should create ECDSA account in state", async () => {
         // Arrange
         const balance = 5000;
-        const newAccountAlias = "greg";
+        const newAccountName = "greg";
         const type = "ECDSA"
         const createAccountSpy = jest.spyOn(accountUtils, "createAccount");
   
@@ -74,16 +74,16 @@ describe("account create command", () => {
           "hedera-cli.ts",
           "account",
           "create",
-          "-a",
-          newAccountAlias,
+          "-n",
+          newAccountName,
           "-b",
           balance.toString(),
         ]);
   
         // Assert
-        const greg = accountUtils.findAccountByAlias(newAccountAlias);
-        expect(createAccountSpy).toHaveBeenCalledWith(balance, type, newAccountAlias, 0);
-        expect(greg.alias).toBe(newAccountAlias);
+        const greg = accountUtils.findAccountByName(newAccountName);
+        expect(createAccountSpy).toHaveBeenCalledWith(balance, type, newAccountName, 0);
+        expect(greg.name).toBe(newAccountName);
         expect(greg.type).toBe(type);
       });
   });

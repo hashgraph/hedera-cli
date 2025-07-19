@@ -41,7 +41,7 @@
     "script-account-storage": {
       "name": "account-storage",
       "commands": [
-        "account create -a alice --args accountId:aliceAccId",
+        "account create -n alice --args accountId:aliceAccId",
         "hardhat compile",
         "hardhat run ./dist/contracts/scripts/accountStorage/deploy-acc-storage.js --network local",
         "hardhat run ./dist/contracts/scripts/accountStorage/add-account-id.js --network local"

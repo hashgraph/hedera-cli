@@ -24,22 +24,22 @@ export default (program: any) => {
       }
     })
     .description('Delete an account from the address book')
-    .option('-a, --alias <alias>', 'account must have an alias')
+    .option('-n, --name <name>', 'account must have a name')
     .option('-i, --id <id>', 'Account ID')
     .action(async (options: AccountDeleteOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options);
 
-      if (options.id && options.alias) {
+      if (options.id && options.name) {
         logger.error(
-          'You must provide either an account ID or an alias, not both.',
+          'You must provide either an account ID or a name, not both.',
         );
         process.exit(1);
       }
 
-      // Prompt for account ID or alias if not provided
-      let accountIdOrAlias;
+      // Prompt for account ID or name if not provided
+      let accountIdOrName;
       const network = stateUtils.getNetwork();
-      if (!options.id && !options.alias) {
+      if (!options.id && !options.name) {
         try {
           const accounts: Account[] = Object.values(
             stateController.getAll().accounts,
@@ -51,8 +51,8 @@ export default (program: any) => {
             logger.error('No accounts found to delete.');
             process.exit(1);
           }
-          accountIdOrAlias = await enquirerUtils.createPrompt(
-            filteredAccounts.map((account) => account.alias),
+          accountIdOrName = await enquirerUtils.createPrompt(
+            filteredAccounts.map((account) => account.name),
             'Choose account to delete:',
           );
         } catch (error) {
@@ -60,21 +60,21 @@ export default (program: any) => {
           process.exit(1);
         }
       } else {
-        accountIdOrAlias = options.id || options.alias;
+        accountIdOrName = options.id || options.name;
       }
 
-      // options.id || options.alias;
-      logger.verbose(`Deleting account with alias or ID: ${accountIdOrAlias}`);
-      if (!accountIdOrAlias) {
-        logger.error('You must provide either an account ID or an alias.');
+      // options.id || options.name;
+      logger.verbose(`Deleting account with name or ID: ${accountIdOrName}`);
+      if (!accountIdOrName) {
+        logger.error('You must provide either an account ID or a name.');
         process.exit(1);
       }
 
-      accountUtils.deleteAccount(accountIdOrAlias);
+      accountUtils.deleteAccount(accountIdOrName);
     });
 };
 
 interface AccountDeleteOptions {
-  alias?: string;
+  name?: string;
   id?: string;
 }

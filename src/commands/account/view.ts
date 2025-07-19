@@ -23,7 +23,7 @@ export default (program: any) => {
     .description(
       'View the detials of an account by accound ID. The account can be in the state or external.',
     )
-    // We don't allow an alias here as you can use the state command to view accounts by alias
+    // We don't allow a name here as you can use the state command to view accounts by name
     // This command is used to look up external accounts via mirror node
     .requiredOption('-i, --id <id>', 'Account ID')
     .option(

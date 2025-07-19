@@ -18,14 +18,14 @@
       "name": "token",
       "creation": 1752750463475,
       "commands": [
-        "account create -a random --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
-        "account create -a random --args privateKey,privKeyAcc2 --args alias,aliasAcc2 --args accountId,idAcc2",
-        "account create -a random --args privateKey,privKeyAcc3 --args alias,aliasAcc3 --args accountId,idAcc3",
-        "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId,tokenId",
+        "account create -n random --args privateKey:privKeyAcc1 --args name:nameAcc1 --args accountId:idAcc1",
+        "account create -n random --args privateKey:privKeyAcc2 --args name:nameAcc2 --args accountId:idAcc2",
+        "account create -n random --args privateKey:privKeyAcc3 --args name:nameAcc3 --args accountId:idAcc3",
+        "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId:tokenId",
         "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
-        "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}",
+        "token transfer -t {{tokenId}} -b 1 --from {{nameAcc2}} --to {{nameAcc3}}",
         "wait 3",
-        "account balance --account-id-or-alias {{aliasAcc3}} --token-id {{tokenId}}",
+        "account balance --account-id-or-name {{nameAcc3}} --token-id {{tokenId}}",
         "state view --token-id {{tokenId}}"
       ],
       "args": {}
@@ -34,9 +34,9 @@
       "name": "account-create",
       "creation": 1752750463480,
       "commands": [
-        "account create -a random -b 10000000 --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "account create -n random -b 10000000 --args privateKey:privKeyAcc1 --args name:nameAcc1 --args accountId:idAcc1",
         "wait 5",
-        "account balance --account-id-or-alias {{idAcc1}} --only-hbar"
+        "account balance --account-id-or-name {{idAcc1}} --only-hbar"
       ],
       "args": {}
     },
@@ -44,7 +44,7 @@
       "name": "account-create-simple",
       "creation": 1752750463481,
       "commands": [
-        "account create -a random -b 10000000 --args privateKey,privKeyAcc1 --args alias,aliasAcc1 --args accountId,idAcc1",
+        "account create -n random -b 10000000 --args privateKey:privKeyAcc1 --args name:nameAcc1 --args accountId:idAcc1",
         "wait 5"
       ],
       "args": {}
@@ -53,8 +53,8 @@
       "name": "topic-create",
       "creation": 1752750463483,
       "commands": [
-        "account create -a random --args privateKey:privKeyAdmin",
-        "account create -a random --args privateKey:privKeySubmit",
+        "account create -n random --args privateKey:privKeyAdmin",
+        "account create -n random --args privateKey:privKeySubmit",
         "topic create --admin-key {{privKeyAdmin}} --submit-key {{privKeySubmit}} --args topicId:topicId"
       ],
       "args": {}
@@ -73,7 +73,7 @@
     "script-account-storage": {
       "name": "account-storage",
       "commands": [
-        "account create -a alice --args accountId:aliceAccId",
+        "account create -n alice --args accountId:aliceAccId",
         "hardhat compile",
         "hardhat run ./dist/contracts/scripts/accountStorage/deploy-acc-storage.js --network local",
         "hardhat run ./dist/contracts/scripts/accountStorage/add-account-id.js --network local"

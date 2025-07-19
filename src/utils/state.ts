@@ -229,11 +229,7 @@ function switchNetwork(name: string) {
   stateController.saveKey('network', name);
 }
 
-function addTokenAssociation(
-  tokenId: string,
-  accountId: string,
-  alias: string,
-) {
+function addTokenAssociation(tokenId: string, accountId: string, name: string) {
   const tokens = stateController.get('tokens');
 
   if (!tokens[tokenId]) {
@@ -243,7 +239,7 @@ function addTokenAssociation(
     return;
   }
   const token: Token = tokens[tokenId];
-  token.associations.push({ alias, accountId });
+  token.associations.push({ name, accountId });
   tokens[tokenId] = token;
   stateController.saveKey('tokens', tokens);
 }
@@ -257,23 +253,23 @@ function getAccountById(accountId: string): Account | undefined {
   return account;
 }
 
-function getAccountByAlias(alias: string): Account | undefined {
+function getAccountByName(name: string): Account | undefined {
   const accounts: Record<string, Account> = stateController.get('accounts');
-  return accounts[alias];
+  return accounts[name];
 }
 
-function getAccountByIdOrAlias(accountIdOrAlias: string): Account {
+function getAccountByIdOrName(accountIdOrName: string): Account {
   const accountIdPattern = /^0\.0\.\d+$/;
-  const match = accountIdOrAlias.match(accountIdPattern);
+  const match = accountIdOrName.match(accountIdPattern);
   let account;
   if (match) {
-    account = getAccountById(accountIdOrAlias);
+    account = getAccountById(accountIdOrName);
   } else {
-    account = getAccountByAlias(accountIdOrAlias);
+    account = getAccountByName(accountIdOrName);
   }
 
   if (!account) {
-    logger.error(`Account not found: ${accountIdOrAlias}`);
+    logger.error(`Account not found: ${accountIdOrName}`);
     process.exit(1);
   }
 
@@ -327,7 +323,7 @@ async function downloadState(url: string): Promise<DownloadState> {
 function addAccounts(importedAccounts: Account[], merge: boolean) {
   const accounts: Record<string, Account> = stateController.get('accounts');
   Object.values(importedAccounts).forEach((account: Account) => {
-    const existingAccount = accounts[account.alias];
+    const existingAccount = accounts[account.name];
 
     if (!merge && existingAccount) {
       logger.error(`Account with name ${account} already exists`);
@@ -336,14 +332,14 @@ function addAccounts(importedAccounts: Account[], merge: boolean) {
 
     if (merge && existingAccount) {
       logger.log(
-        `Account "${account.alias}" already exists, merging it with the new account details`,
+        `Account "${account.name}" already exists, merging it with the new account details`,
       );
     }
 
-    accounts[account.alias] = account;
+    accounts[account.name] = account;
     stateController.saveKey('accounts', accounts);
     logger.log(
-      `Account "${account.alias}" with ID ${account.accountId} added successfully`,
+      `Account "${account.name}" with ID ${account.accountId} added successfully`,
     );
   });
 }
@@ -455,8 +451,8 @@ const stateUtils = {
   getNetwork,
   addTokenAssociation,
   getAccountById,
-  getAccountByAlias,
-  getAccountByIdOrAlias,
+  getAccountByName,
+  getAccountByIdOrName,
   startScriptExecution,
   stopScriptExecution,
   clearState,

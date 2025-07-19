@@ -44,14 +44,14 @@
       "creation": 1742830623351,
       "commands": [
         "network use testnet",
-        "account create -a random --args privateKey:privKeyAcc1 --args alias:aliasAcc1 --args accountId:idAcc1",
-        "account create -a random --args privateKey:privKeyAcc2 --args alias:aliasAcc2 --args accountId:idAcc2",
-        "account create -a random --args privateKey:privKeyAcc3 --args alias:aliasAcc3 --args accountId:idAcc3",
+        "account create -n random --args privateKey:privKeyAcc1 --args name:nameAcc1 --args accountId:idAcc1",
+        "account create -n random --args privateKey:privKeyAcc2 --args name:nameAcc2 --args accountId:idAcc2",
+        "account create -n random --args privateKey:privKeyAcc3 --args name:nameAcc3 --args accountId:idAcc3",
         "token create -n mytoken -s MTK -d 2 -i 1000 --supply-type infinite -a {{privKeyAcc1}} -t {{idAcc2}} -k {{privKeyAcc2}} --args tokenId:tokenId",
         "token associate --account-id {{idAcc3}} --token-id {{tokenId}}",
-        "token transfer -t {{tokenId}} -b 1 --from {{aliasAcc2}} --to {{aliasAcc3}}",
+        "token transfer -t {{tokenId}} -b 1 --from {{nameAcc2}} --to {{nameAcc3}}",
         "wait 3",
-        "account balance --account-id-or-alias {{aliasAcc3}} --token-id {{tokenId}}",
+        "account balance --account-id-or-name {{nameAcc3}} --token-id {{tokenId}}",
         "state view --token-id {{tokenId}}"
       ],
       "args": {}
@@ -59,7 +59,7 @@
     "script-account-storage": {
       "name": "account-storage",
       "commands": [
-        "account create -a alice --args accountId:aliceAccId",
+        "account create -n alice --args accountId:aliceAccId",
         "hardhat compile",
         "hardhat run ./dist/contracts/scripts/account-storage/deploy-acc-storage.js --network local",
         "hardhat run ./dist/contracts/scripts/account-storage/add-account-id.js --network local"

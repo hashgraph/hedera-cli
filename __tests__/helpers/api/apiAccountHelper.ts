@@ -2,7 +2,7 @@ import { AccountResponse, APIResponse } from "../../../types";
 
 export const accountResponse: AccountResponse = {
   account: "0.0.1117",
-  alias: "aliasString",
+  name: "nameString",
   auto_renew_period: 7890,
   balance: {
     balance: 1000,

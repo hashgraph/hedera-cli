@@ -74,7 +74,7 @@ describe('End to end tests', () => {
     // Arrange: Create a new account with specific balance, type, and network and verify it is created
     commands.accountCommands(program);
     commands.waitCommands(program);
-    const accountAlias = 'greg';
+    const accountName = 'greg';
 
     // Act
     await program.parseAsync([
@@ -82,8 +82,8 @@ describe('End to end tests', () => {
       'hedera-cli.ts',
       'account',
       'create',
-      '-a',
-      accountAlias,
+      '-n',
+      accountName,
       '--auto-associations',
       '1',
     ]);
@@ -91,10 +91,10 @@ describe('End to end tests', () => {
 
     // Assert
     let state = stateController.get('accounts');
-    expect(state[accountAlias]).toBeDefined();
-    expect(state[accountAlias].type).toEqual('ECDSA');
+    expect(state[accountName]).toBeDefined();
+    expect(state[accountName].type).toEqual('ECDSA');
 
-    let data = await api.account.getAccountInfo(state[accountAlias].accountId);
+    let data = await api.account.getAccountInfo(state[accountName].accountId);
     expect(data.data.balance.balance).toEqual(10000); // default value if no balance is specified
 
     // Arrange: Transfer part of the balance back to the operator account and verify the balance is correct
@@ -110,14 +110,14 @@ describe('End to end tests', () => {
       '-b',
       transferAmount.toString(),
       '-f',
-      accountAlias,
+      accountName,
       '-t',
       'localnet-operator',
     ]);
     await new Promise((resolve) => setTimeout(resolve, 7000));
 
     // Assert
-    data = await api.account.getAccountInfo(state[accountAlias].accountId);
+    data = await api.account.getAccountInfo(state[accountName].accountId);
     expect(data.data.balance.balance).toEqual(9000);
 
     // Arrange: Create a backup of the state file and verify it is created
@@ -147,13 +147,13 @@ describe('End to end tests', () => {
       'hedera-cli.ts',
       'account',
       'delete',
-      '-a',
-      accountAlias,
+      '-n',
+      accountName,
     ]);
 
     // Assert
     state = stateController.get('accounts');
-    expect(state[accountAlias]).toBeUndefined();
+    expect(state[accountName]).toBeUndefined();
 
     // Arrange: Restore the state file from backup and verify the account and operator details are restored
     commands.backupCommands(program);
@@ -170,7 +170,7 @@ describe('End to end tests', () => {
 
     // Assert
     state = stateController.get('accounts');
-    expect(state[accountAlias]).toBeDefined();
+    expect(state[accountName]).toBeDefined();
 
     // Cleanup
     files = fs.readdirSync(path.join(__dirname, '..', 'src', 'state'));
@@ -192,7 +192,7 @@ describe('End to end tests', () => {
     // Arrange: Download a script from the internet
     commands.stateCommands(program);
     const scriptURL =
-      'https://gist.githubusercontent.com/michielmulders/7747a83579c7d9deecbe0c18df9e0bfd/raw/6dd2b618017ce1363c19f1de0808327776dcd36c/examples.json';
+      'https://raw.githubusercontent.com/hashgraph/hedera-cli/78e4e0dd4eb1a6d9e0894ae970bf6706142e0252/src/commands/script/examples.json';
 
     // Act
     await program.parseAsync([
@@ -268,9 +268,9 @@ describe('End to end tests', () => {
   test('✅ Token features', async () => {
     // Arrange: Create 3 accounts
     commands.accountCommands(program);
-    const accountAliasTreasury = 'treasury';
-    const accountAliasAdmin = 'admin';
-    const accountAliasUser = 'user';
+    const accountNameTreasury = 'treasury';
+    const accountNameAdmin = 'admin';
+    const accountNameUser = 'user';
 
     // Act
     await program.parseAsync([
@@ -278,8 +278,8 @@ describe('End to end tests', () => {
       'hedera-cli.ts',
       'account',
       'create',
-      '-a',
-      accountAliasTreasury,
+      '-n',
+      accountNameTreasury,
       '-b',
       '300000000',
     ]);
@@ -288,8 +288,8 @@ describe('End to end tests', () => {
       'hedera-cli.ts',
       'account',
       'create',
-      '-a',
-      accountAliasAdmin,
+      '-n',
+      accountNameAdmin,
       '-b',
       '300000000',
     ]);
@@ -298,17 +298,17 @@ describe('End to end tests', () => {
       'hedera-cli.ts',
       'account',
       'create',
-      '-a',
-      accountAliasUser,
+      '-n',
+      accountNameUser,
       '-b',
       '300000000',
     ]);
 
     // Assert
     const accounts = stateController.get('accounts');
-    expect(accounts[accountAliasTreasury]).toBeDefined();
-    expect(accounts[accountAliasAdmin]).toBeDefined();
-    expect(accounts[accountAliasUser]).toBeDefined();
+    expect(accounts[accountNameTreasury]).toBeDefined();
+    expect(accounts[accountNameAdmin]).toBeDefined();
+    expect(accounts[accountNameUser]).toBeDefined();
 
     // Arrange: Create a token (account 1 is the treasury and account 2 is the admin key)
     commands.tokenCommands(program);
@@ -321,11 +321,11 @@ describe('End to end tests', () => {
       'token',
       'create',
       '-a',
-      accounts[accountAliasAdmin].privateKey,
+      accounts[accountNameAdmin].privateKey,
       '-t',
-      accounts[accountAliasTreasury].accountId,
+      accounts[accountNameTreasury].accountId,
       '-k',
-      accounts[accountAliasTreasury].privateKey,
+      accounts[accountNameTreasury].privateKey,
       '-n',
       tokenName,
       '-s',
@@ -358,7 +358,7 @@ describe('End to end tests', () => {
       'token',
       'associate',
       '--account-id',
-      accounts[accountAliasUser].accountId,
+      accounts[accountNameUser].accountId,
       '-t',
       token.tokenId,
     ]);
@@ -370,8 +370,8 @@ describe('End to end tests', () => {
     );
     expect(token?.associations).toEqual([
       {
-        accountId: accounts[accountAliasUser].accountId,
-        alias: accountAliasUser,
+        accountId: accounts[accountNameUser].accountId,
+        name: accountNameUser,
       },
     ]);
 
@@ -391,20 +391,20 @@ describe('End to end tests', () => {
       '-b',
       '1',
       '--from',
-      accountAliasTreasury,
+      accountNameTreasury,
       '--to',
-      accountAliasUser,
+      accountNameUser,
     ]);
     await new Promise((resolve) => setTimeout(resolve, 7000));
 
     // Assert
     const data = await api.token.getTokenBalance(
       token.tokenId,
-      accounts[accountAliasUser].accountId,
+      accounts[accountNameUser].accountId,
     );
     expect(data.data.balances).toEqual([
       {
-        account: accounts[accountAliasUser].accountId,
+        account: accounts[accountNameUser].accountId,
         balance: 1,
         decimals: 2,
       },
@@ -440,8 +440,8 @@ describe('End to end tests', () => {
 
     // Arrange: Create 2 accounts
     commands.accountCommands(program);
-    const accountAliasAdmin = 'admin';
-    const accountAliasSubmit = 'submit';
+    const accountNameAdmin = 'admin';
+    const accountNameSubmit = 'submit';
 
     // Act
     await program.parseAsync([
@@ -449,8 +449,8 @@ describe('End to end tests', () => {
       'hedera-cli.ts',
       'account',
       'create',
-      '-a',
-      accountAliasAdmin,
+      '-n',
+      accountNameAdmin,
       '-b',
       '300000000',
     ]);
@@ -459,16 +459,16 @@ describe('End to end tests', () => {
       'hedera-cli.ts',
       'account',
       'create',
-      '-a',
-      accountAliasSubmit,
+      '-n',
+      accountNameSubmit,
       '-b',
       '300000000',
     ]);
 
     // Assert
     accounts = stateController.get('accounts');
-    expect(accounts[accountAliasAdmin]).toBeDefined();
-    expect(accounts[accountAliasSubmit]).toBeDefined();
+    expect(accounts[accountNameAdmin]).toBeDefined();
+    expect(accounts[accountNameSubmit]).toBeDefined();
 
     // Arrange: Create a topic with admin key and submit key
     commands.topicCommands(program);
@@ -483,9 +483,9 @@ describe('End to end tests', () => {
       '--memo',
       topicMemo,
       '-a',
-      accounts[accountAliasAdmin].privateKey,
+      accounts[accountNameAdmin].privateKey,
       '-s',
-      accounts[accountAliasSubmit].privateKey,
+      accounts[accountNameSubmit].privateKey,
     ]);
 
     // Assert

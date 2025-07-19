@@ -40,8 +40,8 @@ describe('token transfer command', () => {
     const tokenStateWithAlice = {
         ...tokenState,
         accounts: {
-            [alice.alias]: alice,
-            [bob.alias]: bob,
+            [alice.name]: alice,
+            [bob.name]: bob,
         },
     };
     stateController.saveState(tokenStateWithAlice);
@@ -68,9 +68,9 @@ describe('token transfer command', () => {
         '-t',
         tokenId,
         '--to',
-        bob.alias,
+        bob.name,
         '--from',
-        alice.alias,
+        alice.name,
         '-b',
         balance.toString()
       ]);

@@ -37,16 +37,16 @@ export default (program: any) => {
       );
 
       const tokenId = options.tokenId;
-      const toIdOrAlias = options.to;
-      const fromIdOrAlias = options.from;
+      const toIdOrName = options.to;
+      const fromIdOrName = options.from;
       const balance = options.balance;
 
       // Find sender account
-      let fromAccount = stateUtils.getAccountByIdOrAlias(fromIdOrAlias);
+      let fromAccount = stateUtils.getAccountByIdOrName(fromIdOrName);
       let fromId = fromAccount.accountId;
 
       // Find receiver account
-      let toAccount = stateUtils.getAccountByIdOrAlias(toIdOrAlias);
+      let toAccount = stateUtils.getAccountByIdOrName(toIdOrName);
       let toId = toAccount.accountId;
 
       await tokenUtils.transfer(

@@ -25,7 +25,10 @@ export default (program: any) => {
     .description(
       'Create a new Hedera account using NEW recovery words and keypair. This is default.',
     )
-    .requiredOption('-a, --alias <alias>', 'account must have an alias')
+    .requiredOption(
+      '-n, --name <name>',
+      'account must have a name for internal referencing in the CLI state',
+    )
     .option(
       '-b, --balance <balance>',
       'Initial balance in tinybars',
@@ -45,14 +48,14 @@ export default (program: any) => {
       [],
     )
     .action(async (options: CreateAccountOptions) => {
-      logger.verbose(`Creating account with alias: ${options.alias}`);
+      logger.verbose(`Creating account with name: ${options.name}`);
 
       options = dynamicVariablesUtils.replaceOptions(options);
 
       let accountDetails = await accountUtils.createAccount(
         options.balance,
         'ECDSA',
-        options.alias,
+        options.name,
         Number(options.autoAssociations),
       );
 
@@ -65,7 +68,7 @@ export default (program: any) => {
 };
 
 interface CreateAccountOptions {
-  alias: string;
+  name: string;
   balance: number;
   type: 'ECDSA';
   autoAssociations: number;
