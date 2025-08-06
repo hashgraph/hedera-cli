@@ -1,11 +1,18 @@
-import { Client, AccountId, PrivateKey } from '@hashgraph/sdk';
+import { AccountId, Client, PrivateKey } from '@hashgraph/sdk';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Logger } from '../utils/logger';
+import { Logger } from './logger';
 import stateController from '../state/stateController';
 
-import type { Account, DownloadState, Script, Token, Topic } from '../../types';
+import type {
+  Account,
+  DownloadState,
+  NetworkConfig,
+  Script,
+  Token,
+  Topic,
+} from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -29,94 +36,67 @@ function isTelemetryEnabled(): boolean {
   return telemetry === 1;
 }
 
-function getMirrorNodeURL(): string {
-  const network = stateController.get('network');
-  let mirrorNodeURL = stateController.get('mirrorNodeTestnet');
-  switch (network) {
-    case 'testnet':
-      mirrorNodeURL = stateController.get('mirrorNodeTestnet');
-      break;
-    case 'mainnet':
-      mirrorNodeURL = stateController.get('mirrorNodeMainnet');
-      break;
-    case 'previewnet':
-      mirrorNodeURL = stateController.get('mirrorNodePreviewnet');
-      break;
-    case 'localnet':
-      mirrorNodeURL = stateController.get('mirrorNodeLocalnet');
-      break;
-    default:
-      logger.error('Invalid network name');
-      process.exit(1);
+function getNetworkFromState(network: string): NetworkConfig {
+  const state = stateController.getAll();
+  if (!state.networks[network]) {
+    logger.error(`Network ${network} not found in state`);
+    process.exit(1);
   }
-  return mirrorNodeURL;
+  return state.networks[network];
 }
 
+function getOperator(network?: string): {
+  operatorId: string;
+  operatorKey: string;
+} {
+  const state = stateController.getAll();
+
+  // set the network to the current state network if not provided
+  if (!network) {
+    network = state.network;
+  }
+  const netConfig = getNetworkFromState(network);
+  const operatorId = netConfig.operatorId;
+  const operatorKey = netConfig.operatorKey;
+
+  if (operatorId === '' || operatorKey === '') {
+    logger.error(`operator key and ID not set for ${network}`);
+    process.exit(1);
+  }
+
+  return {
+    operatorId,
+    operatorKey,
+  };
+}
+
+// Get all the available networks from the state
 function getAvailableNetworks(): string[] {
-  const mainnet = stateController.get('mainnetOperatorKey');
-  const testnet = stateController.get('testnetOperatorKey');
-  const previewnet = stateController.get('previewnetOperatorKey');
-  const localnet = stateController.get('localnetOperatorKey');
-
-  const networks = [];
-  if (mainnet) {
-    networks.push('mainnet');
-  }
-  if (testnet) {
-    networks.push('testnet');
-  }
-  if (previewnet) {
-    networks.push('previewnet');
-  }
-  if (localnet) {
-    networks.push('localnet');
-  }
-
-  return networks;
+  return Array.from(
+    new Set<string>(Object.keys(stateController.getAll().networks).values()),
+  );
 }
 
-function getMirrorNodeURLByNetwork(network: string): string {
-  let mirrorNodeURL = stateController.get('mirrorNodeTestnet');
-  switch (network) {
-    case 'testnet':
-      mirrorNodeURL = stateController.get('mirrorNodeTestnet');
-      break;
-    case 'mainnet':
-      mirrorNodeURL = stateController.get('mirrorNodeMainnet');
-      break;
-    case 'previewnet':
-      mirrorNodeURL = stateController.get('mirrorNodePreviewnet');
-      break;
-    case 'localnet':
-      mirrorNodeURL = stateController.get('mirrorNodeLocalnet');
-      break;
-    default:
-      logger.error('Invalid network name');
-      process.exit(1);
-  }
-  return mirrorNodeURL;
-}
+const getMirrorNodeURL = (): string =>
+  getNetworkFromState(stateController.getAll().network).mirrorNodeUrl;
+
+const getMirrorNodeURLByNetwork = (network: string): string =>
+  getNetworkFromState(network).mirrorNodeUrl;
 
 function getHederaClient(): Client {
   const state = stateController.getAll();
   let client: Client;
-  let operatorId, operatorKey;
+  const { operatorId, operatorKey } = getOperator(state.network);
 
   switch (state.network) {
     case 'mainnet':
       client = Client.forMainnet();
-      operatorId = state.mainnetOperatorId;
-      operatorKey = state.mainnetOperatorKey;
       break;
     case 'testnet':
       client = Client.forTestnet();
-      operatorId = state.testnetOperatorId;
-      operatorKey = state.testnetOperatorKey;
       break;
     case 'previewnet':
       client = Client.forPreviewnet();
-      operatorId = state.previewnetOperatorId;
-      operatorKey = state.previewnetOperatorKey;
       break;
     case 'localnet':
       const node = {
@@ -127,17 +107,11 @@ function getHederaClient(): Client {
       client = Client.forNetwork(node).setMirrorNetwork(
         state.localNodeMirrorAddressGRPC,
       );
-      operatorId = state.localnetOperatorId;
-      operatorKey = state.localnetOperatorKey;
       break;
     default:
-      logger.error('Invalid network name');
+      // TODO: add in the ability to add custom networks here by name for sphere instances esp.
+      logger.error('Invalid network name - FIXME');
       process.exit(1);
-  }
-
-  if (operatorId === '' || operatorKey === '') {
-    logger.error(`operator key and ID not set for ${state.network}`);
-    process.exit(1);
   }
 
   return client.setOperator(
@@ -154,43 +128,6 @@ function getNetwork() {
   return state.network;
 }
 
-function getOperator(): { operatorId: string; operatorKey: string } {
-  const state = stateController.getAll();
-  let operatorId, operatorKey;
-
-  switch (state.network) {
-    case 'mainnet':
-      operatorId = state.mainnetOperatorId;
-      operatorKey = state.mainnetOperatorKey;
-      break;
-    case 'testnet':
-      operatorId = state.testnetOperatorId;
-      operatorKey = state.testnetOperatorKey;
-      break;
-    case 'previewnet':
-      operatorId = state.previewnetOperatorId;
-      operatorKey = state.previewnetOperatorKey;
-      break;
-    case 'localnet':
-      operatorId = state.localnetOperatorId;
-      operatorKey = state.localnetOperatorKey;
-      break;
-    default:
-      logger.error('Invalid network name');
-      process.exit(1);
-  }
-
-  if (operatorId === '' || operatorKey === '') {
-    logger.error(`operator key and ID not set for ${state.network}`);
-    process.exit(1);
-  }
-
-  return {
-    operatorId,
-    operatorKey,
-  };
-}
-
 function switchNetwork(name: string) {
   const networks = getAvailableNetworks();
   if (!networks.includes(name)) {
@@ -199,32 +136,8 @@ function switchNetwork(name: string) {
     );
     process.exit(1);
   }
-
-  const state = stateController.getAll();
-  let operatorId, operatorKey;
-  switch (name) {
-    case 'mainnet':
-      operatorId = state.mainnetOperatorId;
-      operatorKey = state.mainnetOperatorKey;
-      break;
-    case 'testnet':
-      operatorId = state.testnetOperatorId;
-      operatorKey = state.testnetOperatorKey;
-      break;
-    case 'previewnet':
-      operatorId = state.previewnetOperatorId;
-      operatorKey = state.previewnetOperatorKey;
-      break;
-    case 'localnet':
-      operatorId = state.localnetOperatorId;
-      operatorKey = state.localnetOperatorKey;
-      break;
-  }
-
-  if (operatorId === '' || operatorKey === '') {
-    logger.error(`operator key and ID not set for ${name}`);
-    process.exit(1);
-  }
+  // check the operator exists.
+  getOperator(name);
 
   stateController.saveKey('network', name);
 }
@@ -247,10 +160,9 @@ function addTokenAssociation(tokenId: string, accountId: string, name: string) {
 /* Accounts */
 function getAccountById(accountId: string): Account | undefined {
   const accounts: Record<string, Account> = stateController.get('accounts');
-  const account = Object.values(accounts).find(
+  return Object.values(accounts).find(
     (el: Account) => el.accountId === accountId,
   );
-  return account;
 }
 
 function getAccountByName(name: string): Account | undefined {

@@ -47,7 +47,7 @@ export default (program: any) => {
     .option('-a, --skip-accounts', 'Skip resetting accounts', false)
     .option('-t, --skip-tokens', 'Skip resetting tokens', false)
     .option('-s, --skip-scripts', 'Skip resetting scripts', false)
-    .option('-t, --skip-topics', 'Skip resetting topics', false)
+    .option('-o, --skip-topics', 'Skip resetting topics', false)
     .action((options: ResetOptions) => {
       logger.verbose('Clearing state');
       clear(

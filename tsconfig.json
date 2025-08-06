@@ -1,16 +1,18 @@
 {
-    "compilerOptions": {
-        "target": "ES2020",
-        "module": "CommonJS",
-        "moduleResolution": "node",
-        "outDir": "dist",
-        "rootDir": "src",
-        "allowJs": true,
-        "strict": true, // enable all strict type-checking options
-        "sourceMap": true, // generate corresponding .map file which maps compiled javascript back to typescript
-        "typeRoots": ["./types", "./node_modules/@types"],
-        "skipLibCheck": true, // skip type checking of declaration files
-    },
-    "include": ["src/**/*"],
-    "exclude": ["hardhat.config.js", "node_modules", "**/*.spec.ts", "**/*.json", "**/__mocks__/**/*", ".husky/**/*"]
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "hardhat.config.js",
+    "node_modules",
+    "**/*.spec.ts",
+    "**/*.json",
+    "**/__mocks__/**/*",
+    ".husky/**/*"
+  ]
 }

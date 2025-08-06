@@ -1,14 +1,10 @@
-import {
-  TokenSupplyType,
-} from "@hashgraph/sdk";
-
 export type Topic = {
   network: string;
   topicId: string;
   memo?: string;
   adminKey?: string;
   submitKey?: string;
-}
+};
 
 export type Account = {
   network: string;
@@ -20,14 +16,14 @@ export type Account = {
   solidityAddress: string;
   solidityAddressFull: string;
   privateKey: string;
-}
+};
 
 export type Script = {
   name: string;
   creation: number;
   commands: string[];
   args: Record<string, string>;
-}
+};
 
 interface Fee {
   collectorId?: string;
@@ -64,7 +60,7 @@ export type Token = {
   keys: Keys;
   network: string;
   customFees: CustomFeeInput[];
-}
+};
 
 export interface Keys {
   adminKey: string;
@@ -82,45 +78,56 @@ export interface Association {
   accountId: string;
 }
 
+export interface NetworkConfig {
+  mirrorNodeUrl: string;
+  rpcUrl: string;
+  operatorKey: string;
+  operatorId: string;
+  hexKey: string;
+}
+
 export interface State {
   network: string;
-  mirrorNodeLocalnet: string;
-  mirrorNodePreviewnet: string;
-  mirrorNodeTestnet: string;
-  mirrorNodeMainnet: string;
-  rpcUrlMainnet: string;
-  rpcUrlTestnet: string;
-  rpcUrlPreviewnet: string;
-  rpcUrlLocalnet: string;
+  networks: Record<string, NetworkConfig>;
+  // mirrorNodeLocalnet: string;
+  // mirrorNodePreviewnet: string;
+  // mirrorNodeTestnet: string;
+  // mirrorNodeMainnet: string;
+  // rpcUrlMainnet: string;
+  // rpcUrlTestnet: string;
+  // rpcUrlPreviewnet: string;
+  // rpcUrlLocalnet: string;
   telemetryServer: string;
   telemetry: number;
   scriptExecution: number;
   scriptExecutionName: string;
+  // this will hold all the accounts and operator keys etc
   accounts: Record<string, Account>;
   scripts: Record<string, Script>;
   tokens: Record<string, Token>;
   topics: Record<string, Topic>;
-  localnetOperatorKey: string;
-  localnetOperatorKeyHex: string;
-  localnetOperatorId: string;
+
+  // localnetOperatorKey: string;
+  // localnetOperatorKeyHex: string;
+  // localnetOperatorId: string;
   localNodeAddress: string;
   localNodeAccountId: string;
   localNodeMirrorAddressGRPC: string;
-  previewnetOperatorKey: string;
-  previewnetOperatorKeyHex: string;
-  previewnetOperatorId: string;
-  testnetOperatorKey: string;
-  testnetOperatorKeyHex: string;
-  testnetOperatorId: string;
-  mainnetOperatorKey: string;
-  mainnetOperatorKeyHex: string;
-  mainnetOperatorId: string;
+  // previewnetOperatorKey: string;
+  // previewnetOperatorKeyHex: string;
+  // previewnetOperatorId: string;
+  // testnetOperatorKey: string;
+  // testnetOperatorKeyHex: string;
+  // testnetOperatorId: string;
+  // mainnetOperatorKey: string;
+  // mainnetOperatorKeyHex: string;
+  // mainnetOperatorId: string;
   uuid: string;
 }
 
 export interface DownloadState {
-  accounts: Record<string, Account>, 
-  scripts: Record<string, Script>, 
-  tokens: Record<string, Token>, 
-  topics: Record<string, Topic>
+  accounts: Record<string, Account>;
+  scripts: Record<string, Script>;
+  tokens: Record<string, Token>;
+  topics: Record<string, Topic>;
 }

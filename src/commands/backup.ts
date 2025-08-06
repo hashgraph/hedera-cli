@@ -21,13 +21,6 @@ const logger = Logger.getInstance();
 function filterState(data: State) {
   const filteredState = { ...data };
 
-  filteredState.previewnetOperatorId = '';
-  filteredState.previewnetOperatorKey = '';
-  filteredState.testnetOperatorId = '';
-  filteredState.testnetOperatorKey = '';
-  filteredState.mainnetOperatorId = '';
-  filteredState.mainnetOperatorKey = '';
-
   Object.keys(filteredState.tokens).forEach((key) => {
     filteredState.tokens[key].keys = {
       adminKey: '',

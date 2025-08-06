@@ -1,8 +1,8 @@
-import { alice, baseState } from "../../helpers/state";
 import { Command } from "commander";
 import commands from "../../../src/commands";
 import accountUtils from "../../../src/utils/account";
 import stateController from "../../../src/state/stateController";
+import { alice, baseState } from '../../helpers/state';
 
 jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 

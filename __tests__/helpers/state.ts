@@ -9,35 +9,47 @@ import {
 
 export const baseState: State = {
   network: 'localnet',
-  mirrorNodeLocalnet: 'http://localhost:5551/api/v1',
-  mirrorNodePreviewnet: 'https://previewnet.mirrornode.hedera.com/api/v1',
-  mirrorNodeTestnet: 'https://testnet.mirrornode.hedera.com/api/v1',
-  mirrorNodeMainnet: 'https://mainnet.mirrornode.hedera.com/api/v1',
-  rpcUrlMainnet: "https://mainnet.hashio.io/api",
-  rpcUrlTestnet: "https://testnet.hashio.io/api",
-  rpcUrlPreviewnet: "https://previewnet.hashio.io/api",
-  rpcUrlLocalnet: "http://localhost:7546",
-  telemetryServer: "https://hedera-cli-telemetry.onrender.com/track",
+  networks: {
+    localnet: {
+      mirrorNodeUrl: 'http://localhost:5551/api/v1',
+      rpcUrl: 'http://localhost:7546',
+      operatorKey:
+        '302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137',
+      operatorId: '0.0.2',
+      hexKey: '0x87592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f',
+    },
+    previewnet: {
+      mirrorNodeUrl: 'https://previewnet.mirrornode.hedera.com/api/v1',
+      rpcUrl: 'https://previewnet.hashio.io/api',
+      operatorKey: '',
+      operatorId: '',
+      hexKey: '',
+    },
+    testnet: {
+      mirrorNodeUrl: 'https://testnet.mirrornode.hedera.com/api/v1',
+      rpcUrl: 'https://testnet.hashio.io/api',
+      operatorKey: '',
+      operatorId: '',
+      hexKey: '',
+    },
+    mainnet: {
+      mirrorNodeUrl: 'https://mainnet.mirrornode.hedera.com/api/v1',
+      rpcUrl: 'https://mainnet.hashio.io/api',
+      operatorKey: '',
+      operatorId: '',
+      hexKey: '',
+    },
+  },
+  telemetryServer: 'https://hedera-cli-telemetry.onrender.com/track',
   telemetry: 0,
   scriptExecution: 0,
   scriptExecutionName: '',
-  accounts: {},
+  accounts: {
+  },
   scripts: {},
   tokens: {},
   topics: {},
-  testnetOperatorKey: '',
-  testnetOperatorKeyHex: '',
-  testnetOperatorId: '',
-  mainnetOperatorKey: '',
-  mainnetOperatorKeyHex: '',
-  mainnetOperatorId: '',
-  previewnetOperatorKey: '',
-  previewnetOperatorKeyHex: '',
-  previewnetOperatorId: '',
-  localnetOperatorKeyHex: '0x87592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f',
-  localnetOperatorKey:
-    '302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137',
-  localnetOperatorId: '0.0.2',
+
   localNodeAddress: '127.0.0.1:50211',
   localNodeAccountId: '0.0.3',
   localNodeMirrorAddressGRPC: '127.0.0.1:5600',
@@ -187,14 +199,12 @@ export const testnetOperatorId = '0.0.7699836';
 
 export const testnetOperatorAccount: Record<string, Account> = {
   'testnet-operator': {
-    accountId: '0.0.7699836',
+    accountId: testnetOperatorId,
     name: 'testnet-operator',
     evmAddress: '',
     network: 'testnet',
-    privateKey:
-      '302e020100300506032b6570042204202ef1cb430150535aa15bdcc6609ff2ef4ec843eb35f1d0cc655a4cad2130b796',
-    publicKey:
-      '302a300506032b6570032100b5416f8c0c2836904c58082e4e4a4e923db30bcf85aa189b41fa91062eb8e98b',
+    privateKey: testnetOperatorKey,
+    publicKey: '302a300506032b6570032100b5416f8c0c2836904c58082e4e4a4e923db30bcf85aa189b41fa91062eb8e98b',
     solidityAddress: '0000000000000000000000000000000000757d7c',
     solidityAddressFull: '0x0000000000000000000000000000000000757d7c',
     type: 'ECDSA',

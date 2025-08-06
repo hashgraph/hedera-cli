@@ -34,8 +34,9 @@ describe("network list command", () => {
   
         // Assert
         expect(logSpy).toHaveBeenCalledWith(`Available networks:`);
-        expect(logSpy).toHaveBeenLastCalledWith(`- localnet`);
-        expect(logSpy).toHaveBeenCalledTimes(2);
+        expect(logSpy).toHaveBeenCalledWith(`- localnet`);
+        expect(logSpy).toHaveBeenCalledWith(`- testnet`);
+        expect(logSpy).toHaveBeenCalledTimes(5);
       });
   });
 });

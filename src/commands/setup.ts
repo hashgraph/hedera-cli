@@ -5,7 +5,7 @@ import telemetryUtils from '../utils/telemetry';
 import config from '../state/config';
 import { Logger } from '../utils/logger';
 import accountUtils from '../utils/account';
-import setupUtils from '../utils/setup';
+import { setupOperatorAccount } from '../utils/setup';
 import stateController from '../state/stateController';
 
 import type { Command } from '../../types';
@@ -34,6 +34,7 @@ function setupState(): void {
 /**
  * @description Verify that the operator account has enough balance to pay for transactions (at least 1 Hbar)
  * @param operatorId Operator ID to check balance for
+ * @param network
  */
 async function verifyOperatorBalance(
   operatorId: string,
@@ -57,7 +58,7 @@ async function verifyOperatorBalance(
 /**
  * @description Setup the CLI with operator key and ID for different networks
  * @param action Action to perform (init or reload)
- * @param envPath Path to the .env file
+ * @param telemetry Flag to enable telemetry
  */
 async function setupCLI(
   action: string,
@@ -72,95 +73,57 @@ async function setupCLI(
     process.exit(1);
   }
 
-  // Extract operator key and ID from environment variables
-  const {
-    TESTNET_OPERATOR_KEY,
-    TESTNET_OPERATOR_ID,
-    MAINNET_OPERATOR_KEY,
-    MAINNET_OPERATOR_ID,
-    PREVIEWNET_OPERATOR_ID,
-    PREVIEWNET_OPERATOR_KEY,
-    LOCALNET_OPERATOR_ID,
-    LOCALNET_OPERATOR_KEY,
-    TELEMETRY_URL,
-  } = process.env;
-
-  let mainnetOperatorId = MAINNET_OPERATOR_ID || '';
-  let mainnetOperatorKey = MAINNET_OPERATOR_KEY || '';
-  let testnetOperatorId = TESTNET_OPERATOR_ID || '';
-  let testnetOperatorKey = TESTNET_OPERATOR_KEY || '';
-  let previewnetOperatorId = PREVIEWNET_OPERATOR_ID || '';
-  let previewnetOperatorKey = PREVIEWNET_OPERATOR_KEY || '';
-  let localnetOperatorId = LOCALNET_OPERATOR_ID || '';
-  let localnetOperatorKey = LOCALNET_OPERATOR_KEY || '';
-
-  // Validate operator key and ID pairs for previewnet, testnet, and mainnet
-  if (
-    (PREVIEWNET_OPERATOR_KEY && !PREVIEWNET_OPERATOR_ID) ||
-    (!PREVIEWNET_OPERATOR_KEY && PREVIEWNET_OPERATOR_ID)
-  ) {
+  // rework this to use the networks object from config
+  // This will allow us to add more networks in the future without changing this code
+  if (!config.networks || Object.keys(config.networks).length === 0) {
     logger.error(
-      'Both PREVIEWNET_OPERATOR_KEY and PREVIEWNET_OPERATOR_ID must be defined together in the .env file.',
+      'No networks found in the config. Please check your config file.',
+    );
+    process.exit(1);
+  }
+  // check against the know list of networks
+  const knownNetworks = ['mainnet', 'testnet', 'previewnet', 'localnet'];
+  const networkNames = Object.keys(config.networks);
+  // report if any network is missing from the known list
+  const missingNetworks = networkNames.filter(
+    (networkName) => !knownNetworks.includes(networkName),
+  );
+  //report if any network is missing from the known list
+  if (missingNetworks.length > 0) {
+    logger.error(
+      `The following networks are required: [${missingNetworks.join(', ')}]. Please check your config file.`,
     );
     process.exit(1);
   }
 
-  if (
-    (TESTNET_OPERATOR_KEY && !TESTNET_OPERATOR_ID) ||
-    (!TESTNET_OPERATOR_KEY && TESTNET_OPERATOR_ID)
-  ) {
-    logger.error(
-      'Both TESTNET_OPERATOR_KEY and TESTNET_OPERATOR_ID must be defined together in the .env file.',
-    );
-    process.exit(1);
+  // Lets check each network in the config based on the network name
+  for (const networkName of networkNames) {
+    const network = config.networks[networkName];
+    if (!network.operatorId || !network.operatorKey) {
+      logger.error(
+        `Operator ID and Key for ${networkName} are not defined in the config. Please check your config file.`,
+      );
+      process.exit(1);
+    }
+    setupOperatorAccount(network.operatorId, network.operatorKey, networkName);
+
+    // Check if the operator account has enough balance to pay for transactions
+    await verifyOperatorBalance(network.operatorId, networkName);
   }
 
-  if (
-    (MAINNET_OPERATOR_KEY && !MAINNET_OPERATOR_ID) ||
-    (!MAINNET_OPERATOR_KEY && MAINNET_OPERATOR_ID)
-  ) {
-    logger.error(
-      'Both MAINNET_OPERATOR_KEY and MAINNET_OPERATOR_ID must be defined together in the .env file.',
-    );
-    process.exit(1);
-  }
-
-  if (
-    (LOCALNET_OPERATOR_KEY && !LOCALNET_OPERATOR_ID) ||
-    (!LOCALNET_OPERATOR_KEY && LOCALNET_OPERATOR_ID)
-  ) {
-    logger.error(
-      'Both LOCALNET_OPERATOR_KEY and LOCALNET_OPERATOR_ID must be defined together in the .env file.',
-    );
-    process.exit(1);
-  }
+  // // Extract operator key and ID from environment variables
+  const { TELEMETRY_URL } = process.env;
 
   // Only write a fresh state file if the user is running the init command
   if (action === 'init') {
     setupState();
   }
 
-  await verifyOperatorBalance(localnetOperatorId, 'localnet');
-  await verifyOperatorBalance(previewnetOperatorId, 'previewnet');
-  await verifyOperatorBalance(testnetOperatorId, 'testnet');
-  await verifyOperatorBalance(mainnetOperatorId, 'mainnet');
-
-  setupUtils.setupOperatorAccounts(
-    testnetOperatorId,
-    testnetOperatorKey,
-    mainnetOperatorId,
-    mainnetOperatorKey,
-    previewnetOperatorId,
-    previewnetOperatorKey,
-    localnetOperatorId,
-    localnetOperatorKey,
-  );
-
   // Set telemetry server URL
   let telemetryServer =
     TELEMETRY_URL || 'https://hedera-cli-telemetry.onrender.com/track';
   stateController.saveKey('telemetryServer', telemetryServer);
-  if (telemetry === true) {
+  if (telemetry) {
     stateController.saveKey('telemetry', 1);
   }
 }

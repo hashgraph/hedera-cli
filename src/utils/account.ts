@@ -1,8 +1,8 @@
 import {
-  PrivateKey,
   AccountCreateTransaction,
-  Hbar,
   AccountId,
+  Hbar,
+  PrivateKey,
 } from '@hashgraph/sdk';
 
 import stateController from '../state/stateController';
@@ -76,8 +76,7 @@ async function createAccount(
   let isRandomName = false;
   if (name.toLowerCase() === 'random') {
     isRandomName = true;
-    let newName = generateRandomName();
-    name = newName;
+    name = generateRandomName();
   }
 
   // Check if name is unique
@@ -94,7 +93,7 @@ async function createAccount(
   let newAccountId;
   try {
     const newAccount = await new AccountCreateTransaction()
-      .setKey(newAccountPublicKey)
+      .setECDSAKeyWithAlias(newAccountPublicKey) // this makes it EVM compatible
       .setInitialBalance(Hbar.fromTinybars(balance))
       .setMaxAutomaticTokenAssociations(setMaxAutomaticTokenAssociations)
       .execute(client);
@@ -114,8 +113,7 @@ async function createAccount(
     process.exit(1);
   }
 
-  // Store the new account in the config
-  const newAccountDetails = {
+  const newAccountDetails: Account = {
     network: stateUtils.getNetwork(),
     name,
     accountId: newAccountId.toString(),
@@ -126,8 +124,7 @@ async function createAccount(
     solidityAddressFull: `0x${newAccountId.toSolidityAddress()}`,
     privateKey: newAccountPrivateKey.toString(),
   };
-
-  // Add the new account to the accounts object in the config
+  // Store the new account in the config
   const updatedAccounts = { ...accounts, [name]: newAccountDetails };
   stateController.saveKey('accounts', updatedAccounts);
 
@@ -217,7 +214,7 @@ function importAccount(id: string, key: string, name: string): Account {
     solidityAddress: `${accountId.toSolidityAddress()}`,
     solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: key,
-  };
+  } as Account;
 
   stateController.saveKey('accounts', updatedAccounts);
   return updatedAccounts[name];
@@ -244,7 +241,7 @@ function importAccountId(id: string, name: string): Account {
     solidityAddress: `${accountId.toSolidityAddress()}`,
     solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: '',
-  };
+  } as Account;
 
   stateController.saveKey('accounts', updatedAccounts);
   return updatedAccounts[name];
@@ -382,7 +379,6 @@ const accountUtils = {
   generateRandomName,
   clearAddressBook,
   deleteAccount,
-
   findAccountByPrivateKey,
   findAccountByName,
 };
