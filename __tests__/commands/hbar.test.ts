@@ -29,7 +29,7 @@ describe("hbar transfer command", () => {
         await program.parseAsync(["node", "hedera-cli.ts", "hbar", "transfer", "-f", alice.accountId, "-t", bob.accountId, "-b", amount]);
   
         // Assert
-        expect(hbarUtilsSpy).toHaveBeenCalledWith(Number(amount), alice.accountId, bob.accountId);
+        expect(hbarUtilsSpy).toHaveBeenCalledWith(Number(amount), alice.accountId, bob.accountId, undefined);
     });
   });
 });

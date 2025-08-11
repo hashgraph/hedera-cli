@@ -13,6 +13,7 @@ jest.mock('@hashgraph/sdk', () => {
     ...originalModule,
     AccountCreateTransaction: jest.fn().mockImplementation(() => ({
       setKey: jest.fn().mockReturnThis(),
+      setECDSAKeyWithAlias: jest.fn().mockReturnThis(),
       setInitialBalance: jest.fn().mockReturnThis(),
       setMaxAutomaticTokenAssociations: jest.fn().mockReturnThis(),
       execute: jest.fn().mockResolvedValue({

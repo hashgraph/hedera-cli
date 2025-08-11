@@ -5,7 +5,7 @@ import telemetryUtils from '../utils/telemetry';
 import config from '../state/config';
 import { Logger } from '../utils/logger';
 import accountUtils from '../utils/account';
-import { setupOperatorAccount } from '../utils/setup';
+import setupUtils from '../utils/setup';
 import stateController from '../state/stateController';
 
 import type { Command } from '../../types';
@@ -14,6 +14,7 @@ const logger = Logger.getInstance();
 
 interface SetupOptions {
   telemetry: boolean;
+  path?: string;
 }
 
 interface ReloadOptions {
@@ -60,56 +61,20 @@ async function verifyOperatorBalance(
  * @param action Action to perform (init or reload)
  * @param telemetry Flag to enable telemetry
  */
-async function setupCLI(
-  action: string,
-  telemetry: boolean = false,
-): Promise<void> {
-  // Load environment variables from .env file
-  const envConfig = dotenv.config();
-
-  // Check for errors in loading .env file
+async function setupCLI(action: string, telemetry: boolean = false, envPath?: string): Promise<void> {
+  // Load environment variables from .env file (optional custom path)
+  const envConfig = dotenv.config(envPath ? { path: envPath } : undefined);
   if (envConfig.error) {
     logger.error(`Can't load .env file: ${envConfig.error.message}`);
     process.exit(1);
   }
 
-  // rework this to use the networks object from config
-  // This will allow us to add more networks in the future without changing this code
   if (!config.networks || Object.keys(config.networks).length === 0) {
-    logger.error(
-      'No networks found in the config. Please check your config file.',
-    );
+    logger.error('No networks found in the config. Please check your config file.');
     process.exit(1);
   }
-  // check against the know list of networks
-  const knownNetworks = ['mainnet', 'testnet', 'previewnet', 'localnet'];
+
   const networkNames = Object.keys(config.networks);
-  // report if any network is missing from the known list
-  const missingNetworks = networkNames.filter(
-    (networkName) => !knownNetworks.includes(networkName),
-  );
-  //report if any network is missing from the known list
-  if (missingNetworks.length > 0) {
-    logger.error(
-      `The following networks are required: [${missingNetworks.join(', ')}]. Please check your config file.`,
-    );
-    process.exit(1);
-  }
-
-  // Lets check each network in the config based on the network name
-  for (const networkName of networkNames) {
-    const network = config.networks[networkName];
-    if (!network.operatorId || !network.operatorKey) {
-      logger.error(
-        `Operator ID and Key for ${networkName} are not defined in the config. Please check your config file.`,
-      );
-      process.exit(1);
-    }
-    setupOperatorAccount(network.operatorId, network.operatorKey, networkName);
-
-    // Check if the operator account has enough balance to pay for transactions
-    await verifyOperatorBalance(network.operatorId, networkName);
-  }
 
   // // Extract operator key and ID from environment variables
   const { TELEMETRY_URL } = process.env;
@@ -117,6 +82,17 @@ async function setupCLI(
   // Only write a fresh state file if the user is running the init command
   if (action === 'init') {
     setupState();
+  }
+
+  // For each supported network allow env overrides: TESTNET_OPERATOR_ID / KEY etc.
+  for (const networkName of networkNames) {
+    const upper = networkName.toUpperCase();
+    const envId = (process.env[`${upper}_OPERATOR_ID`] || '').trim();
+    const envKey = (process.env[`${upper}_OPERATOR_KEY`] || '').trim();
+    if (envId && envKey) {
+      setupUtils.setupOperatorAccount(envId, envKey, networkName);
+      await verifyOperatorBalance(envId, networkName);
+    }
   }
 
   // Set telemetry server URL
@@ -147,6 +123,7 @@ export default (program: any) => {
       '--telemetry',
       'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
     )
+    .option('--path <path>', 'Specify a custom path for the .env file')
     .action(async (options: SetupOptions) => {
       logger.verbose(
         'Initializing the CLI tool with the config and operator key and ID for different networks',
@@ -156,7 +133,7 @@ export default (program: any) => {
           'You don\'t have telmetry enabled. You can enable it by running "hcli setup init --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
         );
       }
-      await setupCLI('init', options.telemetry);
+      await setupCLI('init', options.telemetry, options.path);
       stateUtils.createUUID(); // Create a new UUID for the user if doesn't exist
     });
 
@@ -177,7 +154,7 @@ export default (program: any) => {
       '--telemetry',
       'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
     )
-    .action(async (options: ReloadOptions) => {
+    .action(async (options: ReloadOptions & { path?: string }) => {
       logger.verbose(
         'Reloading the CLI tool with operator key and ID for different networks',
       );
@@ -186,6 +163,6 @@ export default (program: any) => {
           'You don\'t have telmetry enabled. You can enable it by running "hcli setup reload --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
         );
       }
-      await setupCLI('reload', options.telemetry);
+      await setupCLI('reload', options.telemetry, options.path);
     });
 };

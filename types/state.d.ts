@@ -89,14 +89,6 @@ export interface NetworkConfig {
 export interface State {
   network: string;
   networks: Record<string, NetworkConfig>;
-  // mirrorNodeLocalnet: string;
-  // mirrorNodePreviewnet: string;
-  // mirrorNodeTestnet: string;
-  // mirrorNodeMainnet: string;
-  // rpcUrlMainnet: string;
-  // rpcUrlTestnet: string;
-  // rpcUrlPreviewnet: string;
-  // rpcUrlLocalnet: string;
   telemetryServer: string;
   telemetry: number;
   scriptExecution: number;
@@ -106,22 +98,9 @@ export interface State {
   scripts: Record<string, Script>;
   tokens: Record<string, Token>;
   topics: Record<string, Topic>;
-
-  // localnetOperatorKey: string;
-  // localnetOperatorKeyHex: string;
-  // localnetOperatorId: string;
   localNodeAddress: string;
   localNodeAccountId: string;
   localNodeMirrorAddressGRPC: string;
-  // previewnetOperatorKey: string;
-  // previewnetOperatorKeyHex: string;
-  // previewnetOperatorId: string;
-  // testnetOperatorKey: string;
-  // testnetOperatorKeyHex: string;
-  // testnetOperatorId: string;
-  // mainnetOperatorKey: string;
-  // mainnetOperatorKeyHex: string;
-  // mainnetOperatorId: string;
   uuid: string;
 }
 

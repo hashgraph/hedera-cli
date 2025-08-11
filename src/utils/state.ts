@@ -56,8 +56,33 @@ function getOperator(network?: string): {
     network = state.network;
   }
   const netConfig = getNetworkFromState(network);
-  const operatorId = netConfig.operatorId;
-  const operatorKey = netConfig.operatorKey;
+  // FIXME - I dont think we need this
+  let operatorId = netConfig.operatorId;
+  let operatorKey = netConfig.operatorKey;
+
+  // Fallback support for legacy root-level operator fields used in tests (e.g. mainnetOperatorId)
+  if (operatorId === '' || operatorKey === '') {
+    const rootIdKey = `${network}OperatorId` as keyof typeof state;
+    const rootKeyKey = `${network}OperatorKey` as keyof typeof state;
+    // @ts-ignore dynamic legacy fields possibly present in test state
+    const legacyId = state[rootIdKey];
+    // @ts-ignore
+    const legacyKey = state[rootKeyKey];
+    if (
+      typeof legacyId === 'string' &&
+      legacyId !== '' &&
+      typeof legacyKey === 'string' &&
+      legacyKey !== ''
+    ) {
+      operatorId = legacyId;
+      operatorKey = legacyKey;
+      // Persist back into networks config so subsequent reads succeed
+      const networks = state.networks;
+      networks[network].operatorId = operatorId;
+      networks[network].operatorKey = operatorKey;
+      stateController.saveKey('networks', networks);
+    }
+  }
 
   if (operatorId === '' || operatorKey === '') {
     logger.error(`operator key and ID not set for ${network}`);

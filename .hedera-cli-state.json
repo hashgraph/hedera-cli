@@ -38,11 +38,13 @@
     "localnet-operator": {
       "accountId": "0.0.2",
       "privateKey": "302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137",
+      "hexKey": "0x91132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137",
       "network": "localnet",
       "name": "localnet-operator",
       "type": "ECDSA",
       "publicKey": "302d300706052b8104000a032200026afafc36051b63af6d0f03b53b7df42ca1eeff681b89df4689f37350e88e7b9b",
       "evmAddress": "0af21f238f0fb29d8bca9ba00cea5710bc194e75",
+      "evmKey": "0x06032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b",
       "solidityAddress": "0000000000000000000000000000000000000002",
       "solidityAddressFull": "0x0000000000000000000000000000000000000002"
     }

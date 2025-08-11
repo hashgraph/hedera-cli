@@ -1,5 +1,9 @@
-
-import { baseState, testnetOperatorAccount, testnetOperatorId, testnetOperatorKey } from '../helpers/state';
+import {
+  baseState,
+  testnetOperatorAccount,
+  testnetOperatorId,
+  testnetOperatorKey,
+} from '../helpers/state';
 import { Command } from 'commander';
 import commands from '../../src/commands';
 
@@ -17,7 +21,10 @@ describe('setup init command', () => {
   describe('setup init - success path', () => {
     let originalEnv: any;
     const logSpy = jest.spyOn(console, 'log');
-    const setupOperatorAccountsSpy = jest.spyOn(setupUtils, 'setupOperatorAccounts');
+    const setupOperatorAccountSpy = jest.spyOn(
+      setupUtils,
+      'setupOperatorAccount',
+    );
     const saveStateControllerSpy = jest.spyOn(stateController, 'saveState');
 
     beforeEach(() => {
@@ -29,7 +36,7 @@ describe('setup init command', () => {
       // Reset process.env to its original state
       process.env = originalEnv;
       logSpy.mockClear();
-      setupOperatorAccountsSpy.mockClear();
+      setupOperatorAccountSpy.mockClear();
       saveStateControllerSpy.mockClear();
     });
 
@@ -41,10 +48,15 @@ describe('setup init command', () => {
       // Set up mock environment variables
       process.env.TESTNET_OPERATOR_KEY = testnetOperatorKey;
       process.env.TESTNET_OPERATOR_ID = testnetOperatorId;
-      
+
       const mockEnvPath = '/some/path/.env';
       dotenv.config.mockReturnValue({ error: null }); // Mock dotenv to succeed - if error path doesn't exist
-      accountUtils.getAccountHbarBalance = jest.fn().mockResolvedValue(1000000000); // Mock accountUtils to succeed
+      accountUtils.getAccountHbarBalance = jest
+        .fn()
+        .mockResolvedValue(1000000000); // Mock accountUtils to succeed
+      accountUtils.getAccountHbarBalanceByNetwork = jest
+        .fn()
+        .mockResolvedValue(1000000000);
 
       // Act
       await program.parseAsync([
@@ -58,13 +70,21 @@ describe('setup init command', () => {
 
       // Assert
       expect(dotenv.config).toHaveBeenCalledWith({ path: mockEnvPath });
-      expect(setupOperatorAccountsSpy).toHaveBeenCalledWith(testnetOperatorId, testnetOperatorKey, '', '', '', '');
-      expect(saveStateControllerSpy).toHaveBeenCalledWith({
-        ...baseState,
+      expect(setupOperatorAccountSpy).toHaveBeenCalledTimes(1);
+      expect(setupOperatorAccountSpy).toHaveBeenCalledWith(
         testnetOperatorId,
         testnetOperatorKey,
+        'testnet',
+      );
+      expect(saveStateControllerSpy).toHaveBeenCalledWith({
+        ...baseState,
         accounts: testnetOperatorAccount,
       });
+
+      const updated = stateController.getAll();
+      expect(updated.accounts['testnet-operator']).toMatchObject(
+        testnetOperatorAccount['testnet-operator'],
+      );
     });
   });
 });

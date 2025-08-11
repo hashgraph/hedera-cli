@@ -201,10 +201,10 @@ export const testnetOperatorAccount: Record<string, Account> = {
   'testnet-operator': {
     accountId: testnetOperatorId,
     name: 'testnet-operator',
-    evmAddress: '',
+    evmAddress: 'a943d99f6b909dca4fce25268cb8dd3c8ef55455',
     network: 'testnet',
     privateKey: testnetOperatorKey,
-    publicKey: '302a300506032b6570032100b5416f8c0c2836904c58082e4e4a4e923db30bcf85aa189b41fa91062eb8e98b',
+    publicKey: '302d300706052b8104000a0322000369a94f7e9c67faa92b8c4357a32b8c6ac90914fdf36bf5be3713f2acbbd856e1',
     solidityAddress: '0000000000000000000000000000000000757d7c',
     solidityAddressFull: '0x0000000000000000000000000000000000757d7c',
     type: 'ECDSA',
