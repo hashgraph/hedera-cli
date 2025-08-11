@@ -1187,6 +1187,47 @@ export HCLI_CONFIG_FILE=/absolute/path/config.json
 
 Only supplied keys override defaults; others fall back to `src/state/config.ts`.
 
+### Example user config
+
+An example cosmiconfig file is included as `hedera-cli.config.example.json` in the repository root. Copy it to `hedera-cli.config.json` (or rename to any supported name like `.hederarc` / `.hedera-clirc`) and edit the values you need. You can also point `HCLI_CONFIG_FILE` to it directly.
+
+Example contents:
+
+```json
+{
+  "network": "testnet",
+  "telemetry": 0,
+  "networks": {
+    "localnet": {
+      "rpcUrl": "http://localhost:7546",
+      "mirrorNodeUrl": "http://localhost:5551/api/v1",
+      "operatorKey": "",
+      "operatorId": "",
+      "hexKey": ""
+    },
+    "customnet": {
+      "rpcUrl": "https://rpc.customnet.hedera.example/api",
+      "mirrorNodeUrl": "https://mirror.customnet.hedera.example/api/v1",
+      "operatorKey": "",
+      "operatorId": "",
+      "hexKey": ""
+    }
+  }
+}
+```
+
+Guidelines:
+
+- The file is a partial overlay; omit keys you don't want to override.
+- Runtime sections (`accounts`, `tokens`, `topics`, `scripts`) are managed by the CLI and should not be placed here.
+- Keep real operator keys out of version control; prefer environment variables or a private, untracked config file.
+- To use a custom path:
+
+```sh
+export HCLI_CONFIG_FILE=/absolute/path/to/my-hcli-config.json
+```
+
+
 ## Layering order
 
 1. Base defaults (`src/state/config.ts`)
