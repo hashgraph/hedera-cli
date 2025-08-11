@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import stateUtils from '../utils/state';
 import telemetryUtils from '../utils/telemetry';
 import config from '../state/config';
+import type { State } from '../../types';
 import { Logger } from '../utils/logger';
 import accountUtils from '../utils/account';
 import setupUtils from '../utils/setup';
@@ -25,11 +26,7 @@ interface ReloadOptions {
  * @description Setup the state file with the init config
  */
 function setupState(): void {
-  const newState = {
-    ...config,
-  };
-
-  stateController.saveState(newState);
+  stateController.saveState(config as State);
 }
 
 /**
@@ -61,7 +58,11 @@ async function verifyOperatorBalance(
  * @param action Action to perform (init or reload)
  * @param telemetry Flag to enable telemetry
  */
-async function setupCLI(action: string, telemetry: boolean = false, envPath?: string): Promise<void> {
+async function setupCLI(
+  action: string,
+  telemetry: boolean = false,
+  envPath?: string,
+): Promise<void> {
   // Load environment variables from .env file (optional custom path)
   const envConfig = dotenv.config(envPath ? { path: envPath } : undefined);
   if (envConfig.error) {
@@ -70,7 +71,9 @@ async function setupCLI(action: string, telemetry: boolean = false, envPath?: st
   }
 
   if (!config.networks || Object.keys(config.networks).length === 0) {
-    logger.error('No networks found in the config. Please check your config file.');
+    logger.error(
+      'No networks found in the config. Please check your config file.',
+    );
     process.exit(1);
   }
 

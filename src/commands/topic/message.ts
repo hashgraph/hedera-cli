@@ -116,10 +116,9 @@ export default (program: any) => {
 
         // Signing if submit key is set (if it exists in the state - otherwise skip this step)
         const topics = stateController.get('topics');
-        if (topics[options.topicId] && topics[options.topicId].submitKey) {
-          const submitKey = PrivateKey.fromStringDer(
-            topics[options.topicId].submitKey,
-          );
+        const topicEntry = topics[options.topicId];
+        if (topicEntry && topicEntry.submitKey) {
+          const submitKey = PrivateKey.fromStringDer(topicEntry.submitKey);
           submitMessageTx.sign(submitKey);
         }
 

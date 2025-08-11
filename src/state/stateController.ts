@@ -1,9 +1,9 @@
 import type { State } from '../../types';
 import { state } from './state';
 
-const get = (key: string) => {
+function get<K extends keyof State>(key: K): State[K] {
   return state.get(key);
-};
+}
 
 const getAll = () => {
   return state.getAll();
@@ -13,9 +13,9 @@ const saveState = (newState: State) => {
   state.setAll(newState);
 };
 
-const saveKey = (key: string, value: any) => {
-  state.set(key, value);
-};
+function saveKey<K extends keyof State>(key: K, value: State[K]): void {
+  state.set(key as string, value);
+}
 
 /**
  * Store an argument in the script execution state

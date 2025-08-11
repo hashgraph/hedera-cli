@@ -90,7 +90,7 @@ export default (program: any) => {
         memo: options.memo || '',
       };
 
-      const topics: Record<string, Topic> = stateController.get('topics');
+      const topics = stateController.get('topics');
       const updatedTopics = { ...topics, [topicId.toString()]: topic };
       stateController.saveKey('topics', updatedTopics);
       logger.verbose(`Saved topic to state: ${topicId.toString()}`);

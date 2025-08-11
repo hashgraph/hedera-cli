@@ -1,6 +1,6 @@
 import { State } from '../../types';
 
-export default {
+const defaultConfig: State = {
   network: 'localnet',
   networks: {
     localnet: {
@@ -46,4 +46,6 @@ export default {
   localNodeAccountId: '0.0.3',
   localNodeMirrorAddressGRPC: '127.0.0.1:5600',
   uuid: '',
-} as State;
+};
+
+export default defaultConfig;

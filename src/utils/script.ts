@@ -6,7 +6,7 @@ import { Logger } from './logger';
 const logger = Logger.getInstance();
 
 function listScripts() {
-  const scripts: Record<string, Script> = stateController.get('scripts');
+  const scripts = stateController.get('scripts');
   const scriptNames = Object.keys(scripts);
 
   if (scriptNames.length === 0) {
@@ -25,7 +25,7 @@ function listScripts() {
 }
 
 function deleteScript(name: string) {
-  const scripts: Record<string, Script> = stateController.get('scripts');
+  const scripts = stateController.get('scripts');
   const scriptName = `script-${name}`;
   const script = scripts[scriptName];
 

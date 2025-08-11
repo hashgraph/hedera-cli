@@ -7,7 +7,7 @@ import enquirerUtils from '../utils/enquirer';
 import stateController from '../state/stateController';
 import { Logger } from '../utils/logger';
 
-import type { Command, State } from '../../types';
+import type { Command, State, Account } from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -62,7 +62,8 @@ function backupState(
   safe: boolean,
   storagePath: string,
 ) {
-  let data;
+  // Can be full state or subset (accounts object) when --accounts flag used
+  let data: State | Record<string, Account>;
 
   try {
     const statePath = path.join(__dirname, '..', 'state', 'state.json');
@@ -79,7 +80,7 @@ function backupState(
     backupFilename = `state.backup.${name}.json`;
   }
 
-  if (safe) {
+  if (safe && 'network' in data) {
     data = filterState(data);
   }
 
@@ -89,7 +90,9 @@ function backupState(
     if (name) {
       backupFilename = `accounts.backup.${name}.json`;
     }
-    data = data.accounts;
+    if ('accounts' in data) {
+      data = data.accounts;
+    }
   }
 
   if (storagePath !== '' && !path.isAbsolute(storagePath)) {
@@ -121,23 +124,27 @@ function restoreState(
   restoreTokens: boolean,
   restoreScripts: boolean,
 ) {
-  let data;
-
+  let raw: unknown;
   try {
     const backupPath = path.join(__dirname, '..', 'state', filename);
-    data = JSON.parse(fs.readFileSync(backupPath, 'utf8')) as State;
+    raw = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
   } catch (error) {
     logger.error('Unable to read backup file:', error as object);
     process.exit(1);
   }
 
-  // If the backup file does not contain a network, we assume it is an account backup
-  if (!data.accounts) {
+  // Distinguish between full state and accounts-only backup
+  const isFullState =
+    typeof raw === 'object' && raw !== null && 'network' in (raw as any);
+
+  if (!isFullState) {
     logger.log('Importing account backup');
-    stateController.saveKey('accounts', data || {});
+    stateController.saveKey('accounts', (raw as Record<string, Account>) || {});
     logger.log('Account backup restored successfully');
     return;
   }
+
+  const data = raw as State;
 
   if (!restoreAccounts && !restoreTokens && !restoreScripts) {
     stateController.saveState(data);
@@ -148,15 +155,12 @@ function restoreState(
   if (restoreAccounts) {
     stateController.saveKey('accounts', data.accounts || {});
   }
-
   if (restoreTokens) {
     stateController.saveKey('tokens', data.tokens || {});
   }
-
   if (restoreScripts) {
     stateController.saveKey('scripts', data.scripts || {});
   }
-
   logger.log('Backup restored successfully');
 }
 
