@@ -99,7 +99,7 @@ Next, set up the CLI tool with the command. **The `--telemetry` flag is optional
 node dist/hedera-cli.js setup init --telemetry
 ```
 
-The `setup init` command will also create the different operator accounts in your address book (`dist/state/state.json` file) so you can use them in your commands.
+The `setup init` command will also create the different operator accounts in your address book (persisted state file) so you can use them in your commands.
 
 ### 5. Verify Installation
 
@@ -230,7 +230,7 @@ When executed, the setup command performs several key functions:
 It reads the `PREVIEWNET_OPERATOR_KEY`, `PREVIEWNET_OPERATOR_KEY`, `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID`, `LOCALNET_OPERATOR_ID`, and `LOCALNET_OPERATOR_KEY` variables from the `.env` file in the root of the CLI project.
 
 **State Update:**
-Once the localnet, previewnet, testnet, and mainnet operator key and ID are validated, these credentials are used to update the `dist/state/state.json` file, which holds the configuration state of the CLI tool. The command will also add the operator accounts to your address book.
+Once the localnet, previewnet, testnet, and mainnet operator key and ID are validated, these credentials are written to the persisted state file, which holds the configuration state of the CLI tool. The command will also add the operator accounts to your address book.
 
 **2. Reload Operator Key and Id:**
 
@@ -911,7 +911,7 @@ state clear
 
 **1. Download State:**
 
-Downloads a state file from an external URL and add it to the `dist/state.json` file. You can use this command to update your state with new accounts, tokens, or scripts. You can choose to overwrite the current state or merge the downloaded state with the current state.
+Downloads a state file from an external URL and merges or overwrites it into your persisted state file. You can use this command to update your state with new accounts, tokens, or scripts.
 
 ```sh
 hcli state download --url <url> [--overwrite] [--merge]
@@ -1044,7 +1044,7 @@ Loads a script by name from state and sequentially executes each command in the 
 hcli script load -n,--name <name>
 ```
 
-Each command is executed via [`execSync`](https://nodejs.org/api/child_process.html), which runs the command in a synchronous child process. Scripts are stored in the `dist/state.json` file, in the `scripts` section. 
+Each command is executed via [`execSync`](https://nodejs.org/api/child_process.html), which runs the command in a synchronous child process. Scripts are stored in the persisted state file, in the `scripts` section. 
 
 **Make sure to append each script with `script-` prefix. The name of the script is just the name without the `script-` prefix.** If you want to load this script, you use `hcli script load -n erc721`, without the `script-` prefix.
 
@@ -1066,7 +1066,7 @@ Each command is executed via [`execSync`](https://nodejs.org/api/child_process.h
 
 **2. List All Scripts:**
 
-Lists all scripts stored in the `dist/state.json` file.
+Lists all scripts stored in the persisted state file.
 
 ```sh
 hcli script list
@@ -1074,7 +1074,7 @@ hcli script list
 
 **3. Delete Script:**
 
-Deletes a script from the `dist/state.json` file.
+Deletes a script from the persisted state file.
 
 ```sh
 hcli script delete -n,--name <name>
@@ -1154,87 +1154,69 @@ Not each command exposes the same variables. Here's a list of commands and the v
 | `topic create` | `topicId`, `adminKey`, `submitKey` |
 | `topic message submit` | `sequenceNumber` |
 
-# CLI State
+# Configuration & State Storage
 
-The Hedera CLI tool stores its state in the `dist/state/state.json` file. This file contains all the information about your accounts, tokens, scripts, and network. You can edit this file manually, but it's not recommended.
+The CLI externalizes both its immutable base configuration and mutable runtime state. No editable JSON lives in `src/state/` anymore.
 
-Here's an example state:
+## State file location
 
-```json
-{
-  "network": "testnet",
-  "mirrorNodeLocalnet": "http://localhost:5551/api/v1",
-  "mirrorNodePreviewnet": "https://previewnet.mirrornode.hedera.com/api/v1",
-  "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
-  "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
-  "rpcUrlMainnet": "https://mainnet.hashio.io/api",
-  "rpcUrlTestnet": "https://testnet.hashio.io/api",
-  "rpcUrlPreviewnet": "https://previewnet.hashio.io/api",
-  "rpcUrlLocalnet": "http://localhost:7546",
-  "telemetryServer": "http://localhost:3000/track",
-  "localNodeAddress": "127.0.0.1:50211",
-  "localNodeAccountId": "0.0.3",
-  "localNodeMirrorAddressGRPC": "127.0.0.1:5600",
-  "testnetOperatorKey": "",
-  "testnetOperatorId": "",
-  "mainnetOperatorKey": "",
-  "mainnetOperatorId": "",
-  "previewnetOperatorId": "",
-  "previewnetOperatorKey": "",
-  "telemetry": 0,
-  "scriptExecution": { "active": false, "name": "" },
-  "uuid": "",
-  "accounts": {
-    "bob": {
-      "network": "testnet",
-      "name": "bob",
-      "accountId": "0.0.7393086",
-      "type": "ECDSA",
-      "publicKey": "302a300506032b657003210059b9fc2413aa2a1dccda4b6ea0f99a48414db6f6ad6eb28589bab12f578f8697",
-      "evmAddress": "",
-      "solidityAddress": "000000000000000000000000000000000070cf3e",
-      "solidityAddressFull": "0x000000000000000000000000000000000070cf3e",
-      "privateKey": "302e0201003005060507c46c02ad871ffc38bb216497c6ac9a34aff3ac637153815a896"
-    }
-  },
-  "scripts": {
-    "script-test": {
-      "name": "test",
-      "creation": 1697103669402,
-      "commands": [
-        "network use testnet",
-        "account create -n random --args privateKey:tokenMichielAdminKey --args name:accountName",
-        "token create -n {{accountName}} -s mm -d 2 -i 1000 --supply-type infinite -a {{tokenMichielAdminKey}} -t 0.0.4536940 -k 302e020100300506032b6568253a539643468dda3128a734c9fcb07a927b3f742719db731f9f50"
-      ],
-      "args": {}
-    }
-  },
-  "tokens": {
-    "0.0.7393102": {
-      "network": "testnet",
-      "associations": [],
-      "tokenId": "0.0.7393102",
-      "name": "myToken",
-      "symbol": "MTK",
-      "treasuryId": "0.0.7393093",
-      "decimals": 2,
-      "initialSupply": 1000,
-      "supplyType": "finite",
-      "maxSupply": 1000000,
-      "keys": {
-        "adminKey": "3030020100300506e9fdf92f82267a40c9ce7932d2622ba29aad3d8d7036dbe5d27",
-        "pauseKey": "",
-        "kycKey": "",
-        "wipeKey": "",
-        "freezeKey": "",
-        "supplyKey": "302e0201003005002ad871ffc38bb216497c6ac9a34aff3ac637153815a896",
-        "feeScheduleKey": "",
-        "treasuryKey": "302e0201003078aede2e6a5c46701d89ab48b3e28a31e50243bd85c19f0"
-      }
-    }
-  }
-}
+Default path (created on first write):
+
+- macOS / Linux: `~/.config/hedera-cli/state.json` (respects `XDG_CONFIG_HOME`)
+- Windows: `%APPDATA%/hedera-cli/state.json`
+
+Override with an absolute path:
+
+```sh
+export HCLI_STATE_FILE=/custom/path/my-hcli-state.json
 ```
+
+## User config overrides
+
+Provide optional overrides with a cosmiconfig file (module name `hedera-cli`):
+
+- `hedera-cli.config.{js,ts,cjs,mjs,json}`
+- `.hedera-clirc` (JSON / YAML)
+- `package.json` (key: `hedera-cli`)
+
+Or explicitly:
+
+```sh
+export HCLI_CONFIG_FILE=/absolute/path/config.json
+```
+
+Only supplied keys override defaults; others fall back to `src/state/config.ts`.
+
+## Layering order
+
+1. Base defaults (`src/state/config.ts`)
+2. User config (cosmiconfig or `HCLI_CONFIG_FILE`)
+3. Persisted runtime state (accounts, tokens, topics, scripts, args, telemetry flag, selected network)
+
+## Inspecting state
+
+Use commands instead of editing the JSON manually:
+
+```sh
+hcli state view --accounts
+hcli state view --tokens
+```
+
+## Backups
+
+Create or restore backups via `hcli backup create|restore`. Backups sit beside your `state.json` unless you pass `--path`. Use `--safe` to strip private keys.
+
+## Temporary / test usage
+
+Run an isolated session without touching your main state:
+
+```sh
+HCLI_STATE_FILE=$(mktemp -t hcli-state.json) hcli account list
+```
+
+## Resetting
+
+Delete the file or run `hcli state clear` (optionally skipping sections) to reinitialize.
 
 ## Contributing
 
@@ -1242,24 +1224,16 @@ Contributions are welcome. Please see the [contributing guide](https://github.co
 
 ### Development Mode
 
-You can run the application in development mode. It will watch for changes in the `src` folder and automatically recompile the application while maintaining the `dist/state.json` file.
+You can run the application in development mode. It watches the `src` folder and recompiles automatically. The runtime state now lives outside the repository (e.g. `~/.config/hedera-cli/state.json`). No seeding or copying JSON files is required.
 
-To get started, create a new state file called `test_state.json` in the `/src/state/` folder.
-
-```sh
-cd src/state
-touch test_state.json
-```
-
-Next, copy the contents of the `src/state/base_state.json` file into the `test_state.json` file.
-
-Once that's done, you can start the application in development mode using the following command:
+If you want an isolated state for a development session, point `HCLI_STATE_FILE` to a temporary path before starting the watcher:
 
 ```sh
+export HCLI_STATE_FILE=$(pwd)/.dev-state.json
 npm run dev-build
 ```
 
-Further, you can lint or format the code using the following commands:
+Remove that file or unset the variable to return to your default OS config path. Lint or format the code using:
 
 ```sh
 npm run lint
@@ -1324,7 +1298,7 @@ describe("network commands", () => {
 
 ## E2E Testing
 
-The E2E tests run on localnet and use the state from the `dist/state/state.json` file.
+The E2E tests run on localnet and use the state from the resolved persisted state file path.
 
 ### Dynamic Variables
 

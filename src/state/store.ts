@@ -1,4 +1,14 @@
-// Primary Zustand store implementation (formerly in newStore.ts)
+// Primary Zustand store implementation.
+//
+// Layering strategy when hydrating:
+//   baseConfig (static defaults)
+//     + userConfig (cosmiconfig overrides)
+//       + persisted runtime slice (accounts/tokens/scripts/etc.)
+//
+// The merge order ensures new default fields added in later versions appear
+// without deleting user data, and user-provided overrides always take
+// precedence over shipped defaults but can still be superseded by explicit
+// runtime modifications where intended.
 import { createStore } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
@@ -13,6 +23,7 @@ import type {
   NetworkConfig,
 } from '../../types';
 import baseConfig from './config';
+import { loadUserConfig, resolveStateFilePath } from '../config/loader';
 
 export type CliState = State;
 
@@ -35,8 +46,10 @@ export interface Actions {
 
 export type StoreState = CliState & { actions: Actions };
 
-const stateFile = path.join(__dirname, 'state.json');
+// Externalized user/runtime persistence path (XDG config or override)
+const stateFile = resolveStateFilePath();
 
+// Read persisted runtime state (if file missing / unreadable return empty object)
 const loadFile = (): Partial<State> => {
   try {
     return JSON.parse(fs.readFileSync(stateFile, 'utf-8'));
@@ -45,6 +58,7 @@ const loadFile = (): Partial<State> => {
   }
 };
 
+// Persist runtime slice (best-effort; failures are silent to avoid crashing CLI)
 const writeFile = (data: unknown) => {
   try {
     fs.writeFileSync(stateFile, JSON.stringify(data, null, 2), 'utf-8');
@@ -53,6 +67,9 @@ const writeFile = (data: unknown) => {
   }
 };
 
+// Merge helper combining a partial state (file or user overrides) with a base state.
+// Performs deep merge only for `networks` so individual network overrides don't
+// obliterate the entire networks map.
 const mergeInitial = (file: Partial<State>, base: State): CliState => {
   const networks: Record<string, NetworkConfig> = { ...base.networks };
   if (file.networks) {
@@ -74,7 +91,15 @@ const mergeInitial = (file: Partial<State>, base: State): CliState => {
   };
 };
 
-const initialState = mergeInitial(loadFile(), baseConfig);
+// Load user overrides and precompute layered base prior to reading persisted state.
+// Note: We snapshot userConfig here for the initial in-memory state, but when
+// hydrating from persistence (storage.getItem) we re-load user config each time
+// to allow users to add new overrides (e.g. new networks) without requiring a
+// manual restart of the process. This keeps runtime flexible while keeping the
+// hot path (initial creation) simple.
+const { user: userConfig } = loadUserConfig();
+const basePlusUser = mergeInitial(userConfig, baseConfig);
+const initialState = mergeInitial(loadFile(), basePlusUser);
 
 interface PersistedSlice {
   network: StoreState['network'];
@@ -92,6 +117,7 @@ interface PersistedSlice {
   scriptExecution: StoreState['scriptExecution'];
 }
 
+// Determine which fields are persisted (avoid writing derived/action props)
 const partialize = (s: StoreState): PersistedSlice => ({
   network: s.network,
   networks: s.networks,
@@ -189,7 +215,8 @@ export const cliStore = createStore<StoreState>()(
       name: 'hedera-cli-state',
       version: 1,
       partialize,
-      migrate: (persisted: any) => {
+  // Simple migration example retained for backward compat demonstration.
+  migrate: (persisted: any) => {
         if (persisted && typeof persisted.scriptExecution === 'number') {
           persisted.scriptExecution = {
             active: persisted.scriptExecution === 1,
@@ -200,21 +227,26 @@ export const cliStore = createStore<StoreState>()(
         return persisted;
       },
       storage: {
-        getItem: (_name: string) => {
+        // Reconstruct fresh state on each load by layering user overrides over
+        // base defaults and then applying persisted runtime data. This allows
+        // changing shipped defaults or user config without requiring a manual reset.
+        getItem: () => {
           const data = loadFile();
-          const merged = mergeInitial(data, baseConfig);
-          return { state: { ...initialState, ...merged } } as any;
+          // Re-load user configuration on each hydration so changes to the
+          // config file (e.g. adding a custom network) appear on next access.
+          const { user: dynamicUser } = loadUserConfig();
+          const dynamicBase = mergeInitial(dynamicUser, baseConfig);
+          const merged = mergeInitial(data, dynamicBase);
+          return { state: merged } as any;
         },
-        setItem: (_key: string, value: any) => {
+  setItem: (_key: string, value: any) => {
           try {
             if (value?.state) writeFile(value.state);
           } catch {
             /* ignore */
           }
         },
-        removeItem: () => {
-          /* noop */
-        },
+        removeItem: () => { /* noop */ },
       },
     },
   ),
@@ -223,6 +255,7 @@ export const cliStore = createStore<StoreState>()(
 export const getState = (): StoreState => cliStore.getState();
 export const actions = (): Actions => cliStore.getState().actions;
 
+// Internal helper using vanilla setState to apply an immer-style mutation function
 const mutate = (fn: (draft: StoreState) => void) =>
   cliStore.setState((d) => {
     fn(d);
