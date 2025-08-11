@@ -1,6 +1,7 @@
 import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import accountUtils from '../../utils/account';
+import { DomainError, exitOnError } from '../../utils/errors';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import telemetryUtils from '../../utils/telemetry';
 
@@ -27,23 +28,24 @@ export default (program: any) => {
     )
     .option('-h, --only-hbar', 'Show only Hbar balance')
     .option('-t, --token-id <tokenId>', 'Show balance for a specific token ID')
-    .action(async (options: GetAccountBalanceOptions) => {
-      logger.verbose(`Getting balance for ${options.accountIdOrName}`);
-      options = dynamicVariablesUtils.replaceOptions(options);
+    .action(
+      exitOnError(async (options: GetAccountBalanceOptions) => {
+        logger.verbose(`Getting balance for ${options.accountIdOrName}`);
+        options = dynamicVariablesUtils.replaceOptions(options);
 
-      if (options.onlyHbar && options.tokenId) {
-        logger.error(
-          'You cannot use both --only-hbar and --token-id options at the same time.',
+        if (options.onlyHbar && options.tokenId) {
+          throw new DomainError(
+            'You cannot use both --only-hbar and --token-id options at the same time.',
+          );
+        }
+
+        await accountUtils.getAccountBalance(
+          options.accountIdOrName,
+          options.onlyHbar,
+          options.tokenId,
         );
-        process.exit(1);
-      }
-
-      await accountUtils.getAccountBalance(
-        options.accountIdOrName,
-        options.onlyHbar,
-        options.tokenId,
-      );
-    });
+      }),
+    );
 };
 
 interface GetAccountBalanceOptions {

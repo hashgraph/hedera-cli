@@ -2,7 +2,7 @@ import { alice, baseState } from "../../helpers/state";
 import { Command } from "commander";
 import commands from "../../../src/commands";
 import api from "../../../src/api/";
-import stateController from "../../../src/state/stateController";
+import { saveState as storeSaveState } from "../../../src/state/store";
 import { accountResponse } from "../../helpers/api/apiAccountHelper";
 import { Logger } from "../../../src/utils/logger";
 
@@ -17,7 +17,7 @@ describe("account view command", () => {
   const logSpy = jest.spyOn(logger, "log").mockImplementation();
 
   beforeEach(() => {
-    stateController.saveState(baseState);
+  storeSaveState(baseState as any);
   });
 
   afterEach(() => {

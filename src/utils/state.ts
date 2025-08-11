@@ -3,7 +3,20 @@ import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Logger } from './logger';
-import stateController from '../state/stateController';
+import { DomainError } from './errors';
+import {
+  get as storeGet,
+  saveKey as storeSaveKey,
+  updateState as storeUpdateState,
+  saveState as storeSaveState,
+  getState,
+} from '../state/store';
+import {
+  selectAccounts,
+  selectTokens,
+  selectTopics,
+  selectScripts,
+} from '../state/selectors';
 
 import type {
   Account,
@@ -20,10 +33,10 @@ const logger = Logger.getInstance();
  * Generates a UUID when it doesn't exist
  */
 function createUUID(): void {
-  const uuid = stateController.get('uuid');
+  const uuid = storeGet('uuid' as any) as any;
   if (uuid === '' || !uuid) {
     const newUUID = uuidv4();
-    stateController.saveKey('uuid', newUUID);
+    storeSaveKey('uuid' as any, newUUID as any);
   }
 }
 
@@ -32,15 +45,15 @@ function createUUID(): void {
  * @returns {boolean} telemetry
  */
 function isTelemetryEnabled(): boolean {
-  const telemetry = stateController.get('telemetry');
+  const telemetry = storeGet('telemetry' as any) as any;
   return telemetry === 1;
 }
 
 function getNetworkFromState(network: string): NetworkConfig {
-  const state = stateController.getAll();
+  const state = getState() as any;
   if (!state.networks[network]) {
     logger.error(`Network ${network} not found in state`);
-    process.exit(1);
+    throw new DomainError(`Network ${network} not found in state`);
   }
   return state.networks[network];
 }
@@ -49,13 +62,13 @@ function getOperator(network?: string): {
   operatorId: string;
   operatorKey: string;
 } {
-  const state = stateController.getAll();
+  const state = getState() as any;
 
   // set the network to the current state network if not provided
   if (!network) {
     network = state.network;
   }
-  const netConfig = getNetworkFromState(network);
+  const netConfig = getNetworkFromState(network as string);
   // FIXME - I dont think we need this
   let operatorId = netConfig.operatorId;
   let operatorKey = netConfig.operatorKey;
@@ -77,16 +90,21 @@ function getOperator(network?: string): {
       operatorId = legacyId;
       operatorKey = legacyKey;
       // Persist back into networks config so subsequent reads succeed
-      const networks = state.networks;
-      networks[network].operatorId = operatorId;
-      networks[network].operatorKey = operatorKey;
-      stateController.saveKey('networks', networks);
+      const networks = {
+        ...state.networks,
+        [network as string]: {
+          ...(state.networks as any)[network as string],
+          operatorId,
+          operatorKey,
+        },
+      } as any;
+      storeSaveKey('networks' as any, networks as any);
     }
   }
 
   if (operatorId === '' || operatorKey === '') {
     logger.error(`operator key and ID not set for ${network}`);
-    process.exit(1);
+    throw new DomainError(`operator key and ID not set for ${network}`);
   }
 
   return {
@@ -98,18 +116,18 @@ function getOperator(network?: string): {
 // Get all the available networks from the state
 function getAvailableNetworks(): string[] {
   return Array.from(
-    new Set<string>(Object.keys(stateController.getAll().networks).values()),
+    new Set<string>(Object.keys((getState() as any).networks).values()),
   );
 }
 
 const getMirrorNodeURL = (): string =>
-  getNetworkFromState(stateController.getAll().network).mirrorNodeUrl;
+  getNetworkFromState((getState() as any).network).mirrorNodeUrl;
 
 const getMirrorNodeURLByNetwork = (network: string): string =>
   getNetworkFromState(network).mirrorNodeUrl;
 
 function getHederaClient(): Client {
-  const state = stateController.getAll();
+  const state = getState() as any;
   let client: Client;
   const { operatorId, operatorKey } = getOperator(state.network);
 
@@ -136,7 +154,7 @@ function getHederaClient(): Client {
     default:
       // TODO: add in the ability to add custom networks here by name for sphere instances esp.
       logger.error('Invalid network name - FIXME');
-      process.exit(1);
+      throw new DomainError('Invalid network name - FIXME');
   }
 
   return client.setOperator(
@@ -149,7 +167,7 @@ function getHederaClient(): Client {
  * @returns {string} network name
  */
 function getNetwork() {
-  const state = stateController.getAll();
+  const state = getState() as any;
   return state.network;
 }
 
@@ -159,39 +177,43 @@ function switchNetwork(name: string) {
     logger.error(
       'Invalid network name. Available networks: ' + networks.join(', '),
     );
-    process.exit(1);
+    throw new DomainError(
+      'Invalid network name. Available networks: ' + networks.join(', '),
+    );
   }
   // check the operator exists.
   getOperator(name);
 
-  stateController.saveKey('network', name);
+  storeSaveKey('network' as any, name as any);
 }
 
 function addTokenAssociation(tokenId: string, accountId: string, name: string) {
-  const tokens = stateController.get('tokens');
-
-  if (!tokens[tokenId]) {
-    logger.log(
-      `Token ${tokenId} not found in state. Skipping storing the token associations.`,
-    );
-    return;
-  }
-  const token: Token = tokens[tokenId];
-  token.associations.push({ name, accountId });
-  tokens[tokenId] = token;
-  stateController.saveKey('tokens', tokens);
+  storeUpdateState((draft: any) => {
+    const token = draft.tokens[tokenId];
+    if (!token) {
+      logger.log(
+        `Token ${tokenId} not found in state. Skipping storing the token associations.`,
+      );
+      return;
+    }
+    token.associations = [...token.associations, { name, accountId }];
+    draft.tokens = { ...draft.tokens, [tokenId]: { ...token } } as Record<
+      string,
+      Token
+    >;
+  });
 }
 
 /* Accounts */
 function getAccountById(accountId: string): Account | undefined {
-  const accounts: Record<string, Account> = stateController.get('accounts');
+  const accounts: Record<string, Account> = selectAccounts();
   return Object.values(accounts).find(
     (el: Account) => el.accountId === accountId,
   );
 }
 
 function getAccountByName(name: string): Account | undefined {
-  const accounts: Record<string, Account> = stateController.get('accounts');
+  const accounts: Record<string, Account> = selectAccounts();
   return accounts[name];
 }
 
@@ -207,37 +229,43 @@ function getAccountByIdOrName(accountIdOrName: string): Account {
 
   if (!account) {
     logger.error(`Account not found: ${accountIdOrName}`);
-    process.exit(1);
+    throw new DomainError(`Account not found: ${accountIdOrName}`);
   }
 
   return account;
 }
 
 function startScriptExecution(name: string): void {
-  const state = stateController.getAll();
-  state.scriptExecutionName = name;
-  state.scriptExecution = 1;
-  stateController.saveState(state);
+  storeUpdateState((draft: any) => {
+    draft.scriptExecution.active = true;
+    draft.scriptExecution.name = name;
+  });
 }
 
 function stopScriptExecution(): void {
-  const state = stateController.getAll();
-  state.scripts[`script-${state.scriptExecutionName}`].args = {};
-  state.scriptExecutionName = '';
-  state.scriptExecution = 0;
-  stateController.saveState(state);
+  const s: any = getState();
+  const active = s.scriptExecution?.name;
+  storeUpdateState((draft: any) => {
+    if (active) {
+      const key = `script-${active}`;
+      if (draft.scripts[key])
+        draft.scripts[key] = { ...draft.scripts[key], args: {} };
+    }
+    draft.scriptExecution = { active: false, name: '' };
+  });
 }
 
 function clearState(): void {
-  const state = stateController.getAll();
-  state.accounts = {};
-  state.tokens = {};
-  state.scripts = {};
-  state.topics = {};
-  state.scriptExecution = 0;
-  state.scriptExecutionName = '';
-
-  stateController.saveState(state);
+  const current = getState() as any;
+  const cleared = {
+    ...current,
+    accounts: {},
+    tokens: {},
+    scripts: {},
+    topics: {},
+    scriptExecution: { active: false, name: '' },
+  };
+  storeSaveState(cleared as any);
 }
 
 async function downloadState(url: string): Promise<DownloadState> {
@@ -251,30 +279,39 @@ async function downloadState(url: string): Promise<DownloadState> {
     } else {
       logger.error('Unexpected error downloading file', error as object);
     }
-    process.exit(1);
+    throw new DomainError('Error downloading state');
   }
 
   return data;
 }
 
 function addAccounts(importedAccounts: Account[], merge: boolean) {
-  const accounts: Record<string, Account> = stateController.get('accounts');
-  Object.values(importedAccounts).forEach((account: Account) => {
-    const existingAccount = accounts[account.name];
+  const additions = Object.values(importedAccounts);
+  const currentAccounts: Record<string, Account> = selectAccounts();
 
+  // Validate & log merge notices first (no mutations yet)
+  additions.forEach((account) => {
+    const existingAccount = currentAccounts[account.name];
     if (!merge && existingAccount) {
-      logger.error(`Account with name ${account} already exists`);
-      process.exit(1);
+      logger.error(`Account with name ${account.name} already exists`);
+      throw new DomainError(`Account with name ${account.name} already exists`);
     }
-
     if (merge && existingAccount) {
       logger.log(
         `Account "${account.name}" already exists, merging it with the new account details`,
       );
     }
+  });
 
-    accounts[account.name] = account;
-    stateController.saveKey('accounts', accounts);
+  // Single transactional mutation
+  storeUpdateState((s: any) => {
+    additions.forEach((account) => {
+      s.accounts[account.name] = account;
+    });
+  });
+
+  // Success logs (post mutation)
+  additions.forEach((account) => {
     logger.log(
       `Account "${account.name}" with ID ${account.accountId} added successfully`,
     );
@@ -282,21 +319,27 @@ function addAccounts(importedAccounts: Account[], merge: boolean) {
 }
 
 function addTokens(importedTokens: Token[], merge: boolean) {
-  const tokens: Record<string, Token> = stateController.get('tokens');
-  Object.values(importedTokens).forEach((token: Token) => {
-    const existingToken = tokens[token.tokenId];
+  const additions = Object.values(importedTokens);
+  const currentTokens: Record<string, Token> = selectTokens();
 
+  additions.forEach((token) => {
+    const existingToken = currentTokens[token.tokenId];
     if (!merge && existingToken) {
       logger.error(`Token with ID ${token.tokenId} already exists`);
-      process.exit(1);
+      throw new DomainError(`Token with ID ${token.tokenId} already exists`);
     }
-
     if (merge && existingToken) {
       logger.log(`Token ${token.tokenId} already exists, overwriting it`);
     }
+  });
 
-    tokens[token.tokenId] = token;
-    stateController.saveKey('tokens', tokens);
+  storeUpdateState((s: any) => {
+    additions.forEach((token) => {
+      s.tokens[token.tokenId] = token;
+    });
+  });
+
+  additions.forEach((token) => {
     logger.log(
       `Token ${token.tokenId} with name "${token.name}" added successfully`,
     );
@@ -304,60 +347,74 @@ function addTokens(importedTokens: Token[], merge: boolean) {
 }
 
 function addTopics(importedTopics: Topic[], merge: boolean) {
-  const topics: Record<string, Topic> = stateController.get('topics');
-  Object.values(importedTopics).forEach((topic: Topic) => {
-    const existingTopic = topics[topic.topicId];
+  const additions = Object.values(importedTopics);
+  const currentTopics: Record<string, Topic> = selectTopics();
 
+  additions.forEach((topic) => {
+    const existingTopic = currentTopics[topic.topicId];
     if (!merge && existingTopic) {
       logger.error(`Topic with ID ${topic.topicId} already exists`);
-      process.exit(1);
+      throw new DomainError(`Topic with ID ${topic.topicId} already exists`);
     }
-
     if (merge && existingTopic) {
       logger.log(`Topic ${topic.topicId} already exists, overwriting it`);
     }
+  });
 
-    topics[topic.topicId] = topic;
-    stateController.saveKey('topics', topics);
+  storeUpdateState((s: any) => {
+    additions.forEach((topic) => {
+      s.topics[topic.topicId] = topic;
+    });
+  });
+
+  additions.forEach((topic) => {
     logger.log(`Topic ${topic.topicId} added successfully`);
   });
 }
 
 function addScripts(importedScripts: Script[], merge: boolean) {
-  const scripts: Record<string, Script> = stateController.get('scripts');
-  Object.values(importedScripts).forEach((script: Script) => {
-    const scriptName = `script-${script.name}`;
-    const existingScript = scripts[scriptName];
+  const additions = Object.values(importedScripts);
+  const currentScripts: Record<string, Script> = selectScripts();
 
+  additions.forEach((script) => {
+    const scriptName = `script-${script.name}`;
+    const existingScript = currentScripts[scriptName];
     if (!merge && existingScript) {
       logger.error(`Script with name ${scriptName} already exists`);
-      process.exit(1);
+      throw new DomainError(`Script with name ${scriptName} already exists`);
     }
-
     if (merge && existingScript) {
-      // continue to add values to existing state (merging)
       logger.log(`Script "${script.name}" already exists, overwriting it`);
     }
+  });
 
-    scripts[scriptName] = {
-      name: script.name,
-      creation: Date.now(),
-      commands: script.commands,
-      args: {},
-    };
-    stateController.saveKey('scripts', scripts);
+  storeUpdateState((s: any) => {
+    additions.forEach((script) => {
+      const scriptName = `script-${script.name}`;
+      s.scripts[scriptName] = {
+        name: script.name,
+        creation: Date.now(),
+        commands: script.commands,
+        args: {},
+      };
+    });
+  });
+
+  additions.forEach((script) => {
     logger.log(`Script "${script.name}" added successfully`);
   });
 }
 
 function importState(data: any, overwrite: boolean, merge: boolean) {
   if (overwrite) {
-    stateController.saveKey('accounts', data.accounts || {});
-    stateController.saveKey('tokens', data.tokens || {});
-    stateController.saveKey('scripts', data.scripts || {});
-    stateController.saveKey('topics', data.topics || {});
+    storeUpdateState((draft: any) => {
+      draft.accounts = data.accounts || {};
+      draft.tokens = data.tokens || {};
+      draft.scripts = data.scripts || {};
+      draft.topics = data.topics || {};
+    });
     logger.log('State overwritten successfully');
-    process.exit(0);
+    throw new DomainError('State overwritten successfully', 0);
   }
 
   if (data.accounts && Object.entries(data.accounts).length > 0) {

@@ -42,8 +42,7 @@ export const baseState: State = {
   },
   telemetryServer: 'https://hedera-cli-telemetry.onrender.com/track',
   telemetry: 0,
-  scriptExecution: 0,
-  scriptExecutionName: '',
+  scriptExecution: { active: false, name: '' },
   accounts: {
   },
   scripts: {},

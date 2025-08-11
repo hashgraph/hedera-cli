@@ -1,7 +1,7 @@
 import { alice, tokenState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import { saveState as storeSaveState, get as storeGet } from '../../../src/state/store';
 
 let tokenId = Object.keys(tokenState.tokens)[0];
 jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
@@ -30,7 +30,7 @@ describe('token associate command', () => {
             [alice.name]: alice,
         },
     };
-    stateController.saveState(tokenStateWithAlice);
+  storeSaveState(tokenStateWithAlice as any);
   });
 
   describe('token associate - success path', () => {
@@ -52,7 +52,7 @@ describe('token associate command', () => {
       ]);
 
       // Assert
-      const tokens = stateController.get('tokens');
+  const tokens = storeGet('tokens' as any);
       expect(tokens[tokenId].associations).toEqual([
         {
           name: alice.name,

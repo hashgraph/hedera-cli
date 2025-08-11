@@ -5,7 +5,7 @@ import api from "../../../src/api";
 
 import { accountResponse, getAccountInfoResponseMock } from "../../helpers/api/apiAccountHelper";
 import { baseState } from "../../helpers/state";
-import stateController from "../../../src/state/stateController";
+import { saveState as storeSaveState } from "../../../src/state/store";
 
 jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
@@ -15,7 +15,7 @@ describe("account balance command", () => {
 
   describe("account balance - success path", () => {
     beforeEach(() => {
-      stateController.saveState(baseState);
+  storeSaveState(baseState as any);
     });
 
     afterEach(() => {

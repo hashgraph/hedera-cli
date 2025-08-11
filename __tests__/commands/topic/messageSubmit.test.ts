@@ -1,6 +1,6 @@
 import { topicState, topic, baseState } from '../../helpers/state';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import { saveState as storeSaveState } from '../../../src/state/store';
 import { Command } from 'commander';
 import sdkMock from '../../helpers/sdk';
 import { TopicMessageSubmitTransaction } from '@hashgraph/sdk';
@@ -22,7 +22,7 @@ describe('topic message submit command', () => {
   const logSpy = jest.spyOn(console, 'log');
 
   beforeEach(() => {
-    stateController.saveState(topicState);
+  storeSaveState(topicState as any);
     sdkMock.setCustomMockImplementation(null);
   });
 

@@ -1,7 +1,7 @@
 import { alice, bob, tokenState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import { saveState as storeSaveState } from '../../../src/state/store';
 import { TransactionId } from '@hashgraph/sdk';
 import { Logger } from "../../../src/utils/logger";
 
@@ -44,7 +44,7 @@ describe('token transfer command', () => {
             [bob.name]: bob,
         },
     };
-    stateController.saveState(tokenStateWithAlice);
+  storeSaveState(tokenStateWithAlice as any);
   });
 
   afterEach(() => {

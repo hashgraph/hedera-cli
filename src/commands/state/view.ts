@@ -2,7 +2,7 @@ import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
-import stateController from '../../state/stateController';
+import { getState } from '../../state/store';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 const logger = Logger.getInstance();
@@ -30,7 +30,7 @@ export default (program: any) => {
       options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for account-name, account-id, and token-id
       logger.verbose('Viewing state');
 
-      const state = stateController.getAll();
+      const state = getState() as any;
 
       if (
         !options.accounts &&

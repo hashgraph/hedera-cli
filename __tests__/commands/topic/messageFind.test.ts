@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { topicState, topic } from '../../helpers/state';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import { saveState as storeSaveState } from '../../../src/state/store';
 import { Command } from 'commander';
 import api from '../../../src/api';
 import { findMessageResponseMock, topicMessageResponse, findMessagesResponseMock, topicMessagesResponse } from '../../helpers/api/apiTopicHelper'
@@ -18,7 +18,7 @@ describe('topic message find command', () => {
   const errorSpy = jest.spyOn(logger, 'error');
 
   beforeEach(() => {
-    stateController.saveState(topicState);
+  storeSaveState(topicState as any);
   });
 
   describe('topic message find - success path', () => {

@@ -1,8 +1,10 @@
 import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
+import { DomainError, exitOnError } from '../../utils/errors';
 import signUtils from '../../utils/sign';
 import telemetryUtils from '../../utils/telemetry';
-import stateController from '../../state/stateController';
+import { selectTopics } from '../../state/selectors';
+import { addTopic } from '../../state/mutations';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { TopicCreateTransaction, PrivateKey } from '@hashgraph/sdk';
 
@@ -33,75 +35,76 @@ export default (program: any) => {
         previous ? previous.concat(value) : [value],
       [],
     )
-    .action(async (options: CreateTopicOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for admin-key and submit-key
-      logger.verbose('Creating topic');
+    .action(
+      exitOnError(async (options: CreateTopicOptions) => {
+        options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for admin-key and submit-key
+        logger.verbose('Creating topic');
 
-      const client = stateUtils.getHederaClient();
+        const client = stateUtils.getHederaClient();
 
-      let topicId;
-      try {
-        const topicCreateTx = new TopicCreateTransaction();
-        if (options.memo) {
-          topicCreateTx.setTopicMemo(options.memo);
-        }
-        if (options.adminKey) {
-          topicCreateTx.setAdminKey(PrivateKey.fromStringDer(options.adminKey));
-        }
-        if (options.submitKey) {
-          topicCreateTx.setSubmitKey(
-            PrivateKey.fromStringDer(options.submitKey),
+        let topicId;
+        try {
+          const topicCreateTx = new TopicCreateTransaction();
+          if (options.memo) {
+            topicCreateTx.setTopicMemo(options.memo);
+          }
+          if (options.adminKey) {
+            topicCreateTx.setAdminKey(
+              PrivateKey.fromStringDer(options.adminKey),
+            );
+          }
+          if (options.submitKey) {
+            topicCreateTx.setSubmitKey(
+              PrivateKey.fromStringDer(options.submitKey),
+            );
+          }
+
+          // Signing
+          topicCreateTx.freezeWith(client);
+          const signedTopicCreateTx = await signUtils.signByType(
+            topicCreateTx,
+            'topicCreate',
+            {
+              adminKey: options.adminKey,
+              submitKey: options.submitKey,
+            },
           );
+
+          const topicCreateTxResponse =
+            await signedTopicCreateTx.execute(client);
+          const receipt = await topicCreateTxResponse.getReceipt(client);
+          topicId = receipt.topicId;
+        } catch (error) {
+          client.close();
+          throw new DomainError('Error creating new topic');
         }
 
-        // Signing
-        topicCreateTx.freezeWith(client);
-        const signedTopicCreateTx = await signUtils.signByType(
-          topicCreateTx,
-          'topicCreate',
-          {
-            adminKey: options.adminKey,
-            submitKey: options.submitKey,
-          },
+        if (!topicId) {
+          client.close();
+          throw new DomainError('Failed to create new topic');
+        }
+
+        logger.log(`Created new topic: ${topicId.toString()}`);
+
+        const topic: Topic = {
+          network: stateUtils.getNetwork(),
+          topicId: topicId.toString(),
+          adminKey: options.adminKey || '',
+          submitKey: options.submitKey || '',
+          memo: options.memo || '',
+        };
+
+        addTopic(topic, false);
+        logger.verbose(`Saved topic to state: ${topicId.toString()}`);
+
+        client.close();
+        dynamicVariablesUtils.storeArgs(
+          options.args,
+          dynamicVariablesUtils.commandActions.topic.create.action,
+          topic,
         );
-
-        const topicCreateTxResponse = await signedTopicCreateTx.execute(client);
-        const receipt = await topicCreateTxResponse.getReceipt(client);
-        topicId = receipt.topicId;
-      } catch (error) {
-        logger.error('Error creating new topic:', error as object);
-        client.close();
-        process.exit(1);
-      }
-
-      if (!topicId) {
-        logger.error('Failed to create new topic');
-        client.close();
-        process.exit(1);
-      }
-
-      logger.log(`Created new topic: ${topicId.toString()}`);
-
-      const topic: Topic = {
-        network: stateUtils.getNetwork(),
-        topicId: topicId.toString(),
-        adminKey: options.adminKey || '',
-        submitKey: options.submitKey || '',
-        memo: options.memo || '',
-      };
-
-      const topics = stateController.get('topics');
-      const updatedTopics = { ...topics, [topicId.toString()]: topic };
-      stateController.saveKey('topics', updatedTopics);
-      logger.verbose(`Saved topic to state: ${topicId.toString()}`);
-
-      client.close();
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.topic.create.action,
-        topic,
-      );
-    });
+      }),
+    );
 };
 
 interface CreateTopicOptions {

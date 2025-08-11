@@ -1,7 +1,7 @@
 import { baseState, fullState, bob, alice } from "../helpers/state";
 import { Command } from "commander";
 import commands from "../../src/commands";
-import stateController from "../../src/state/stateController";
+import { saveState as storeSaveState } from "../../src/state/store";
 import hbarUtils from "../../src/utils/hbar";
 
 jest.mock("../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
@@ -10,7 +10,7 @@ describe("hbar transfer command", () => {
   const hbarUtilsSpy = jest.spyOn(hbarUtils, 'transfer').mockResolvedValue()
 
   beforeEach(() => {
-    stateController.saveState(fullState);
+  storeSaveState(fullState as any);
   });
 
   describe("hbar transfer - success path", () => {

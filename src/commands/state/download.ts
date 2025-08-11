@@ -1,6 +1,7 @@
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import { Logger } from '../../utils/logger';
+import { DomainError, exitOnError } from '../../utils/errors';
 
 import type { Command } from '../../../types';
 
@@ -24,17 +25,18 @@ export default (program: any) => {
     .requiredOption('--url <url>', 'URL of script to download')
     .option('--merge', 'Merge state with downloaded state', false)
     .option('--overwrite', 'Overwrite state with downloaded state', false)
-    .action(async (options: DownloadStateOptions) => {
-      logger.verbose(`Downloading state from ${options.url}`);
+    .action(
+      exitOnError(async (options: DownloadStateOptions) => {
+        logger.verbose(`Downloading state from ${options.url}`);
 
-      if (options.merge && options.overwrite) {
-        logger.error('Cannot use both --merge and --overwrite');
-        process.exit(1);
-      }
+        if (options.merge && options.overwrite) {
+          throw new DomainError('Cannot use both --merge and --overwrite');
+        }
 
-      const data = await stateUtils.downloadState(options.url);
-      stateUtils.importState(data, options.overwrite, options.merge);
-    });
+        const data = await stateUtils.downloadState(options.url);
+        stateUtils.importState(data, options.overwrite, options.merge);
+      }),
+    );
 };
 
 interface DownloadStateOptions {

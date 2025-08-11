@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "npm run format && rimraf --glob 'dist/' && tsc && npm run copy-state && npm run rename-base-state && npm run copy-input && npm run copy-contracts",
+    "build-test": "tsc -p tsconfig.test.json ",
     "clean": "rm -rf dist/ && rm -rf coverage/ && rm -rf junit.xml && rm -rf junit-e2e.xml",
     "dev-build": "rm -rf dist/ && tsc && npm run copy-test-state && npm run copy-input && npm run rename-test-state && npm run watch",
     "watch": "tsc --watch",
@@ -27,10 +28,11 @@
     "copy-contracts": "copyfiles -u 2 src/contracts/*.sol dist/contracts/",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet",
     "format": "prettier --write 'src/**/*.{js,ts,tsx}'",
-    "unit-test": "JEST_SUITE_NAME='Unit Tests' JEST_JUNIT_OUTPUT_NAME='junit.xml' jest --maxWorkers=50% --coverage --coverageDirectory='coverage/unit' -- __tests__/commands/**/*.test.ts",
-    "e2e-test": "JEST_SUITE_NAME='E2E Tests' JEST_JUNIT_OUTPUT_NAME='junit-e2e.xml' jest --coverage --coverageDirectory='coverage/e2e' -- __tests__/e2e.test.ts --runInBand",
-    "test": "npm run unit-test && npm run e2e-test",
-    "single-test": "jest"
+  "test:unit": "JEST_SUITE_NAME='Unit Tests' JEST_JUNIT_OUTPUT_NAME='junit.xml' jest -c jest.unit.config.js --coverage --coverageDirectory='coverage/unit'",
+  "test:e2e": "JEST_SUITE_NAME='E2E Tests' JEST_JUNIT_OUTPUT_NAME='junit-e2e.xml' jest -c jest.e2e.config.js --coverage --coverageDirectory='coverage/e2e' --runInBand",
+  "test:all": "npm run test:unit && npm run test:e2e",
+  "test": "npm run test:unit",
+  "single-test": "jest"
   },
   "keywords": [
     "CLI",

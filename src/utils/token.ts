@@ -5,6 +5,7 @@ import {
 } from '@hashgraph/sdk';
 
 import { Logger } from './logger';
+import { DomainError } from './errors';
 import api from '../api';
 import stateUtils from '../utils/state';
 import signUtils from '../utils/sign';
@@ -18,8 +19,7 @@ const getSupplyType = (type: string): TokenSupplyType => {
   } else if (tokenType === 'infinite') {
     return TokenSupplyType.Infinite;
   } else {
-    logger.error('Invalid supply type');
-    process.exit(1);
+    throw new DomainError('Invalid supply type');
   }
 };
 
@@ -70,9 +70,8 @@ const associateToken = async (
 
     logger.log(`Token associated: ${tokenId}`);
   } catch (error) {
-    logger.error(`Failed to associate token: ${tokenId}`, error as object);
     client.close();
-    process.exit(1);
+    throw new DomainError(`Failed to associate token: ${tokenId}`);
   }
 
   // Store association in state for token
@@ -103,10 +102,9 @@ const transfer = async (
         `Transfer successful with tx ID: ${submittedTransfer.transactionId.toString()}`,
       );
     } else {
-      logger.error(
+      throw new DomainError(
         `Transfer failed with tx ID: ${submittedTransfer.transactionId.toString()}`,
       );
-      process.exit(1);
     }
   } catch (error) {
     logger.error('Unable to transfer token', error as object);

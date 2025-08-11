@@ -1,7 +1,7 @@
 import { baseState, scriptState, script_basic } from "../../helpers/state";
 import { Command } from "commander";
 import commands from "../../../src/commands";
-import stateController from "../../../src/state/stateController";
+import { saveState as storeSaveState, saveKey as storeSaveKey } from "../../../src/state/store";
 
 jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
@@ -9,7 +9,7 @@ describe("script list command", () => {
   const logSpy = jest.spyOn(console, 'log');
 
   beforeEach(() => {
-    stateController.saveState(baseState);
+  storeSaveState(baseState as any);
   });
 
   describe("script list - success path", () => {
@@ -22,7 +22,7 @@ describe("script list command", () => {
       // Arrange
       const program = new Command();
       commands.scriptCommands(program);
-      stateController.saveState(scriptState)
+  storeSaveState(scriptState as any)
 
       // Act
       await program.parse([

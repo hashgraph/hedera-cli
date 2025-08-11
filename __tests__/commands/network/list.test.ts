@@ -1,7 +1,7 @@
 import { baseState } from '../../helpers/state';
 import { Command } from "commander";
 import commands from "../../../src/commands";
-import stateController from '../../../src/state/stateController';
+import { saveState as storeSaveState } from '../../../src/state/store';
 
 jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
@@ -16,7 +16,7 @@ describe("network list command", () => {
         localnetOperatorKey: 'mykey',
       };
   
-      stateController.saveState(stateCopy);
+  storeSaveState(stateCopy as any);
     });
 
     afterEach(() => {

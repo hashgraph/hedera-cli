@@ -1,12 +1,11 @@
 import { baseState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import { saveState as storeSaveState, get as storeGet } from '../../../src/state/store';
 
 jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe('network use command', () => {
-  const stateControllerSpy = jest.spyOn(stateController, 'saveKey');
 
   beforeEach(() => {
     const stateCopy = {
@@ -17,18 +16,15 @@ describe('network use command', () => {
         '302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137',
     };
 
-    stateController.saveState(stateCopy);
+  storeSaveState(stateCopy as any);
   });
 
   describe('network use - success path', () => {
-    afterEach(() => {
-      // Spy cleanup
-      stateControllerSpy.mockClear();
-    });
+  afterEach(() => {});
 
     test('✅ switch to mainnet', async () => {
       // Assert
-      expect(stateController.get('network')).toEqual('localnet');
+  expect(storeGet('network' as any)).toEqual('localnet');
 
       // Arrange
       const program = new Command();
@@ -38,7 +34,7 @@ describe('network use command', () => {
       await program.parseAsync(['node', 'hedera-cli.ts', 'network', 'use', 'mainnet']);
 
       // Assert
-      expect(stateControllerSpy).toHaveBeenCalledWith('network', 'mainnet');
+  expect(storeGet('network' as any)).toEqual('mainnet');
     });
   });
 });

@@ -1,6 +1,6 @@
 import { topicState, topic, baseState } from '../../helpers/state';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import { saveState as storeSaveState, get as storeGet } from '../../../src/state/store';
 import { Command } from 'commander';
 
 jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
@@ -27,7 +27,7 @@ describe('topic create command', () => {
   const logSpy = jest.spyOn(console, 'log');
 
   beforeEach(() => {
-    stateController.saveState(baseState);
+  storeSaveState(baseState as any);
   });
 
   describe('topic create - success path', () => {
@@ -49,7 +49,7 @@ describe('topic create command', () => {
       await program.parseAsync(['node', 'hedera-cli.ts', 'topic', 'create', '--memo', customTopic.memo]);
 
       // Assert
-      const topics = stateController.get('topics');
+  const topics = storeGet('topics' as any);
       expect(Object.keys(topics).length).toEqual(1);
       expect(topics[topic.topicId]).toEqual(customTopic);
       expect(logSpy).toHaveBeenCalledWith(`Created new topic: ${topic.topicId}`);

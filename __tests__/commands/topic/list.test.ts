@@ -1,6 +1,6 @@
 import { topicState, topic } from "../../helpers/state";
 import commands from "../../../src/commands";
-import stateController from "../../../src/state/stateController";
+import { saveState as storeSaveState } from "../../../src/state/store";
 import { Command } from "commander";
 
 jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
@@ -9,7 +9,7 @@ describe("topic list command", () => {
   const logSpy = jest.spyOn(console, 'log');
 
   beforeEach(() => {
-    stateController.saveState(topicState);
+  storeSaveState(topicState as any);
   });
 
   describe("topic message submit - success path", () => {

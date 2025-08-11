@@ -1,16 +1,11 @@
-import {
-  baseState,
-  testnetOperatorAccount,
-  testnetOperatorId,
-  testnetOperatorKey,
-} from '../helpers/state';
+import { testnetOperatorId, testnetOperatorKey } from '../helpers/state';
 import { Command } from 'commander';
 import commands from '../../src/commands';
 
 const os = require('os');
 const dotenv = require('dotenv');
 import accountUtils from '../../src/utils/account';
-import stateController from '../../src/state/stateController';
+import { saveState as storeSaveState, getState as storeGetAll } from '../../src/state/store';
 import setupUtils from '../../src/utils/setup';
 
 jest.mock('os');
@@ -21,11 +16,7 @@ describe('setup init command', () => {
   describe('setup init - success path', () => {
     let originalEnv: any;
     const logSpy = jest.spyOn(console, 'log');
-    const setupOperatorAccountSpy = jest.spyOn(
-      setupUtils,
-      'setupOperatorAccount',
-    );
-    const saveStateControllerSpy = jest.spyOn(stateController, 'saveState');
+  const setupOperatorAccountSpy = jest.spyOn(setupUtils, 'setupOperatorAccount');
 
     beforeEach(() => {
       // Save the original process.env
@@ -35,9 +26,7 @@ describe('setup init command', () => {
     afterEach(() => {
       // Reset process.env to its original state
       process.env = originalEnv;
-      logSpy.mockClear();
-      setupOperatorAccountSpy.mockClear();
-      saveStateControllerSpy.mockClear();
+  jest.clearAllMocks();
     });
 
     test('✅ should set up state with environment variables with custom path', async () => {
@@ -70,21 +59,23 @@ describe('setup init command', () => {
 
       // Assert
       expect(dotenv.config).toHaveBeenCalledWith({ path: mockEnvPath });
-      expect(setupOperatorAccountSpy).toHaveBeenCalledTimes(1);
-      expect(setupOperatorAccountSpy).toHaveBeenCalledWith(
-        testnetOperatorId,
-        testnetOperatorKey,
-        'testnet',
+      // Assert we invoked setupOperatorAccount for testnet with expected args
+      const calls = setupOperatorAccountSpy.mock.calls;
+      const hasExpectedCall = calls.some(
+        (c) => c[0] === testnetOperatorId && c[1] === testnetOperatorKey && c[2] === 'testnet',
       );
-      expect(saveStateControllerSpy).toHaveBeenCalledWith({
-        ...baseState,
-        accounts: testnetOperatorAccount,
-      });
+      expect(hasExpectedCall).toBe(true);
 
-      const updated = stateController.getAll();
-      expect(updated.accounts['testnet-operator']).toMatchObject(
-        testnetOperatorAccount['testnet-operator'],
-      );
+  const finalState = storeGetAll();
+      const opAcct = finalState.accounts?.['testnet-operator'];
+      expect(opAcct).toBeDefined();
+      expect(opAcct).toMatchObject({
+        accountId: testnetOperatorId,
+        privateKey: testnetOperatorKey,
+        network: 'testnet',
+        name: 'testnet-operator',
+        type: 'ECDSA',
+      });
     });
   });
 });

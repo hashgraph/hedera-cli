@@ -1,5 +1,6 @@
-import stateController from '../state/stateController';
+import { getState, saveKey as storeSaveKey } from '../state/store';
 import { Logger } from './logger';
+import { DomainError } from './errors';
 
 interface CommandAction {
   action: string;
@@ -28,8 +29,8 @@ const logger = Logger.getInstance();
  * @returns
  */
 function replaceOptions<T extends Record<string, any>>(options: T): T {
-  const state = stateController.getAll();
-  if (state.scriptExecution === 0) return options;
+  const state: any = getState();
+  if (!state.scriptExecution?.active) return options;
 
   Object.keys(options).forEach((option) => {
     if (option === 'args') return;
@@ -40,14 +41,19 @@ function replaceOptions<T extends Record<string, any>>(options: T): T {
     if (match === null) return;
 
     const argument = match[1];
-    if (!state.scripts[`script-${state.scriptExecutionName}`].args[argument]) {
-      logger.error(
-        `Unable to find argument value for: ${argument} for script: ${state.scriptExecutionName}`,
+    const scriptKey = `script-${state.scriptExecution.name}`;
+    const scriptEntry = state.scripts[scriptKey];
+    if (!scriptEntry) {
+      throw new DomainError(
+        `Active script ${state.scriptExecution.name} not found in state`,
       );
-      process.exit(1);
     }
-    const argumentValue =
-      state.scripts[`script-${state.scriptExecutionName}`].args[argument];
+    if (!scriptEntry.args[argument]) {
+      throw new DomainError(
+        `Unable to find argument value for: ${argument} for script: ${state.scriptExecution.name}`,
+      );
+    }
+    const argumentValue = scriptEntry.args[argument];
     (options as Record<string, any>)[option] = argumentValue;
   });
 
@@ -152,8 +158,8 @@ function storeArgs(
   action: string,
   output: Record<string, any>,
 ) {
-  const state = stateController.getAll();
-  if (state.scriptExecution === 0) return;
+  const state: any = getState();
+  if (!state.scriptExecution?.active) return;
 
   // return if action doesn't have output
   if (action === '' || !action) return;
@@ -168,13 +174,13 @@ function storeArgs(
     stateArgs[variableName] = output[outputVar];
   });
 
-  const newScripts = { ...state.scripts };
-  const newArgs = {
-    ...newScripts[`script-${state.scriptExecutionName}`].args,
-    ...stateArgs,
-  };
-  newScripts[`script-${state.scriptExecutionName}`].args = newArgs;
-  stateController.saveKey('scripts', newScripts);
+  const scriptKey = `script-${state.scriptExecution.name}`;
+  const currentScript = state.scripts[scriptKey];
+  if (!currentScript) return; // silently ignore if script missing
+  const newScripts = { ...state.scripts } as any;
+  const mergedArgs = { ...(currentScript.args || {}), ...stateArgs };
+  newScripts[scriptKey] = { ...currentScript, args: mergedArgs };
+  storeSaveKey('scripts', newScripts as any);
 }
 
 const dynamicVariables = {

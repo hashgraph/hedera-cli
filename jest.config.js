@@ -8,14 +8,12 @@ module.exports = {
         tsconfig: 'tsconfig.test.json',
         diagnostics: {
           warnOnly: true, // Set to true to avoid failing the test suite on TypeScript errors
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   testEnvironment: 'node',
   testTimeout: 40000,
-  testPathIgnorePatterns: [
-    "<rootDir>/__tests__/helpers/"
-  ],
-  reporters: ['default', 'jest-junit']
+  testPathIgnorePatterns: ['<rootDir>/__tests__/helpers/'],
+  reporters: ['default', 'jest-junit'],
 };

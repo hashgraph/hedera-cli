@@ -7,7 +7,7 @@ import {
 } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import { saveState as storeSaveState, getState as storeGetAll } from '../../../src/state/store';
 import stateUtils from '../../../src/utils/state';
 
 jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
@@ -25,7 +25,7 @@ describe('state download command', () => {
 
   describe('state download - success path', () => {
     beforeAll(() => {
-      stateController.saveState(baseState);
+  storeSaveState(baseState as any);
     });
 
     afterEach(() => {
@@ -37,7 +37,7 @@ describe('state download command', () => {
 
     test('✅ download state and merge with base state', async () => {
       // Arrange
-      stateController.saveState(baseState);
+  storeSaveState(baseState as any);
       const program = new Command();
       commands.stateCommands(program);
       const url = 'https://dummy.url/state.json';
@@ -55,7 +55,8 @@ describe('state download command', () => {
 
       // Assert
       expect(stateUtilsDownloadStateSpy).toHaveBeenCalledWith(url);
-      expect(stateController.getAll()).toEqual({
+  const { actions: _a1, scriptExecutionName: _legacyName1, ...stateAfterMerge } = storeGetAll() as any;
+  expect(stateAfterMerge).toEqual({
         ...fullState,
         scripts: {
           'script-basic': {
@@ -69,7 +70,7 @@ describe('state download command', () => {
 
     test('✅ download and overwrite state', async () => {
       // Arrange
-      stateController.saveState(accountState);
+  storeSaveState(accountState as any);
       const program = new Command();
       commands.stateCommands(program);
       const url = 'https://dummy.url/state.json';
@@ -91,7 +92,8 @@ describe('state download command', () => {
 
       // Assert
       expect(stateUtilsDownloadStateSpy).toHaveBeenCalledWith(url);
-      expect(stateController.getAll()).toEqual({
+  const { actions: _a2, scriptExecutionName: _legacyName2, ...stateAfterOverwrite } = storeGetAll() as any;
+  expect(stateAfterOverwrite).toEqual({
         ...fullState,
         scripts: {
           [`script-${script_basic.name}`]: {

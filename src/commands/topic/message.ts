@@ -1,7 +1,8 @@
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import { Logger } from '../../utils/logger';
-import stateController from '../../state/stateController';
+import { DomainError, exitOnError } from '../../utils/errors';
+import { selectTopics } from '../../state/selectors';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { TopicMessageSubmitTransaction, PrivateKey } from '@hashgraph/sdk';
 import api from '../../api';
@@ -101,44 +102,45 @@ export default (program: any) => {
         previous ? previous.concat(value) : [value],
       [],
     )
-    .action(async (options: SubmitMessageOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id
-      logger.verbose(`Submitting message to topic: ${options.topicId}`);
+    .action(
+      exitOnError(async (options: SubmitMessageOptions) => {
+        options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id
+        logger.verbose(`Submitting message to topic: ${options.topicId}`);
 
-      const client = stateUtils.getHederaClient();
+        const client = stateUtils.getHederaClient();
 
-      let sequenceNumber;
-      try {
-        const submitMessageTx = await new TopicMessageSubmitTransaction({
-          topicId: options.topicId,
-          message: options.message,
-        }).freezeWith(client);
+        let sequenceNumber;
+        try {
+          const submitMessageTx = await new TopicMessageSubmitTransaction({
+            topicId: options.topicId,
+            message: options.message,
+          }).freezeWith(client);
 
-        // Signing if submit key is set (if it exists in the state - otherwise skip this step)
-        const topics = stateController.get('topics');
-        const topicEntry = topics[options.topicId];
-        if (topicEntry && topicEntry.submitKey) {
-          const submitKey = PrivateKey.fromStringDer(topicEntry.submitKey);
-          submitMessageTx.sign(submitKey);
+          // Signing if submit key is set (if it exists in the state - otherwise skip this step)
+          const topics = selectTopics();
+          const topicEntry = topics[options.topicId];
+          if (topicEntry && topicEntry.submitKey) {
+            const submitKey = PrivateKey.fromStringDer(topicEntry.submitKey);
+            submitMessageTx.sign(submitKey);
+          }
+
+          const topicMessageTxResponse = await submitMessageTx.execute(client);
+          const receipt = await topicMessageTxResponse.getReceipt(client);
+          sequenceNumber = receipt.topicSequenceNumber;
+        } catch (error) {
+          client.close();
+          throw new DomainError('Error sending message to topic');
         }
 
-        const topicMessageTxResponse = await submitMessageTx.execute(client);
-        const receipt = await topicMessageTxResponse.getReceipt(client);
-        sequenceNumber = receipt.topicSequenceNumber;
-      } catch (error) {
-        logger.error('Error sending message to topic', error as object);
+        logger.log(`Message submitted with sequence number: ${sequenceNumber}`);
         client.close();
-        process.exit(1);
-      }
-
-      logger.log(`Message submitted with sequence number: ${sequenceNumber}`);
-      client.close();
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.topic.messageSubmit.action,
-        { sequenceNumber: sequenceNumber.toString() },
-      );
-    });
+        dynamicVariablesUtils.storeArgs(
+          options.args,
+          dynamicVariablesUtils.commandActions.topic.messageSubmit.action,
+          { sequenceNumber: sequenceNumber.toString() },
+        );
+      }),
+    );
 
   message
     .command('find')

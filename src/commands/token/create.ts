@@ -5,7 +5,9 @@ import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import { Logger } from '../../utils/logger';
-import stateController from '../../state/stateController';
+import { DomainError, exitOnError } from '../../utils/errors';
+import { selectTokens } from '../../state/selectors';
+import { addToken } from '../../state/mutations';
 
 import type { Command, Token } from '../../../types';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
@@ -63,48 +65,41 @@ async function createFungibleToken(
     tokenId = tokenCreateRx.tokenId;
 
     if (tokenId == null) {
-      logger.error('Token was not created');
-      process.exit(1);
+      throw new DomainError('Token was not created');
     }
 
     logger.log(`Token ID: ${tokenId.toString()}`);
   } catch (error) {
-    logger.error(error as object);
     client.close();
-    process.exit(1);
+    throw new DomainError('Failed to create token');
   }
 
   // Store new token in state
   logger.verbose(`Storing new token with ID ${tokenId} in state`);
-  const tokens: Record<string, Token> = stateController.get('tokens');
-  const updatedTokens: Record<string, Token> = {
-    ...tokens,
-    [tokenId.toString()]: {
-      tokenId: tokenId.toString(),
-      associations: [],
-      name,
-      symbol,
-      treasuryId,
-      decimals,
-      supplyType: supplyType.toUpperCase(),
-      maxSupply: supplyType.toUpperCase() === 'FINITE' ? initialSupply : 0,
-      initialSupply,
-      keys: {
-        treasuryKey,
-        adminKey,
-        supplyKey: '',
-        wipeKey: '',
-        kycKey: '',
-        freezeKey: '',
-        pauseKey: '',
-        feeScheduleKey: '',
-      },
-      network: stateUtils.getNetwork(),
-      customFees: [],
+  const newToken: Token = {
+    tokenId: tokenId.toString(),
+    associations: [],
+    name,
+    symbol,
+    treasuryId,
+    decimals,
+    supplyType: supplyType.toUpperCase(),
+    maxSupply: supplyType.toUpperCase() === 'FINITE' ? initialSupply : 0,
+    initialSupply,
+    keys: {
+      treasuryKey,
+      adminKey,
+      supplyKey: '',
+      wipeKey: '',
+      kycKey: '',
+      freezeKey: '',
+      pauseKey: '',
+      feeScheduleKey: '',
     },
+    network: stateUtils.getNetwork(),
+    customFees: [],
   };
-
-  stateController.saveKey('tokens', updatedTokens);
+  addToken(newToken, false);
 
   client.close();
   return tokenId.toString();
@@ -158,30 +153,32 @@ export default (program: any) => {
         previous ? previous.concat(value) : [value],
       [],
     )
-    .action(async (options: CreateOptions) => {
-      logger.verbose('Creating new token');
-      options = dynamicVariablesUtils.replaceOptions(options);
-      const tokenId = await createFungibleToken(
-        options.name,
-        options.symbol,
-        options.treasuryId,
-        options.treasuryKey,
-        options.decimals,
-        options.initialSupply,
-        options.supplyType,
-        options.adminKey,
-      );
+    .action(
+      exitOnError(async (options: CreateOptions) => {
+        logger.verbose('Creating new token');
+        options = dynamicVariablesUtils.replaceOptions(options);
+        const tokenId = await createFungibleToken(
+          options.name,
+          options.symbol,
+          options.treasuryId,
+          options.treasuryKey,
+          options.decimals,
+          options.initialSupply,
+          options.supplyType,
+          options.adminKey,
+        );
 
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.token.create.action,
-        {
-          tokenId: tokenId.toString(),
-          name: options.name,
-          symbol: options.symbol,
-          treasuryId: options.treasuryId,
-          adminKey: options.adminKey,
-        },
-      );
-    });
+        dynamicVariablesUtils.storeArgs(
+          options.args,
+          dynamicVariablesUtils.commandActions.token.create.action,
+          {
+            tokenId: tokenId.toString(),
+            name: options.name,
+            symbol: options.symbol,
+            treasuryId: options.treasuryId,
+            adminKey: options.adminKey,
+          },
+        );
+      }),
+    );
 };

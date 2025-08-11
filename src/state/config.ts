@@ -1,5 +1,7 @@
 import { State } from '../../types';
-
+/**
+ * Base config used in application startup/testing etc. Used to help us populate a base state model.
+ */
 const defaultConfig: State = {
   network: 'localnet',
   networks: {
@@ -36,8 +38,7 @@ const defaultConfig: State = {
   },
   telemetryServer: 'https://hedera-cli-telemetry.onrender.com/track',
   telemetry: 0,
-  scriptExecution: 0,
-  scriptExecutionName: '',
+  scriptExecution: { active: false, name: '' },
   accounts: {},
   tokens: {},
   scripts: {},

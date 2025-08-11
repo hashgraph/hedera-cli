@@ -7,6 +7,7 @@ import {
 } from '@hashgraph/sdk';
 
 import { Logger } from './logger';
+import { DomainError } from './errors';
 
 import { FixedFee, FractionalFee } from '../../types';
 
@@ -27,15 +28,13 @@ function createCustomFixedFee(fee: FixedFee): CustomFee {
     case 'token':
     case 'tokens':
       if (!fee.denom) {
-        logger.error('Token fee requires denom property');
-        process.exit(1);
+        throw new DomainError('Token fee requires denom property');
       }
       customFee.setAmount(fee.amount);
       customFee.setDenominatingTokenId(fee.denom);
       break;
     default:
-      logger.error(`Invalid fee unit type: ${fee.unitType}`);
-      process.exit(1);
+      throw new DomainError(`Invalid fee unit type: ${fee.unitType}`);
   }
 
   if (fee.collectorId) {

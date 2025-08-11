@@ -1182,8 +1182,7 @@ Here's an example state:
   "previewnetOperatorId": "",
   "previewnetOperatorKey": "",
   "telemetry": 0,
-  "scriptExecution": 0,
-  "scriptExecutionName": "",
+  "scriptExecution": { "active": false, "name": "" },
   "uuid": "",
   "accounts": {
     "bob": {

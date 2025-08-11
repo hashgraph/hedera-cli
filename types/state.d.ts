@@ -91,8 +91,11 @@ export interface State {
   networks: Record<string, NetworkConfig>;
   telemetryServer: string;
   telemetry: number;
-  scriptExecution: number;
-  scriptExecutionName: string;
+  // Script execution runtime status persisted as structured object
+  scriptExecution: {
+    active: boolean;
+    name: string;
+  };
   // this will hold all the accounts and operator keys etc
   accounts: Record<string, Account>;
   scripts: Record<string, Script>;

@@ -2,7 +2,7 @@ import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
-import stateController from '../../state/stateController';
+import { updateState as storeUpdateState } from '../../state/store';
 
 const logger = Logger.getInstance();
 
@@ -24,10 +24,12 @@ function clear(
     return;
   }
 
-  if (!skipAccounts) stateController.saveKey('accounts', {});
-  if (!skipTokens) stateController.saveKey('tokens', {});
-  if (!skipScripts) stateController.saveKey('scripts', {});
-  if (!skipTopics) stateController.saveKey('topics', {});
+  storeUpdateState((draft: any) => {
+    if (!skipAccounts) draft.accounts = {} as any;
+    if (!skipTokens) draft.tokens = {} as any;
+    if (!skipScripts) draft.scripts = {} as any;
+    if (!skipTopics) draft.topics = {} as any;
+  });
   logger.log('State cleared successfully');
 }
 

@@ -1,8 +1,9 @@
-import stateController from '../../state/stateController';
+import { getState } from '../../state/store';
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import { execSync } from 'child_process';
 import { Logger } from '../../utils/logger';
+import { DomainError, exitOnError } from '../../utils/errors';
 
 import type { Command, Script } from '../../../types';
 
@@ -15,15 +16,14 @@ interface ScriptLoadOptions {
 function loadScript(name: string) {
   stateUtils.startScriptExecution(name);
 
-  const state = stateController.getAll();
+  const state = getState() as any;
   const scripts: Record<string, Script> = state.scripts;
   const scriptName = `script-${name}`;
   const script = scripts[scriptName];
 
   if (!script) {
-    logger.error(`No script found with name: ${scriptName}`);
     stateUtils.stopScriptExecution();
-    process.exit(1);
+    throw new DomainError(`No script found with name: ${scriptName}`);
   }
 
   logger.log(`Executing script: ${script.name}\n`);
@@ -35,17 +35,17 @@ function loadScript(name: string) {
       // If the command starts with 'hardhat', we can execute it directly by adding 'npx'
       // Verify that the command is safe to execute
       if (command.includes('&&') || command.includes(';')) {
-        logger.error('Unsafe command detected. Please check the script.');
         stateUtils.stopScriptExecution();
-        process.exit(1);
+        throw new DomainError(
+          'Unsafe command detected. Please check the script.',
+        );
       }
 
       try {
         execSync(`npx ${command}`, { stdio: 'inherit' });
       } catch (error: any) {
-        logger.error('Unable to execute command', error.message || error);
         stateUtils.stopScriptExecution();
-        process.exit(1);
+        throw new DomainError('Unable to execute command');
       }
       return;
     }
@@ -54,9 +54,8 @@ function loadScript(name: string) {
     try {
       execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
     } catch (error: any) {
-      logger.error('Unable to execute command', error.message || error);
       stateUtils.stopScriptExecution();
-      process.exit(1);
+      throw new DomainError('Unable to execute command');
     }
   });
 
@@ -78,8 +77,10 @@ export default (program: any) => {
     })
     .description('Load and execute a script')
     .requiredOption('-n, --name <name>', 'Name of script to load and execute')
-    .action((options: ScriptLoadOptions) => {
-      logger.verbose(`Loading script ${options.name}`);
-      loadScript(options.name);
-    });
+    .action(
+      exitOnError((options: ScriptLoadOptions) => {
+        logger.verbose(`Loading script ${options.name}`);
+        loadScript(options.name);
+      }),
+    );
 };

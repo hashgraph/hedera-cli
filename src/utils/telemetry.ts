@@ -1,4 +1,4 @@
-import stateController from '../state/stateController';
+import { get as storeGet } from '../state/store';
 const { version } = require('../../package.json');
 
 async function recordCommand(command: string) {
@@ -12,14 +12,15 @@ async function recordCommand(command: string) {
     // TODO: Replace with actual telemetry endpoint.
     // If .env contains a TELEMETRY_URL, use that instead otherwise use the default URL.
     const telemetryUrl =
-      stateController.get('telemetryServer') ||
+      (storeGet('telemetryServer' as any) as any) ||
       'https://hedera-cli-telemetry.onrender.com/track';
     await fetch(telemetryUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Telemetry-Token':
-          stateController.get('uuid') || 'facade00-0000-4000-a000-000000000000', // Default user ID
+          (storeGet('uuid' as any) as any) ||
+          'facade00-0000-4000-a000-000000000000', // Default user ID
       },
       body: JSON.stringify(payload),
     });

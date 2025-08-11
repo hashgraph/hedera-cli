@@ -4,8 +4,13 @@ import * as path from 'path';
 import stateUtils from '../utils/state';
 import telemetryUtils from '../utils/telemetry';
 import enquirerUtils from '../utils/enquirer';
-import stateController from '../state/stateController';
+import {
+  saveKey as storeSaveKey,
+  updateState as storeUpdateState,
+} from '../state/store';
+import { addAccount, addToken, addScript, addTopic } from '../state/mutations';
 import { Logger } from '../utils/logger';
+import { DomainError, exitOnError } from '../utils/errors';
 
 import type { Command, State, Account } from '../../types';
 
@@ -69,8 +74,7 @@ function backupState(
     const statePath = path.join(__dirname, '..', 'state', 'state.json');
     data = JSON.parse(fs.readFileSync(statePath, 'utf8')) as State;
   } catch (error) {
-    logger.error('Unable to read state file:', error as object);
-    process.exit(1);
+    throw new DomainError('Unable to read state file');
   }
 
   // Create backup filename
@@ -108,8 +112,7 @@ function backupState(
     fs.writeFileSync(backupPath, JSON.stringify(data, null, 2), 'utf8');
     logger.log(`Backup created with filename: ${backupFilename}`);
   } catch (error) {
-    logger.error('Unable to create backup file:', error as object);
-    process.exit(1);
+    throw new DomainError('Unable to create backup file');
   }
 }
 
@@ -129,8 +132,7 @@ function restoreState(
     const backupPath = path.join(__dirname, '..', 'state', filename);
     raw = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
   } catch (error) {
-    logger.error('Unable to read backup file:', error as object);
-    process.exit(1);
+    throw new DomainError('Unable to read backup file');
   }
 
   // Distinguish between full state and accounts-only backup
@@ -139,7 +141,10 @@ function restoreState(
 
   if (!isFullState) {
     logger.log('Importing account backup');
-    stateController.saveKey('accounts', (raw as Record<string, Account>) || {});
+    storeSaveKey(
+      'accounts' as any,
+      (raw as Record<string, Account>) || ({} as any),
+    );
     logger.log('Account backup restored successfully');
     return;
   }
@@ -147,19 +152,29 @@ function restoreState(
   const data = raw as State;
 
   if (!restoreAccounts && !restoreTokens && !restoreScripts) {
-    stateController.saveState(data);
+    // full overwrite
+    storeUpdateState((draft: any) => {
+      draft.accounts = data.accounts || {};
+      draft.tokens = data.tokens || {};
+      draft.scripts = data.scripts || {};
+      draft.topics = data.topics || {};
+    });
     logger.log('Backup restored successfully');
     return;
   }
 
-  if (restoreAccounts) {
-    stateController.saveKey('accounts', data.accounts || {});
+  // granular restore merges into existing using helpers
+  if (restoreAccounts && data.accounts) {
+    Object.values(data.accounts).forEach((acc: any) => addAccount(acc, true));
   }
-  if (restoreTokens) {
-    stateController.saveKey('tokens', data.tokens || {});
+  if (restoreTokens && data.tokens) {
+    Object.values(data.tokens).forEach((tok: any) => addToken(tok, true));
   }
-  if (restoreScripts) {
-    stateController.saveKey('scripts', data.scripts || {});
+  if (restoreScripts && data.scripts) {
+    Object.values(data.scripts).forEach((scr: any) => {
+      // scr already internal name keyed when coming from backup? If using same shape as state.scripts values we keep name field
+      addScript(scr, true);
+    });
   }
   logger.log('Backup restored successfully');
 }
@@ -183,15 +198,17 @@ export default (program: any) => {
     .option('--safe', 'Remove the private keys from the backup')
     .option('--name <name>', 'Name of the backup file')
     .option('--path <path>', 'Specify a custom path to store the backup')
-    .action((options: BackupOptions) => {
-      logger.verbose('Creating backup of state');
-      backupState(
-        options.name,
-        options.accounts,
-        options.safe,
-        options.path || '',
-      );
-    });
+    .action(
+      exitOnError((options: BackupOptions) => {
+        logger.verbose('Creating backup of state');
+        backupState(
+          options.name,
+          options.accounts,
+          options.safe,
+          options.path || '',
+        );
+      }),
+    );
 
   network
     .command('restore')
@@ -209,40 +226,40 @@ export default (program: any) => {
     .option('--restore-accounts', 'Restore the accounts', false)
     .option('--restore-tokens', 'Restore the tokens', false)
     .option('--restore-scripts', 'Restore the scripts', false)
-    .action(async (options: RestoreOptions) => {
-      logger.verbose('Restoring backup of state');
+    .action(
+      exitOnError(async (options: RestoreOptions) => {
+        logger.verbose('Restoring backup of state');
 
-      let filename = options.file;
-      if (!options.file) {
-        const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
+        let filename = options.file;
+        if (!options.file) {
+          const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
 
-        // filter out the pattern *.backup.*.json like accounts.backup.7-nov-2024.json
-        const pattern = /^.*\.backup\..*\.json$/;
-        const backups = files.filter((file) => pattern.test(file));
+          // filter out the pattern *.backup.*.json like accounts.backup.7-nov-2024.json
+          const pattern = /^.*\.backup\..*\.json$/;
+          const backups = files.filter((file) => pattern.test(file));
 
-        if (backups.length === 0) {
-          logger.error('No backup files found');
-          process.exit(1);
+          if (backups.length === 0) {
+            throw new DomainError('No backup files found');
+          }
+
+          try {
+            filename = await enquirerUtils.createPrompt(
+              backups,
+              'Choose a backup:',
+            );
+          } catch (error) {
+            throw new DomainError('Unable to read backup file');
+          }
         }
 
-        try {
-          filename = await enquirerUtils.createPrompt(
-            backups,
-            'Choose a backup:',
-          );
-        } catch (error) {
-          logger.error('Unable to read backup file:', error as object);
-          process.exit(1);
-        }
-      }
-
-      restoreState(
-        filename,
-        options.restoreAccounts,
-        options.restoreTokens,
-        options.restoreScripts,
-      );
-    });
+        restoreState(
+          filename,
+          options.restoreAccounts,
+          options.restoreTokens,
+          options.restoreScripts,
+        );
+      }),
+    );
 };
 
 interface BackupOptions {

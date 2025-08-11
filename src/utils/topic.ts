@@ -1,4 +1,4 @@
-import stateController from '../state/stateController';
+import { selectTopics } from '../state/selectors';
 import { Logger } from './logger';
 
 import type { Topic } from '../../types';
@@ -6,7 +6,7 @@ import type { Topic } from '../../types';
 const logger = Logger.getInstance();
 
 function list() {
-  const topics: Topic[] = Object.values(stateController.get('topics'));
+  const topics: Topic[] = Object.values(selectTopics());
 
   if (topics.length === 0) {
     logger.log('No topics found');

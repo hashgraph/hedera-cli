@@ -12,7 +12,8 @@ import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import feeUtils from '../../utils/fees';
 import { Logger } from '../../utils/logger';
-import stateController from '../../state/stateController';
+import { get as storeGet, saveKey as storeSaveKey } from '../../state/store';
+// (Reverted) DomainError/exitOnError not used here
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 import type {
@@ -104,7 +105,7 @@ function initializeToken(tokenInput: TokenInput): Token {
  * @return updated keys
  */
 function replaceNamePattern(keys: Keys): Keys {
-  const accounts = stateController.get('accounts');
+  const accounts = storeGet('accounts' as any) as any;
   const namePattern = /<name:([a-zA-Z0-9_-]+)>/;
   let newKeys = { ...keys };
 
@@ -303,13 +304,13 @@ async function createTokenOnNetwork(token: Token) {
 }
 
 function updateTokenState(token: Token) {
-  const tokens: Record<string, Token> = stateController.get('tokens');
+  const tokens: Record<string, Token> = storeGet('tokens' as any) as any;
   const updatedTokens = {
     ...tokens,
     [token.tokenId]: token,
   };
 
-  stateController.saveKey('tokens', updatedTokens);
+  storeSaveKey('tokens' as any, updatedTokens as any);
   stateUtils.getHederaClient().close();
 }
 

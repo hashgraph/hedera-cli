@@ -2,7 +2,7 @@ import { baseState } from "../../helpers/state";
 import { Command } from "commander";
 import commands from "../../../src/commands";
 import accountUtils from "../../../src/utils/account";
-import stateController from "../../../src/state/stateController";
+import { saveState as storeSaveState } from "../../../src/state/store";
 import { AccountId } from "@hashgraph/sdk";
 
 jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
@@ -27,7 +27,7 @@ jest.mock('@hashgraph/sdk', () => {
 
 describe("account create command", () => {
   beforeEach(() => {
-    stateController.saveState(baseState);
+  storeSaveState(baseState as any);
   });
 
   describe("account create - success path", () => {

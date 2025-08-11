@@ -3,6 +3,7 @@ import { Logger } from '../../utils/logger';
 import { myParseInt } from '../../utils/verification';
 
 import accountUtils from '../../utils/account';
+import { exitOnError } from '../../utils/errors';
 import telemetryUtils from '../../utils/telemetry';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
@@ -47,24 +48,26 @@ export default (program: any) => {
         previous ? previous.concat(value) : [value],
       [],
     )
-    .action(async (options: CreateAccountOptions) => {
-      logger.verbose(`Creating account with name: ${options.name}`);
+    .action(
+      exitOnError(async (options: CreateAccountOptions) => {
+        logger.verbose(`Creating account with name: ${options.name}`);
 
-      options = dynamicVariablesUtils.replaceOptions(options);
+        options = dynamicVariablesUtils.replaceOptions(options);
 
-      let accountDetails = await accountUtils.createAccount(
-        options.balance,
-        'ECDSA',
-        options.name,
-        Number(options.autoAssociations),
-      );
+        let accountDetails = await accountUtils.createAccount(
+          options.balance,
+          'ECDSA',
+          options.name,
+          Number(options.autoAssociations),
+        );
 
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.account.create.action,
-        accountDetails,
-      );
-    });
+        dynamicVariablesUtils.storeArgs(
+          options.args,
+          dynamicVariablesUtils.commandActions.account.create.action,
+          accountDetails,
+        );
+      }),
+    );
 };
 
 interface CreateAccountOptions {

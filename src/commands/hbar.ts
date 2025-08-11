@@ -1,9 +1,10 @@
 import stateUtils from '../utils/state';
 import telemetryUtils from '../utils/telemetry';
-import stateController from '../state/stateController';
+import { getState } from '../state/store';
 import enquirerUtils from '../utils/enquirer';
 import dynamicVariablesUtils from '../utils/dynamicVariables';
 import { Logger } from '../utils/logger';
+import { DomainError, exitOnError } from '../utils/errors';
 import hbarUtils from '../utils/hbar';
 
 import type { Account, Command } from '../../types';
@@ -29,64 +30,67 @@ export default (program: any) => {
     .option('-t, --to <to>', 'Account ID to transfer tinybars to')
     .option('-f, --from <from>', 'Account ID to transfer tinybars from')
     .option('--memo <memo>', 'Memo for the transfer')
-    .action(async (options: HbarTransferOptions) => {
-      logger.verbose('Transferring tinybars');
-      options = dynamicVariablesUtils.replaceOptions(options);
+    .action(
+      exitOnError(async (options: HbarTransferOptions) => {
+        logger.verbose('Transferring tinybars');
+        options = dynamicVariablesUtils.replaceOptions(options);
 
-      let to = options.to;
-      let from = options.from;
-      const network = stateUtils.getNetwork();
+        let to = options.to;
+        let from = options.from;
+        const network = stateUtils.getNetwork();
 
-      if (!options.from) {
-        try {
-          const accounts: Account[] = Object.values(
-            stateController.getAll().accounts,
-          );
-          const filteredAccounts = accounts.filter(
-            (account) => account.network === network,
-          );
-          if (filteredAccounts.length === 0) {
-            logger.error(
-              'No accounts found to transfer hbar from. Please create an account first.',
+        if (!options.from) {
+          try {
+            const accounts: Account[] = Object.values(
+              (getState() as any).accounts,
             );
-            process.exit(1);
-          }
-          from = await enquirerUtils.createPrompt(
-            filteredAccounts.map((account) => account.name),
-            'Choose account to transfer hbar from:',
-          );
-        } catch (error) {
-          logger.error('Unable to get response:', error as object);
-          process.exit(1);
-        }
-      }
-
-      if (!options.to) {
-        try {
-          const accounts: Account[] = Object.values(
-            stateController.getAll().accounts,
-          );
-          const filteredAccounts = accounts.filter(
-            (account) => account.network === network,
-          );
-          if (filteredAccounts.length === 0) {
-            logger.error(
-              'No accounts found to transfer hbar from. Please create an account first.',
+            const filteredAccounts = accounts.filter(
+              (account) => account.network === network,
             );
-            process.exit(1);
+            if (filteredAccounts.length === 0) {
+              throw new DomainError(
+                'No accounts found to transfer hbar from. Please create an account first.',
+              );
+            }
+            from = await enquirerUtils.createPrompt(
+              filteredAccounts.map((account) => account.name),
+              'Choose account to transfer hbar from:',
+            );
+          } catch (error) {
+            throw new DomainError('Unable to get response');
           }
-          to = await enquirerUtils.createPrompt(
-            filteredAccounts.map((account) => account.name),
-            'Choose account to transfer hbar to:',
-          );
-        } catch (error) {
-          logger.error('Unable to get response:', error as object);
-          process.exit(1);
         }
-      }
 
-      await hbarUtils.transfer(Number(options.balance), from, to, options.memo);
-    });
+        if (!options.to) {
+          try {
+            const accounts: Account[] = Object.values(
+              (getState() as any).accounts,
+            );
+            const filteredAccounts = accounts.filter(
+              (account) => account.network === network,
+            );
+            if (filteredAccounts.length === 0) {
+              throw new DomainError(
+                'No accounts found to transfer hbar from. Please create an account first.',
+              );
+            }
+            to = await enquirerUtils.createPrompt(
+              filteredAccounts.map((account) => account.name),
+              'Choose account to transfer hbar to:',
+            );
+          } catch (error) {
+            throw new DomainError('Unable to get response');
+          }
+        }
+
+        await hbarUtils.transfer(
+          Number(options.balance),
+          from,
+          to,
+          options.memo,
+        );
+      }),
+    );
 };
 
 interface HbarTransferOptions {

@@ -1,14 +1,14 @@
 import { Command } from "commander";
 import commands from "../../../src/commands";
 import accountUtils from "../../../src/utils/account";
-import stateController from "../../../src/state/stateController";
+import { saveState as storeSaveState, get as storeGet } from "../../../src/state/store";
 import { alice, baseState } from '../../helpers/state';
 
 jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("account import command", () => {
   beforeEach(() => {
-    stateController.saveState(baseState);
+  storeSaveState(baseState as any);
   });
 
   describe("account import - success path", () => {
@@ -35,7 +35,7 @@ describe("account import command", () => {
 
       // Assert
       expect(importAccountSpy).toHaveBeenCalledWith(alice.accountId, alice.privateKey, alice.name);
-      expect(stateController.get("accounts")).toEqual({ [alice.name]: alice });
+  expect(storeGet("accounts" as any)).toEqual({ [alice.name]: alice });
     });
   });
 });
