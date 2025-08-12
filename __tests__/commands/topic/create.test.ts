@@ -1,6 +1,9 @@
 import { topicState, topic, baseState } from '../../helpers/state';
 import commands from '../../../src/commands';
-import { saveState as storeSaveState, get as storeGet } from '../../../src/state/store';
+import {
+  saveState as storeSaveState,
+  get as storeGet,
+} from '../../../src/state/store';
 import { Command } from 'commander';
 
 jest.mock('@hashgraph/sdk', () => {
@@ -16,7 +19,7 @@ jest.mock('@hashgraph/sdk', () => {
       execute: jest.fn().mockResolvedValue({
         getReceipt: jest.fn().mockResolvedValue({
           topicId: topic.topicId,
-        })
+        }),
       }),
     })),
   };
@@ -26,7 +29,7 @@ describe('topic create command', () => {
   const logSpy = jest.spyOn(console, 'log');
 
   beforeEach(() => {
-  storeSaveState(baseState as any);
+    storeSaveState(baseState as any);
   });
 
   describe('topic create - success path', () => {
@@ -42,16 +45,25 @@ describe('topic create command', () => {
       const customTopic = {
         ...topic,
         memo: 'my custom memo',
-      }
+      };
 
       // Act
-      await program.parseAsync(['node', 'hedera-cli.ts', 'topic', 'create', '--memo', customTopic.memo]);
+      await program.parseAsync([
+        'node',
+        'hedera-cli.ts',
+        'topic',
+        'create',
+        '--memo',
+        customTopic.memo,
+      ]);
 
       // Assert
-  const topics = storeGet('topics' as any);
+      const topics = storeGet('topics' as any);
       expect(Object.keys(topics).length).toEqual(1);
       expect(topics[topic.topicId]).toEqual(customTopic);
-      expect(logSpy).toHaveBeenCalledWith(`Created new topic: ${topic.topicId}`);
+      expect(logSpy).toHaveBeenCalledWith(
+        `Created new topic: ${topic.topicId}`,
+      );
     });
   });
 });

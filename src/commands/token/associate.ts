@@ -1,10 +1,7 @@
 import { Command } from 'commander';
 import tokenUtils from '../../utils/token';
 import { telemetryPreAction } from '../shared/telemetryHook';
-import { Logger } from '../../utils/logger';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-
-const logger = Logger.getInstance();
+import { wrapAction } from '../shared/wrapAction';
 
 export default (program: Command) => {
   program
@@ -19,13 +16,14 @@ export default (program: Command) => {
       '-t, --token-id <tokenId>',
       'Token ID to associate with account',
     )
-    .action(async (options: AssociateTokenOptions) => {
-      logger.verbose(
-        `Associating token ${options.tokenId} with ${options.accountId}`,
-      );
-      options = dynamicVariablesUtils.replaceOptions(options);
-      await tokenUtils.associateToken(options.tokenId, options.accountId);
-    });
+    .action(
+      wrapAction<AssociateTokenOptions>(
+        async (options) => {
+          await tokenUtils.associateToken(options.tokenId, options.accountId);
+        },
+        { log: (o) => `Associating token ${o.tokenId} with ${o.accountId}` },
+      ),
+    );
 };
 
 interface AssociateTokenOptions {

@@ -5,7 +5,10 @@ import commands from '../../src/commands';
 const os = require('os');
 const dotenv = require('dotenv');
 import accountUtils from '../../src/utils/account';
-import { saveState as storeSaveState, getState as storeGetAll } from '../../src/state/store';
+import {
+  saveState as storeSaveState,
+  getState as storeGetAll,
+} from '../../src/state/store';
 import setupUtils from '../../src/utils/setup';
 
 jest.mock('os');
@@ -15,7 +18,10 @@ describe('setup init command', () => {
   describe('setup init - success path', () => {
     let originalEnv: any;
     const logSpy = jest.spyOn(console, 'log');
-  const setupOperatorAccountSpy = jest.spyOn(setupUtils, 'setupOperatorAccount');
+    const setupOperatorAccountSpy = jest.spyOn(
+      setupUtils,
+      'setupOperatorAccount',
+    );
 
     beforeEach(() => {
       // Save the original process.env
@@ -25,7 +31,7 @@ describe('setup init command', () => {
     afterEach(() => {
       // Reset process.env to its original state
       process.env = originalEnv;
-  jest.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     test('✅ should set up state with environment variables with custom path', async () => {
@@ -61,11 +67,14 @@ describe('setup init command', () => {
       // Assert we invoked setupOperatorAccount for testnet with expected args
       const calls = setupOperatorAccountSpy.mock.calls;
       const hasExpectedCall = calls.some(
-        (c) => c[0] === testnetOperatorId && c[1] === testnetOperatorKey && c[2] === 'testnet',
+        (c) =>
+          c[0] === testnetOperatorId &&
+          c[1] === testnetOperatorKey &&
+          c[2] === 'testnet',
       );
       expect(hasExpectedCall).toBe(true);
 
-  const finalState = storeGetAll();
+      const finalState = storeGetAll();
       const opAcct = finalState.accounts?.['testnet-operator'];
       expect(opAcct).toBeDefined();
       expect(opAcct).toMatchObject({

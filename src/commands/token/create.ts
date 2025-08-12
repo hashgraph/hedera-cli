@@ -5,11 +5,12 @@ import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { Logger } from '../../utils/logger';
-import { DomainError, exitOnError } from '../../utils/errors';
+import { DomainError } from '../../utils/errors';
 import { addToken } from '../../state/mutations';
 import type { Token } from '../../../types/state';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import signUtils from '../../utils/sign';
+import { wrapAction } from '../shared/wrapAction';
 
 const logger = Logger.getInstance();
 
@@ -143,31 +144,31 @@ export default (program: Command) => {
       [] as string[],
     )
     .action(
-      exitOnError(async (options: CreateOptions) => {
-        logger.verbose('Creating new token');
-        options = dynamicVariablesUtils.replaceOptions(options);
-        const tokenId = await createFungibleToken(
-          options.name,
-          options.symbol,
-          options.treasuryId,
-          options.treasuryKey,
-          options.decimals,
-          options.initialSupply,
-          options.supplyType,
-          options.adminKey,
-        );
-
-        dynamicVariablesUtils.storeArgs(
-          options.args,
-          dynamicVariablesUtils.commandActions.token.create.action,
-          {
-            tokenId: tokenId,
-            name: options.name,
-            symbol: options.symbol,
-            treasuryId: options.treasuryId,
-            adminKey: options.adminKey,
-          },
-        );
-      }),
+      wrapAction<CreateOptions>(
+        async (options) => {
+          const tokenId = await createFungibleToken(
+            options.name,
+            options.symbol,
+            options.treasuryId,
+            options.treasuryKey,
+            options.decimals,
+            options.initialSupply,
+            options.supplyType,
+            options.adminKey,
+          );
+          dynamicVariablesUtils.storeArgs(
+            options.args,
+            dynamicVariablesUtils.commandActions.token.create.action,
+            {
+              tokenId: tokenId,
+              name: options.name,
+              symbol: options.symbol,
+              treasuryId: options.treasuryId,
+              adminKey: options.adminKey,
+            },
+          );
+        },
+        { log: 'Creating new token' },
+      ),
     );
 };

@@ -23,7 +23,10 @@
     "copy-input": "copyfiles -u 2 src/input/*.json dist/input/",
     "copy-contracts": "copyfiles -u 2 src/contracts/*.sol dist/contracts/",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet",
-    "format": "prettier --write 'src/**/*.{js,ts,tsx}'",
+    "lint:fix": "eslint 'src/**/*.{js,ts,tsx}' --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+  "prepare": "husky install",
     "test:unit": "JEST_SUITE_NAME='Unit Tests' JEST_JUNIT_OUTPUT_NAME='junit.xml' jest -c jest.unit.config.js --coverage --coverageDirectory='coverage/unit'",
     "test:e2e": "JEST_SUITE_NAME='E2E Tests' JEST_JUNIT_OUTPUT_NAME='junit-e2e.xml' jest -c jest.e2e.config.js --coverage --coverageDirectory='coverage/e2e' --runInBand",
     "test:all": "npm run test:unit && npm run test:e2e",
@@ -59,6 +62,8 @@
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
     "ethers": "^6.14.4",
     "hardhat": "^2.22.19",
     "hardhat-deploy": "^1.0.3",
@@ -68,5 +73,14 @@
     "rimraf": "^5.0.5",
     "ts-jest": "^29.3.2",
     "typescript": "^5.8.3"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css,scss,html}": [
+      "prettier --write"
+    ]
   }
 }

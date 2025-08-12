@@ -30,6 +30,9 @@ describe('invalid user config handling', () => {
     expect(state.networks.testnet).toBeDefined();
 
     // Clean up temp file
-    try { fs.unlinkSync(invalidPath); fs.rmdirSync(tmpDir); } catch {}
+    try {
+      fs.unlinkSync(invalidPath);
+      fs.rmdirSync(tmpDir);
+    } catch {}
   });
 });

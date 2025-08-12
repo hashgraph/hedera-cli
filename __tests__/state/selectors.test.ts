@@ -11,10 +11,9 @@ import {
   selectAccountNames,
 } from '../../src/state/selectors';
 
-
 describe('state selectors', () => {
   beforeEach(() => {
-  storeSaveState({
+    storeSaveState({
       ...baseState,
       accounts: { [alice.name]: alice },
       tokens: { [token.tokenId]: token },
@@ -32,7 +31,9 @@ describe('state selectors', () => {
     expect(selectAccountByName(alice.name)?.accountId).toBe(alice.accountId);
     expect(selectTokenById(token.tokenId)?.name).toBe(token.name);
     expect(selectTopicById(topic.topicId)?.memo).toBe(topic.memo);
-    expect(selectScriptByInternalName(`script-${script_basic.name}`)?.name).toBe(script_basic.name);
+    expect(
+      selectScriptByInternalName(`script-${script_basic.name}`)?.name,
+    ).toBe(script_basic.name);
   });
 
   test('id collections', () => {

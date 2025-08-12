@@ -35,6 +35,17 @@
     {
       "files": ["__tests__/setup/silenceLogs.ts"],
       "rules": { "no-restricted-syntax": "off" }
+    },
+    {
+      "files": ["src/contracts/scripts/**/*.js"],
+      "env": { "node": true },
+      "rules": {
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "no-undef": "off",
+        "@typescript-eslint/no-var-requires": "off"
+      }
     }
   ]
 }

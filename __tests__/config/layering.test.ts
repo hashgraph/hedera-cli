@@ -3,15 +3,15 @@ describe('config layering with test user config', () => {
   test('merges test user config with base defaults', () => {
     // Sanity: marker env set
     expect(process.env.HCLI_TEST_USER_CONFIG).toBe('1');
-  // Reset store to ensure fresh layering (uses per-worker temp state file from setup)
-  resetStore();
-  const state = getState();
+    // Reset store to ensure fresh layering (uses per-worker temp state file from setup)
+    resetStore();
+    const state = getState();
 
     // Default network preserved as specified in fixture
     expect(state.network).toBe('localnet');
 
-  // Telemetry overridden to 1 by fixture (runtime file removed so user override surfaces)
-  expect(state.telemetry).toBe(1);
+    // Telemetry overridden to 1 by fixture (runtime file removed so user override surfaces)
+    expect(state.telemetry).toBe(1);
 
     // Base networks still present
     expect(state.networks.testnet).toBeDefined();
@@ -26,6 +26,14 @@ describe('config layering with test user config', () => {
 
     // Ensure no accidental mutation of base defaults shape
     const networkKeys = Object.keys(state.networks).sort();
-    expect(networkKeys).toEqual(expect.arrayContaining(['localnet','testnet','previewnet','mainnet','fixture-extra']));
+    expect(networkKeys).toEqual(
+      expect.arrayContaining([
+        'localnet',
+        'testnet',
+        'previewnet',
+        'mainnet',
+        'fixture-extra',
+      ]),
+    );
   });
 });

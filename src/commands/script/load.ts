@@ -2,9 +2,10 @@ import { Command } from 'commander';
 import { getState } from '../../state/store';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 import { execSync } from 'child_process';
 import { Logger } from '../../utils/logger';
-import { DomainError, exitOnError } from '../../utils/errors';
+import { DomainError } from '../../utils/errors';
 import type { Script } from '../../../types';
 
 const logger = Logger.getInstance();
@@ -70,9 +71,11 @@ export default (program: Command) => {
     .description('Load and execute a script')
     .requiredOption('-n, --name <name>', 'Name of script to load and execute')
     .action(
-      exitOnError((options: ScriptLoadOptions) => {
-        logger.verbose(`Loading script ${options.name}`);
-        loadScript(options.name);
-      }),
+      wrapAction<ScriptLoadOptions>(
+        (options) => {
+          loadScript(options.name);
+        },
+        { log: (o) => `Loading script ${o.name}` },
+      ),
     );
 };

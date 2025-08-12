@@ -17,6 +17,7 @@ npm run test:unit
 ### Configuration & State Layering
 
 The CLI layers state in three tiers (lowest precedence first):
+
 1. Base defaults (`src/state/config.ts`)
 2. Optional user overrides (cosmiconfig – `hedera-cli.config.*` or `HCLI_CONFIG_FILE`)
 3. Mutable runtime state persisted to JSON (accounts, tokens, scripts, topics, etc.)
@@ -46,9 +47,14 @@ import * as os from 'os';
 import * as path from 'path';
 
 test('missing user config falls back to defaults', () => {
-  const tmpConfigPath = path.join(os.tmpdir(), `hcli-missing-${Date.now()}.json`);
+  const tmpConfigPath = path.join(
+    os.tmpdir(),
+    `hcli-missing-${Date.now()}.json`,
+  );
   process.env.HCLI_CONFIG_FILE = tmpConfigPath; // no file created
-  resetStore({ stateFile: path.join(os.tmpdir(), `hcli-state-${Date.now()}.json`) });
+  resetStore({
+    stateFile: path.join(os.tmpdir(), `hcli-state-${Date.now()}.json`),
+  });
   const state = getState();
   expect(state.telemetry).toBe(0);
   expect(state.networks['fixture-extra']).toBeUndefined();
@@ -62,7 +68,11 @@ Unit tests load `__tests__/setup/silenceLogs.ts` which sets `HCLI_SUPPRESS_CONSO
 Per‑test scoped control helpers live in `__tests__/helpers/loggerHelper.ts`:
 
 ```ts
-import { withSilencedLogs, withVerboseLogs, withNormalLogs } from '../helpers/loggerHelper';
+import {
+  withSilencedLogs,
+  withVerboseLogs,
+  withNormalLogs,
+} from '../helpers/loggerHelper';
 
 test('quiet block', async () => {
   await withSilencedLogs(async () => {
@@ -88,6 +98,7 @@ delete process.env.HCLI_SUPPRESS_CONSOLE;
 ### Adding New Config Edge-Case Tests
 
 Patterns:
+
 - Missing config: point `HCLI_CONFIG_FILE` to a non-existent path then `resetStore()`.
 - Empty config: create a temp file with empty contents.
 - Malformed config: already covered by `invalidConfig.test.ts` (bad JSON falls back gracefully).

@@ -4,9 +4,7 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
     "hardhat.config.js",
     "node_modules",

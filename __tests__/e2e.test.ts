@@ -4,7 +4,10 @@ import * as path from 'path';
 import { baseState } from './helpers/state';
 import { program } from 'commander';
 import commands from '../src/commands';
-import { saveState as storeSaveState, get as storeGet } from '../src/state/store';
+import {
+  saveState as storeSaveState,
+  get as storeGet,
+} from '../src/state/store';
 import api from '../src/api';
 import { Logger } from '../src/utils/logger';
 
@@ -16,7 +19,7 @@ describe('End to end tests', () => {
   const logSpy = jest.spyOn(logger, 'log');
 
   beforeEach(() => {
-  storeSaveState(baseState as any); // reset state to base state for each test
+    storeSaveState(baseState as any); // reset state to base state for each test
   });
 
   afterEach(async () => {
@@ -36,7 +39,7 @@ describe('End to end tests', () => {
   });
 
   afterAll(() => {
-  storeSaveState(baseState as any);
+    storeSaveState(baseState as any);
     logSpy.mockClear();
   });
 
@@ -58,17 +61,23 @@ describe('End to end tests', () => {
     await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
 
     // Assert
-  const accounts = storeGet('accounts' as any);
+    const accounts = storeGet('accounts' as any);
     expect(accounts['localnet-operator']).toBeDefined();
 
     // Arrange: Change network to localnet
     commands.networkCommands(program);
 
     // Act
-    await program.parseAsync(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'network',
+      'use',
+      'localnet',
+    ]);
 
     // Assert
-  const network = storeGet('network' as any);
+    const network = storeGet('network' as any);
     expect(network).toEqual('localnet');
 
     // Arrange: Create a new account with specific balance, type, and network and verify it is created
@@ -90,7 +99,7 @@ describe('End to end tests', () => {
     await new Promise((resolve) => setTimeout(resolve, 7000));
 
     // Assert
-  let state = storeGet('accounts' as any);
+    let state = storeGet('accounts' as any);
     expect(state[accountName]).toBeDefined();
     expect(state[accountName].type).toEqual('ECDSA');
 
@@ -152,7 +161,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-  state = storeGet('accounts' as any);
+    state = storeGet('accounts' as any);
     expect(state[accountName]).toBeUndefined();
 
     // Arrange: Restore the state file from backup and verify the account and operator details are restored
@@ -169,7 +178,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-  state = storeGet('accounts' as any);
+    state = storeGet('accounts' as any);
     expect(state[accountName]).toBeDefined();
 
     // Cleanup
@@ -205,7 +214,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-  let scripts = storeGet('scripts' as any);
+    let scripts = storeGet('scripts' as any);
     expect(scripts['script-token']).toBeDefined();
     expect(scripts['script-account-create']).toBeDefined();
 
@@ -252,7 +261,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-  scripts = storeGet('scripts' as any);
+    scripts = storeGet('scripts' as any);
     expect(scripts['script-account-create-simple']).toBeUndefined();
     expect(scripts['script-account-create']).toBeDefined();
   });
@@ -305,7 +314,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-  const accounts = storeGet('accounts' as any);
+    const accounts = storeGet('accounts' as any);
     expect(accounts[accountNameTreasury]).toBeDefined();
     expect(accounts[accountNameAdmin]).toBeDefined();
     expect(accounts[accountNameUser]).toBeDefined();
@@ -339,8 +348,8 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-  let tokens = storeGet('tokens' as any) as Record<string, Token>;
-  let token = Object.values(tokens).find((token) => token.name === tokenName);
+    let tokens = storeGet('tokens' as any) as Record<string, Token>;
+    let token = Object.values(tokens).find((token) => token.name === tokenName);
     expect(token).toBeDefined();
 
     // TypeScript still sees `token` as possibly undefined. You need to assert it's not.
@@ -362,8 +371,8 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-  tokens = storeGet('tokens' as any) as Record<string, Token>;
-  token = Object.values(tokens).find((token) => token.name === tokenName);
+    tokens = storeGet('tokens' as any) as Record<string, Token>;
+    token = Object.values(tokens).find((token) => token.name === tokenName);
     expect(token?.associations).toEqual([
       {
         accountId: accounts[accountNameUser].accountId,
@@ -421,17 +430,23 @@ describe('End to end tests', () => {
     await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
 
     // Assert
-  let accounts = storeGet('accounts' as any);
+    let accounts = storeGet('accounts' as any);
     expect(accounts['localnet-operator']).toBeDefined();
 
     // Arrange: Change network to localnet
     commands.networkCommands(program);
 
     // Act
-    await program.parseAsync(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'network',
+      'use',
+      'localnet',
+    ]);
 
     // Assert
-  const network = storeGet('network' as any);
+    const network = storeGet('network' as any);
     expect(network).toEqual('localnet');
 
     // Arrange: Create 2 accounts
@@ -462,7 +477,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-  accounts = storeGet('accounts' as any);
+    accounts = storeGet('accounts' as any);
     expect(accounts[accountNameAdmin]).toBeDefined();
     expect(accounts[accountNameSubmit]).toBeDefined();
 
@@ -485,7 +500,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-  let topics = storeGet('topics' as any);
+    let topics = storeGet('topics' as any);
     expect(Object.keys(topics).length).toBe(1);
     expect(topics[Object.keys(topics)[0]].memo).toEqual(topicMemo);
 

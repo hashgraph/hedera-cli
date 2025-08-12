@@ -277,7 +277,7 @@ hcli telemetry disable
 
 ### Overview
 
-The CLI tool uses Hardhat for all smart contract interactions. There are no dedicated commands for smart contracts in the CLI tool. Instead, you can use the Hardhat commands to deploy and interact with smart contracts. 
+The CLI tool uses Hardhat for all smart contract interactions. There are no dedicated commands for smart contracts in the CLI tool. Instead, you can use the Hardhat commands to deploy and interact with smart contracts.
 
 ### Contract Storage
 
@@ -289,15 +289,15 @@ To deploy a smart contract and interact with it, you can use the Hardhat scripts
 
 ### Configuring Hardhat
 
-Make sure the your `hardhat.config.js` file is configured correctly to interact with one of the Hedera networks. By default, the CLI tool uses the `local` network, which is configured for the Hedera Local Node. You can add the `mainnet`, `testnet`, or `previewnet` networks to the Hardhat configuration file. 
+Make sure the your `hardhat.config.js` file is configured correctly to interact with one of the Hedera networks. By default, the CLI tool uses the `local` network, which is configured for the Hedera Local Node. You can add the `mainnet`, `testnet`, or `previewnet` networks to the Hardhat configuration file.
 
 > A sample config is included in the project. If you configure the `mainnet`, `testnet`, or `previewnet` networks, make sure to set the operator key and ID in your `.env` file in the HEX format. You can see the example config reads the operator key from the `.env` file using, for example the `process.env.TESTNET_OPERATOR_KEY_HEX`. Don't forget to set these HEX-based variables in your `.env` file.
 
 ```json
-{ 
+{
   // ... other Hardhat configuration options
-  defaultNetwork: 'local',
-  networks: {
+  "defaultNetwork": "local",
+  "networks": {
     /*mainnet: {
       url: stateController.default.get('rpcUrlMainnet'),
       accounts: [process.env.MAINNET_OPERATOR_KEY_HEX],
@@ -312,14 +312,14 @@ Make sure the your `hardhat.config.js` file is configured correctly to interact 
       accounts: [process.env.PREVIEWNET_OPERATOR_KEY_HEX],
       chainId: 297,
     },*/
-    local: {
-      url: 'http://localhost:7546',
-      accounts: [
-        '0x105d050185ccb907fba04dd92d8de9e32c18305e097ab41dadda21489a211524',
-        '0x2e1d968b041d84dd120a5860cee60cd83f9374ef527ca86996317ada3d0d03e7'
+    "local": {
+      "url": "http://localhost:7546",
+      "accounts": [
+        "0x105d050185ccb907fba04dd92d8de9e32c18305e097ab41dadda21489a211524",
+        "0x2e1d968b041d84dd120a5860cee60cd83f9374ef527ca86996317ada3d0d03e7"
       ],
-      chainId: 298,
-    },
+      "chainId": 298
+    }
   }
 }
 ```
@@ -387,7 +387,7 @@ async function main() {
 main().catch(console.error);
 ```
 
-In this example, the `erc721address` variable is stored in the `args` object of the script you are executing. You can then use this variable in other scripts by retrieving it again (`stateController.getScriptArgument(erc721address)`) and using it in your Hardhat scripts. 
+In this example, the `erc721address` variable is stored in the `args` object of the script you are executing. You can then use this variable in other scripts by retrieving it again (`stateController.getScriptArgument(erc721address)`) and using it in your Hardhat scripts.
 
 _Don't forget to use `.default` when importing the `stateController` in your Hardhat scripts, as shown above._
 
@@ -395,14 +395,14 @@ As mentioned, you can build interesting script blocks that combine regular CLI c
 
 ```json
 {
-    "name": "account-storage",
-    "commands": [
-      "account create -n alice --args accountId:aliceAccId", // Create account and store account Id
-      "hardhat compile", // Compile contracts
-      "hardhat run ./dist/contracts/scripts/account-storage/deploy-acc-storage.js", // Deploy the contract
-      "hardhat run ./dist/contracts/scripts/account-storage/add-account-id.js" // Add Alice's account ID to the contract
-    ],
-    "args": {}
+  "name": "account-storage",
+  "commands": [
+    "account create -n alice --args accountId:aliceAccId", // Create account and store account Id
+    "hardhat compile", // Compile contracts
+    "hardhat run ./dist/contracts/scripts/account-storage/deploy-acc-storage.js", // Deploy the contract
+    "hardhat run ./dist/contracts/scripts/account-storage/add-account-id.js" // Add Alice's account ID to the contract
+  ],
+  "args": {}
 }
 ```
 
@@ -590,7 +590,6 @@ Max automatic token associations: 0
 Flags:
 
 - **-i, --id:** (required) Account ID to view.
-
 
 ## Token Commands
 
@@ -847,7 +846,7 @@ backup restore
 
 **1. Creating Backup:**
 
-This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`. It's possible to provide a custom name for the backup file: `state.backup.<name>.json`. 
+This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`. It's possible to provide a custom name for the backup file: `state.backup.<name>.json`.
 
 Further, you can also provide a custom path for your backup, which is useful if you want to export a clean testing state in another application that can be used to run E2E tests.
 
@@ -943,10 +942,7 @@ Format for remote script files:
   "scripts": {
     "script-script1": {
       "name": "script1",
-      "commands": [
-        "account create -n alice",
-        "account create -n bob"
-      ]
+      "commands": ["account create -n alice", "account create -n bob"]
     }
   },
   "tokens": {
@@ -1044,7 +1040,7 @@ Loads a script by name from state and sequentially executes each command in the 
 hcli script load -n,--name <name>
 ```
 
-Each command is executed via [`execSync`](https://nodejs.org/api/child_process.html), which runs the command in a synchronous child process. Scripts are stored in the persisted state file, in the `scripts` section. 
+Each command is executed via [`execSync`](https://nodejs.org/api/child_process.html), which runs the command in a synchronous child process. Scripts are stored in the persisted state file, in the `scripts` section.
 
 **Make sure to append each script with `script-` prefix. The name of the script is just the name without the `script-` prefix.** If you want to load this script, you use `hcli script load -n erc721`, without the `script-` prefix.
 
@@ -1144,15 +1140,15 @@ This example shows how to use Hardhat scripts as part of your flow, mixing it wi
 
 Not each command exposes the same variables. Here's a list of commands and the variables they expose, which you can use in your scripts.
 
-| Command | Variables |
-| --- | --- |
-| `account create` | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
-| `account import` | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
-| `account view` | `accountId`, `balance`, `evmAddress`, `type`, `maxAutomaticTokenAssociations` |
-| `token create` | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey` |
+| Command                  | Variables                                                                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `account create`         | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey`                                    |
+| `account import`         | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey`                                    |
+| `account view`           | `accountId`, `balance`, `evmAddress`, `type`, `maxAutomaticTokenAssociations`                                                                     |
+| `token create`           | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey`                                                                                             |
 | `token create-from-file` | `tokenId`, `name`, `symbol`, `treasuryId`, `treasuryKey`, `adminKey`, `pauseKey`, `kycKey`, `wipeKey`, `freezeKey`, `supplyKey`, `feeScheduleKey` |
-| `topic create` | `topicId`, `adminKey`, `submitKey` |
-| `topic message submit` | `sequenceNumber` |
+| `topic create`           | `topicId`, `adminKey`, `submitKey`                                                                                                                |
+| `topic message submit`   | `sequenceNumber`                                                                                                                                  |
 
 # Configuration & State Storage
 
@@ -1237,7 +1233,6 @@ hcli config view --active # just the active network's settings
 hcli config view --json   # machine-readable output
 ```
 
-
 ## Layering order
 
 1. Base defaults (`src/state/config.ts`)
@@ -1305,16 +1300,15 @@ Use `program.parseAsync` if you are testing an asynchronous command.
 
 ```js
 const { Command } = require('commander');
-const networkCommands = require("../../commands/network");
+const networkCommands = require('../../commands/network');
 
-const fs = require("fs");
+const fs = require('fs');
 
-describe("network commands", () => {
-
-  describe("network switch command", () => {
-    test("switching networks successfully", () => {
+describe('network commands', () => {
+  describe('network switch command', () => {
+    test('switching networks successfully', () => {
       // Arrange
-      fs.readFileSync = jest.fn(() => JSON.stringify({ network: "mainnet" })); // Mock fs.readFileSync to return a sample config
+      fs.readFileSync = jest.fn(() => JSON.stringify({ network: 'mainnet' })); // Mock fs.readFileSync to return a sample config
       fs.writeFileSync = jest.fn(); // Mock fs.writeFileSync to do nothing
       //console.log = jest.fn(); // Mock console.log to check the log messages
 
@@ -1322,26 +1316,26 @@ describe("network commands", () => {
       networkCommands(program);
 
       // Act
-      program.parse(["node", "hedera-cli.js", "network", "use", "testnet"]);
+      program.parse(['node', 'hedera-cli.js', 'network', 'use', 'testnet']);
 
       // Assert
       const opts = program.opts();
-      expect(opts.network).toBe("testnet");
+      expect(opts.network).toBe('testnet');
       // expect(program.args).toEqual(["--type", "order-cake"]);
 
       // Check that console.log was called with the correct message
-      expect(console.log).toHaveBeenCalledWith("Switched to testnet");
+      expect(console.log).toHaveBeenCalledWith('Switched to testnet');
 
       // Check that fs.writeFileSync was called with the updated config
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         expect.any(String), // path
-        JSON.stringify({ network: "testnet" }, null, 2),
-        "utf-8"
+        JSON.stringify({ network: 'testnet' }, null, 2),
+        'utf-8',
       );
     });
   });
 
-  describe("network switch ls", () => {
+  describe('network switch ls', () => {
     // [...]
   });
 });

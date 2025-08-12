@@ -4,9 +4,10 @@ import stateUtils from '../utils/state';
 import { telemetryPreAction } from './shared/telemetryHook';
 import config from '../state/config';
 import { Logger } from '../utils/logger';
-import { DomainError, exitOnError } from '../utils/errors';
+import { DomainError } from '../utils/errors';
 import accountUtils from '../utils/account';
 import setupUtils from '../utils/setup';
+import { wrapAction } from './shared/wrapAction';
 import {
   saveState as storeSaveState,
   saveKey as storeSaveKey,
@@ -123,18 +124,20 @@ export default (program: Command) => {
     )
     .option('--path <path>', 'Specify a custom path for the .env file')
     .action(
-      exitOnError(async (options: SetupOptions) => {
-        logger.verbose(
-          'Initializing the CLI tool with the config and operator key and ID for different networks',
-        );
-        if (!options.telemetry) {
-          logger.log(
-            'You don\'t have telmetry enabled. You can enable it by running "hcli setup init --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
-          );
-        }
-        await setupCLI('init', options.telemetry, options.path);
-        stateUtils.createUUID(); // Create a new UUID for the user if doesn't exist
-      }),
+      wrapAction<SetupOptions>(
+        async (options) => {
+          if (!options.telemetry) {
+            logger.log(
+              'You don\'t have telmetry enabled. You can enable it by running "hcli setup init --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
+            );
+          }
+          await setupCLI('init', options.telemetry, options.path);
+          stateUtils.createUUID(); // Create a new UUID for the user if doesn't exist
+        },
+        {
+          log: 'Initializing the CLI tool with the config and operator key and ID for different networks',
+        },
+      ),
     );
 
   setup
@@ -147,16 +150,18 @@ export default (program: Command) => {
       'Enable telemetry for Hedera to process anonymous usage data, disabled by default',
     )
     .action(
-      exitOnError(async (options: ReloadOptions & { path?: string }) => {
-        logger.verbose(
-          'Reloading the CLI tool with operator key and ID for different networks',
-        );
-        if (!options.telemetry) {
-          logger.log(
-            'You don\'t have telmetry enabled. You can enable it by running "hcli setup reload --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
-          );
-        }
-        await setupCLI('reload', options.telemetry, options.path);
-      }),
+      wrapAction<ReloadOptions & { path?: string }>(
+        async (options) => {
+          if (!options.telemetry) {
+            logger.log(
+              'You don\'t have telmetry enabled. You can enable it by running "hcli setup reload --telemetry". This helps us improve the CLI tool by collecting anonymous usage data.',
+            );
+          }
+          await setupCLI('reload', options.telemetry, options.path);
+        },
+        {
+          log: 'Reloading the CLI tool with operator key and ID for different networks',
+        },
+      ),
     );
 };

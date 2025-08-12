@@ -1,4 +1,4 @@
-import type { Key } from "./shared.d.ts";
+import type { Key } from './shared.d.ts';
 
 export type TokenBalance = {
   token_id: string;

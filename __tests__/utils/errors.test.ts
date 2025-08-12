@@ -1,4 +1,8 @@
-import { exitOnError, DomainError, installGlobalErrorHandlers } from '../../src/utils/errors';
+import {
+  exitOnError,
+  DomainError,
+  installGlobalErrorHandlers,
+} from '../../src/utils/errors';
 import telemetryUtils from '../../src/utils/telemetry';
 import { Logger } from '../../src/utils/logger';
 
@@ -44,8 +48,12 @@ describe('errors utilities', () => {
 
     beforeAll(() => {
       const originalOn = process.on;
-      jest.spyOn(process, 'on').mockImplementation(((event: any, listener: any) => {
-        if (event === 'unhandledRejection') unhandledRejectionHandler = listener;
+      jest.spyOn(process, 'on').mockImplementation(((
+        event: any,
+        listener: any,
+      ) => {
+        if (event === 'unhandledRejection')
+          unhandledRejectionHandler = listener;
         if (event === 'uncaughtException') uncaughtExceptionHandler = listener;
         return originalOn.call(process, event, listener);
       }) as any);
@@ -55,7 +63,7 @@ describe('errors utilities', () => {
     it('unhandledRejection with DomainError sets exitCode to DomainError code', async () => {
       unhandledRejectionHandler?.(new DomainError('UR Domain', 7));
       expect(process.exitCode).toBe(7);
-  expect((telemetryUtils as any).flush).toHaveBeenCalledTimes(1);
+      expect((telemetryUtils as any).flush).toHaveBeenCalledTimes(1);
     });
 
     it('unhandledRejection with generic error sets exitCode to 1 and logs', async () => {
@@ -67,7 +75,7 @@ describe('errors utilities', () => {
       unhandledRejectionHandler?.(new Error('UR Generic'));
       expect(process.exitCode).toBe(1);
       expect(spy).toHaveBeenCalled();
-  expect((telemetryUtils as any).flush).toHaveBeenCalledTimes(1);
+      expect((telemetryUtils as any).flush).toHaveBeenCalledTimes(1);
       spy.mockRestore();
     });
 
@@ -76,7 +84,7 @@ describe('errors utilities', () => {
       (process as any).exitCode = undefined;
       uncaughtExceptionHandler?.(new DomainError('UE Domain', 4));
       expect(process.exitCode).toBe(4);
-  expect((telemetryUtils as any).flush).toHaveBeenCalledTimes(1);
+      expect((telemetryUtils as any).flush).toHaveBeenCalledTimes(1);
     });
 
     it('uncaughtException with generic error sets exitCode=1 and logs', async () => {
@@ -87,7 +95,7 @@ describe('errors utilities', () => {
       uncaughtExceptionHandler?.(new Error('UE Generic'));
       expect(process.exitCode).toBe(1);
       expect(spy).toHaveBeenCalled();
-  expect((telemetryUtils as any).flush).toHaveBeenCalledTimes(1);
+      expect((telemetryUtils as any).flush).toHaveBeenCalledTimes(1);
       spy.mockRestore();
     });
   });

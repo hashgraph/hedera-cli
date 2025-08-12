@@ -1,10 +1,8 @@
-import accountUtils from '../../utils/account';
-import { telemetryPreAction } from '../shared/telemetryHook';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-import { Logger } from '../../utils/logger';
 import { Command } from 'commander';
-
-const logger = Logger.getInstance();
+import accountUtils from '../../utils/account';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
 export default (program: Command) => {
   program
@@ -23,27 +21,21 @@ export default (program: Command) => {
         previous ? previous.concat(value) : [value],
       [] as string[],
     )
-    .action((options: ImportAccountOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options);
-      logger.verbose(`Importing account with name: ${options.name}`);
-
-      let accountDetails;
-      if (options.key) {
-        accountDetails = accountUtils.importAccount(
-          options.id,
-          options.key,
-          options.name,
-        );
-      } else {
-        accountDetails = accountUtils.importAccountId(options.id, options.name);
-      }
-
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.account.import.action,
-        accountDetails,
-      );
-    });
+    .action(
+      wrapAction<ImportAccountOptions>(
+        (options) => {
+          const accountDetails = options.key
+            ? accountUtils.importAccount(options.id, options.key, options.name)
+            : accountUtils.importAccountId(options.id, options.name);
+          dynamicVariablesUtils.storeArgs(
+            options.args,
+            dynamicVariablesUtils.commandActions.account.import.action,
+            accountDetails,
+          );
+        },
+        { log: (o) => `Importing account with name: ${o.name}` },
+      ),
+    );
 };
 
 interface ImportAccountOptions {

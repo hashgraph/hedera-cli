@@ -16,7 +16,8 @@ export const baseState: State = {
       operatorKey:
         '302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137',
       operatorId: '0.0.2',
-      hexKey: '0x87592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f',
+      hexKey:
+        '0x87592ee314bd0f42c4cf9f82b494481a2bb77bab0dc4454eedfe00f60168646f',
     },
     previewnet: {
       mirrorNodeUrl: 'https://previewnet.mirrornode.hedera.com/api/v1',
@@ -43,8 +44,7 @@ export const baseState: State = {
   telemetryServer: 'https://hedera-cli-telemetry.onrender.com/track',
   telemetry: 0,
   scriptExecution: { active: false, name: '' },
-  accounts: {
-  },
+  accounts: {},
   scripts: {},
   tokens: {},
   topics: {},
@@ -203,7 +203,8 @@ export const testnetOperatorAccount: Record<string, Account> = {
     evmAddress: 'a943d99f6b909dca4fce25268cb8dd3c8ef55455',
     network: 'testnet',
     privateKey: testnetOperatorKey,
-    publicKey: '302d300706052b8104000a0322000369a94f7e9c67faa92b8c4357a32b8c6ac90914fdf36bf5be3713f2acbbd856e1',
+    publicKey:
+      '302d300706052b8104000a0322000369a94f7e9c67faa92b8c4357a32b8c6ac90914fdf36bf5be3713f2acbbd856e1',
     solidityAddress: '0000000000000000000000000000000000757d7c',
     solidityAddressFull: '0x0000000000000000000000000000000000757d7c',
     type: 'ECDSA',

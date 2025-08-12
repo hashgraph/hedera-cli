@@ -1,12 +1,13 @@
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { Logger } from '../../utils/logger';
-import { DomainError, exitOnError } from '../../utils/errors';
+import { DomainError } from '../../utils/errors';
 import { selectTopics } from '../../state/selectors';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { TopicMessageSubmitTransaction, PrivateKey } from '@hashgraph/sdk';
 import api from '../../api';
 import { Command } from 'commander';
+import { wrapAction } from '../shared/wrapAction';
 import type { Filter } from '../../../types';
 
 const logger = Logger.getInstance();
@@ -95,49 +96,52 @@ export default (program: Command) => {
       [] as string[],
     )
     .action(
-      exitOnError(async (options: SubmitMessageOptions) => {
-        const replacedOptions = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id
-        logger.verbose(
-          `Submitting message to topic: ${replacedOptions.topicId}`,
-        );
+      wrapAction<SubmitMessageOptions>(
+        async (replacedOptions) => {
+          const client = stateUtils.getHederaClient();
 
-        const client = stateUtils.getHederaClient();
+          let sequenceNumber: number | undefined;
+          try {
+            const submitMessageTx = new TopicMessageSubmitTransaction({
+              topicId: replacedOptions.topicId,
+              message: replacedOptions.message,
+            }).freezeWith(client);
 
-        let sequenceNumber: number | undefined;
-        try {
-          const submitMessageTx = new TopicMessageSubmitTransaction({
-            topicId: replacedOptions.topicId,
-            message: replacedOptions.message,
-          }).freezeWith(client);
+            // Signing if submit key is set (if it exists in the state - otherwise skip this step)
+            const topics = selectTopics();
+            const topicEntry = topics[replacedOptions.topicId];
+            if (topicEntry && topicEntry.submitKey) {
+              const submitKey = PrivateKey.fromStringDer(topicEntry.submitKey);
+              submitMessageTx.sign(submitKey);
+            }
 
-          // Signing if submit key is set (if it exists in the state - otherwise skip this step)
-          const topics = selectTopics();
-          const topicEntry = topics[replacedOptions.topicId];
-          if (topicEntry && topicEntry.submitKey) {
-            const submitKey = PrivateKey.fromStringDer(topicEntry.submitKey);
-            submitMessageTx.sign(submitKey);
+            const topicMessageTxResponse =
+              await submitMessageTx.execute(client);
+            const receipt = (await topicMessageTxResponse.getReceipt(
+              client,
+            )) as {
+              topicSequenceNumber?: number;
+            };
+            sequenceNumber = receipt.topicSequenceNumber
+              ? Number(receipt.topicSequenceNumber)
+              : undefined;
+          } catch (_e: unknown) {
+            client.close();
+            throw new DomainError('Error sending message to topic');
           }
 
-          const topicMessageTxResponse = await submitMessageTx.execute(client);
-          const receipt = (await topicMessageTxResponse.getReceipt(client)) as {
-            topicSequenceNumber?: number;
-          };
-          sequenceNumber = receipt.topicSequenceNumber
-            ? Number(receipt.topicSequenceNumber)
-            : undefined;
-        } catch (_e: unknown) {
+          logger.log(
+            `Message submitted with sequence number: ${sequenceNumber}`,
+          );
           client.close();
-          throw new DomainError('Error sending message to topic');
-        }
-
-        logger.log(`Message submitted with sequence number: ${sequenceNumber}`);
-        client.close();
-        dynamicVariablesUtils.storeArgs(
-          replacedOptions.args,
-          dynamicVariablesUtils.commandActions.topic.messageSubmit.action,
-          { sequenceNumber: String(sequenceNumber) },
-        );
-      }),
+          dynamicVariablesUtils.storeArgs(
+            replacedOptions.args,
+            dynamicVariablesUtils.commandActions.topic.messageSubmit.action,
+            { sequenceNumber: String(sequenceNumber) },
+          );
+        },
+        { log: (o) => `Submitting message to topic: ${o.topicId}` },
+      ),
     );
 
   message
@@ -170,71 +174,78 @@ export default (program: Command) => {
       '--sequence-number-ne <sequenceNumberNe>',
       'The sequence number not equal to',
     )
-    .action(async (options: FindMessageOptions) => {
-      const replacedOptions = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id and sequence-number
-      logger.verbose(`Finding message for topic: ${replacedOptions.topicId}`);
+    .action(
+      wrapAction<FindMessageOptions>(
+        async (replacedOptions) => {
+          logger.verbose(
+            `Finding message for topic: ${replacedOptions.topicId}`,
+          );
 
-      // Define the keys of options we are interested in
-      const sequenceNumberOptions: string[] = [
-        'sequenceNumberGt',
-        'sequenceNumberLt',
-        'sequenceNumberGte',
-        'sequenceNumberLte',
-        'sequenceNumberEq',
-        'sequenceNumberNe',
-      ];
+          // Define the keys of options we are interested in
+          const sequenceNumberOptions: string[] = [
+            'sequenceNumberGt',
+            'sequenceNumberLt',
+            'sequenceNumberGte',
+            'sequenceNumberLte',
+            'sequenceNumberEq',
+            'sequenceNumberNe',
+          ];
 
-      // Check if any of the sequence number options is set
-      const isAnyOptionSet = sequenceNumberOptions.some(
-        (option: string) => replacedOptions[option as keyof FindMessageOptions],
-      );
+          // Check if any of the sequence number options is set
+          const isAnyOptionSet = sequenceNumberOptions.some(
+            (option: string) =>
+              replacedOptions[option as keyof FindMessageOptions],
+          );
 
-      if (!isAnyOptionSet && !replacedOptions.sequenceNumber) {
-        logger.error(
-          'Please provide a sequence number or a sequence number filter',
-        );
-        return;
-      }
+          if (!isAnyOptionSet && !replacedOptions.sequenceNumber) {
+            logger.error(
+              'Please provide a sequence number or a sequence number filter',
+            );
+            return;
+          }
 
-      if (!isAnyOptionSet) {
-        // If no sequence number options are set, proceed with the original logic
-        const response = await api.topic.findMessage(
-          replacedOptions.topicId,
-          Number(replacedOptions.sequenceNumber),
-        );
-        logger.log(
-          `Message found: "${Buffer.from(
-            response.data.message,
-            'base64',
-          ).toString('ascii')}"`,
-        );
-        return;
-      }
+          if (!isAnyOptionSet) {
+            // If no sequence number options are set, proceed with the original logic
+            const response = await api.topic.findMessage(
+              replacedOptions.topicId,
+              Number(replacedOptions.sequenceNumber),
+            );
+            logger.log(
+              `Message found: "${Buffer.from(
+                response.data.message,
+                'base64',
+              ).toString('ascii')}"`,
+            );
+            return;
+          }
 
-      // Assuming options can include multiple filters
-      const filters: Filter[] = []; // Populate this based on the options provided
-      formatFilters(filters, replacedOptions);
+          // Assuming options can include multiple filters
+          const filters: Filter[] = []; // Populate this based on the options provided
+          formatFilters(filters, replacedOptions);
 
-      // Call the new API function
-      const response = await api.topic.findMessagesWithFilters(
-        replacedOptions.topicId,
-        filters,
-      );
+          // Call the new API function
+          const response = await api.topic.findMessagesWithFilters(
+            replacedOptions.topicId,
+            filters,
+          );
 
-      if (response.data.messages.length === 0) {
-        logger.log('No messages found');
-        return;
-      }
+          if (response.data.messages.length === 0) {
+            logger.log('No messages found');
+            return;
+          }
 
-      response.data.messages.forEach(
-        (el: { sequence_number: number; message: string }) => {
-          logger.log(
-            `Message ${el.sequence_number}: "${Buffer.from(
-              el.message,
-              'base64',
-            ).toString('ascii')}"`,
+          response.data.messages.forEach(
+            (el: { sequence_number: number; message: string }) => {
+              logger.log(
+                `Message ${el.sequence_number}: "${Buffer.from(
+                  el.message,
+                  'base64',
+                ).toString('ascii')}"`,
+              );
+            },
           );
         },
-      );
-    });
+        { log: (o) => `Finding message for topic: ${o.topicId}` },
+      ),
+    );
 };

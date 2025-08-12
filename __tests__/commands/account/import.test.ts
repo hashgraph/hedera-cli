@@ -1,40 +1,46 @@
-import { Command } from "commander";
-import commands from "../../../src/commands";
-import accountUtils from "../../../src/utils/account";
-import { saveState as storeSaveState, get as storeGet } from "../../../src/state/store";
+import { Command } from 'commander';
+import commands from '../../../src/commands';
+import accountUtils from '../../../src/utils/account';
+import {
+  saveState as storeSaveState,
+  get as storeGet,
+} from '../../../src/state/store';
 import { alice, baseState } from '../../helpers/state';
 
-
-describe("account import command", () => {
+describe('account import command', () => {
   beforeEach(() => {
-  storeSaveState(baseState as any);
+    storeSaveState(baseState as any);
   });
 
-  describe("account import - success path", () => {
-    test("✅ should import account into state", async () => {
+  describe('account import - success path', () => {
+    test('✅ should import account into state', async () => {
       // Arrange
-      const importAccountSpy = jest.spyOn(accountUtils, "importAccount");
+      const importAccountSpy = jest.spyOn(accountUtils, 'importAccount');
 
       const program = new Command();
       commands.accountCommands(program);
 
       // Act
       await program.parse([
-        "node",
-        "hedera-cli.ts",
-        "account",
-        "import",
-        "-n",
+        'node',
+        'hedera-cli.ts',
+        'account',
+        'import',
+        '-n',
         alice.name,
-        "-i",
+        '-i',
         alice.accountId,
-        "-k",
-        alice.privateKey
+        '-k',
+        alice.privateKey,
       ]);
 
       // Assert
-      expect(importAccountSpy).toHaveBeenCalledWith(alice.accountId, alice.privateKey, alice.name);
-  expect(storeGet("accounts" as any)).toEqual({ [alice.name]: alice });
+      expect(importAccountSpy).toHaveBeenCalledWith(
+        alice.accountId,
+        alice.privateKey,
+        alice.name,
+      );
+      expect(storeGet('accounts' as any)).toEqual({ [alice.name]: alice });
     });
   });
 });

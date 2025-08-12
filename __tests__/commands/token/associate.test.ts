@@ -1,7 +1,10 @@
 import { alice, tokenState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import { saveState as storeSaveState, get as storeGet } from '../../../src/state/store';
+import {
+  saveState as storeSaveState,
+  get as storeGet,
+} from '../../../src/state/store';
 
 let tokenId = Object.keys(tokenState.tokens)[0];
 jest.mock('@hashgraph/sdk', () => {
@@ -24,12 +27,12 @@ jest.mock('@hashgraph/sdk', () => {
 describe('token associate command', () => {
   beforeEach(() => {
     const tokenStateWithAlice = {
-        ...tokenState,
-        accounts: {
-            [alice.name]: alice,
-        },
+      ...tokenState,
+      accounts: {
+        [alice.name]: alice,
+      },
     };
-  storeSaveState(tokenStateWithAlice as any);
+    storeSaveState(tokenStateWithAlice as any);
   });
 
   describe('token associate - success path', () => {
@@ -51,7 +54,7 @@ describe('token associate command', () => {
       ]);
 
       // Assert
-  const tokens = storeGet('tokens' as any);
+      const tokens = storeGet('tokens' as any);
       expect(tokens[tokenId].associations).toEqual([
         {
           name: alice.name,

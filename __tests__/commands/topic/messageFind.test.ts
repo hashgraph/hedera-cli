@@ -5,8 +5,13 @@ import commands from '../../../src/commands';
 import { saveState as storeSaveState } from '../../../src/state/store';
 import { Command } from 'commander';
 import api from '../../../src/api';
-import { findMessageResponseMock, topicMessageResponse, findMessagesResponseMock, topicMessagesResponse } from '../../helpers/api/apiTopicHelper'
-import { Logger } from "../../../src/utils/logger";
+import {
+  findMessageResponseMock,
+  topicMessageResponse,
+  findMessagesResponseMock,
+  topicMessagesResponse,
+} from '../../helpers/api/apiTopicHelper';
+import { Logger } from '../../../src/utils/logger';
 import stateUtils from '../../../src/utils/state';
 
 const logger = Logger.getInstance();
@@ -17,7 +22,7 @@ describe('topic message find command', () => {
   const errorSpy = jest.spyOn(logger, 'error');
 
   beforeEach(() => {
-  storeSaveState(topicState as any);
+    storeSaveState(topicState as any);
   });
 
   describe('topic message find - success path', () => {
@@ -31,8 +36,10 @@ describe('topic message find command', () => {
       // Arrange
       const program = new Command();
       commands.topicCommands(program);
-      api.topic.findMessage = jest.fn().mockResolvedValue(findMessageResponseMock);
-      
+      api.topic.findMessage = jest
+        .fn()
+        .mockResolvedValue(findMessageResponseMock);
+
       // Act
       await program.parseAsync([
         'node',
@@ -50,8 +57,8 @@ describe('topic message find command', () => {
       expect(logSpy).toHaveBeenCalledWith(
         `Message found: "${Buffer.from(
           topicMessageResponse.message,
-            'base64',
-          ).toString('ascii')}"`
+          'base64',
+        ).toString('ascii')}"`,
       );
     });
 
@@ -77,7 +84,9 @@ describe('topic message find command', () => {
       ]);
 
       // Assert
-      expect(mockedAxios.get).toHaveBeenCalledWith(`${stateUtils.getMirrorNodeURL()}/topics/${topic.topicId}/messages?sequencenumber=gte:${topicMessagesResponse.messages.length.toString()}&limit=100`);
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        `${stateUtils.getMirrorNodeURL()}/topics/${topic.topicId}/messages?sequencenumber=gte:${topicMessagesResponse.messages.length.toString()}&limit=100`,
+      );
     });
   });
 
@@ -92,8 +101,10 @@ describe('topic message find command', () => {
       // Arrange
       const program = new Command();
       commands.topicCommands(program);
-      api.topic.findMessage = jest.fn().mockResolvedValue(findMessageResponseMock);
-      
+      api.topic.findMessage = jest
+        .fn()
+        .mockResolvedValue(findMessageResponseMock);
+
       // Act
       await program.parseAsync([
         'node',
@@ -107,7 +118,7 @@ describe('topic message find command', () => {
 
       // Assert
       expect(errorSpy).toHaveBeenCalledWith(
-        'Please provide a sequence number or a sequence number filter'
+        'Please provide a sequence number or a sequence number filter',
       );
     });
 
@@ -123,8 +134,10 @@ describe('topic message find command', () => {
           },
         },
       };
-      api.topic.findMessagesWithFilters = jest.fn().mockResolvedValue(customFindMessageResponseMock);
-      
+      api.topic.findMessagesWithFilters = jest
+        .fn()
+        .mockResolvedValue(customFindMessageResponseMock);
+
       // Act
       await program.parseAsync([
         'node',
@@ -139,9 +152,7 @@ describe('topic message find command', () => {
       ]);
 
       // Assert
-      expect(logSpy).toHaveBeenCalledWith(
-        'No messages found'
-      );
+      expect(logSpy).toHaveBeenCalledWith('No messages found');
     });
   });
 });

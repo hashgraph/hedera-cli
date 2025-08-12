@@ -90,7 +90,6 @@ jobs:
       enable-e2e-coverage-report: true
     secrets:
       codacy-project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-
 #  snyk:
 #    name: Snyk Scan
 #    uses: ./.github/workflows/zxc-code-analysis.yaml

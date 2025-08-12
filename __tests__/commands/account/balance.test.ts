@@ -1,20 +1,22 @@
-import { Command } from "commander";
-import commands from "../../../src/commands";
-import accountUtils from "../../../src/utils/account";
-import api from "../../../src/api";
+import { Command } from 'commander';
+import commands from '../../../src/commands';
+import accountUtils from '../../../src/utils/account';
+import api from '../../../src/api';
 
-import { accountResponse, getAccountInfoResponseMock } from "../../helpers/api/apiAccountHelper";
-import { baseState } from "../../helpers/state";
-import { saveState as storeSaveState } from "../../../src/state/store";
+import {
+  accountResponse,
+  getAccountInfoResponseMock,
+} from '../../helpers/api/apiAccountHelper';
+import { baseState } from '../../helpers/state';
+import { saveState as storeSaveState } from '../../../src/state/store';
 
-
-describe("account balance command", () => {
+describe('account balance command', () => {
   const logSpy = jest.spyOn(console, 'log');
-  const getAccountBalanceSpy = jest.spyOn(accountUtils, "getAccountBalance");
+  const getAccountBalanceSpy = jest.spyOn(accountUtils, 'getAccountBalance');
 
-  describe("account balance - success path", () => {
+  describe('account balance - success path', () => {
     beforeEach(() => {
-  storeSaveState(baseState as any);
+      storeSaveState(baseState as any);
     });
 
     afterEach(() => {
@@ -23,35 +25,70 @@ describe("account balance command", () => {
       getAccountBalanceSpy.mockClear();
     });
 
-    test("✅ retrieve hbar balance", async () => {
+    test('✅ retrieve hbar balance', async () => {
       // Arrange
-      api.account.getAccountInfo = jest.fn().mockResolvedValue(getAccountInfoResponseMock);
+      api.account.getAccountInfo = jest
+        .fn()
+        .mockResolvedValue(getAccountInfoResponseMock);
 
       const program = new Command();
       commands.accountCommands(program);
 
       // Act
-      await program.parseAsync(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--only-hbar"]);
+      await program.parseAsync([
+        'node',
+        'hedera-cli.ts',
+        'account',
+        'balance',
+        '-a',
+        accountResponse.account,
+        '--only-hbar',
+      ]);
 
       // Assert
-      expect(getAccountBalanceSpy).toHaveBeenCalledWith(accountResponse.account, true, undefined);
-      expect(logSpy).toHaveBeenCalledWith(`Hbar balance for account ${accountResponse.account}:`);
-      expect(logSpy).toHaveBeenCalledWith(`${accountResponse.balance.balance} Tinybars or ${(accountResponse.balance.balance / 100000000)} Hbar`);
+      expect(getAccountBalanceSpy).toHaveBeenCalledWith(
+        accountResponse.account,
+        true,
+        undefined,
+      );
+      expect(logSpy).toHaveBeenCalledWith(
+        `Hbar balance for account ${accountResponse.account}:`,
+      );
+      expect(logSpy).toHaveBeenCalledWith(
+        `${accountResponse.balance.balance} Tinybars or ${accountResponse.balance.balance / 100000000} Hbar`,
+      );
     });
 
-    test("✅ retrieve token balance", async () => {
+    test('✅ retrieve token balance', async () => {
       // Arrange
-      api.account.getAccountInfo = jest.fn().mockResolvedValue(getAccountInfoResponseMock);
+      api.account.getAccountInfo = jest
+        .fn()
+        .mockResolvedValue(getAccountInfoResponseMock);
 
       const program = new Command();
       commands.accountCommands(program);
 
       // Act
-      await program.parseAsync(["node", "hedera-cli.ts", "account", "balance", "-a", accountResponse.account, "--token-id", accountResponse.balance.tokens[0].token_id]);
+      await program.parseAsync([
+        'node',
+        'hedera-cli.ts',
+        'account',
+        'balance',
+        '-a',
+        accountResponse.account,
+        '--token-id',
+        accountResponse.balance.tokens[0].token_id,
+      ]);
 
       // Assert
-      expect(getAccountBalanceSpy).toHaveBeenCalledWith(accountResponse.account, undefined, accountResponse.balance.tokens[0].token_id);
-      expect(logSpy).toHaveBeenCalledWith(`Token ID ${accountResponse.balance.tokens[0].token_id}: ${accountResponse.balance.tokens[0].balance}`);
+      expect(getAccountBalanceSpy).toHaveBeenCalledWith(
+        accountResponse.account,
+        undefined,
+        accountResponse.balance.tokens[0].token_id,
+      );
+      expect(logSpy).toHaveBeenCalledWith(
+        `Token ID ${accountResponse.balance.tokens[0].token_id}: ${accountResponse.balance.tokens[0].balance}`,
+      );
     });
   });
 });

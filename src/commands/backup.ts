@@ -9,7 +9,8 @@ import {
 } from '../state/store';
 import { addAccount, addToken, addScript } from '../state/mutations';
 import { Logger } from '../utils/logger';
-import { DomainError, exitOnError } from '../utils/errors';
+import { DomainError } from '../utils/errors';
+import { wrapAction } from './shared/wrapAction';
 
 import type { State, Account, Token, Script } from '../../types';
 import type { StoreState } from '../state/store';
@@ -189,15 +190,17 @@ export default (program: CommanderCommand) => {
     .option('--name <name>', 'Name of the backup file')
     .option('--path <path>', 'Specify a custom path to store the backup')
     .action(
-      exitOnError((options: BackupOptions) => {
-        logger.verbose('Creating backup of state');
-        backupState(
-          options.name,
-          options.accounts,
-          options.safe,
-          options.path || '',
-        );
-      }),
+      wrapAction<BackupOptions>(
+        (options) => {
+          backupState(
+            options.name,
+            options.accounts,
+            options.safe,
+            options.path || '',
+          );
+        },
+        { log: 'Creating backup of state' },
+      ),
     );
 
   backup
@@ -209,38 +212,34 @@ export default (program: CommanderCommand) => {
     .option('--restore-tokens', 'Restore the tokens', false)
     .option('--restore-scripts', 'Restore the scripts', false)
     .action(
-      exitOnError(async (options: RestoreOptions) => {
-        logger.verbose('Restoring backup of state');
-
-        let filename = options.file;
-        if (!options.file) {
-          const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
-
-          // filter out the pattern *.backup.*.json like accounts.backup.7-nov-2024.json
-          const pattern = /^.*\.backup\..*\.json$/;
-          const backups = files.filter((file) => pattern.test(file));
-
-          if (backups.length === 0) {
-            throw new DomainError('No backup files found');
+      wrapAction<RestoreOptions>(
+        async (options) => {
+          let filename = options.file;
+          if (!options.file) {
+            const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
+            const pattern = /^.*\.backup\..*\.json$/;
+            const backups = files.filter((file) => pattern.test(file));
+            if (backups.length === 0) {
+              throw new DomainError('No backup files found');
+            }
+            try {
+              filename = await enquirerUtils.createPrompt(
+                backups,
+                'Choose a backup:',
+              );
+            } catch (error) {
+              throw new DomainError('Unable to read backup file');
+            }
           }
-
-          try {
-            filename = await enquirerUtils.createPrompt(
-              backups,
-              'Choose a backup:',
-            );
-          } catch (error) {
-            throw new DomainError('Unable to read backup file');
-          }
-        }
-
-        restoreState(
-          filename,
-          options.restoreAccounts,
-          options.restoreTokens,
-          options.restoreScripts,
-        );
-      }),
+          restoreState(
+            filename,
+            options.restoreAccounts,
+            options.restoreTokens,
+            options.restoreScripts,
+          );
+        },
+        { log: 'Restoring backup of state' },
+      ),
     );
 };
 

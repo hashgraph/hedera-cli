@@ -17,8 +17,14 @@ describe('config view command', () => {
   test('✅ show merged configuration json', async () => {
     const program = new Command();
     commands.configCommands(program);
-    await program.parseAsync(['node', 'hedera-cli.ts', 'config', 'view', '--json']);
-    const printed = logSpy.mock.calls.map(c => c[0]).join('\n');
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'config',
+      'view',
+      '--json',
+    ]);
+    const printed = logSpy.mock.calls.map((c) => c[0]).join('\n');
     expect(printed).toContain('"activeNetwork"');
     expect(printed).toContain('"networks"');
   });
@@ -26,8 +32,16 @@ describe('config view command', () => {
   test('✅ show active network only', async () => {
     const program = new Command();
     commands.configCommands(program);
-    await program.parseAsync(['node', 'hedera-cli.ts', 'config', 'view', '--active']);
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'config',
+      'view',
+      '--active',
+    ]);
     const calls = logSpy.mock.calls.flat();
-    expect(calls.find(c => typeof c === 'string' && c.includes('Active network'))).toBeTruthy();
+    expect(
+      calls.find((c) => typeof c === 'string' && c.includes('Active network')),
+    ).toBeTruthy();
   });
 });

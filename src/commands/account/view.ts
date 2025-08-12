@@ -2,6 +2,7 @@ import { telemetryPreAction } from '../shared/telemetryHook';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
 import { Command } from 'commander';
+import { wrapAction } from '../shared/wrapAction';
 import api from '../../api';
 
 const logger = Logger.getInstance();
@@ -23,42 +24,44 @@ export default (program: Command) => {
         previous ? previous.concat(value) : [value],
       [] as string[],
     )
-    .action(async (options: ViewAccountOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic var for id
-      logger.verbose(`Viewing account ${options.id} details`);
-
-      try {
-        const response = await api.account.getAccountInfo(options.id);
-        logger.log(`Account: ${response.data.account}`);
-        logger.log(`Balance Tinybars: ${response.data.balance.balance}`);
-        logger.log(`Deleted: ${response.data.deleted}`);
-        logger.log(`EVM Address: ${response.data.evm_address}`);
-        logger.log(
-          `Key type: ${response.data.key._type} - Key: ${response.data.key.key}`,
-        );
-        logger.log(
-          `Max automatic token associations: ${response.data.max_automatic_token_associations}`,
-        );
-
-        dynamicVariablesUtils.storeArgs(
-          options.args,
-          dynamicVariablesUtils.commandActions.account.view.action,
-          {
-            accountId: response.data.account,
-            balance: response.data.balance.balance.toString(),
-            evmAddress: response.data.evm_address,
-            type:
-              response.data.key._type === 'ECDSA_SECP256K1'
-                ? 'ECDSA'
-                : 'ED25519',
-            maxAutomaticTokenAssociations:
-              response.data.max_automatic_token_associations.toString(),
-          },
-        );
-      } catch (error) {
-        logger.error('Failed to get account info:', error as object);
-      }
-    });
+    .action(
+      wrapAction<ViewAccountOptions>(
+        async (options) => {
+          // Attempt mirror node lookup for external visibility
+          try {
+            const response = await api.account.getAccountInfo(options.id);
+            logger.log(`Account: ${response.data.account}`);
+            logger.log(`Balance Tinybars: ${response.data.balance.balance}`);
+            logger.log(`Deleted: ${response.data.deleted}`);
+            logger.log(`EVM Address: ${response.data.evm_address}`);
+            logger.log(
+              `Key type: ${response.data.key._type} - Key: ${response.data.key.key}`,
+            );
+            logger.log(
+              `Max automatic token associations: ${response.data.max_automatic_token_associations}`,
+            );
+            dynamicVariablesUtils.storeArgs(
+              options.args,
+              dynamicVariablesUtils.commandActions.account.view.action,
+              {
+                accountId: response.data.account,
+                balance: response.data.balance.balance.toString(),
+                evmAddress: response.data.evm_address,
+                type:
+                  response.data.key._type === 'ECDSA_SECP256K1'
+                    ? 'ECDSA'
+                    : 'ED25519',
+                maxAutomaticTokenAssociations:
+                  response.data.max_automatic_token_associations.toString(),
+              },
+            );
+          } catch (err) {
+            logger.error('Failed to get account info:', err as object);
+          }
+        },
+        { log: (o) => `Viewing account ${o.id} details` },
+      ),
+    );
 };
 
 interface ViewAccountOptions {

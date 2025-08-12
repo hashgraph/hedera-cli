@@ -1,1 +1,11 @@
-npm run format
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "husky - pre-commit running lint-staged"
+npx lint-staged
+status=$?
+if [ $status -ne 0 ]; then
+	echo "husky - pre-commit failed (code $status)"
+	exit $status
+fi
+echo "husky - pre-commit passed"

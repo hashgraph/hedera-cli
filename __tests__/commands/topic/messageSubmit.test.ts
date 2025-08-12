@@ -21,7 +21,7 @@ describe('topic message submit command', () => {
   const logSpy = jest.spyOn(console, 'log');
 
   beforeEach(() => {
-  storeSaveState(topicState as any);
+    storeSaveState(topicState as any);
     sdkMock.setCustomMockImplementation(null);
   });
 
@@ -39,14 +39,17 @@ describe('topic message submit command', () => {
 
       // Overwrite the mock implementation of TopicCreateTransaction to return a sequence number of 1
       const sequenceNumber = 2;
-      sdkMock.setCustomMockImplementation(() => ({
-        freezeWith: jest.fn().mockReturnThis(),
-        execute: jest.fn().mockResolvedValue({
-          getReceipt: jest.fn().mockResolvedValue({
-            topicSequenceNumber: sequenceNumber,
-          }),
-        }),
-      }) as unknown as TopicMessageSubmitTransaction);
+      sdkMock.setCustomMockImplementation(
+        () =>
+          ({
+            freezeWith: jest.fn().mockReturnThis(),
+            execute: jest.fn().mockResolvedValue({
+              getReceipt: jest.fn().mockResolvedValue({
+                topicSequenceNumber: sequenceNumber,
+              }),
+            }),
+          }) as unknown as TopicMessageSubmitTransaction,
+      );
 
       // Act
       await program.parseAsync([

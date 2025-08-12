@@ -1,13 +1,13 @@
-import { Logger } from '../../utils/logger';
-import { myParseInt } from '../../utils/verification';
+import { myParseInt, parseIntOption } from '../../utils/verification';
 import accountUtils from '../../utils/account';
-import { exitOnError } from '../../utils/errors';
+// Removed direct exitOnError usage; wrapAction handles error wrapping
 import { telemetryPreAction } from '../shared/telemetryHook';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
 
-const logger = Logger.getInstance();
+// logger handled via wrapAction config
 
 export default (program: Command) => {
   program
@@ -29,7 +29,7 @@ export default (program: Command) => {
     .option(
       '--auto-associations <autoAssociations>',
       'Set number of automatic associations',
-      (value: string) => Number(value),
+      parseIntOption,
       0,
     )
     .option(
@@ -40,23 +40,22 @@ export default (program: Command) => {
       [] as string[],
     )
     .action(
-      exitOnError(async (options: CreateAccountOptions) => {
-        logger.verbose(`Creating account with name: ${options.name}`);
-
-        options = dynamicVariablesUtils.replaceOptions(options);
-        const accountDetails = await accountUtils.createAccount(
-          options.balance,
-          'ECDSA',
-          options.name,
-          Number(options.autoAssociations),
-        );
-
-        dynamicVariablesUtils.storeArgs(
-          options.args,
-          dynamicVariablesUtils.commandActions.account.create.action,
-          accountDetails,
-        );
-      }),
+      wrapAction<CreateAccountOptions>(
+        async (options) => {
+          const accountDetails = await accountUtils.createAccount(
+            options.balance,
+            'ECDSA',
+            options.name,
+            Number(options.autoAssociations),
+          );
+          dynamicVariablesUtils.storeArgs(
+            options.args,
+            dynamicVariablesUtils.commandActions.account.create.action,
+            accountDetails,
+          );
+        },
+        { log: (o) => `Creating account with name: ${o.name}` },
+      ),
     );
 };
 

@@ -1,7 +1,10 @@
 import { alice, bob, baseState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import { saveState as storeSaveState, get as storeGet } from '../../../src/state/store';
+import {
+  saveState as storeSaveState,
+  get as storeGet,
+} from '../../../src/state/store';
 import * as mutations from '../../../src/state/mutations';
 
 import { TokenId } from '@hashgraph/sdk';
@@ -43,13 +46,13 @@ describe('token create command', () => {
   const addTokenSpy = jest.spyOn(mutations, 'addToken');
 
   beforeEach(() => {
-  storeSaveState(baseState as any);
+    storeSaveState(baseState as any);
   });
 
   afterEach(() => {
     // Spy cleanup
     mockProcessExit.mockClear();
-  addTokenSpy.mockClear();
+    addTokenSpy.mockClear();
   });
 
   describe('token create - success path', () => {
@@ -88,7 +91,7 @@ describe('token create command', () => {
       ]);
 
       // Assert
-  const tokens = storeGet('tokens' as any);
+      const tokens = storeGet('tokens' as any);
       expect(Object.keys(tokens).length).toEqual(1);
       expect(tokens[tokenId]).toEqual({
         tokenId: tokenId,
@@ -113,7 +116,7 @@ describe('token create command', () => {
         network: 'localnet',
         customFees: [],
       } as Token);
-  expect(addTokenSpy).toHaveBeenCalled();
+      expect(addTokenSpy).toHaveBeenCalled();
     });
   });
 });

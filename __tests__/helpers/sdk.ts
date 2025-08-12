@@ -25,8 +25,8 @@ const mockTopicMessageSubmitTransaction = () =>
     : defaultMockImplementation();
 
 const sdkMock = {
-    setCustomMockImplementation,
-    mockTopicMessageSubmitTransaction,
-}
+  setCustomMockImplementation,
+  mockTopicMessageSubmitTransaction,
+};
 
 export default sdkMock;

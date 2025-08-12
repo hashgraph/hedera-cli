@@ -4,7 +4,10 @@ import { Logger } from '../../src/utils/logger';
  * Temporarily set the global logger level for the duration of a callback.
  * Safe because each Jest test file runs in an isolated process.
  */
-export async function withLoggerLevel<T>(level: 'verbose' | 'quiet' | 'normal', fn: () => Promise<T> | T): Promise<T> {
+export async function withLoggerLevel<T>(
+  level: 'verbose' | 'quiet' | 'normal',
+  fn: () => Promise<T> | T,
+): Promise<T> {
   const logger = Logger.getInstance();
   const prev = logger.level;
   try {
@@ -31,6 +34,12 @@ export function withVerboseLogs<T>(fn: () => Promise<T> | T): Promise<T> {
 }
 
 /** Imperative helpers (avoid if you can; prefer scoped versions above). */
-export function setLoggerQuiet() { Logger.getInstance().setLevel('quiet'); }
-export function setLoggerNormal() { Logger.getInstance().setLevel('normal'); }
-export function setLoggerVerbose() { Logger.getInstance().setLevel('verbose'); }
+export function setLoggerQuiet() {
+  Logger.getInstance().setLevel('quiet');
+}
+export function setLoggerNormal() {
+  Logger.getInstance().setLevel('normal');
+}
+export function setLoggerVerbose() {
+  Logger.getInstance().setLevel('verbose');
+}

@@ -1,13 +1,12 @@
 import { myParseInt } from '../../utils/verification';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-import { Logger } from '../../utils/logger';
+import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
 import tokenUtils from '../../utils/token';
 
-const logger = Logger.getInstance();
+// logging handled via wrapAction configuration
 
 export default (program: Command) => {
   program
@@ -22,33 +21,31 @@ export default (program: Command) => {
       'Amount of token to transfer',
       myParseInt,
     )
-    .action(async (options: TransferTokenOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options);
-      logger.verbose(
-        `Transfering tokens from ${options.from} to ${options.to}`,
-      );
+    .action(
+      wrapAction<TransferTokenOptions>(
+        async (options) => {
+          const tokenId = options.tokenId;
+          const toIdOrName = options.to;
+          const fromIdOrName = options.from;
+          const balance = options.balance;
 
-      const tokenId = options.tokenId;
-      const toIdOrName = options.to;
-      const fromIdOrName = options.from;
-      const balance = options.balance;
+          const fromAccount = stateUtils.getAccountByIdOrName(fromIdOrName);
+          const fromId = fromAccount.accountId;
 
-      // Find sender account
-      const fromAccount = stateUtils.getAccountByIdOrName(fromIdOrName);
-      const fromId = fromAccount.accountId;
+          const toAccount = stateUtils.getAccountByIdOrName(toIdOrName);
+          const toId = toAccount.accountId;
 
-      // Find receiver account
-      const toAccount = stateUtils.getAccountByIdOrName(toIdOrName);
-      const toId = toAccount.accountId;
-
-      await tokenUtils.transfer(
-        tokenId,
-        fromId,
-        fromAccount.privateKey,
-        toId,
-        Number(balance),
-      );
-    });
+          await tokenUtils.transfer(
+            tokenId,
+            fromId,
+            fromAccount.privateKey,
+            toId,
+            Number(balance),
+          );
+        },
+        { log: (o) => `Transfering tokens from ${o.from} to ${o.to}` },
+      ),
+    );
 };
 
 interface TransferTokenOptions {

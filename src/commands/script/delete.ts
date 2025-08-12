@@ -1,10 +1,7 @@
 import { Command } from 'commander';
 import scriptUtils from '../../utils/script';
 import { telemetryPreAction } from '../shared/telemetryHook';
-import { Logger } from '../../utils/logger';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-
-const logger = Logger.getInstance();
+import { wrapAction } from '../shared/wrapAction';
 
 export default (program: Command) => {
   program
@@ -12,12 +9,14 @@ export default (program: Command) => {
     .hook('preAction', telemetryPreAction)
     .description('Delete a script')
     .requiredOption('-n, --name <name>', 'Name of script to delete')
-    .action((options: ScriptDeleteOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options);
-      logger.verbose(`Deleting script: ${options.name}`);
-
-      scriptUtils.deleteScript(options.name);
-    });
+    .action(
+      wrapAction<ScriptDeleteOptions>(
+        (options) => {
+          scriptUtils.deleteScript(options.name);
+        },
+        { log: (o) => `Deleting script: ${o.name}` },
+      ),
+    );
 };
 
 interface ScriptDeleteOptions {

@@ -1,12 +1,11 @@
-import { Logger } from '../../utils/logger';
 import accountUtils from '../../utils/account';
-import { DomainError, exitOnError } from '../../utils/errors';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { DomainError } from '../../utils/errors';
 import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
 
-const logger = Logger.getInstance();
+// logging handled via wrapAction config
 
 export default (program: Command) => {
   program
@@ -20,22 +19,21 @@ export default (program: Command) => {
     .option('-h, --only-hbar', 'Show only Hbar balance')
     .option('-t, --token-id <tokenId>', 'Show balance for a specific token ID')
     .action(
-      exitOnError(async (options: GetAccountBalanceOptions) => {
-        logger.verbose(`Getting balance for ${options.accountIdOrName}`);
-        options = dynamicVariablesUtils.replaceOptions(options);
-
-        if (options.onlyHbar && options.tokenId) {
-          throw new DomainError(
-            'You cannot use both --only-hbar and --token-id options at the same time.',
+      wrapAction<GetAccountBalanceOptions>(
+        async (options) => {
+          if (options.onlyHbar && options.tokenId) {
+            throw new DomainError(
+              'You cannot use both --only-hbar and --token-id options at the same time.',
+            );
+          }
+          await accountUtils.getAccountBalance(
+            options.accountIdOrName,
+            options.onlyHbar,
+            options.tokenId,
           );
-        }
-
-        await accountUtils.getAccountBalance(
-          options.accountIdOrName,
-          options.onlyHbar,
-          options.tokenId,
-        );
-      }),
+        },
+        { log: (o) => `Getting balance for ${o.accountIdOrName}` },
+      ),
     );
 };
 

@@ -1,11 +1,15 @@
-import type { AccountResponse } from "./account.d.ts";
-import type { TokenResponse, BalanceResponse } from "./token.d.ts";
-import type { TopicResponse } from "./topic.d.ts";
+import type { AccountResponse } from './account.d.ts';
+import type { TokenResponse, BalanceResponse } from './token.d.ts';
+import type { TopicResponse } from './topic.d.ts';
 
-type APIResponseTypes = AccountResponse | TokenResponse | BalanceResponse | TopicResponse;
+type APIResponseTypes =
+  | AccountResponse
+  | TokenResponse
+  | BalanceResponse
+  | TopicResponse;
 export type APIResponse<T extends APIResponseTypes = APIResponseTypes> = {
-    data: T;
-}
+  data: T;
+};
 
 export type * from './account.d.ts';
 export type * from './token.d.ts';

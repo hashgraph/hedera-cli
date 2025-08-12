@@ -1,10 +1,8 @@
 import { Command } from 'commander';
+import { DomainError } from '../../utils/errors';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
-import { Logger } from '../../utils/logger';
-import { DomainError, exitOnError } from '../../utils/errors';
-
-const logger = Logger.getInstance();
+import { wrapAction } from '../shared/wrapAction';
 
 export default (program: Command) => {
   program
@@ -17,16 +15,16 @@ export default (program: Command) => {
     .option('--merge', 'Merge state with downloaded state', false)
     .option('--overwrite', 'Overwrite state with downloaded state', false)
     .action(
-      exitOnError(async (options: DownloadStateOptions) => {
-        logger.verbose(`Downloading state from ${options.url}`);
-
-        if (options.merge && options.overwrite) {
-          throw new DomainError('Cannot use both --merge and --overwrite');
-        }
-
-        const data = await stateUtils.downloadState(options.url);
-        stateUtils.importState(data, options.overwrite, options.merge);
-      }),
+      wrapAction<DownloadStateOptions>(
+        async (options) => {
+          if (options.merge && options.overwrite) {
+            throw new DomainError('Cannot use both --merge and --overwrite');
+          }
+          const data = await stateUtils.downloadState(options.url);
+          stateUtils.importState(data, options.overwrite, options.merge);
+        },
+        { log: (o) => `Downloading state from ${o.url}` },
+      ),
     );
 };
 
