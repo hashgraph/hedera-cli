@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { getState } from '../../state/store';
 import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { execSync } from 'child_process';
 import { Logger } from '../../utils/logger';
 import { DomainError, exitOnError } from '../../utils/errors';
@@ -66,13 +66,7 @@ function loadScript(name: string): void {
 export default (program: Command) => {
   program
     .command('load')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Load and execute a script')
     .requiredOption('-n, --name <name>', 'Name of script to load and execute')
     .action(

@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { Logger } from '../../utils/logger';
 import { updateState as storeUpdateState } from '../../state/store';
 
@@ -36,13 +36,7 @@ function clear(
 export default (program: Command) => {
   program
     .command('clear')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Clear all state and reset to default')
     .option('-a, --skip-accounts', 'Skip resetting accounts', false)
     .option('-t, --skip-tokens', 'Skip resetting tokens', false)

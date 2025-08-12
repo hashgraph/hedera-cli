@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import * as dotenv from 'dotenv';
 import stateUtils from '../utils/state';
-import telemetryUtils from '../utils/telemetry';
+import { telemetryPreAction } from './shared/telemetryHook';
 import config from '../state/config';
 import { Logger } from '../utils/logger';
 import { DomainError, exitOnError } from '../utils/errors';
@@ -115,13 +115,7 @@ export default (program: Command) => {
 
   setup
     .command('init')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Setup the CLI with operator key and ID')
     .option(
       '--telemetry',
@@ -145,13 +139,7 @@ export default (program: Command) => {
 
   setup
     .command('reload')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Reload the CLI with operator key and ID')
     .option('--path <path>', 'Specify a custom path for the .env file')
     .option(

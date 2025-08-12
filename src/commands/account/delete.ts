@@ -3,7 +3,7 @@ import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import accountUtils from '../../utils/account';
 import { DomainError, exitOnError } from '../../utils/errors';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { getState } from '../../state/store';
 import enquirerUtils from '../../utils/enquirer';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
@@ -14,13 +14,7 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('delete')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Delete an account from the address book')
     .option('-n, --name <name>', 'account must have a name')
     .option('-i, --id <id>', 'Account ID')

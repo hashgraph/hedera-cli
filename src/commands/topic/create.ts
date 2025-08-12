@@ -2,7 +2,7 @@ import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import { DomainError, exitOnError } from '../../utils/errors';
 import signUtils from '../../utils/sign';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { addTopic } from '../../state/mutations';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { TopicCreateTransaction, PrivateKey } from '@hashgraph/sdk';
@@ -14,13 +14,7 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('create')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Create a new topic')
     .option('-a, --admin-key <adminKey>', 'The admin key')
     .option('-s, --submit-key <submitKey>', 'The submit key')

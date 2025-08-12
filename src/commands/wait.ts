@@ -1,5 +1,4 @@
-import stateUtils from '../utils/state';
-import telemetryUtils from '../utils/telemetry';
+import { telemetryPreAction } from './shared/telemetryHook';
 import { Logger } from '../utils/logger';
 
 import { Command } from 'commander';
@@ -13,13 +12,7 @@ async function wait(seconds: number) {
 export default (program: Command) => {
   program
     .command('wait <seconds>')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Wait for a specified number of seconds')
     .action(async (seconds: string) => {
       logger.verbose(`Waiting for ${seconds} seconds`);

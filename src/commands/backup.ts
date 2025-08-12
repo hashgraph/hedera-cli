@@ -1,8 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import stateUtils from '../utils/state';
-import telemetryUtils from '../utils/telemetry';
+import { telemetryPreAction } from './shared/telemetryHook';
 import enquirerUtils from '../utils/enquirer';
 import {
   saveKey as storeSaveKey,
@@ -183,15 +182,7 @@ export default (program: CommanderCommand) => {
 
   backup
     .command('create')
-    .hook('preAction', async (thisCommand: CommanderCommand) => {
-      const parent = thisCommand.parent;
-      const command = parent
-        ? [parent.name(), ...parent.args]
-        : [thisCommand.name()];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Create a backup of the state.json file')
     .option('--accounts', 'Backup the accounts')
     .option('--safe', 'Remove the private keys from the backup')
@@ -211,15 +202,7 @@ export default (program: CommanderCommand) => {
 
   backup
     .command('restore')
-    .hook('preAction', async (thisCommand: CommanderCommand) => {
-      const parent = thisCommand.parent;
-      const command = parent
-        ? [parent.name(), ...parent.args]
-        : [thisCommand.name()];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Restore a backup of the full state')
     .option('-f, --file <filename>', 'Filename containing the state backup')
     .option('--restore-accounts', 'Restore the accounts', false)

@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { Logger } from '../../utils/logger';
 import { DomainError, exitOnError } from '../../utils/errors';
 
@@ -9,13 +9,7 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('download')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description(
       'Download state from a URL and merge it with the current state',
     )

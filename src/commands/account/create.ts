@@ -1,10 +1,8 @@
-import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import { myParseInt } from '../../utils/verification';
-
 import accountUtils from '../../utils/account';
 import { exitOnError } from '../../utils/errors';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 import { Command } from 'commander';
@@ -14,13 +12,7 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('create')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description(
       'Create a new Hedera account using NEW recovery words and keypair. This is default.',
     )

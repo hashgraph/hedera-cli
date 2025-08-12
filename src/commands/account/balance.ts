@@ -1,9 +1,8 @@
-import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
 import accountUtils from '../../utils/account';
 import { DomainError, exitOnError } from '../../utils/errors';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 
 import { Command } from 'commander';
 
@@ -12,13 +11,7 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('balance')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Retrieve the balance for an account ID or name')
     .requiredOption(
       '-a, --account-id-or-name <accountIdOrName>',

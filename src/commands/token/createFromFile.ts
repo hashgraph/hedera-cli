@@ -10,7 +10,7 @@ import {
 import accountUtils from '../../utils/account';
 import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import feeUtils from '../../utils/fees';
 import { Logger } from '../../utils/logger';
 import { fail } from '../../utils/errors';
@@ -383,13 +383,7 @@ async function createToken(options: CreateTokenFromFileOptions) {
 export default (program: Command) => {
   program
     .command('create-from-file')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Create a new token from a file')
     .requiredOption(
       '-f, --file <filename>',

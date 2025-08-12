@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import tokenUtils from '../../utils/token';
-import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { Logger } from '../../utils/logger';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
@@ -10,13 +9,7 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('associate')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Associate a token with an account')
     .requiredOption(
       '-a, --account-id <accountId>', // name is also possible for --account-id

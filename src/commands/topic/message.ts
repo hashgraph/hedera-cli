@@ -1,5 +1,5 @@
 import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { Logger } from '../../utils/logger';
 import { DomainError, exitOnError } from '../../utils/errors';
 import { selectTopics } from '../../state/selectors';
@@ -83,13 +83,7 @@ export default (program: Command) => {
 
   message
     .command('submit')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Submit a message to a topic')
     .requiredOption('-m, --message <message>', 'Submit a message to the topic')
     .requiredOption('-t, --topic-id <topicId>', 'The topic ID')
@@ -148,13 +142,7 @@ export default (program: Command) => {
 
   message
     .command('find')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Find a message by sequence number')
     .option('-s, --sequence-number <sequenceNumber>', 'The sequence number')
     .option('-t, --topic-id <topicId>', 'The topic ID')

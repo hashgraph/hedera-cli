@@ -1,5 +1,5 @@
 import stateUtils from '../utils/state';
-import telemetryUtils from '../utils/telemetry';
+import { telemetryPreAction } from './shared/telemetryHook';
 import { getState } from '../state/store';
 import enquirerUtils from '../utils/enquirer';
 import dynamicVariablesUtils from '../utils/dynamicVariables';
@@ -17,13 +17,7 @@ export default (program: Command) => {
 
   hbar
     .command('transfer')
-    .hook('preAction', async (thisCommand: Command) => {
-      const parentName = thisCommand.parent?.name() || 'unknown';
-      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Transfer tinybars between accounts')
     .requiredOption('-b, --balance <balance>', 'Amount of tinybars to transfer')
     .option('-t, --to <to>', 'Account ID to transfer tinybars to')
