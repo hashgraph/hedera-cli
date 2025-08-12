@@ -1,92 +1,116 @@
-export class Logger {
-  private static instance: Logger;
+/**
+ * Logger modes:
+ *  normal  - standard logs + errors
+ *  verbose - verbose + standard logs + errors
+ *  quiet   - suppress standard logs & verbose (keep errors)
+ *  silent  - suppress everything to user (still feeds jest spies)
+ */
+export type LoggerMode = 'normal' | 'verbose' | 'quiet' | 'silent';
 
-  level: 'verbose' | 'quiet' | 'normal' = 'normal';
+interface LoggerTransport {
+  log(msg: string): void;
+  error(msg: string, error?: unknown): void;
+}
 
-  public static getInstance(): Logger {
-    if (!Logger.instance) {
-      Logger.instance = new Logger();
-      // Auto-silence in test environments when requested
-      if (process.env.HCLI_SILENT_TEST === '1') {
-        Logger.instance.level = 'quiet';
-      }
-    }
-    return Logger.instance;
+class ConsoleTransport implements LoggerTransport {
+  log(msg: string): void {
+    console.log(msg); // eslint-disable-line no-console
   }
 
-  setLevel(level: 'verbose' | 'quiet' | 'normal') {
-    this.level = level;
-  }
-
-  log(message: string | object) {
-    if (this.level === 'quiet') {
-      return; // still counts as a call for spies
-    }
-    // Preserve original argument for test spies; only stringify for console output
-    let out: string;
-    if (typeof message === 'object' && message !== null) {
-      out = this._convertObjectToString(message);
+  error(msg: string, error?: unknown): void {
+    if (error !== undefined) {
+      console.error(msg, error); // eslint-disable-line no-console
     } else {
-      out = message; // message is string here
-    }
-    if (process.env.HCLI_SUPPRESS_CONSOLE === '1') {
-      // If console.log is spied (jest), still call it so test spies on logger.log receive argument mapping via mockImplementation
-      if (this.isJestMock(console.log)) {
-        console.log(out);
-      }
-      return;
-    }
-    console.log(out);
-  }
-
-  verbose(message: string | object) {
-    if (this.level !== 'verbose') return;
-    let out: string;
-    if (typeof message === 'object' && message !== null) {
-      out = this._convertObjectToString(message);
-    } else {
-      out = message;
-    }
-    console.log(out);
-  }
-
-  // Overload signatures
-  error(message: string | object): void;
-  error(message: string, error: object): void;
-
-  // Unified implementation
-  error(message: string, error?: object) {
-    let out: string;
-    if (typeof message === 'object' && message !== null) {
-      out = this._convertObjectToString(message);
-    } else {
-      out = message;
-    }
-    if (process.env.HCLI_SUPPRESS_CONSOLE === '1') {
-      if (this.isJestMock(console.error)) {
-        if (error) {
-          console.error(out, error);
-        } else {
-          console.error('Error:', out);
-        }
-      }
-      return;
-    }
-    if (error) {
-      console.error(out, error);
-    } else {
-      console.error('Error:', out);
+      console.error('Error:', msg); // eslint-disable-line no-console
     }
   }
+}
 
-  _convertObjectToString(object: object) {
-    return JSON.stringify(object, null, 2);
-  }
-
+class SilentTransport implements LoggerTransport {
   private isJestMock(fn: unknown): fn is { _isMockFunction: boolean } {
     return (
       typeof fn === 'function' &&
       typeof (fn as { _isMockFunction?: unknown })._isMockFunction === 'boolean'
     );
   }
+  log(msg: string): void {
+    if (this.isJestMock(console.log)) console.log(msg); // eslint-disable-line no-console
+  }
+
+  error(msg: string, error?: unknown): void {
+    if (this.isJestMock(console.error)) {
+      if (error !== undefined)
+        console.error(msg, error); // eslint-disable-line no-console
+      else console.error('Error:', msg); // eslint-disable-line no-console
+    }
+  }
 }
+
+function serialize(value: string | object): string {
+  if (typeof value === 'string') return value;
+  if (value && typeof value === 'object') return JSON.stringify(value, null, 2);
+  return String(value);
+}
+
+export class Logger {
+  private static instance: Logger;
+  private transport: LoggerTransport;
+  private _mode: LoggerMode = 'normal';
+
+  private constructor() {
+    this.transport = new ConsoleTransport();
+    this.configureFromEnv();
+  }
+
+  static getInstance(): Logger {
+    if (!Logger.instance) Logger.instance = new Logger();
+    return Logger.instance;
+  }
+
+  get mode(): LoggerMode {
+    return this._mode;
+  }
+
+  setLevel(level: 'verbose' | 'quiet' | 'normal'): void {
+    this._mode = ((): LoggerMode => {
+      if (level === 'verbose') return 'verbose';
+      if (level === 'quiet') return 'quiet';
+      return 'normal';
+    })();
+  }
+
+  setMode(mode: LoggerMode): void {
+    this._mode = mode;
+    if (mode === 'silent') this.transport = new SilentTransport();
+  }
+
+  setTransport(transport: LoggerTransport): void {
+    this.transport = transport;
+  }
+
+  private configureFromEnv(): void {
+    const explicit = process.env.HCLI_LOG_MODE as LoggerMode | undefined;
+    if (explicit) this.setMode(explicit);
+  }
+
+  log(message: string | object): void {
+    if (this._mode === 'quiet') return;
+    this.transport.log(serialize(message));
+  }
+
+  verbose(message: string | object): void {
+    if (this._mode !== 'verbose') return;
+    this.transport.log(serialize(message));
+  }
+
+  // Overload signatures preserved
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  error(message: string | object): void;
+  error(message: string, error: object): void;
+  error(message: string | object, error?: object): void {
+    const msg = serialize(message);
+    this.transport.error(msg, error);
+  }
+}
+
+export const logger = Logger.getInstance();

@@ -19,13 +19,7 @@
   "rules": {
     "no-console": "off",
     "@typescript-eslint/no-floating-promises": "off",
-    "no-restricted-syntax": [
-      "error",
-      {
-        "selector": "AssignmentExpression[left.type='MemberExpression'][left.object.type='MemberExpression'][left.object.object.name='process'][left.object.property.name='env'][left.property.name='HCLI_SUPPRESS_CONSOLE']",
-        "message": "Do not assign process.env.HCLI_SUPPRESS_CONSOLE directly; use loggerHelper scoped helpers or the global silenceLogs setup file."
-      }
-    ]
+    "no-restricted-syntax": "off"
   },
   "overrides": [
     {

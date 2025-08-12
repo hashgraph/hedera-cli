@@ -9,12 +9,24 @@ export async function withLoggerLevel<T>(
   fn: () => Promise<T> | T,
 ): Promise<T> {
   const logger = Logger.getInstance();
-  const prev = logger.level;
+  // Support legacy level property via mode mapping
+  const prev = (logger as unknown as { mode?: string }).mode || 'normal';
   try {
     logger.setLevel(level);
     return await fn();
   } finally {
-    logger.setLevel(prev);
+    // Map back to legacy setLevel if possible (prev may be quiet/normal/verbose/silent)
+    if (prev === 'silent') {
+      // silent not part of legacy API; set quiet then elevate transport manually
+      logger.setLevel('quiet');
+      (logger as unknown as { setMode?: (m: string) => void }).setMode?.(
+        'silent',
+      );
+    } else if (prev === 'verbose' || prev === 'quiet' || prev === 'normal') {
+      logger.setLevel(prev);
+    } else {
+      logger.setLevel('normal');
+    }
   }
 }
 

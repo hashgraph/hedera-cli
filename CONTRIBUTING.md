@@ -63,7 +63,7 @@ test('missing user config falls back to defaults', () => {
 
 ### Logging & Silencing Strategy in Tests
 
-Unit tests load `__tests__/setup/silenceLogs.ts` which sets `HCLI_SUPPRESS_CONSOLE=1`. The `Logger` honors this by not emitting to the real console (reducing noise) while still allowing Jest spies on `logger.log` / `logger.error` to observe calls.
+Unit tests load `__tests__/setup/silenceLogs.ts` which sets `HCLI_LOG_MODE=silent`. The `Logger` will not emit user-facing output while still allowing Jest spies on `console.log` / `console.error` to observe calls (the silent transport routes through console for mocks).
 
 Per‑test scoped control helpers live in `__tests__/helpers/loggerHelper.ts`:
 
@@ -89,10 +89,10 @@ test('verbose tracing', async () => {
 
 Prefer these scoped helpers over imperative setters; they automatically restore the previous level.
 
-If you truly need to see raw console output in a specific test file, unset the env var at the top of that file before the logger singleton is first created:
+If you need raw console output in a specific test file, set the mode early (before any logger import):
 
 ```ts
-delete process.env.HCLI_SUPPRESS_CONSOLE;
+process.env.HCLI_LOG_MODE = 'normal'; // or 'verbose'
 ```
 
 ### Adding New Config Edge-Case Tests
