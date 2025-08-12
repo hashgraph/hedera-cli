@@ -19,9 +19,10 @@
  */
 import { cosmiconfigSync } from 'cosmiconfig';
 import * as fs from 'fs';
-import * as path from 'path';
 import * as os from 'os';
+import * as path from 'path';
 import type { State } from '../../types';
+import { validateUserConfig } from './schema';
 
 const MODULE_NAME = 'hedera-cli';
 
@@ -48,8 +49,18 @@ export const loadUserConfig = (): LoadedConfig => {
       if (ext === '.json' || ext === '') {
         try {
           const raw = fs.readFileSync(full, 'utf-8');
-          const parsed = JSON.parse(raw) as Partial<State>;
-          return { user: parsed, source: full };
+          const parsedRaw = JSON.parse(raw) as unknown;
+          const validated = validateUserConfig(parsedRaw);
+          if (!validated.valid) {
+            // Surface validation errors but continue with empty overlay
+            // (avoid throwing to keep CLI resilient)
+            // eslint-disable-next-line no-console
+            console.warn(
+              `Invalid user config at ${full}:\n${validated.errors?.join('\n')}`,
+            );
+            return { user: {}, source: full };
+          }
+          return { user: validated.config as Partial<State>, source: full };
         } catch {
           return { user: {}, source: full };
         }
@@ -57,11 +68,15 @@ export const loadUserConfig = (): LoadedConfig => {
       // Fallback to require for JS/TS transpiled configs
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const cfgRaw = require(full) as unknown;
-      const cfg: Partial<State> =
-        cfgRaw && typeof cfgRaw === 'object' && 'default' in cfgRaw
-          ? ((cfgRaw as { default: unknown }).default as Partial<State>)
-          : (cfgRaw as Partial<State>) || {};
-      return { user: cfg, source: full };
+      const validated = validateUserConfig(cfgRaw);
+      if (!validated.valid) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Invalid user config at ${full}:\n${validated.errors?.join('\n')}`,
+        );
+        return { user: {}, source: full };
+      }
+      return { user: validated.config as Partial<State>, source: full };
     } catch {
       return { user: {}, source: direct };
     }
@@ -70,7 +85,18 @@ export const loadUserConfig = (): LoadedConfig => {
     const explorer = cosmiconfigSync(MODULE_NAME);
     const result = explorer.search();
     if (result && !result.isEmpty) {
-      return { user: result.config as Partial<State>, source: result.filepath };
+      const validated = validateUserConfig(result.config as unknown);
+      if (!validated.valid) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Invalid user config at ${result.filepath}:\n${validated.errors?.join('\n')}`,
+        );
+        return { user: {}, source: result.filepath };
+      }
+      return {
+        user: validated.config as Partial<State>,
+        source: result.filepath,
+      };
     }
   } catch {
     /* ignore */

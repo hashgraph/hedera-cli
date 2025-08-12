@@ -1,11 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import type { StoreState } from '../../src/state/store';
 
+// Utility to force a fresh require of a module (bypass Jest/Node cache)
 const fresh = <T>(mod: string): T => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   delete require.cache[require.resolve(mod)];
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  return require(mod);
+  const loaded: unknown = require(mod);
+  return loaded as T;
 };
 
 describe('store layering', () => {
@@ -55,7 +58,7 @@ describe('store layering', () => {
     const storePath = path
       .join(root, 'src/state/store.ts')
       .replace(/\.ts$/, '');
-    const { getState } = fresh<{ getState: any }>(storePath);
+    const { getState } = fresh<{ getState: () => StoreState }>(storePath);
     const s = getState();
     expect(s.telemetry).toBe(1);
     expect(s.network).toBe('previewnet');
@@ -66,10 +69,12 @@ describe('store layering', () => {
     const storePath = path
       .join(root, 'src/state/store.ts')
       .replace(/\.ts$/, '');
-    let storeMod: any = fresh<any>(storePath);
-    storeMod.saveKey('telemetry', 1);
-    storeMod.saveKey('network', 'previewnet');
-    // Write an account to persisted file through action
+    let storeMod = fresh<{
+      saveKey?: <K extends keyof StoreState>(k: K, v: StoreState[K]) => void;
+      getState: () => StoreState;
+    }>(storePath);
+    storeMod.saveKey?.('telemetry', 1);
+    storeMod.saveKey?.('network', 'previewnet');
     const { actions } = storeMod.getState();
     actions.addAccount({
       network: 'previewnet',
@@ -91,8 +96,9 @@ describe('store layering', () => {
         network: 'previewnet',
         networks: {
           custom: {
-            mirrorNodeUrl: 'x',
-            rpcUrl: 'y',
+            // Provide valid URLs so schema validation (z.string().url()) passes
+            mirrorNodeUrl: 'https://customnet.mirrornode.local/api/v1',
+            rpcUrl: 'https://customnet.rpc.local/api',
             operatorKey: '',
             operatorId: '',
             hexKey: '',
@@ -121,7 +127,10 @@ describe('store layering', () => {
     jest.resetModules();
 
     // Reload store (fresh require)
-    storeMod = fresh<any>(storePath);
+    storeMod = fresh<{
+      getState: () => StoreState;
+      // saveKey not needed on reload for this assertion path
+    }>(storePath);
     const stateReloaded = storeMod.getState();
     expect(stateReloaded.accounts.alice).toBeDefined();
     expect(stateReloaded.networks.custom).toBeDefined();

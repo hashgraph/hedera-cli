@@ -1233,6 +1233,27 @@ hcli config view --active # just the active network's settings
 hcli config view --json   # machine-readable output
 ```
 
+### User config validation
+
+User-provided configuration overlays are validated against a strict schema. If the file contains unknown keys, invalid URL fields, or out-of-range values (e.g. `telemetry: 2`), the entire overlay is ignored and a warning is printed. This prevents partially-applied ambiguous configuration.
+
+Allowed keys:
+
+- `network` (string)
+- `telemetry` (0 or 1)
+- `telemetryServer` (valid URL)
+- `networks` (object mapping network name -> partial network config with `mirrorNodeUrl` (URL), `rpcUrl` (URL), `operatorKey`, `operatorId`, `hexKey` strings)
+
+Example warning:
+
+```
+Invalid user config at /path/hedera-cli.config.json:
+telemetry: Number must be less than or equal to 1
+extraKey: Unrecognized key(s) in object
+```
+
+Fix the issues and re-run any command; the corrected file will be re-loaded automatically on next access.
+
 ## Layering order
 
 1. Base defaults (`src/state/config.ts`)
