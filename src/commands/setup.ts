@@ -1,9 +1,8 @@
+import { Command } from 'commander';
 import * as dotenv from 'dotenv';
-
 import stateUtils from '../utils/state';
 import telemetryUtils from '../utils/telemetry';
 import config from '../state/config';
-import type { State } from '../../types';
 import { Logger } from '../utils/logger';
 import { DomainError, exitOnError } from '../utils/errors';
 import accountUtils from '../utils/account';
@@ -12,8 +11,6 @@ import {
   saveState as storeSaveState,
   saveKey as storeSaveKey,
 } from '../state/store';
-
-import type { Command } from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -30,7 +27,7 @@ interface ReloadOptions {
  * @description Setup the state file with the init config
  */
 function setupState(): void {
-  storeSaveState(config as any as State);
+  storeSaveState(config);
 }
 
 /**
@@ -107,24 +104,20 @@ async function setupCLI(
   }
 
   // Set telemetry server URL
-  let telemetryServer =
+  const telemetryServer =
     TELEMETRY_URL || 'https://hedera-cli-telemetry.onrender.com/track';
-  storeSaveKey('telemetryServer', telemetryServer as any);
-  if (telemetry) {
-    storeSaveKey('telemetry', 1 as any);
-  }
+  storeSaveKey('telemetryServer', telemetryServer);
+  if (telemetry) storeSaveKey('telemetry', 1);
 }
 
-export default (program: any) => {
+export default (program: Command) => {
   const setup = program.command('setup').description('Setup Hedera CLI');
 
   setup
     .command('init')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -153,10 +146,8 @@ export default (program: any) => {
   setup
     .command('reload')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }

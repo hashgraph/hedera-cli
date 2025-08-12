@@ -1,20 +1,17 @@
+import { Command } from 'commander';
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import { Logger } from '../../utils/logger';
 import { DomainError, exitOnError } from '../../utils/errors';
 
-import type { Command } from '../../../types';
-
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('download')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }

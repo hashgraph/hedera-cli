@@ -15,21 +15,20 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-  "build": "npm run format && rimraf --glob 'dist/' && tsc && npm run copy-input && npm run copy-contracts",
+    "build": "npm run format && rimraf --glob 'dist/' && tsc && npm run copy-input && npm run copy-contracts",
     "build-test": "tsc -p tsconfig.test.json ",
     "clean": "rm -rf dist/ && rm -rf coverage/ && rm -rf junit.xml && rm -rf junit-e2e.xml",
-  "dev-build": "rm -rf dist/ && tsc && npm run copy-input && npm run watch",
+    "dev-build": "rm -rf dist/ && tsc && npm run copy-input && npm run watch",
     "watch": "tsc --watch",
-    
     "copy-input": "copyfiles -u 2 src/input/*.json dist/input/",
     "copy-contracts": "copyfiles -u 2 src/contracts/*.sol dist/contracts/",
     "lint": "eslint 'src/**/*.{js,ts,tsx}' --quiet",
     "format": "prettier --write 'src/**/*.{js,ts,tsx}'",
-  "test:unit": "JEST_SUITE_NAME='Unit Tests' JEST_JUNIT_OUTPUT_NAME='junit.xml' jest -c jest.unit.config.js --coverage --coverageDirectory='coverage/unit'",
-  "test:e2e": "JEST_SUITE_NAME='E2E Tests' JEST_JUNIT_OUTPUT_NAME='junit-e2e.xml' jest -c jest.e2e.config.js --coverage --coverageDirectory='coverage/e2e' --runInBand",
-  "test:all": "npm run test:unit && npm run test:e2e",
-  "test": "npm run test:unit",
-  "single-test": "jest"
+    "test:unit": "JEST_SUITE_NAME='Unit Tests' JEST_JUNIT_OUTPUT_NAME='junit.xml' jest -c jest.unit.config.js --coverage --coverageDirectory='coverage/unit'",
+    "test:e2e": "JEST_SUITE_NAME='E2E Tests' JEST_JUNIT_OUTPUT_NAME='junit-e2e.xml' jest -c jest.e2e.config.js --coverage --coverageDirectory='coverage/e2e' --runInBand",
+    "test:all": "npm run test:unit && npm run test:e2e",
+    "test": "npm run test:unit",
+    "single-test": "jest"
   },
   "keywords": [
     "CLI",
@@ -44,9 +43,9 @@
     "@openzeppelin/contracts": "5.4.0",
     "axios": "^1.11.0",
     "commander": "^14.0.0",
+    "cosmiconfig": "^9.0.0",
     "dotenv": "^16.4.7",
     "enquirer": "^2.4.1",
-  "cosmiconfig": "^9.0.0",
     "uuid": "^11.1.0",
     "zustand": "^4.5.2"
   },
@@ -58,7 +57,6 @@
     "@typescript-eslint/parser": "^7.18.0",
     "copyfiles": "^2.4.1",
     "eslint": "^8.55.0",
-    "eslint-config-airbnb-typescript": "^18.0.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
     "ethers": "^6.14.4",

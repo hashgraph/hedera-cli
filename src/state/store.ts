@@ -52,7 +52,10 @@ let stateFile = resolveStateFilePath();
 // Read persisted runtime state (if file missing / unreadable return empty object)
 const loadFile = (): Partial<State> => {
   try {
-    return JSON.parse(fs.readFileSync(stateFile, 'utf-8'));
+    const raw = fs.readFileSync(stateFile, 'utf-8');
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') return parsed as Partial<State>;
+    return {};
   } catch {
     return {};
   }
@@ -74,7 +77,8 @@ const mergeInitial = (file: Partial<State>, base: State): CliState => {
   const networks: Record<string, NetworkConfig> = { ...base.networks };
   if (file.networks) {
     for (const k of Object.keys(file.networks)) {
-      networks[k] = { ...(networks[k] || {}), ...file.networks[k]! };
+      const incoming = file.networks[k];
+      if (incoming) networks[k] = { ...(networks[k] || {}), ...incoming };
     }
   }
   return {
@@ -131,7 +135,12 @@ const partialize = (s: StoreState): PersistedSlice => ({
 });
 
 // Shared actions builder so we don't duplicate in reset path.
-const buildActions = (set: any, get: () => StoreState): Actions => ({
+type ImmerSetter<T> = (fn: (draft: T) => void) => void;
+
+const buildActions = (
+  set: ImmerSetter<StoreState>,
+  get: () => StoreState,
+): Actions => ({
   setNetwork: (network) => {
     if (!get().networks[network])
       throw new Error(`Unknown network: ${network}`);
@@ -208,21 +217,35 @@ const buildStore = (state: CliState): StoreApi<StoreState> =>
     persist(
       immer<StoreState>((set, get) => ({
         ...state,
-        actions: buildActions(set, get),
+        actions: buildActions(set as ImmerSetter<StoreState>, get),
       })),
       {
         name: 'hedera-cli-state',
         version: 1,
         partialize,
-        migrate: (persisted: any) => {
-          if (persisted && typeof persisted.scriptExecution === 'number') {
-            persisted.scriptExecution = {
-              active: persisted.scriptExecution === 1,
-              name: persisted.scriptExecutionName || '',
-            };
-            delete persisted.scriptExecutionName;
+        migrate: (persisted: unknown) => {
+          if (
+            typeof persisted === 'object' &&
+            persisted !== null &&
+            'scriptExecution' in persisted &&
+            typeof (persisted as { scriptExecution: unknown })
+              .scriptExecution === 'number'
+          ) {
+            const p = persisted as {
+              scriptExecution: number;
+              scriptExecutionName?: string;
+            } & Record<string, unknown>;
+            const migrated = {
+              ...p,
+              scriptExecution: {
+                active: p.scriptExecution === 1,
+                name: p.scriptExecutionName || '',
+              },
+            } as PersistedSlice & Record<string, unknown>;
+            delete migrated.scriptExecutionName;
+            return migrated as PersistedSlice;
           }
-          return persisted;
+          return persisted as PersistedSlice;
         },
         storage: {
           getItem: () => {
@@ -230,9 +253,9 @@ const buildStore = (state: CliState): StoreApi<StoreState> =>
             const { user: dynamicUser } = loadUserConfig();
             const dynamicBase = mergeInitial(dynamicUser, baseConfig);
             const merged = mergeInitial(data, dynamicBase);
-            return { state: merged } as any;
+            return { state: merged } as { state: CliState };
           },
-          setItem: (_key: string, value: any) => {
+          setItem: (_key: string, value: { state?: CliState }) => {
             try {
               if (value?.state) writeFile(value.state);
             } catch {

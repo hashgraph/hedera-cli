@@ -1,11 +1,12 @@
+import { Command } from 'commander';
 import * as path from 'path';
+import * as fs from 'fs/promises';
 import {
   TokenCreateTransaction,
   TokenType,
   PrivateKey,
   CustomFee,
 } from '@hashgraph/sdk';
-
 import accountUtils from '../../utils/account';
 import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
@@ -14,18 +15,15 @@ import feeUtils from '../../utils/fees';
 import { Logger } from '../../utils/logger';
 import { fail } from '../../utils/errors';
 import { get as storeGet, saveKey as storeSaveKey } from '../../state/store';
-// (Reverted) DomainError/exitOnError not used here
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
-
 import type {
   Account,
-  Command,
   Token,
   Keys,
   CustomFeeInput,
   FixedFee,
   FractionalFee,
-} from '../../../types';
+} from '../../../types/state';
 import signUtils from '../../utils/sign';
 
 const logger = Logger.getInstance();
@@ -106,9 +104,9 @@ function initializeToken(tokenInput: TokenInput): Token {
  * @return updated keys
  */
 function replaceNamePattern(keys: Keys): Keys {
-  const accounts = storeGet('accounts' as any) as any;
+  const accounts = storeGet('accounts');
   const namePattern = /<name:([a-zA-Z0-9_-]+)>/;
-  let newKeys = { ...keys };
+  const newKeys = { ...keys };
 
   Object.keys(newKeys).forEach((key) => {
     const match = newKeys[key as keyof typeof newKeys].match(namePattern);
@@ -134,7 +132,7 @@ function replaceNamePattern(keys: Keys): Keys {
 function findNewKeyPattern(
   keys: Keys,
 ): Promise<{ key: string; account: Account }>[] {
-  let newAccountPromises: Promise<{ key: string; account: Account }>[] = [];
+  const newAccountPromises: Promise<{ key: string; account: Account }>[] = [];
 
   // Only allow ECDSA
   const newKeyPattern = /<newkey:(ecdsa|ECDSA):(\d+)>/;
@@ -165,11 +163,11 @@ function findNewKeyPattern(
  * @returns updated keys
  */
 async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
-  let newAccountPromises: Promise<{ key: string; account: Account }>[] =
+  const newAccountPromises: Promise<{ key: string; account: Account }>[] =
     findNewKeyPattern(keys);
 
   // Create new accounts if pattern is detected
-  let newKeys = { ...keys };
+  const newKeys = { ...keys };
   if (newAccountPromises.length > 0) {
     try {
       const newAccounts = await Promise.all(newAccountPromises);
@@ -190,7 +188,7 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
 }
 
 async function replaceKeysForToken(token: Token): Promise<Token> {
-  let newToken = { ...token };
+  const newToken = { ...token };
 
   // Look for name pattern in keys on token
   newToken.keys = replaceNamePattern(newToken.keys);
@@ -219,21 +217,27 @@ function addKeysToTokenCreateTx(
   tokenCreateTx: TokenCreateTransaction,
   token: Token,
 ) {
-  // Mapping key names to their corresponding setter methods
-  const keySetters = {
-    adminKey: tokenCreateTx.setAdminKey,
-    pauseKey: tokenCreateTx.setPauseKey,
-    kycKey: tokenCreateTx.setKycKey,
-    wipeKey: tokenCreateTx.setWipeKey,
-    freezeKey: tokenCreateTx.setFreezeKey,
-    supplyKey: tokenCreateTx.setSupplyKey,
-    feeScheduleKey: tokenCreateTx.setFeeScheduleKey,
+  // Mapping key names to their corresponding setter methods wrapped to preserve binding
+  const keySetters: Record<
+    string,
+    (
+      pub: ReturnType<typeof PrivateKey.fromStringDer>['publicKey'],
+    ) => TokenCreateTransaction
+  > = {
+    adminKey: (pub) => tokenCreateTx.setAdminKey(pub),
+    pauseKey: (pub) => tokenCreateTx.setPauseKey(pub),
+    kycKey: (pub) => tokenCreateTx.setKycKey(pub),
+    wipeKey: (pub) => tokenCreateTx.setWipeKey(pub),
+    freezeKey: (pub) => tokenCreateTx.setFreezeKey(pub),
+    supplyKey: (pub) => tokenCreateTx.setSupplyKey(pub),
+    feeScheduleKey: (pub) => tokenCreateTx.setFeeScheduleKey(pub),
   };
 
   Object.entries(keySetters).forEach(([key, setter]) => {
     const keyValue = token.keys[key as keyof typeof token.keys];
     if (keyValue && keyValue !== '') {
-      setter.call(tokenCreateTx, PrivateKey.fromStringDer(keyValue).publicKey);
+      const publicKey = PrivateKey.fromStringDer(keyValue).publicKey;
+      setter(publicKey);
     }
   });
 }
@@ -259,7 +263,7 @@ async function createTokenOnNetwork(token: Token) {
     addKeysToTokenCreateTx(tokenCreateTx, token);
 
     // Add custom fees
-    let fees: CustomFee[] = token.customFees.map((fee) => {
+    const fees: CustomFee[] = token.customFees.map((fee) => {
       switch (fee.type) {
         case 'fixed':
           return feeUtils.createCustomFixedFee(fee as FixedFee);
@@ -285,8 +289,8 @@ async function createTokenOnNetwork(token: Token) {
     );
 
     // Execute
-    let tokenCreateSubmit = await signedTokenCreateTx.execute(client);
-    let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
+    const tokenCreateSubmit = await signedTokenCreateTx.execute(client);
+    const tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
 
     if (tokenCreateRx.tokenId == null) {
       logger.error('Token was not created');
@@ -305,13 +309,12 @@ async function createTokenOnNetwork(token: Token) {
 }
 
 function updateTokenState(token: Token) {
-  const tokens: Record<string, Token> = storeGet('tokens' as any) as any;
-  const updatedTokens = {
+  const tokens = storeGet('tokens');
+  const updatedTokens: Record<string, Token> = {
     ...tokens,
     [token.tokenId]: token,
   };
-
-  storeSaveKey('tokens' as any, updatedTokens as any);
+  storeSaveKey('tokens', updatedTokens);
   stateUtils.getHederaClient().close();
 }
 
@@ -331,15 +334,34 @@ async function createTokenFromFile(tokenInput: TokenInput): Promise<Token> {
 
 async function createToken(options: CreateTokenFromFileOptions) {
   logger.verbose(`Creating token from template with name: ${options.file}`);
-  options = dynamicVariablesUtils.replaceOptions(options);
+  const replaceTokenOptions = (
+    o: CreateTokenFromFileOptions,
+  ): CreateTokenFromFileOptions =>
+    dynamicVariablesUtils.replaceOptions<CreateTokenFromFileOptions>(o);
+  const resolvedOptions = replaceTokenOptions(options);
 
-  const filepath = resolveTokenFilePath(options.file);
-  const tokenDefinition = require(filepath);
+  const filepath = resolveTokenFilePath(resolvedOptions.file);
+  const fileContent = await fs.readFile(filepath, 'utf-8');
+  const raw = JSON.parse(fileContent) as unknown;
+  const isTokenInput = (o: unknown): o is TokenInput =>
+    !!o &&
+    typeof o === 'object' &&
+    'name' in o &&
+    'symbol' in o &&
+    'decimals' in o &&
+    'initialSupply' in o &&
+    'keys' in o &&
+    'maxSupply' in o &&
+    Array.isArray((o as { customFees?: unknown }).customFees);
+  if (!isTokenInput(raw)) {
+    fail('Invalid token definition file');
+  }
+  const tokenDefinition = raw;
   const token = await createTokenFromFile(tokenDefinition);
 
   // Store dynamic script variables
   dynamicVariablesUtils.storeArgs(
-    options.args,
+    resolvedOptions.args,
     dynamicVariablesUtils.commandActions.token.createFromFile.action,
     {
       tokenId: token.tokenId,
@@ -358,14 +380,12 @@ async function createToken(options: CreateTokenFromFileOptions) {
   );
 }
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('create-from-file')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -378,9 +398,9 @@ export default (program: any) => {
     .option(
       '--args <args>',
       'Store arguments for scripts',
-      (value: string, previous: string) =>
-        previous ? previous.concat(value) : [value],
-      [],
+      (value: string, previous: string[]) =>
+        previous ? [...previous, value] : [value],
+      [] as string[],
     )
     .action(createToken);
 };

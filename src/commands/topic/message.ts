@@ -6,8 +6,8 @@ import { selectTopics } from '../../state/selectors';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { TopicMessageSubmitTransaction, PrivateKey } from '@hashgraph/sdk';
 import api from '../../api';
-
-import type { Command, Filter } from '../../../types';
+import { Command } from 'commander';
+import type { Filter } from '../../../types';
 
 const logger = Logger.getInstance();
 
@@ -78,16 +78,14 @@ function formatFilters(filters: Filter[], options: FindMessageOptions) {
   }
 }
 
-export default (program: any) => {
+export default (program: Command) => {
   const message = program.command('message');
 
   message
     .command('submit')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -98,36 +96,42 @@ export default (program: any) => {
     .option(
       '--args <args>',
       'Store arguments for scripts',
-      (value: string, previous: string) =>
+      (value: string, previous: string[]) =>
         previous ? previous.concat(value) : [value],
-      [],
+      [] as string[],
     )
     .action(
       exitOnError(async (options: SubmitMessageOptions) => {
-        options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id
-        logger.verbose(`Submitting message to topic: ${options.topicId}`);
+        const replacedOptions = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id
+        logger.verbose(
+          `Submitting message to topic: ${replacedOptions.topicId}`,
+        );
 
         const client = stateUtils.getHederaClient();
 
-        let sequenceNumber;
+        let sequenceNumber: number | undefined;
         try {
-          const submitMessageTx = await new TopicMessageSubmitTransaction({
-            topicId: options.topicId,
-            message: options.message,
+          const submitMessageTx = new TopicMessageSubmitTransaction({
+            topicId: replacedOptions.topicId,
+            message: replacedOptions.message,
           }).freezeWith(client);
 
           // Signing if submit key is set (if it exists in the state - otherwise skip this step)
           const topics = selectTopics();
-          const topicEntry = topics[options.topicId];
+          const topicEntry = topics[replacedOptions.topicId];
           if (topicEntry && topicEntry.submitKey) {
             const submitKey = PrivateKey.fromStringDer(topicEntry.submitKey);
             submitMessageTx.sign(submitKey);
           }
 
           const topicMessageTxResponse = await submitMessageTx.execute(client);
-          const receipt = await topicMessageTxResponse.getReceipt(client);
-          sequenceNumber = receipt.topicSequenceNumber;
-        } catch (error) {
+          const receipt = (await topicMessageTxResponse.getReceipt(client)) as {
+            topicSequenceNumber?: number;
+          };
+          sequenceNumber = receipt.topicSequenceNumber
+            ? Number(receipt.topicSequenceNumber)
+            : undefined;
+        } catch (_e: unknown) {
           client.close();
           throw new DomainError('Error sending message to topic');
         }
@@ -135,9 +139,9 @@ export default (program: any) => {
         logger.log(`Message submitted with sequence number: ${sequenceNumber}`);
         client.close();
         dynamicVariablesUtils.storeArgs(
-          options.args,
+          replacedOptions.args,
           dynamicVariablesUtils.commandActions.topic.messageSubmit.action,
-          { sequenceNumber: sequenceNumber.toString() },
+          { sequenceNumber: String(sequenceNumber) },
         );
       }),
     );
@@ -145,10 +149,8 @@ export default (program: any) => {
   message
     .command('find')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -181,8 +183,8 @@ export default (program: any) => {
       'The sequence number not equal to',
     )
     .action(async (options: FindMessageOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id and sequence-number
-      logger.verbose(`Finding message for topic: ${options.topicId}`);
+      const replacedOptions = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id and sequence-number
+      logger.verbose(`Finding message for topic: ${replacedOptions.topicId}`);
 
       // Define the keys of options we are interested in
       const sequenceNumberOptions: string[] = [
@@ -196,10 +198,10 @@ export default (program: any) => {
 
       // Check if any of the sequence number options is set
       const isAnyOptionSet = sequenceNumberOptions.some(
-        (option: string) => options[option as keyof FindMessageOptions],
+        (option: string) => replacedOptions[option as keyof FindMessageOptions],
       );
 
-      if (!isAnyOptionSet && !options.sequenceNumber) {
+      if (!isAnyOptionSet && !replacedOptions.sequenceNumber) {
         logger.error(
           'Please provide a sequence number or a sequence number filter',
         );
@@ -209,8 +211,8 @@ export default (program: any) => {
       if (!isAnyOptionSet) {
         // If no sequence number options are set, proceed with the original logic
         const response = await api.topic.findMessage(
-          options.topicId,
-          Number(options.sequenceNumber),
+          replacedOptions.topicId,
+          Number(replacedOptions.sequenceNumber),
         );
         logger.log(
           `Message found: "${Buffer.from(
@@ -222,12 +224,12 @@ export default (program: any) => {
       }
 
       // Assuming options can include multiple filters
-      let filters: Filter[] = []; // Populate this based on the options provided
-      formatFilters(filters, options);
+      const filters: Filter[] = []; // Populate this based on the options provided
+      formatFilters(filters, replacedOptions);
 
       // Call the new API function
       const response = await api.topic.findMessagesWithFilters(
-        options.topicId,
+        replacedOptions.topicId,
         filters,
       );
 
@@ -236,13 +238,15 @@ export default (program: any) => {
         return;
       }
 
-      response.data.messages.forEach((el) => {
-        logger.log(
-          `Message ${el.sequence_number}: "${Buffer.from(
-            el.message,
-            'base64',
-          ).toString('ascii')}"`,
-        );
-      });
+      response.data.messages.forEach(
+        (el: { sequence_number: number; message: string }) => {
+          logger.log(
+            `Message ${el.sequence_number}: "${Buffer.from(
+              el.message,
+              'base64',
+            ).toString('ascii')}"`,
+          );
+        },
+      );
     });
 };

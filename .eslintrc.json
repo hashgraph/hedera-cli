@@ -1,12 +1,24 @@
 {
-  "extends": ["airbnb-typescript", "plugin:prettier/recommended"],
+  "root": true,
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": "./tsconfig.json"
+    "project": "./tsconfig.json",
+    "sourceType": "module"
   },
+  "env": {
+    "es2023": true,
+    "node": true
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-type-checked",
+    "plugin:prettier/recommended"
+  ],
   "rules": {
-    "react/jsx-filename-extension": [0],
-    "import/no-extraneous-dependencies": "off",
-    "import/extensions": "off",
+    "no-console": "off",
+    "@typescript-eslint/no-floating-promises": "off",
     "no-restricted-syntax": [
       "error",
       {
@@ -16,6 +28,10 @@
     ]
   },
   "overrides": [
+    {
+      "files": ["**/__tests__/**", "**/*.test.ts"],
+      "env": { "jest": true }
+    },
     {
       "files": ["__tests__/setup/silenceLogs.ts"],
       "rules": { "no-restricted-syntax": "off" }

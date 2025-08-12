@@ -56,8 +56,12 @@ export const loadUserConfig = (): LoadedConfig => {
       }
       // Fallback to require for JS/TS transpiled configs
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const cfg = require(full);
-      return { user: (cfg.default || cfg) as Partial<State>, source: full };
+      const cfgRaw = require(full) as unknown;
+      const cfg: Partial<State> =
+        cfgRaw && typeof cfgRaw === 'object' && 'default' in cfgRaw
+          ? ((cfgRaw as { default: unknown }).default as Partial<State>)
+          : (cfgRaw as Partial<State>) || {};
+      return { user: cfg, source: full };
     } catch {
       return { user: {}, source: direct };
     }

@@ -1,6 +1,6 @@
+import { Command } from 'commander';
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
-import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
 import { updateState as storeUpdateState } from '../../state/store';
 
@@ -24,23 +24,21 @@ function clear(
     return;
   }
 
-  storeUpdateState((draft: any) => {
-    if (!skipAccounts) draft.accounts = {} as any;
-    if (!skipTokens) draft.tokens = {} as any;
-    if (!skipScripts) draft.scripts = {} as any;
-    if (!skipTopics) draft.topics = {} as any;
+  storeUpdateState((draft) => {
+    if (!skipAccounts) draft.accounts = {};
+    if (!skipTokens) draft.tokens = {};
+    if (!skipScripts) draft.scripts = {};
+    if (!skipTopics) draft.topics = {};
   });
   logger.log('State cleared successfully');
 }
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('clear')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }

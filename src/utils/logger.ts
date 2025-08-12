@@ -23,30 +23,31 @@ export class Logger {
       return; // still counts as a call for spies
     }
     // Preserve original argument for test spies; only stringify for console output
-    let out = message;
-    if (typeof out === 'object') {
-      out = this._convertObjectToString(out);
+    let out: string;
+    if (typeof message === 'object' && message !== null) {
+      out = this._convertObjectToString(message);
+    } else {
+      out = message; // message is string here
     }
     if (process.env.HCLI_SUPPRESS_CONSOLE === '1') {
       // If console.log is spied (jest), still call it so test spies on logger.log receive argument mapping via mockImplementation
-      if (
-        typeof console.log === 'function' &&
-        (console.log as any)._isMockFunction
-      ) {
-        console.log(out as string);
+      if (this.isJestMock(console.log)) {
+        console.log(out);
       }
       return;
     }
-    console.log(out as string);
+    console.log(out);
   }
 
   verbose(message: string | object) {
-    if (this.level === 'verbose') {
-      if (typeof message === 'object') {
-        message = this._convertObjectToString(message);
-      }
-      console.log(message);
+    if (this.level !== 'verbose') return;
+    let out: string;
+    if (typeof message === 'object' && message !== null) {
+      out = this._convertObjectToString(message);
+    } else {
+      out = message;
     }
+    console.log(out);
   }
 
   // Overload signatures
@@ -55,15 +56,14 @@ export class Logger {
 
   // Unified implementation
   error(message: string, error?: object) {
-    let out = message;
-    if (typeof out === 'object') {
-      out = this._convertObjectToString(out as any);
+    let out: string;
+    if (typeof message === 'object' && message !== null) {
+      out = this._convertObjectToString(message);
+    } else {
+      out = message;
     }
     if (process.env.HCLI_SUPPRESS_CONSOLE === '1') {
-      if (
-        typeof console.error === 'function' &&
-        (console.error as any)._isMockFunction
-      ) {
+      if (this.isJestMock(console.error)) {
         if (error) {
           console.error(out, error);
         } else {
@@ -81,5 +81,12 @@ export class Logger {
 
   _convertObjectToString(object: object) {
     return JSON.stringify(object, null, 2);
+  }
+
+  private isJestMock(fn: unknown): fn is { _isMockFunction: boolean } {
+    return (
+      typeof fn === 'function' &&
+      typeof (fn as { _isMockFunction?: unknown })._isMockFunction === 'boolean'
+    );
   }
 }

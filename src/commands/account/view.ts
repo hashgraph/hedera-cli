@@ -2,20 +2,17 @@ import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
-
-import type { Command } from '../../../types';
+import { Command } from 'commander';
 import api from '../../api';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('view')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -29,9 +26,9 @@ export default (program: any) => {
     .option(
       '--args <args>',
       'Store arguments for scripts',
-      (value: string, previous: string) =>
+      (value: string, previous: string[]) =>
         previous ? previous.concat(value) : [value],
-      [],
+      [] as string[],
     )
     .action(async (options: ViewAccountOptions) => {
       options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic var for id
@@ -55,14 +52,14 @@ export default (program: any) => {
           dynamicVariablesUtils.commandActions.account.view.action,
           {
             accountId: response.data.account,
-            balance: response.data.balance.balance,
+            balance: response.data.balance.balance.toString(),
             evmAddress: response.data.evm_address,
             type:
               response.data.key._type === 'ECDSA_SECP256K1'
                 ? 'ECDSA'
                 : 'ED25519',
             maxAutomaticTokenAssociations:
-              response.data.max_automatic_token_associations,
+              response.data.max_automatic_token_associations.toString(),
           },
         );
       } catch (error) {

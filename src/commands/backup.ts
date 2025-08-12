@@ -12,7 +12,18 @@ import { addAccount, addToken, addScript } from '../state/mutations';
 import { Logger } from '../utils/logger';
 import { DomainError, exitOnError } from '../utils/errors';
 
-import type { Command, State, Account } from '../../types';
+import type { State, Account, Token, Script } from '../../types';
+import type { StoreState } from '../state/store';
+import type { Command as CommanderCommand } from 'commander';
+
+// Local narrowed shapes for partial restores
+type AccountsOnly = Record<string, Account>;
+interface FullStateLike extends State {}
+
+function isFullStateLike(v: unknown): v is FullStateLike {
+  if (!v || typeof v !== 'object') return false;
+  return 'network' in v && 'accounts' in v; // light heuristic
+}
 
 const logger = Logger.getInstance();
 
@@ -66,9 +77,9 @@ function backupState(
   backupAccounts: boolean,
   safe: boolean,
   storagePath: string,
-) {
+): void {
   // Can be full state or subset (accounts object) when --accounts flag used
-  let data: State | Record<string, Account>;
+  let data: State | AccountsOnly;
 
   try {
     const statePath = path.join(__dirname, '..', 'state', 'state.json');
@@ -84,9 +95,7 @@ function backupState(
     backupFilename = `state.backup.${name}.json`;
   }
 
-  if (safe && 'network' in data) {
-    data = filterState(data);
-  }
+  if (safe && isFullStateLike(data)) data = filterState(data);
 
   // Only backup accounts if the user specified the --accounts flag
   if (backupAccounts) {
@@ -94,9 +103,7 @@ function backupState(
     if (name) {
       backupFilename = `accounts.backup.${name}.json`;
     }
-    if ('accounts' in data) {
-      data = data.accounts;
-    }
+    if (isFullStateLike(data)) data = data.accounts;
   }
 
   if (storagePath !== '' && !path.isAbsolute(storagePath)) {
@@ -126,34 +133,28 @@ function restoreState(
   restoreAccounts: boolean,
   restoreTokens: boolean,
   restoreScripts: boolean,
-) {
+): void {
   let raw: unknown;
   try {
     const backupPath = path.join(__dirname, '..', 'state', filename);
-    raw = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
-  } catch (error) {
+    raw = JSON.parse(fs.readFileSync(backupPath, 'utf8')) as unknown;
+  } catch {
     throw new DomainError('Unable to read backup file');
   }
 
-  // Distinguish between full state and accounts-only backup
-  const isFullState =
-    typeof raw === 'object' && raw !== null && 'network' in (raw as any);
-
-  if (!isFullState) {
+  if (!isFullStateLike(raw)) {
+    // Treat as accounts-only backup
     logger.log('Importing account backup');
-    storeSaveKey(
-      'accounts' as any,
-      (raw as Record<string, Account>) || ({} as any),
-    );
+    storeSaveKey('accounts', (raw as AccountsOnly) || {});
     logger.log('Account backup restored successfully');
     return;
   }
 
-  const data = raw as State;
+  const data: State = raw;
 
   if (!restoreAccounts && !restoreTokens && !restoreScripts) {
-    // full overwrite
-    storeUpdateState((draft: any) => {
+    // Full overwrite
+    storeUpdateState((draft: StoreState) => {
       draft.accounts = data.accounts || {};
       draft.tokens = data.tokens || {};
       draft.scripts = data.scripts || {};
@@ -163,32 +164,30 @@ function restoreState(
     return;
   }
 
-  // granular restore merges into existing using helpers
   if (restoreAccounts && data.accounts) {
-    Object.values(data.accounts).forEach((acc: any) => addAccount(acc, true));
+    Object.values(data.accounts).forEach((acc: Account) =>
+      addAccount(acc, true),
+    );
   }
   if (restoreTokens && data.tokens) {
-    Object.values(data.tokens).forEach((tok: any) => addToken(tok, true));
+    Object.values(data.tokens).forEach((tok: Token) => addToken(tok, true));
   }
   if (restoreScripts && data.scripts) {
-    Object.values(data.scripts).forEach((scr: any) => {
-      // scr already internal name keyed when coming from backup? If using same shape as state.scripts values we keep name field
-      addScript(scr, true);
-    });
+    Object.values(data.scripts).forEach((scr: Script) => addScript(scr, true));
   }
   logger.log('Backup restored successfully');
 }
 
-export default (program: any) => {
-  const network = program.command('backup');
+export default (program: CommanderCommand) => {
+  const backup = program.command('backup');
 
-  network
+  backup
     .command('create')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+    .hook('preAction', async (thisCommand: CommanderCommand) => {
+      const parent = thisCommand.parent;
+      const command = parent
+        ? [parent.name(), ...parent.args]
+        : [thisCommand.name()];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -210,13 +209,13 @@ export default (program: any) => {
       }),
     );
 
-  network
+  backup
     .command('restore')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+    .hook('preAction', async (thisCommand: CommanderCommand) => {
+      const parent = thisCommand.parent;
+      const command = parent
+        ? [parent.name(), ...parent.args]
+        : [thisCommand.name()];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }

@@ -20,7 +20,7 @@ import type { Account } from '../../types';
 const logger = Logger.getInstance();
 
 function clearAddressBook(): void {
-  storeUpdateState((s: any) => {
+  storeUpdateState((s) => {
     s.accounts = {};
   });
 }
@@ -33,7 +33,7 @@ function deleteAccount(accountIdOrName: string): void {
     throw new DomainError('Account not found');
   }
 
-  storeUpdateState((s: any) => {
+  storeUpdateState((s) => {
     delete s.accounts[account.name];
   });
 }
@@ -92,8 +92,10 @@ async function createAccount(
   }
 
   // Only ECDSA supported
-  let newAccountPrivateKey = PrivateKey.generateECDSA();
-  let newAccountPublicKey = newAccountPrivateKey.publicKey;
+  const newAccountPrivateKey = PrivateKey.generateECDSA();
+  const newAccountPublicKey = newAccountPrivateKey.publicKey; // PublicKey object
+  const newAccountPublicKeyStr = newAccountPublicKey.toStringRaw();
+  const newAccountEvmAddress = newAccountPublicKey.toEvmAddress();
 
   let newAccountId;
   try {
@@ -121,17 +123,20 @@ async function createAccount(
     name,
     accountId: newAccountId.toString(),
     type: 'ECDSA',
-    publicKey: newAccountPrivateKey.publicKey.toString(),
-    evmAddress: newAccountPrivateKey.publicKey.toEvmAddress(),
-    solidityAddress: `${newAccountId.toSolidityAddress()}`,
+    publicKey: newAccountPublicKeyStr,
+    evmAddress: newAccountEvmAddress,
+    solidityAddress: newAccountId.toSolidityAddress(),
     solidityAddressFull: `0x${newAccountId.toSolidityAddress()}`,
-    privateKey: newAccountPrivateKey.toString(),
+    privateKey: newAccountPrivateKey.toStringRaw(),
   };
   // Transactional storage via helper (overwrite false to keep safety)
   addAccount(newAccountDetails, false);
 
   // Log the account ID
-  logger.log(`The new account ID is: ${newAccountId}, with name: ${name}`);
+  const newAccountIdStr = newAccountId.toString();
+  logger.log(
+    'The new account ID is: ' + newAccountIdStr + ', with name: ' + name,
+  );
   client.close();
 
   return newAccountDetails;
@@ -194,7 +199,8 @@ function importAccount(id: string, key: string, name: string): Account {
     throw new DomainError('An account with this name already exists.');
   }
 
-  let privateKey, type;
+  let privateKey: PrivateKey | undefined;
+  let type: string | undefined;
   const accountId = AccountId.fromString(id);
 
   if (isValidECDSAPrivateKey(key)) {
@@ -205,26 +211,27 @@ function importAccount(id: string, key: string, name: string): Account {
     throw new DomainError('Invalid key type. Only ECDSA keys are supported.');
   }
 
-  let created: Account | undefined;
   // Primary write via new store actions (validation already done above)
+  // Use DER encoding for public key to maintain backwards compatibility with stored state/tests
+  const accountPublicKeyStr = privateKey.publicKey.toStringDer();
+  const accountEvmAddress = privateKey.publicKey.toEvmAddress();
   const account: Account = {
     network: stateUtils.getNetwork(),
     name,
     accountId: id,
     type,
-    publicKey: privateKey.publicKey.toString(),
-    evmAddress: privateKey.publicKey.toEvmAddress(),
-    solidityAddress: `${accountId.toSolidityAddress()}`,
+    publicKey: accountPublicKeyStr,
+    evmAddress: accountEvmAddress,
+    solidityAddress: accountId.toSolidityAddress(),
     solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: key,
-  } as Account;
+  };
   actions().addAccount(account, true);
   // Dual write legacy
-  storeUpdateState((s: any) => {
+  storeUpdateState((s) => {
     s.accounts[name] = account;
   });
-  created = account;
-  return created!;
+  return account;
 }
 
 function importAccountId(id: string, name: string): Account {
@@ -237,7 +244,6 @@ function importAccountId(id: string, name: string): Account {
   }
 
   const accountId = AccountId.fromString(id);
-  let created: Account | undefined;
   const account: Account = {
     network: stateUtils.getNetwork(),
     name,
@@ -245,16 +251,15 @@ function importAccountId(id: string, name: string): Account {
     type: '',
     publicKey: '',
     evmAddress: '',
-    solidityAddress: `${accountId.toSolidityAddress()}`,
+    solidityAddress: accountId.toSolidityAddress(),
     solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: '',
-  } as Account;
+  };
   actions().addAccount(account, true);
-  storeUpdateState((s: any) => {
+  storeUpdateState((s) => {
     s.accounts[name] = account;
   });
-  created = account;
-  return created!;
+  return account;
 }
 
 async function getAccountBalance(
@@ -364,7 +369,7 @@ function findAccountByName(inputName: string): Account {
 
 function getPublicKeyFromPrivateKey(privateKey: string): string {
   if (isValidECDSAPrivateKey(privateKey)) {
-    return PrivateKey.fromStringECDSA(privateKey).publicKey.toString();
+    return PrivateKey.fromStringECDSA(privateKey).publicKey.toStringRaw();
   }
   logger.error('Invalid private key');
   throw new DomainError('Invalid private key');

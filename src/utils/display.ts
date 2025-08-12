@@ -3,13 +3,15 @@ import type {
   AccountResponse,
   TokenBalance,
   DisplayBalanceOptions,
-  DisplayOptions,
 } from '../../types';
 import { Logger } from './logger';
 
 const logger = Logger.getInstance();
 
-type DisplayFunction = (response: APIResponse, options?: any) => void;
+type DisplayFunction = (
+  response: APIResponse,
+  options?: DisplayBalanceOptions,
+) => void;
 
 // -- display balance functions -- //
 function displayHbarBalance(accountId: string, hbars: number): void {
@@ -53,18 +55,18 @@ function displayAllBalances(
 
 function displayBalance(
   response: APIResponse,
-  options: DisplayBalanceOptions,
+  options?: DisplayBalanceOptions,
 ): void {
   const accountResponse = response.data as AccountResponse;
   const accountId = accountResponse.account;
   const hbars = accountResponse.balance.balance;
   const tokens = accountResponse.balance.tokens;
 
-  if (options.onlyHbar) {
+  if (options?.onlyHbar) {
     return displayHbarBalance(accountId, hbars);
   }
 
-  if (options.tokenId) {
+  if (options?.tokenId) {
     return displayTokenBalance(accountId, tokens, options.tokenId);
   }
 
@@ -72,16 +74,18 @@ function displayBalance(
 }
 
 const displayFunctions: Record<string, DisplayFunction> = {
-  displayBalance: displayBalance,
+  displayBalance,
 };
 
 // -- main display function -- //
 function display(
   displayFunctionName: string,
   response: APIResponse,
-  options: DisplayOptions,
+  options: DisplayBalanceOptions,
 ): void {
-  displayFunctions[displayFunctionName](response, options);
+  const fn = displayFunctions[displayFunctionName];
+  if (!fn) return; // unknown display function (silently ignore)
+  fn(response, options);
 }
 
 export { display };

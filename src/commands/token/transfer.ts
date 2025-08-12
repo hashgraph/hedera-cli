@@ -4,19 +4,17 @@ import telemetryUtils from '../../utils/telemetry';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
 
-import type { Command } from '../../../types';
+import { Command } from 'commander';
 import tokenUtils from '../../utils/token';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('transfer')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -42,12 +40,12 @@ export default (program: any) => {
       const balance = options.balance;
 
       // Find sender account
-      let fromAccount = stateUtils.getAccountByIdOrName(fromIdOrName);
-      let fromId = fromAccount.accountId;
+      const fromAccount = stateUtils.getAccountByIdOrName(fromIdOrName);
+      const fromId = fromAccount.accountId;
 
       // Find receiver account
-      let toAccount = stateUtils.getAccountByIdOrName(toIdOrName);
-      let toId = toAccount.accountId;
+      const toAccount = stateUtils.getAccountByIdOrName(toIdOrName);
+      const toId = toAccount.accountId;
 
       await tokenUtils.transfer(
         tokenId,

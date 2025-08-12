@@ -17,14 +17,11 @@ async function transfer(
     throw new DomainError('Cannot transfer to the same account');
   }
 
-  // Find sender account
-  let fromAccount, fromId;
-  fromAccount = stateUtils.getAccountByIdOrName(from);
-  fromId = fromAccount.accountId;
-
-  // Find receiver account
-  let toAccount = stateUtils.getAccountByIdOrName(to);
-  let toId = toAccount.accountId;
+  // Find sender & receiver accounts
+  const fromAccount = stateUtils.getAccountByIdOrName(from);
+  const fromId = fromAccount.accountId;
+  const toAccount = stateUtils.getAccountByIdOrName(to);
+  const toId = toAccount.accountId;
 
   const client = stateUtils.getHederaClient();
   try {

@@ -1,4 +1,8 @@
-import { getState, saveKey as storeSaveKey } from '../state/store';
+import {
+  getState,
+  saveKey as storeSaveKey,
+  type StoreState,
+} from '../state/store';
 import { DomainError } from './errors';
 
 interface CommandAction {
@@ -20,16 +24,20 @@ interface CommandOutput {
  * @param options Any Commander Options object
  * @returns
  */
-function replaceOptions<T extends Record<string, any>>(options: T): T {
-  const state: any = getState();
-  if (!state.scriptExecution?.active) return options;
+// Accept a generic options object (Commander options) and replace templated values.
+// We purposefully index with string keys using a partial Record view to avoid requiring
+// an index signature on caller types.
+function replaceOptions<T extends object>(options: T): T {
+  const state = getState();
+  if (!state.scriptExecution.active) return options;
 
-  Object.keys(options).forEach((option) => {
+  Object.keys(options as Record<string, unknown>).forEach((option) => {
     if (option === 'args') return;
-    if (typeof options[option] !== 'string') return;
+    const currentVal = (options as Record<string, unknown>)[option];
+    if (typeof currentVal !== 'string') return;
 
     const regex = /\{\{(.+?)\}\}/g;
-    const match = regex.exec(options[option]);
+    const match = regex.exec(currentVal);
     if (match === null) return;
 
     const argument = match[1];
@@ -46,7 +54,7 @@ function replaceOptions<T extends Record<string, any>>(options: T): T {
       );
     }
     const argumentValue = scriptEntry.args[argument];
-    (options as Record<string, any>)[option] = argumentValue;
+    (options as Record<string, unknown>)[option] = argumentValue;
   });
 
   return options;
@@ -148,15 +156,15 @@ const commandOutputs: CommandOutputs = {
 function storeArgs(
   args: string[],
   action: string,
-  output: Record<string, any>,
+  output: Record<string, string>,
 ) {
-  const state: any = getState();
-  if (!state.scriptExecution?.active) return;
+  const state = getState();
+  if (!state.scriptExecution.active) return;
 
   // return if action doesn't have output
   if (action === '' || !action) return;
 
-  let stateArgs: Record<string, string> = {};
+  const stateArgs: Record<string, string> = {};
 
   args.forEach((arg) => {
     const splittedArg = arg.split(':');
@@ -169,10 +177,12 @@ function storeArgs(
   const scriptKey = `script-${state.scriptExecution.name}`;
   const currentScript = state.scripts[scriptKey];
   if (!currentScript) return; // silently ignore if script missing
-  const newScripts = { ...state.scripts } as any;
   const mergedArgs = { ...(currentScript.args || {}), ...stateArgs };
-  newScripts[scriptKey] = { ...currentScript, args: mergedArgs };
-  storeSaveKey('scripts', newScripts as any);
+  const newScripts: StoreState['scripts'] = {
+    ...state.scripts,
+    [scriptKey]: { ...currentScript, args: mergedArgs },
+  };
+  storeSaveKey('scripts', newScripts);
 }
 
 const dynamicVariables = {

@@ -1,5 +1,5 @@
+import { Command } from 'commander';
 import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
-
 import { myParseInt } from '../../utils/verification';
 import tokenUtils from '../../utils/token';
 import stateUtils from '../../utils/state';
@@ -7,8 +7,7 @@ import telemetryUtils from '../../utils/telemetry';
 import { Logger } from '../../utils/logger';
 import { DomainError, exitOnError } from '../../utils/errors';
 import { addToken } from '../../state/mutations';
-
-import type { Command, Token } from '../../../types';
+import type { Token } from '../../../types/state';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import signUtils from '../../utils/sign';
 
@@ -38,9 +37,9 @@ async function createFungibleToken(
 ): Promise<string> {
   const client = stateUtils.getHederaClient();
 
-  let tokenId;
+  let tokenId: string | undefined;
   try {
-    let tokenCreateTx = await new TokenCreateTransaction()
+    const tokenCreateTx = new TokenCreateTransaction()
       .setTokenName(name)
       .setTokenSymbol(symbol)
       .setDecimals(decimals)
@@ -50,8 +49,7 @@ async function createFungibleToken(
       .setTreasuryAccountId(treasuryId)
       .setAdminKey(PrivateKey.fromStringDer(adminKey).publicKey)
       .freezeWith(client);
-
-    let tokenCreateTxSigned = await signUtils.signByType(
+    const tokenCreateTxSigned = await signUtils.signByType(
       tokenCreateTx,
       'tokenCreate',
       {
@@ -59,15 +57,15 @@ async function createFungibleToken(
         treasuryKey: treasuryKey,
       },
     );
-    let tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
-    let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
-    tokenId = tokenCreateRx.tokenId;
+    const tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
+    const tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
+    tokenId = tokenCreateRx.tokenId?.toString();
 
     if (tokenId == null) {
       throw new DomainError('Token was not created');
     }
 
-    logger.log(`Token ID: ${tokenId.toString()}`);
+    logger.log(`Token ID: ${tokenId}`);
   } catch (error) {
     client.close();
     throw new DomainError('Failed to create token');
@@ -76,7 +74,7 @@ async function createFungibleToken(
   // Store new token in state
   logger.verbose(`Storing new token with ID ${tokenId} in state`);
   const newToken: Token = {
-    tokenId: tokenId.toString(),
+    tokenId: tokenId,
     associations: [],
     name,
     symbol,
@@ -101,17 +99,15 @@ async function createFungibleToken(
   addToken(newToken, false);
 
   client.close();
-  return tokenId.toString();
+  return tokenId;
 }
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('create')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -148,9 +144,9 @@ export default (program: any) => {
     .option(
       '--args <args>',
       'Store arguments for scripts',
-      (value: string, previous: string) =>
-        previous ? previous.concat(value) : [value],
-      [],
+      (value: string, previous: string[]) =>
+        previous ? [...previous, value] : [value],
+      [] as string[],
     )
     .action(
       exitOnError(async (options: CreateOptions) => {
@@ -171,7 +167,7 @@ export default (program: any) => {
           options.args,
           dynamicVariablesUtils.commandActions.token.create.action,
           {
-            tokenId: tokenId.toString(),
+            tokenId: tokenId,
             name: options.name,
             symbol: options.symbol,
             treasuryId: options.treasuryId,

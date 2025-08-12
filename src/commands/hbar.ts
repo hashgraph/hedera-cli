@@ -7,20 +7,19 @@ import { Logger } from '../utils/logger';
 import { DomainError, exitOnError } from '../utils/errors';
 import hbarUtils from '../utils/hbar';
 
-import type { Account, Command } from '../../types';
+import type { Account } from '../../types';
+import { Command } from 'commander';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   const hbar = program.command('hbar');
 
   hbar
     .command('transfer')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -41,9 +40,7 @@ export default (program: any) => {
 
         if (!options.from) {
           try {
-            const accounts: Account[] = Object.values(
-              (getState() as any).accounts,
-            );
+            const accounts: Account[] = Object.values(getState().accounts);
             const filteredAccounts = accounts.filter(
               (account) => account.network === network,
             );
@@ -63,9 +60,7 @@ export default (program: any) => {
 
         if (!options.to) {
           try {
-            const accounts: Account[] = Object.values(
-              (getState() as any).accounts,
-            );
+            const accounts: Account[] = Object.values(getState().accounts);
             const filteredAccounts = accounts.filter(
               (account) => account.network === network,
             );

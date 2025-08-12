@@ -50,12 +50,12 @@ const associateToken = async (
   tokenId: string,
   accountIdorName: string,
 ): Promise<void> => {
-  let account = stateUtils.getAccountByIdOrName(accountIdorName);
+  const account = stateUtils.getAccountByIdOrName(accountIdorName);
 
   const client = stateUtils.getHederaClient();
   try {
     // Associate token with account
-    const tokenAssociateTx = await new TokenAssociateTransaction()
+    const tokenAssociateTx = new TokenAssociateTransaction()
       .setAccountId(account.accountId)
       .setTokenIds([tokenId])
       .freezeWith(client);
@@ -65,7 +65,7 @@ const associateToken = async (
       account.privateKey,
     );
 
-    let tokenAssociateSubmit = await signedTokenAssociateTx.execute(client);
+    const tokenAssociateSubmit = await signedTokenAssociateTx.execute(client);
     await tokenAssociateSubmit.getReceipt(client);
 
     logger.log(`Token associated: ${tokenId}`);
@@ -88,7 +88,7 @@ const transfer = async (
 ) => {
   const client = stateUtils.getHederaClient();
   try {
-    const transferTx = await new TransferTransaction()
+    const transferTx = new TransferTransaction()
       .addTokenTransfer(tokenId, fromId, balance * -1)
       .addTokenTransfer(tokenId, toId, balance)
       .freezeWith(client);

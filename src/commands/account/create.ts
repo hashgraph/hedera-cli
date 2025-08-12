@@ -7,18 +7,16 @@ import { exitOnError } from '../../utils/errors';
 import telemetryUtils from '../../utils/telemetry';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
-import type { Command } from '../../../types';
+import { Command } from 'commander';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('create')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -39,22 +37,22 @@ export default (program: any) => {
     .option(
       '--auto-associations <autoAssociations>',
       'Set number of automatic associations',
+      (value: string) => Number(value),
       0,
     )
     .option(
-      '--args <args>',
-      'Store arguments for scripts',
-      (value: string, previous: string) =>
-        previous ? previous.concat(value) : [value],
-      [],
+      '--args <arg>',
+      'Store arguments for scripts (repeatable)',
+      (value: string, previous: string[]) =>
+        previous ? [...previous, value] : [value],
+      [] as string[],
     )
     .action(
       exitOnError(async (options: CreateAccountOptions) => {
         logger.verbose(`Creating account with name: ${options.name}`);
 
         options = dynamicVariablesUtils.replaceOptions(options);
-
-        let accountDetails = await accountUtils.createAccount(
+        const accountDetails = await accountUtils.createAccount(
           options.balance,
           'ECDSA',
           options.name,

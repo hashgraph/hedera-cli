@@ -1,25 +1,22 @@
+import { Command } from 'commander';
 import stateUtils from '../../utils/state';
 import { Logger } from '../../utils/logger';
-
 import accountUtils from '../../utils/account';
 import { DomainError, exitOnError } from '../../utils/errors';
 import telemetryUtils from '../../utils/telemetry';
 import { getState } from '../../state/store';
 import enquirerUtils from '../../utils/enquirer';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
-
-import type { Command, Account } from '../../../types';
+import type { Account } from '../../../types/state';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('delete')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -38,13 +35,12 @@ export default (program: any) => {
         }
 
         // Prompt for account ID or name if not provided
-        let accountIdOrName;
+        let accountIdOrName: string | undefined;
         const network = stateUtils.getNetwork();
         if (!options.id && !options.name) {
           try {
-            const accounts: Account[] = Object.values(
-              (getState() as any).accounts,
-            );
+            const state = getState();
+            const accounts: Account[] = Object.values(state.accounts);
             const filteredAccounts = accounts.filter(
               (account) => account.network === network,
             );

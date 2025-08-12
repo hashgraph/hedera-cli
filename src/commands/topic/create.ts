@@ -6,19 +6,17 @@ import telemetryUtils from '../../utils/telemetry';
 import { addTopic } from '../../state/mutations';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { TopicCreateTransaction, PrivateKey } from '@hashgraph/sdk';
-
-import type { Command, Topic } from '../../../types';
+import { Command } from 'commander';
+import type { Topic } from '../../../types';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('create')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -30,9 +28,9 @@ export default (program: any) => {
     .option(
       '--args <args>',
       'Store arguments for scripts',
-      (value: string, previous: string) =>
+      (value: string, previous: string[]) =>
         previous ? previous.concat(value) : [value],
-      [],
+      [] as string[],
     )
     .action(
       exitOnError(async (options: CreateTopicOptions) => {

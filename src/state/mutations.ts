@@ -9,7 +9,7 @@ const logger = Logger.getInstance();
  * Add (or overwrite if allowed) an account in a transactional way.
  */
 export function addAccount(account: Account, overwrite = false): Account {
-  const storeAccounts = getState().accounts as Record<string, Account>;
+  const storeAccounts = getState().accounts;
   if (!overwrite && storeAccounts[account.name]) {
     logger.error(`Account with name ${account.name} already exists`);
     throw new DomainError('Account already exists');
@@ -22,7 +22,7 @@ export function addAccount(account: Account, overwrite = false): Account {
  * Remove an account by name.
  */
 export function removeAccount(name: string): void {
-  const storeAccounts = getState().accounts as Record<string, Account>;
+  const storeAccounts = getState().accounts;
   if (!storeAccounts[name]) {
     logger.error(`Account with name ${name} not found`);
     throw new DomainError('Account not found');
@@ -31,7 +31,7 @@ export function removeAccount(name: string): void {
 }
 
 export function addToken(token: Token, overwrite = false): Token {
-  const existing = getState().tokens as Record<string, Token>;
+  const existing = getState().tokens;
   if (!overwrite && existing[token.tokenId]) {
     logger.error(`Token with ID ${token.tokenId} already exists`);
     throw new DomainError('Token already exists');
@@ -41,7 +41,7 @@ export function addToken(token: Token, overwrite = false): Token {
 }
 
 export function addTopic(topic: Topic, overwrite = false): Topic {
-  const existing = getState().topics as Record<string, Topic>;
+  const existing = getState().topics;
   if (!overwrite && existing[topic.topicId]) {
     logger.error(`Topic with ID ${topic.topicId} already exists`);
     throw new DomainError('Topic already exists');
@@ -52,7 +52,7 @@ export function addTopic(topic: Topic, overwrite = false): Topic {
 
 export function addScript(script: Script, overwrite = false): Script {
   const internal = `script-${script.name}`;
-  const existing = getState().scripts as Record<string, Script>;
+  const existing = getState().scripts;
   if (!overwrite && existing[internal]) {
     logger.error(`Script with name ${script.name} already exists`);
     throw new DomainError('Script already exists');

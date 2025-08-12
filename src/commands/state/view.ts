@@ -1,20 +1,18 @@
+import { Command } from 'commander';
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
-import type { Command } from '../../../types';
 import { Logger } from '../../utils/logger';
 import { getState } from '../../state/store';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('view')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }
@@ -30,7 +28,7 @@ export default (program: any) => {
       options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for account-name, account-id, and token-id
       logger.verbose('Viewing state');
 
-      const state = getState() as any;
+      const state = getState();
 
       if (
         !options.accounts &&
@@ -41,7 +39,7 @@ export default (program: any) => {
         !options.tokenId
       ) {
         logger.log('\nState:');
-        logger.log(state);
+        logger.log(state); // logger handles object formatting
         return;
       }
 

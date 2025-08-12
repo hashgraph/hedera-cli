@@ -1,11 +1,11 @@
+import { Command } from 'commander';
 import { getState } from '../../state/store';
 import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import { execSync } from 'child_process';
 import { Logger } from '../../utils/logger';
 import { DomainError, exitOnError } from '../../utils/errors';
-
-import type { Command, Script } from '../../../types';
+import type { Script } from '../../../types';
 
 const logger = Logger.getInstance();
 
@@ -13,10 +13,10 @@ interface ScriptLoadOptions {
   name: string;
 }
 
-function loadScript(name: string) {
+function loadScript(name: string): void {
   stateUtils.startScriptExecution(name);
 
-  const state = getState() as any;
+  const state = getState();
   const scripts: Record<string, Script> = state.scripts;
   const scriptName = `script-${name}`;
   const script = scripts[scriptName];
@@ -43,7 +43,7 @@ function loadScript(name: string) {
 
       try {
         execSync(`npx ${command}`, { stdio: 'inherit' });
-      } catch (error: any) {
+      } catch {
         stateUtils.stopScriptExecution();
         throw new DomainError('Unable to execute command');
       }
@@ -53,7 +53,7 @@ function loadScript(name: string) {
     // For other commands, we need to run the hedera-cli.js script
     try {
       execSync(`node dist/hedera-cli.js ${command}`, { stdio: 'inherit' });
-    } catch (error: any) {
+    } catch {
       stateUtils.stopScriptExecution();
       throw new DomainError('Unable to execute command');
     }
@@ -63,14 +63,12 @@ function loadScript(name: string) {
   logger.log(`\nScript ${script.name} executed successfully`);
 }
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('load')
     .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
+      const parentName = thisCommand.parent?.name() || 'unknown';
+      const command = [parentName, ...(thisCommand.parent?.args ?? [])];
       if (stateUtils.isTelemetryEnabled()) {
         await telemetryUtils.recordCommand(command.join(' '));
       }

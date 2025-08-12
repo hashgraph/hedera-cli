@@ -17,28 +17,25 @@ export function fail(message: string, code = 1): never {
 }
 
 // Wrap a top-level invocation so DomainErrors set exitCode and allow graceful shutdown
-export function exitOnError<T extends (...args: any[]) => Promise<any> | any>(
+export function exitOnError<T extends (...args: any[]) => void | Promise<void>>( // eslint-disable-line @typescript-eslint/no-explicit-any
   fn: T,
-): T {
-  return (async (...args: any[]) => {
+): (...funcArgs: Parameters<T>) => Promise<void> {
+  return async (...funcArgs: Parameters<T>): Promise<void> => {
     try {
-      return await fn(...args);
-    } catch (e: any) {
+      await fn(...funcArgs);
+    } catch (e: unknown) {
       if (e instanceof DomainError) {
-        // Step A: graceful termination without hard process.exit
         process.exitCode = e.code;
-        // Step C: attempt to flush telemetry before exiting naturally
         try {
-          // Optional chaining in case older telemetry utils lack flush
           await telemetryUtils.flush?.();
         } catch {
-          /* swallow */
+          /* ignore flush errors */
         }
-        return; // swallow the DomainError after setting exitCode
+        return;
       }
       throw e;
     }
-  }) as unknown as T;
+  };
 }
 
 // Install global handlers for unhandled rejections & uncaught exceptions (optional hardening)
@@ -53,26 +50,34 @@ export function installGlobalErrorHandlers(): void {
     }
   };
 
-  if (!(global as any)._hcliGlobalHandlersInstalled) {
-    (global as any)._hcliGlobalHandlersInstalled = true;
+  const g = global as unknown as { _hcliGlobalHandlersInstalled?: boolean };
+  if (!g._hcliGlobalHandlersInstalled) {
+    g._hcliGlobalHandlersInstalled = true;
 
-    process.on('unhandledRejection', (reason: any) => {
+    process.on('unhandledRejection', (reason: unknown) => {
       if (reason instanceof DomainError) {
         if (process.exitCode == null) process.exitCode = reason.code;
       } else {
-        logger.error('Unhandled promise rejection', reason as any);
+        const detail =
+          typeof reason === 'object' && reason !== null
+            ? reason
+            : { value: String(reason) };
+        logger.error('Unhandled promise rejection', detail);
         if (process.exitCode == null) process.exitCode = 1;
       }
-      // Fire and forget; don't hold the process open excessively.
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
       flushTelemetry();
     });
 
-    process.on('uncaughtException', (err: any) => {
+    process.on('uncaughtException', (err: unknown) => {
       if (err instanceof DomainError) {
         if (process.exitCode == null) process.exitCode = err.code;
       } else {
-        logger.error('Uncaught exception', err as any);
+        const detail =
+          typeof err === 'object' && err !== null
+            ? err
+            : { value: String(err) };
+        logger.error('Uncaught exception', detail);
         if (process.exitCode == null) process.exitCode = 1;
       }
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
