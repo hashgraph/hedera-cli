@@ -30,7 +30,10 @@
   "overrides": [
     {
       "files": ["**/__tests__/**", "**/*.test.ts"],
-      "env": { "jest": true }
+      "env": { "jest": true },
+      "parserOptions": {
+        "project": "./tsconfig.test.json"
+      }
     },
     {
       "files": ["__tests__/setup/silenceLogs.ts"],
