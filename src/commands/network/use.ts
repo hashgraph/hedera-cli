@@ -1,8 +1,8 @@
 import { Command } from 'commander';
+import { exitOnError } from '../../utils/errors';
+import { Logger } from '../../utils/logger';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
-import { Logger } from '../../utils/logger';
-import { exitOnError } from '../../utils/errors';
 
 const logger = Logger.getInstance();
 

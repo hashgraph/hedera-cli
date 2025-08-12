@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build": "npm run format && rimraf --glob 'dist/' && tsc && npm run copy-input && npm run copy-contracts",
-    "build-test": "tsc -p tsconfig.test.json ",
+    "build-test": "tsc && tsc -p tsconfig.test.json && npm run test ",
     "clean": "rm -rf dist/ && rm -rf coverage/ && rm -rf junit.xml && rm -rf junit-e2e.xml",
     "dev-build": "rm -rf dist/ && tsc && npm run copy-input && npm run watch",
     "watch": "tsc --watch",
@@ -26,7 +26,7 @@
     "lint:fix": "eslint 'src/**/*.{js,ts,tsx}' --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-  "prepare": "husky install",
+    "prepare": "husky install",
     "test:unit": "JEST_SUITE_NAME='Unit Tests' JEST_JUNIT_OUTPUT_NAME='junit.xml' jest -c jest.unit.config.js --coverage --coverageDirectory='coverage/unit'",
     "test:e2e": "JEST_SUITE_NAME='E2E Tests' JEST_JUNIT_OUTPUT_NAME='junit-e2e.xml' jest -c jest.e2e.config.js --coverage --coverageDirectory='coverage/e2e' --runInBand",
     "test:all": "npm run test:unit && npm run test:e2e",

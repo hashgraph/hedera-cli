@@ -1,9 +1,9 @@
 import { Command } from 'commander';
-import stateUtils from '../../utils/state';
-import { telemetryPreAction } from '../shared/telemetryHook';
-import { Logger } from '../../utils/logger';
 import { updateState as storeUpdateState } from '../../state/store';
 import { exitOnError } from '../../utils/errors';
+import { Logger } from '../../utils/logger';
+import stateUtils from '../../utils/state';
+import { telemetryPreAction } from '../shared/telemetryHook';
 
 const logger = Logger.getInstance();
 

@@ -1,7 +1,7 @@
 import { program } from 'commander';
 import commands from './commands';
-import { Logger } from './utils/logger';
 import { installGlobalErrorHandlers } from './utils/errors';
+import { Logger } from './utils/logger';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json') as { version?: string };

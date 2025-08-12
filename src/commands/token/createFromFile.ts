@@ -1,30 +1,30 @@
-import { Command } from 'commander';
-import * as path from 'path';
-import * as fs from 'fs/promises';
 import {
+  CustomFee,
+  PrivateKey,
   TokenCreateTransaction,
   TokenType,
-  PrivateKey,
-  CustomFee,
 } from '@hashgraph/sdk';
-import accountUtils from '../../utils/account';
-import tokenUtils from '../../utils/token';
-import stateUtils from '../../utils/state';
-import { telemetryPreAction } from '../shared/telemetryHook';
-import feeUtils from '../../utils/fees';
-import { Logger } from '../../utils/logger';
-import { fail, exitOnError } from '../../utils/errors';
-import { get as storeGet, saveKey as storeSaveKey } from '../../state/store';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { Command } from 'commander';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import type {
   Account,
-  Token,
-  Keys,
   CustomFeeInput,
   FixedFee,
   FractionalFee,
+  Keys,
+  Token,
 } from '../../../types/state';
+import { get as storeGet, saveKey as storeSaveKey } from '../../state/store';
+import accountUtils from '../../utils/account';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { exitOnError, fail } from '../../utils/errors';
+import feeUtils from '../../utils/fees';
+import { Logger } from '../../utils/logger';
 import signUtils from '../../utils/sign';
+import stateUtils from '../../utils/state';
+import tokenUtils from '../../utils/token';
+import { telemetryPreAction } from '../shared/telemetryHook';
 
 const logger = Logger.getInstance();
 

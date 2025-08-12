@@ -1,6 +1,6 @@
-import { telemetryPreAction } from './shared/telemetryHook';
-import { Logger } from '../utils/logger';
 import { exitOnError } from '../utils/errors';
+import { Logger } from '../utils/logger';
+import { telemetryPreAction } from './shared/telemetryHook';
 
 import { Command } from 'commander';
 
