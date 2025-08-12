@@ -9,7 +9,6 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import type {
   Account,
-  CustomFeeInput,
   FixedFee,
   FractionalFee,
   Keys,
@@ -25,6 +24,11 @@ import signUtils from '../../utils/sign';
 import stateUtils from '../../utils/state';
 import tokenUtils from '../../utils/token';
 import { telemetryPreAction } from '../shared/telemetryHook';
+import {
+  mapToTokenInput,
+  TokenFileDefinition,
+  validateTokenFile,
+} from './schema';
 
 const logger = Logger.getInstance();
 
@@ -33,18 +37,9 @@ interface CreateTokenFromFileOptions {
   args: string[];
 }
 
-interface TokenInput {
-  name: string;
-  symbol: string;
-  decimals: number;
-  supplyType: 'finite' | 'infinite';
-  initialSupply: number;
-  keys: Keys;
-  maxSupply: number;
-  treasuryId?: string;
-  treasuryKey: string;
-  customFees: CustomFeeInput[];
-  memo: string;
+// TokenInput now derives from validated token file definition shape
+interface TokenInput extends TokenFileDefinition {
+  treasuryId?: string; // may be inferred
 }
 
 function getTreasuryIdByTreasuryKey(treasuryKey: string): string {
@@ -343,21 +338,16 @@ async function createToken(options: CreateTokenFromFileOptions) {
   const filepath = resolveTokenFilePath(resolvedOptions.file);
   const fileContent = await fs.readFile(filepath, 'utf-8');
   const raw = JSON.parse(fileContent) as unknown;
-  const isTokenInput = (o: unknown): o is TokenInput =>
-    !!o &&
-    typeof o === 'object' &&
-    'name' in o &&
-    'symbol' in o &&
-    'decimals' in o &&
-    'initialSupply' in o &&
-    'keys' in o &&
-    'maxSupply' in o &&
-    Array.isArray((o as { customFees?: unknown }).customFees);
-  if (!isTokenInput(raw)) {
+  const validated = validateTokenFile(raw);
+  if (!validated.valid || !validated.data) {
+    logger.error('Token file validation failed');
+    if (validated.errors && validated.errors.length) {
+      validated.errors.forEach((e) => logger.error(e));
+    }
     fail('Invalid token definition file');
   }
-  const tokenDefinition = raw;
-  const token = await createTokenFromFile(tokenDefinition);
+  const tokenDefinition = mapToTokenInput(validated.data);
+  const token = await createTokenFromFile(tokenDefinition as TokenInput);
 
   // Store dynamic script variables
   dynamicVariablesUtils.storeArgs(
