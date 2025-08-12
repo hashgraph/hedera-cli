@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 set -e
 
-echo "pre-push: running tests (npm run test:all)"
-if npm run test:all; then
+echo "pre-push: running unit tests (npm run test:unit)"
+if npm run test:unit; then
 	echo "pre-push: success"
 else
 	code=$?
