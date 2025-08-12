@@ -4,7 +4,6 @@ import commands from "../../../src/commands";
 import accountUtils from "../../../src/utils/account";
 import { saveState as storeSaveState, saveKey as storeSaveKey, get as storeGet } from "../../../src/state/store";
 
-jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("account delete command", () => {
   beforeEach(() => {

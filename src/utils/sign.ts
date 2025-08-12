@@ -1,9 +1,5 @@
 import { Transaction, PrivateKey } from '@hashgraph/sdk';
-
-import { Logger } from './logger';
 import { DomainError } from './errors';
-
-const logger = Logger.getInstance();
 
 interface SigningRequirements {
   [action: string]: {

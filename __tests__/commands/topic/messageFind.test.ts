@@ -10,7 +10,6 @@ import { Logger } from "../../../src/utils/logger";
 import stateUtils from '../../../src/utils/state';
 
 const logger = Logger.getInstance();
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('axios');
 
 describe('topic message find command', () => {

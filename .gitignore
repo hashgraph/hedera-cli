@@ -128,3 +128,11 @@ hedera-cli/state.json
 
 # Exclude semantic-release version info
 VERSION
+
+# User configuration overrides (cosmiconfig) - keep local only
+hedera-cli.config.local.json
+hedera-cli.config.*.local.json
+.hedera-clirc
+.hedera-clirc.json
+.hedera-clirc.yaml
+.hedera-clirc.yml

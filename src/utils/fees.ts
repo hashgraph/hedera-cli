@@ -5,14 +5,8 @@ import {
   AccountId,
   CustomFee,
 } from '@hashgraph/sdk';
-
-import { Logger } from './logger';
 import { DomainError } from './errors';
-
 import { FixedFee, FractionalFee } from '../../types';
-
-const logger = Logger.getInstance();
-
 function createCustomFixedFee(fee: FixedFee): CustomFee {
   const customFee = new CustomFixedFee();
 

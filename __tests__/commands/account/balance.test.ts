@@ -7,7 +7,6 @@ import { accountResponse, getAccountInfoResponseMock } from "../../helpers/api/a
 import { baseState } from "../../helpers/state";
 import { saveState as storeSaveState } from "../../../src/state/store";
 
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("account balance command", () => {
   const logSpy = jest.spyOn(console, 'log');

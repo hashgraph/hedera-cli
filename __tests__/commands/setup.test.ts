@@ -10,7 +10,6 @@ import setupUtils from '../../src/utils/setup';
 
 jest.mock('os');
 jest.mock('dotenv');
-jest.mock('../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe('setup init command', () => {
   describe('setup init - success path', () => {

@@ -6,7 +6,6 @@ import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import { Logger } from '../../utils/logger';
 import { DomainError, exitOnError } from '../../utils/errors';
-import { selectTokens } from '../../state/selectors';
 import { addToken } from '../../state/mutations';
 
 import type { Command, Token } from '../../../types';

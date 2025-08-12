@@ -4,7 +4,6 @@ import accountUtils from "../../../src/utils/account";
 import { saveState as storeSaveState, get as storeGet } from "../../../src/state/store";
 import { alice, baseState } from '../../helpers/state';
 
-jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("account import command", () => {
   beforeEach(() => {

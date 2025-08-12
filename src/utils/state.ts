@@ -414,7 +414,7 @@ function importState(data: any, overwrite: boolean, merge: boolean) {
       draft.topics = data.topics || {};
     });
     logger.log('State overwritten successfully');
-    throw new DomainError('State overwritten successfully', 0);
+    return; // normal successful completion; no exception
   }
 
   if (data.accounts && Object.entries(data.accounts).length > 0) {

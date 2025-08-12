@@ -45,7 +45,7 @@ function deleteScript(name: string) {
       return; // handle after mutation
     }
     found = true;
-    const { [scriptName]: _, ...rest } = draft.scripts as Record<
+    const { [scriptName]: removedScript, ...rest } = draft.scripts as Record<
       string,
       Script
     >;

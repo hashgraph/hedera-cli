@@ -9,11 +9,11 @@
 // without deleting user data, and user-provided overrides always take
 // precedence over shipped defaults but can still be superseded by explicit
 // runtime modifications where intended.
-import { createStore } from 'zustand/vanilla';
+import { createStore, type StoreApi } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import * as fs from 'fs';
-import * as path from 'path';
+// (path import removed – unused)
 import type {
   State,
   Account,
@@ -47,7 +47,7 @@ export interface Actions {
 export type StoreState = CliState & { actions: Actions };
 
 // Externalized user/runtime persistence path (XDG config or override)
-const stateFile = resolveStateFilePath();
+let stateFile = resolveStateFilePath();
 
 // Read persisted runtime state (if file missing / unreadable return empty object)
 const loadFile = (): Partial<State> => {
@@ -92,14 +92,10 @@ const mergeInitial = (file: Partial<State>, base: State): CliState => {
 };
 
 // Load user overrides and precompute layered base prior to reading persisted state.
-// Note: We snapshot userConfig here for the initial in-memory state, but when
-// hydrating from persistence (storage.getItem) we re-load user config each time
-// to allow users to add new overrides (e.g. new networks) without requiring a
-// manual restart of the process. This keeps runtime flexible while keeping the
-// hot path (initial creation) simple.
-const { user: userConfig } = loadUserConfig();
-const basePlusUser = mergeInitial(userConfig, baseConfig);
-const initialState = mergeInitial(loadFile(), basePlusUser);
+// See note in buildStore regarding dynamic re-load on hydration.
+let { user: userConfig } = loadUserConfig();
+let basePlusUser = mergeInitial(userConfig, baseConfig);
+let initialState = mergeInitial(loadFile(), basePlusUser);
 
 interface PersistedSlice {
   network: StoreState['network'];
@@ -134,123 +130,124 @@ const partialize = (s: StoreState): PersistedSlice => ({
   scriptExecution: s.scriptExecution,
 });
 
-export const cliStore = createStore<StoreState>()(
-  persist(
-    immer<StoreState>((set, get) => ({
-      ...initialState,
-      actions: {
-        setNetwork: (network) => {
-          if (!get().networks[network])
-            throw new Error(`Unknown network: ${network}`);
-          set((d) => {
-            d.network = network;
-          });
-        },
-        ensureUUID: () => {
-          if (!get().uuid)
-            set((d) => {
-              d.uuid = crypto.randomUUID();
-            });
-        },
-        addAccount: (account, overwrite = false) =>
-          set((d) => {
-            if (!overwrite && d.accounts[account.name])
-              throw new Error(
-                `Account with name ${account.name} already exists`,
-              );
-            d.accounts[account.name] = account;
-          }),
-        removeAccount: (name) =>
-          set((d) => {
-            if (!d.accounts[name])
-              throw new Error(`Account with name ${name} not found`);
-            delete d.accounts[name];
-          }),
-        addToken: (token, overwrite = false) =>
-          set((d) => {
-            if (!overwrite && d.tokens[token.tokenId])
-              throw new Error(`Token with ID ${token.tokenId} already exists`);
-            d.tokens[token.tokenId] = token;
-          }),
-        associateToken: (tokenId, assoc) =>
-          set((d) => {
-            const t = d.tokens[tokenId];
-            if (t) t.associations = [...t.associations, assoc];
-          }),
-        addTopic: (topic, overwrite = false) =>
-          set((d) => {
-            if (!overwrite && d.topics[topic.topicId])
-              throw new Error(`Topic with ID ${topic.topicId} already exists`);
-            d.topics[topic.topicId] = topic;
-          }),
-        addScript: (script, overwrite = false) =>
-          set((d) => {
-            const key = `script-${script.name}`;
-            if (!overwrite && d.scripts[key])
-              throw new Error(`Script with name ${script.name} already exists`);
-            d.scripts[key] = { ...script, args: {}, creation: Date.now() };
-          }),
-        startScript: (name) =>
-          set((d) => {
-            d.scriptExecution.active = true;
-            d.scriptExecution.name = name;
-          }),
-        stopScript: () =>
-          set((d) => {
-            const key = `script-${d.scriptExecution.name}`;
-            if (d.scripts[key]) d.scripts[key].args = {};
-            d.scriptExecution = { active: false, name: '' };
-          }),
-        clearRuntime: () =>
-          set((d) => {
-            d.accounts = {};
-            d.tokens = {};
-            d.topics = {};
-            d.scripts = {};
-            d.scriptExecution = { active: false, name: '' };
-          }),
-      },
-    })),
-    {
-      name: 'hedera-cli-state',
-      version: 1,
-      partialize,
-  // Simple migration example retained for backward compat demonstration.
-  migrate: (persisted: any) => {
-        if (persisted && typeof persisted.scriptExecution === 'number') {
-          persisted.scriptExecution = {
-            active: persisted.scriptExecution === 1,
-            name: persisted.scriptExecutionName || '',
-          };
-          delete persisted.scriptExecutionName;
-        }
-        return persisted;
-      },
-      storage: {
-        // Reconstruct fresh state on each load by layering user overrides over
-        // base defaults and then applying persisted runtime data. This allows
-        // changing shipped defaults or user config without requiring a manual reset.
-        getItem: () => {
-          const data = loadFile();
-          // Re-load user configuration on each hydration so changes to the
-          // config file (e.g. adding a custom network) appear on next access.
-          const { user: dynamicUser } = loadUserConfig();
-          const dynamicBase = mergeInitial(dynamicUser, baseConfig);
-          const merged = mergeInitial(data, dynamicBase);
-          return { state: merged } as any;
-        },
-  setItem: (_key: string, value: any) => {
-          try {
-            if (value?.state) writeFile(value.state);
-          } catch {
-            /* ignore */
+// Shared actions builder so we don't duplicate in reset path.
+const buildActions = (set: any, get: () => StoreState): Actions => ({
+  setNetwork: (network) => {
+    if (!get().networks[network])
+      throw new Error(`Unknown network: ${network}`);
+    set((d: StoreState) => {
+      d.network = network;
+    });
+  },
+  ensureUUID: () => {
+    if (get().uuid) return;
+    set((d: StoreState) => {
+      d.uuid = crypto.randomUUID();
+    });
+  },
+  addAccount: (account, overwrite = false) =>
+    set((d: StoreState) => {
+      if (!overwrite && d.accounts[account.name])
+        throw new Error(`Account with name ${account.name} already exists`);
+      d.accounts[account.name] = account;
+    }),
+  removeAccount: (name) =>
+    set((d: StoreState) => {
+      if (!d.accounts[name])
+        throw new Error(`Account with name ${name} not found`);
+      delete d.accounts[name];
+    }),
+  addToken: (token, overwrite = false) =>
+    set((d: StoreState) => {
+      if (!overwrite && d.tokens[token.tokenId])
+        throw new Error(`Token with ID ${token.tokenId} already exists`);
+      d.tokens[token.tokenId] = token;
+    }),
+  associateToken: (tokenId, assoc) =>
+    set((d: StoreState) => {
+      const t = d.tokens[tokenId];
+      if (t) t.associations = [...t.associations, assoc];
+    }),
+  addTopic: (topic, overwrite = false) =>
+    set((d: StoreState) => {
+      if (!overwrite && d.topics[topic.topicId])
+        throw new Error(`Topic with ID ${topic.topicId} already exists`);
+      d.topics[topic.topicId] = topic;
+    }),
+  addScript: (script, overwrite = false) =>
+    set((d: StoreState) => {
+      const key = `script-${script.name}`;
+      if (!overwrite && d.scripts[key])
+        throw new Error(`Script with name ${script.name} already exists`);
+      d.scripts[key] = { ...script, args: {}, creation: Date.now() };
+    }),
+  startScript: (name) =>
+    set((d: StoreState) => {
+      d.scriptExecution.active = true;
+      d.scriptExecution.name = name;
+    }),
+  stopScript: () =>
+    set((d: StoreState) => {
+      const key = `script-${d.scriptExecution.name}`;
+      if (d.scripts[key]) d.scripts[key].args = {};
+      d.scriptExecution = { active: false, name: '' };
+    }),
+  clearRuntime: () =>
+    set((d: StoreState) => {
+      d.accounts = {};
+      d.tokens = {};
+      d.topics = {};
+      d.scripts = {};
+      d.scriptExecution = { active: false, name: '' };
+    }),
+});
+
+// Build a persisted store instance given an initial state.
+const buildStore = (state: CliState): StoreApi<StoreState> =>
+  createStore<StoreState>()(
+    persist(
+      immer<StoreState>((set, get) => ({
+        ...state,
+        actions: buildActions(set, get),
+      })),
+      {
+        name: 'hedera-cli-state',
+        version: 1,
+        partialize,
+        migrate: (persisted: any) => {
+          if (persisted && typeof persisted.scriptExecution === 'number') {
+            persisted.scriptExecution = {
+              active: persisted.scriptExecution === 1,
+              name: persisted.scriptExecutionName || '',
+            };
+            delete persisted.scriptExecutionName;
           }
+          return persisted;
         },
-        removeItem: () => { /* noop */ },
+        storage: {
+          getItem: () => {
+            const data = loadFile();
+            const { user: dynamicUser } = loadUserConfig();
+            const dynamicBase = mergeInitial(dynamicUser, baseConfig);
+            const merged = mergeInitial(data, dynamicBase);
+            return { state: merged } as any;
+          },
+          setItem: (_key: string, value: any) => {
+            try {
+              if (value?.state) writeFile(value.state);
+            } catch {
+              /* ignore */
+            }
+          },
+          removeItem: () => {
+            /* noop */
+          },
+        },
       },
-    },
-  ),
-);
+    ),
+  );
+
+export let cliStore = buildStore(initialState);
 
 export const getState = (): StoreState => cliStore.getState();
 export const actions = (): Actions => cliStore.getState().actions;
@@ -259,6 +256,7 @@ export const actions = (): Actions => cliStore.getState().actions;
 const mutate = (fn: (draft: StoreState) => void) =>
   cliStore.setState((d) => {
     fn(d);
+    return d; // ensure signature returns state/partial for TypeScript
   });
 
 export const get = <K extends keyof StoreState>(k: K): StoreState[K] =>
@@ -287,4 +285,19 @@ export const getScriptArgument = (arg: string): string | undefined => {
   const s = getState();
   if (!s.scriptExecution.active) return undefined;
   return s.scripts[`script-${s.scriptExecution.name}`]?.args?.[arg];
+};
+
+// Test-only: reset the store by re-resolving paths and re-layering configuration.
+// Safe no-op in production unless explicitly invoked.
+export const resetStore = (opts?: {
+  stateFile?: string;
+  userConfigPath?: string;
+}) => {
+  if (opts?.stateFile) process.env.HCLI_STATE_FILE = opts.stateFile;
+  if (opts?.userConfigPath) process.env.HCLI_CONFIG_FILE = opts.userConfigPath;
+  stateFile = resolveStateFilePath();
+  ({ user: userConfig } = loadUserConfig());
+  basePlusUser = mergeInitial(userConfig, baseConfig);
+  initialState = mergeInitial(loadFile(), basePlusUser);
+  cliStore = buildStore(initialState);
 };

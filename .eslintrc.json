@@ -6,6 +6,19 @@
   "rules": {
     "react/jsx-filename-extension": [0],
     "import/no-extraneous-dependencies": "off",
-    "import/extensions": "off"
-  }
+    "import/extensions": "off",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "AssignmentExpression[left.type='MemberExpression'][left.object.type='MemberExpression'][left.object.object.name='process'][left.object.property.name='env'][left.property.name='HCLI_SUPPRESS_CONSOLE']",
+        "message": "Do not assign process.env.HCLI_SUPPRESS_CONSOLE directly; use loggerHelper scoped helpers or the global silenceLogs setup file."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["__tests__/setup/silenceLogs.ts"],
+      "rules": { "no-restricted-syntax": "off" }
+    }
+  ]
 }

@@ -3,7 +3,6 @@ import { Logger } from '../../utils/logger';
 import { DomainError, exitOnError } from '../../utils/errors';
 import signUtils from '../../utils/sign';
 import telemetryUtils from '../../utils/telemetry';
-import { selectTopics } from '../../state/selectors';
 import { addTopic } from '../../state/mutations';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { TopicCreateTransaction, PrivateKey } from '@hashgraph/sdk';

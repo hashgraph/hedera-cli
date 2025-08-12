@@ -5,7 +5,6 @@ import { Command } from 'commander';
 import sdkMock from '../../helpers/sdk';
 import { TopicMessageSubmitTransaction } from '@hashgraph/sdk';
 
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 // Mock the @hashgraph/sdk module directly in the test file
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');

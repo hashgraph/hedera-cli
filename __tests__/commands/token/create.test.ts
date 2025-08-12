@@ -8,7 +8,6 @@ import { TokenId } from '@hashgraph/sdk';
 import { Token } from '../../../types';
 
 let tokenId = '0.0.1234';
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 

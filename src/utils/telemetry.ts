@@ -30,8 +30,14 @@ async function recordCommand(command: string) {
   }
 }
 
+// Flush any buffered telemetry; currently a no-op placeholder for future batching.
+async function flush(): Promise<void> {
+  // Intentionally empty – networking is awaited inline in recordCommand for now.
+}
+
 const telemetryUtils = {
   recordCommand,
+  flush,
 };
 
 export default telemetryUtils;

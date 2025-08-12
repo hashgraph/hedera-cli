@@ -8,7 +8,7 @@ import {
   saveKey as storeSaveKey,
   updateState as storeUpdateState,
 } from '../state/store';
-import { addAccount, addToken, addScript, addTopic } from '../state/mutations';
+import { addAccount, addToken, addScript } from '../state/mutations';
 import { Logger } from '../utils/logger';
 import { DomainError, exitOnError } from '../utils/errors';
 

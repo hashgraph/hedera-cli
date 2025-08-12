@@ -1,5 +1,5 @@
-import { AccountId, PrivateKey } from '@hashgraph/sdk';
-import { getState, updateState as storeUpdateState } from '../state/store';
+import { AccountId } from '@hashgraph/sdk';
+import { updateState as storeUpdateState } from '../state/store';
 import accountUtils from './account';
 import { Account, State } from '../../types';
 
@@ -9,7 +9,7 @@ function setupOperatorAccount(
   operatorKey: string,
   network: string,
 ): void {
-  const state = getState() as any;
+  // state retrieval removed (unused)
   // We'll do mutation via updateState to avoid frozen object issues during migration.
   if (!operatorId || !operatorKey) {
     return; // nothing to do

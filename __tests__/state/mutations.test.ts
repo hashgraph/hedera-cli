@@ -4,7 +4,6 @@ import { addAccount, removeAccount, addToken, addTopic, addScript } from '../../
 import { DomainError } from '../../src/utils/errors';
 import type { Account, Token, Topic, Script } from '../../types';
 
-jest.mock('../../src/state/state');
 
 describe('state mutations helpers', () => {
   beforeEach(() => {

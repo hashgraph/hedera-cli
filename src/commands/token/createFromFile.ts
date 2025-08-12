@@ -12,6 +12,7 @@ import stateUtils from '../../utils/state';
 import telemetryUtils from '../../utils/telemetry';
 import feeUtils from '../../utils/fees';
 import { Logger } from '../../utils/logger';
+import { fail } from '../../utils/errors';
 import { get as storeGet, saveKey as storeSaveKey } from '../../state/store';
 // (Reverted) DomainError/exitOnError not used here
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
@@ -52,7 +53,7 @@ function getTreasuryIdByTreasuryKey(treasuryKey: string): string {
   const account = accountUtils.findAccountByPrivateKey(treasuryKey);
   if (!account) {
     logger.error('Treasury account not found');
-    process.exit(1);
+    fail('Treasury account not found');
   }
   return account.accountId;
 }
@@ -151,7 +152,7 @@ function findNewKeyPattern(
       logger.error(
         'ED25519 keys are no longer supported. Only ECDSA is allowed.',
       );
-      process.exit(1);
+      fail('Unsupported key type ED25519');
     }
   });
 
@@ -181,7 +182,7 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
         'Failed to create new account(s) for token',
         error as object,
       );
-      process.exit(1);
+      fail('Failed to create new account(s) for token');
     }
   }
 
@@ -267,7 +268,7 @@ async function createTokenOnNetwork(token: Token) {
         default:
           logger.error(`Unsupported fee type: ${fee.type}`);
           client.close();
-          process.exit(1);
+          fail(`Unsupported fee type: ${fee.type}`);
       }
     });
     tokenCreateTx.setCustomFees(fees);
@@ -290,7 +291,7 @@ async function createTokenOnNetwork(token: Token) {
     if (tokenCreateRx.tokenId == null) {
       logger.error('Token was not created');
       client.close();
-      process.exit(1);
+      fail('Token was not created');
     }
 
     token.tokenId = tokenCreateRx.tokenId.toString();
@@ -299,7 +300,7 @@ async function createTokenOnNetwork(token: Token) {
   } catch (error) {
     logger.error(error as object);
     client.close();
-    process.exit(1);
+    fail('Failed to create token on network');
   }
 }
 
@@ -324,7 +325,7 @@ async function createTokenFromFile(tokenInput: TokenInput): Promise<Token> {
   } catch (error) {
     logger.error(error as object);
     stateUtils.getHederaClient().close();
-    process.exit(1);
+    fail('Failed to create token from file');
   }
 }
 

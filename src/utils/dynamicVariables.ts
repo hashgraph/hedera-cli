@@ -1,26 +1,18 @@
 import { getState, saveKey as storeSaveKey } from '../state/store';
-import { Logger } from './logger';
 import { DomainError } from './errors';
 
 interface CommandAction {
   action: string;
 }
 
-interface CommandActions {
-  [key: string]: {
-    [key: string]: CommandAction;
-  };
-}
+type CommandActions = Record<string, Record<string, CommandAction>>;
 
 interface CommandOutputs {
   [key: string]: CommandOutput;
 }
-
 interface CommandOutput {
   [key: string]: string;
 }
-
-const logger = Logger.getInstance();
 
 /**
  * Replace options with arguments or state variables

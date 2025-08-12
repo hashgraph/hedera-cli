@@ -8,6 +8,11 @@ module.exports = {
     ...(base.testPathIgnorePatterns || []),
     '<rootDir>/__tests__/e2e.test.ts',
   ],
+  // Load test user config fixture before any modules
+  setupFiles: [
+    '<rootDir>/__tests__/setup/setTestUserConfig.js',
+    '<rootDir>/__tests__/setup/silenceLogs.ts',
+  ],
   // Optionally tighten timeout for unit tests
   testTimeout: 20000,
 };

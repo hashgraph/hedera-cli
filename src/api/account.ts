@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { APIResponse, AccountResponse } from '../../types';
 import stateUtils from '../utils/state';
 import { Logger } from '../utils/logger';
+import { fail } from '../utils/errors';
 
 const logger = Logger.getInstance();
 
@@ -23,7 +24,7 @@ async function getAccountInfo(
     } else {
       logger.error('Unexpected error:', error as object);
     }
-    process.exit(1);
+    fail('Failed to fetch account info');
   }
 }
 
@@ -41,7 +42,7 @@ async function getAccountInfoByNetwork(
     } else {
       logger.error('Unexpected error:', error as object);
     }
-    process.exit(1);
+    fail('Failed to fetch account info for network');
   }
 }
 

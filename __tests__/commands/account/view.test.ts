@@ -8,7 +8,6 @@ import { Logger } from "../../../src/utils/logger";
 
 const logger = Logger.getInstance();
 
-jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("account view command", () => {
   const getAccountInfoSpy = jest.spyOn(api.account, "getAccountInfo").mockResolvedValue({

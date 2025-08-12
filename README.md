@@ -1189,7 +1189,7 @@ Only supplied keys override defaults; others fall back to `src/state/config.ts`.
 
 ### Example user config
 
-An example cosmiconfig file is included as `hedera-cli.config.example.json` in the repository root. Copy it to `hedera-cli.config.json` (or rename to any supported name like `.hederarc` / `.hedera-clirc`) and edit the values you need. You can also point `HCLI_CONFIG_FILE` to it directly.
+An example cosmiconfig file is included as `hedera-cli.config.json` in the repository root. Treat this as a starting point – copy or rename it (e.g. to `hedera-cli.config.local.json`, which you should gitignore) and edit only the values you need. You can also point `HCLI_CONFIG_FILE` to a file stored elsewhere if you prefer to keep secrets out of the repo.
 
 Example contents:
 
@@ -1225,6 +1225,16 @@ Guidelines:
 
 ```sh
 export HCLI_CONFIG_FILE=/absolute/path/to/my-hcli-config.json
+```
+
+### Inspecting configuration at runtime
+
+Use the new command to inspect the layered configuration:
+
+```sh
+hcli config view          # merged view (base + user overrides + runtime metadata)
+hcli config view --active # just the active network's settings
+hcli config view --json   # machine-readable output
 ```
 
 

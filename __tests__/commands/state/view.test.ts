@@ -6,7 +6,6 @@ import { Logger } from "../../../src/utils/logger";
 
 const logger = Logger.getInstance();
 
-jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe("state view command", () => {
   const logSpy = jest.spyOn(logger, 'log');

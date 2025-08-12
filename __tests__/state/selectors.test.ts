@@ -11,7 +11,6 @@ import {
   selectAccountNames,
 } from '../../src/state/selectors';
 
-jest.mock('../../src/state/state');
 
 describe('state selectors', () => {
   beforeEach(() => {

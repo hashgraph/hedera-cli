@@ -2,6 +2,7 @@ import { program } from 'commander';
 
 import commands from './commands';
 import { Logger } from './utils/logger';
+import { installGlobalErrorHandlers } from './utils/errors';
 
 const logger = Logger.getInstance();
 
@@ -29,5 +30,9 @@ commands.tokenCommands(program);
 commands.hbarCommands(program);
 commands.waitCommands(program);
 commands.topicCommands(program);
+commands.configCommands(program);
+
+// Optional global safety nets (unhandled errors -> exit codes & telemetry flush)
+installGlobalErrorHandlers();
 
 program.parseAsync(process.argv);

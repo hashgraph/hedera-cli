@@ -9,6 +9,7 @@ import type {
 import stateUtils from '../utils/state';
 import apiUtils from '../utils/api';
 import { Logger } from '../utils/logger';
+import { fail } from '../utils/errors';
 
 const logger = Logger.getInstance();
 
@@ -34,7 +35,7 @@ async function findMessage(
     } else {
       logger.error('Unexpected error:', error as object);
     }
-    process.exit(1);
+    fail('Failed to find topic message');
   }
 }
 
@@ -64,7 +65,7 @@ async function findMessagesWithFilters(
     } else {
       logger.error('Unexpected error:', error as object);
     }
-    process.exit(1);
+    fail('Failed to find topic messages with filters');
   }
 }
 

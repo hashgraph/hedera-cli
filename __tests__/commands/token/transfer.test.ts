@@ -9,7 +9,6 @@ const logger = Logger.getInstance();
 
 let tokenId = Object.keys(tokenState.tokens)[0];
 const txId = "0.0.14288@1706880903.830877722";
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 

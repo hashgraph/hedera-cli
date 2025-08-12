@@ -25,7 +25,10 @@ import type { State } from '../../types';
 
 const MODULE_NAME = 'hedera-cli';
 
-export interface LoadedConfig { user: Partial<State>; source?: string }
+export interface LoadedConfig {
+  user: Partial<State>;
+  source?: string;
+}
 
 /**
  * Attempt to load user configuration overrides.
@@ -76,12 +79,19 @@ export const loadUserConfig = (): LoadedConfig => {
  * Creates the parent directory if it does not exist (best-effort / silent on failure).
  */
 export const resolveStateFilePath = (): string => {
-  if (process.env.HCLI_STATE_FILE) return path.resolve(process.env.HCLI_STATE_FILE);
+  if (process.env.HCLI_STATE_FILE)
+    return path.resolve(process.env.HCLI_STATE_FILE);
   const home = os.homedir && os.homedir();
-  const base = process.env.XDG_CONFIG_HOME || (home ? path.join(home, '.config') : process.cwd());
+  const base =
+    process.env.XDG_CONFIG_HOME ||
+    (home ? path.join(home, '.config') : process.cwd());
   const dir = path.join(base, 'hedera-cli');
   if (!fs.existsSync(dir)) {
-    try { fs.mkdirSync(dir, { recursive: true }); } catch { /* ignore */ }
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+    } catch {
+      /* ignore */
+    }
   }
   return path.join(dir, 'state.json');
 };

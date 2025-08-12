@@ -10,7 +10,6 @@ import commands from '../../../src/commands';
 import { saveState as storeSaveState, getState as storeGetAll } from '../../../src/state/store';
 import stateUtils from '../../../src/utils/state';
 
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 
 describe('state download command', () => {
   const stateUtilsDownloadStateSpy = jest
@@ -76,19 +75,15 @@ describe('state download command', () => {
       const url = 'https://dummy.url/state.json';
 
       // Act
-      try {
-        await program.parseAsync([
-            'node',
-            'hedera-cli.ts',
-            'state',
-            'download',
-            '--url',
-            url,
-            '--overwrite',
-          ]);
-      } catch (error) {
-        expect(error).toEqual(Error(`Process.exit(0)`));
-      }
+      await program.parseAsync([
+        'node',
+        'hedera-cli.ts',
+        'state',
+        'download',
+        '--url',
+        url,
+        '--overwrite',
+      ]);
 
       // Assert
       expect(stateUtilsDownloadStateSpy).toHaveBeenCalledWith(url);
@@ -102,7 +97,7 @@ describe('state download command', () => {
           },
         },
       });
-      expect(consoleErrorSpy).not.toHaveBeenCalled(); // because we are overwriting the state
+  expect(consoleErrorSpy).not.toHaveBeenCalled(); // overwrite should be silent on errors
     });
   });
 });

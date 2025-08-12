@@ -3,8 +3,6 @@ import { Command } from "commander";
 import commands from "../../../src/commands";
 import { saveState as storeSaveState } from '../../../src/state/store';
 
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
-
 describe("network list command", () => {
   const logSpy = jest.spyOn(console, 'log');
 

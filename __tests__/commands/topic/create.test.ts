@@ -3,7 +3,6 @@ import commands from '../../../src/commands';
 import { saveState as storeSaveState, get as storeGet } from '../../../src/state/store';
 import { Command } from 'commander';
 
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 

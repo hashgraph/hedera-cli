@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { APIResponse, BalanceResponse, TokenResponse } from '../../types';
 import stateUtils from '../utils/state';
 import { Logger } from '../utils/logger';
+import { fail } from '../utils/errors';
 
 const logger = Logger.getInstance();
 
@@ -25,7 +26,7 @@ async function getTokenInfo(
     } else {
       logger.error('Unexpected error:', error as object);
     }
-    process.exit(1);
+    fail('Failed to fetch token info');
   }
 }
 
@@ -45,7 +46,7 @@ async function getTokenBalance(
     } else {
       logger.error('Unexpected error:', error as object);
     }
-    process.exit(1);
+    fail('Failed to fetch token balance');
   }
 }
 

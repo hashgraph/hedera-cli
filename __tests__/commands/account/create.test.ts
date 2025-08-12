@@ -5,7 +5,6 @@ import accountUtils from "../../../src/utils/account";
 import { saveState as storeSaveState } from "../../../src/state/store";
 import { AccountId } from "@hashgraph/sdk";
 
-jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 
