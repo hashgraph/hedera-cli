@@ -13,7 +13,7 @@ import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import feeUtils from '../../utils/fees';
 import { Logger } from '../../utils/logger';
-import { fail } from '../../utils/errors';
+import { fail, exitOnError } from '../../utils/errors';
 import { get as storeGet, saveKey as storeSaveKey } from '../../state/store';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import type {
@@ -396,5 +396,5 @@ export default (program: Command) => {
         previous ? [...previous, value] : [value],
       [] as string[],
     )
-    .action(createToken);
+    .action(exitOnError(createToken));
 };

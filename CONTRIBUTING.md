@@ -95,6 +95,36 @@ If you need raw console output in a specific test file, set the mode early (befo
 process.env.HCLI_LOG_MODE = 'normal'; // or 'verbose'
 ```
 
+### Command Action Wrapping (Required)
+
+All Commander `.action` handlers must be wrapped by either:
+
+- `wrapAction` (preferred) – adds dynamic variable replacement, optional verbose pre-log, and standardized error handling via `exitOnError`.
+- `exitOnError` – if you only need the error mapping behavior.
+
+Why: This enforces consistent DomainError handling (setting `process.exitCode` instead of exiting), guarantees telemetry flushing, and keeps logging noise predictable. A test `wrappingConsistency.test.ts` fails the build if any unwrapped `.action(` is introduced.
+
+When adding a new command:
+
+```ts
+import { wrapAction } from '../shared/wrapAction';
+
+program.command('do-thing').action(
+  wrapAction(
+    async (opts) => {
+      // implement logic
+    },
+    { log: 'Doing the thing' },
+  ),
+);
+```
+
+Throw `new DomainError(message, code?)` for user-facing failures instead of calling `process.exit`.
+
+### Logger Modes
+
+The logger supports modes: `normal`, `verbose`, `quiet`, `silent` (set via `--verbose`, `--quiet`, or `--log-mode <mode>` / `HCLI_LOG_MODE`). Avoid adding bespoke silencing flags; extend the existing mode enum if new behavior is required.
+
 ### Adding New Config Edge-Case Tests
 
 Patterns:

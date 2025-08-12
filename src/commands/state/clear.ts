@@ -3,6 +3,7 @@ import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { Logger } from '../../utils/logger';
 import { updateState as storeUpdateState } from '../../state/store';
+import { exitOnError } from '../../utils/errors';
 
 const logger = Logger.getInstance();
 
@@ -42,13 +43,15 @@ export default (program: Command) => {
     .option('-t, --skip-tokens', 'Skip resetting tokens', false)
     .option('-s, --skip-scripts', 'Skip resetting scripts', false)
     .option('-o, --skip-topics', 'Skip resetting topics', false)
-    .action((options: ResetOptions) => {
-      logger.verbose('Clearing state');
-      clear(
-        options.skipAccounts,
-        options.skipTokens,
-        options.skipScripts,
-        options.skipTopics,
-      );
-    });
+    .action(
+      exitOnError((options: ResetOptions) => {
+        logger.verbose('Clearing state');
+        clear(
+          options.skipAccounts,
+          options.skipTokens,
+          options.skipScripts,
+          options.skipTopics,
+        );
+      }),
+    );
 };

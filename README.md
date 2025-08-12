@@ -1450,20 +1450,36 @@ The `storeArgs` function takes the `options.args` and the `commandAction` as arg
 
 Whenever changing the `commandActions` or `commandOutputs` objects, make sure to update the documentation as well.
 
-### Logging
+### Logging & Error Handling
 
-You can use the `logger` object to log messages to the console. The logger object is defined in `src/utils/logger.ts`. It is defined as a singleton which you can import in your files.
+The CLI uses a centralized logger singleton (`src/utils/logger.ts`) with four modes:
 
-```js
+| Mode    | Set via CLI flag                    | Env (`HCLI_LOG_MODE`) | Behavior                                                                      |
+| ------- | ----------------------------------- | --------------------- | ----------------------------------------------------------------------------- |
+| normal  | (default)                           | normal                | Show standard logs only                                                       |
+| verbose | `--verbose` or `--log-mode verbose` | verbose               | Adds verbose tracing lines                                                    |
+| quiet   | `--quiet` or `--log-mode quiet`     | quiet                 | Suppresses standard logs (errors still shown)                                 |
+| silent  | `--log-mode silent`                 | silent                | Suppresses all user-facing logs (still routed internally so tests can assert) |
+
+Programmatic usage:
+
+```ts
 import { Logger } from '../../utils/logger';
 const logger = Logger.getInstance();
+logger.log('Hello');
+logger.verbose('Diagnostic detail');
+logger.error('Something failed');
 ```
 
-- Regular output messages are logged using the `logger.log` function.
-- Verbose output messages are logged using the `logger.verbose` function.
-- Error messages are logged using the `logger.error` function which has an overload signature
-  - `logger.error(error: Error | string)`: Log a single object or string
-  - `logger.error(error: string, data: object)`: Log an error string and object
+All command handlers are wrapped with a standard error guard (`wrapAction` or `exitOnError`) ensuring that domain-specific failures (thrown as `DomainError`) set `process.exitCode` instead of abruptly exiting. This guarantees consistent telemetry flushing and avoids duplicated `try/catch` blocks. A unit test (`wrappingConsistency.test.ts`) enforces that every `.action(` is wrapped.
+
+When adding a new command:
+
+1. Prefer `wrapAction` from `src/commands/shared/wrapAction` (adds dynamic variable replacement + optional verbose pre-log + error handling).
+2. If you need only error handling, use `exitOnError` directly.
+3. Do not call `process.exit()` inside handlers; throw a `DomainError` instead.
+
+Legacy env flags like `HCLI_SUPPRESS_CONSOLE` were removed—use the log modes above instead.
 
 ## Support
 
