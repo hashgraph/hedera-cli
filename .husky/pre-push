@@ -1,11 +1,11 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+set -e
 
-echo "husky - pre-push running tests"
-npm run test:all
-status=$?
-if [ $status -ne 0 ]; then
-	echo "husky - pre-push failed (code $status)"
-	exit $status
+echo "pre-push: running tests (npm run test:all)"
+if npm run test:all; then
+	echo "pre-push: success"
+else
+	code=$?
+	echo "pre-push: failed (code $code)"
+	exit $code
 fi
-echo "husky - pre-push passed"

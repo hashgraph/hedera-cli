@@ -1,11 +1,11 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+set -e
 
-echo "husky - pre-commit running lint-staged"
-npx lint-staged
-status=$?
-if [ $status -ne 0 ]; then
-	echo "husky - pre-commit failed (code $status)"
-	exit $status
+echo "pre-commit: running lint-staged"
+if npx lint-staged; then
+	echo "pre-commit: success"
+else
+	code=$?
+	echo "pre-commit: failed (code $code)"
+	exit $code
 fi
-echo "husky - pre-commit passed"
