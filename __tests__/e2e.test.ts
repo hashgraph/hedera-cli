@@ -1,29 +1,54 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { baseState } from './helpers/state';
 import { program } from 'commander';
+import api from '../src/api';
 import commands from '../src/commands';
 import {
-  saveState as storeSaveState,
   get as storeGet,
+  saveState as storeSaveState,
+  type StoreState,
 } from '../src/state/store';
-import api from '../src/api';
 import { Logger } from '../src/utils/logger';
-
-import { Token } from '../types';
+import type { Token } from '../types';
+import { waitFor } from './helpers/poll';
+import { baseState } from './helpers/state';
 
 const logger = Logger.getInstance();
 
 describe('End to end tests', () => {
   const logSpy = jest.spyOn(logger, 'log');
 
-  beforeEach(() => {
-    storeSaveState(baseState as any); // reset state to base state for each test
+  // Fast-fail: ensure localnet mirror endpoint is responding before running long flows.
+  beforeAll(async () => {
+    const available = await waitFor(
+      async () => {
+        try {
+          const res = await api.account.getAccountInfo('0.0.2');
+          return !!res?.data;
+        } catch {
+          return false;
+        }
+      },
+      {
+        timeout: 5000,
+        interval: 500,
+        description:
+          'localnet mirror node availability (operator account 0.0.2)',
+      },
+    );
+    if (!available) {
+      throw new Error(
+        'Localnet unavailable: mirror node did not respond within 5s. Start local solo node before running e2e tests.',
+      );
+    }
   });
 
-  afterEach(async () => {
-    // Reset state to base state
+  beforeEach(() => {
+    storeSaveState(baseState as Partial<StoreState>);
+  });
+
+  afterEach(() => {
     const distStatePath = path.join(
       __dirname,
       '..',
@@ -31,15 +56,11 @@ describe('End to end tests', () => {
       'state',
       'state.json',
     );
-    await fs.writeFileSync(
-      distStatePath,
-      JSON.stringify(baseState, null, 2),
-      'utf8',
-    );
+    fs.writeFileSync(distStatePath, JSON.stringify(baseState, null, 2), 'utf8');
   });
 
   afterAll(() => {
-    storeSaveState(baseState as any);
+    storeSaveState(baseState as Partial<StoreState>);
     logSpy.mockClear();
   });
 
@@ -54,6 +75,8 @@ describe('End to end tests', () => {
    * - Restore the state file from backup and verify the account and operator details are restored
    */
   test('✅ Flow 1', async () => {
+    // Extend timeout for this long flow (was formerly passed as 3rd arg)
+    jest.setTimeout(45000);
     // Arrange: Setup init
     commands.setupCommands(program);
 
@@ -61,7 +84,7 @@ describe('End to end tests', () => {
     await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
 
     // Assert
-    const accounts = storeGet('accounts' as any);
+    const accounts = storeGet('accounts');
     expect(accounts['localnet-operator']).toBeDefined();
 
     // Arrange: Change network to localnet
@@ -77,7 +100,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    const network = storeGet('network' as any);
+    const network = storeGet('network');
     expect(network).toEqual('localnet');
 
     // Arrange: Create a new account with specific balance, type, and network and verify it is created
@@ -96,10 +119,28 @@ describe('End to end tests', () => {
       '--auto-associations',
       '1',
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    // Capture state AFTER create before polling so we have accountId available
+    let state = storeGet('accounts');
+    // Wait for account to appear via API (faster than fixed 7s sleep)
+    await waitFor(
+      async () => {
+        try {
+          const info = await api.account.getAccountInfo(
+            state[accountName].accountId,
+          );
+          return info?.data?.balance?.balance === 10000;
+        } catch {
+          return false;
+        }
+      },
+      {
+        timeout: 10000,
+        interval: 500,
+        description: 'new account ledger propagation',
+      },
+    );
 
     // Assert
-    let state = storeGet('accounts' as any);
     expect(state[accountName]).toBeDefined();
     expect(state[accountName].type).toEqual('ECDSA');
 
@@ -123,7 +164,23 @@ describe('End to end tests', () => {
       '-t',
       'localnet-operator',
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await waitFor(
+      async () => {
+        try {
+          const info = await api.account.getAccountInfo(
+            state[accountName].accountId,
+          );
+          return info?.data?.balance?.balance === 9000 ? true : false;
+        } catch {
+          return false;
+        }
+      },
+      {
+        timeout: 10000,
+        interval: 500,
+        description: 'post-transfer balance update',
+      },
+    );
 
     // Assert
     data = await api.account.getAccountInfo(state[accountName].accountId);
@@ -161,7 +218,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    state = storeGet('accounts' as any);
+    state = storeGet('accounts');
     expect(state[accountName]).toBeUndefined();
 
     // Arrange: Restore the state file from backup and verify the account and operator details are restored
@@ -178,7 +235,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    state = storeGet('accounts' as any);
+    state = storeGet('accounts');
     expect(state[accountName]).toBeDefined();
 
     // Cleanup
@@ -189,7 +246,7 @@ describe('End to end tests', () => {
     for (const backup of backups) {
       fs.unlinkSync(path.join(__dirname, '..', 'src', 'state', backup));
     }
-  }, 60000);
+  });
 
   /**
    * E2E testing flow for scripts:
@@ -214,7 +271,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    let scripts = storeGet('scripts' as any);
+    let scripts = storeGet('scripts');
     expect(scripts['script-token']).toBeDefined();
     expect(scripts['script-account-create']).toBeDefined();
 
@@ -239,15 +296,14 @@ describe('End to end tests', () => {
       'state',
       'state.json',
     ); // read state from dist/state/state.json because script load uses dist/ logic
-    const distState = await fs.readFileSync(distStatePath, 'utf8');
-    expect(Object.keys(JSON.parse(distState).accounts).length).toBe(1); // 1 random account created
+    const distState = fs.readFileSync(distStatePath, 'utf8');
+    const parsed = JSON.parse(distState) as {
+      accounts: Record<string, unknown>;
+    };
+    expect(Object.keys(parsed.accounts).length).toBe(1); // 1 random account created
 
     // Reset state to base state
-    await fs.writeFileSync(
-      distStatePath,
-      JSON.stringify(baseState, null, 2),
-      'utf8',
-    );
+    fs.writeFileSync(distStatePath, JSON.stringify(baseState, null, 2), 'utf8');
 
     // Arrange: Delete script and verify it is deleted in state file
     // Act
@@ -261,7 +317,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    scripts = storeGet('scripts' as any);
+    scripts = storeGet('scripts');
     expect(scripts['script-account-create-simple']).toBeUndefined();
     expect(scripts['script-account-create']).toBeDefined();
   });
@@ -314,7 +370,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    const accounts = storeGet('accounts' as any);
+    const accounts = storeGet('accounts');
     expect(accounts[accountNameTreasury]).toBeDefined();
     expect(accounts[accountNameAdmin]).toBeDefined();
     expect(accounts[accountNameUser]).toBeDefined();
@@ -348,8 +404,8 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    let tokens = storeGet('tokens' as any) as Record<string, Token>;
-    let token = Object.values(tokens).find((token) => token.name === tokenName);
+    let tokens = storeGet('tokens');
+    let token = Object.values(tokens).find((t: Token) => t.name === tokenName);
     expect(token).toBeDefined();
 
     // TypeScript still sees `token` as possibly undefined. You need to assert it's not.
@@ -371,8 +427,8 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    tokens = storeGet('tokens' as any) as Record<string, Token>;
-    token = Object.values(tokens).find((token) => token.name === tokenName);
+    tokens = storeGet('tokens');
+    token = Object.values(tokens).find((t: Token) => t.name === tokenName);
     expect(token?.associations).toEqual([
       {
         accountId: accounts[accountNameUser].accountId,
@@ -400,7 +456,24 @@ describe('End to end tests', () => {
       '--to',
       accountNameUser,
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await waitFor(
+      async () => {
+        try {
+          const data = await api.token.getTokenBalance(
+            token.tokenId,
+            accounts[accountNameUser].accountId,
+          );
+          return Array.isArray(data?.data?.balances);
+        } catch {
+          return false;
+        }
+      },
+      {
+        timeout: 10000,
+        interval: 500,
+        description: 'token association propagation',
+      },
+    );
 
     // Assert
     const data = await api.token.getTokenBalance(
@@ -430,7 +503,7 @@ describe('End to end tests', () => {
     await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
 
     // Assert
-    let accounts = storeGet('accounts' as any);
+    let accounts = storeGet('accounts');
     expect(accounts['localnet-operator']).toBeDefined();
 
     // Arrange: Change network to localnet
@@ -446,7 +519,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    const network = storeGet('network' as any);
+    const network = storeGet('network');
     expect(network).toEqual('localnet');
 
     // Arrange: Create 2 accounts
@@ -477,7 +550,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    accounts = storeGet('accounts' as any);
+    accounts = storeGet('accounts');
     expect(accounts[accountNameAdmin]).toBeDefined();
     expect(accounts[accountNameSubmit]).toBeDefined();
 
@@ -500,7 +573,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    let topics = storeGet('topics' as any);
+    const topics = storeGet('topics');
     expect(Object.keys(topics).length).toBe(1);
     expect(topics[Object.keys(topics)[0]].memo).toEqual(topicMemo);
 
@@ -519,7 +592,21 @@ describe('End to end tests', () => {
       '-t',
       Object.keys(topics)[0],
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await waitFor(
+      async () => {
+        try {
+          const resp = await api.topic.findMessage(Object.keys(topics)[0], 1);
+          return !!resp?.data?.message;
+        } catch {
+          return false;
+        }
+      },
+      {
+        timeout: 10000,
+        interval: 500,
+        description: 'topic message availability',
+      },
+    );
 
     // Assert
     const response = await api.topic.findMessage(Object.keys(topics)[0], 1); // first message
