@@ -28,7 +28,7 @@ The CLI layers state in three tiers (lowest precedence first):
 
 To keep tests deterministic and isolated while still exercising the real layering logic:
 
-- A global Jest setup file (`__tests__/setup/setTestUserConfig.js`) sets `HCLI_CONFIG_FILE` to the fixture `__tests__/fixtures/hedera-cli.config.test.json` for every worker process.
+- A single global Jest setup file (`__tests__/setup/jestSetup.ts`) sets `HCLI_CONFIG_FILE` to the fixture `__tests__/fixtures/hedera-cli.config.test.json` for every worker process.
 - Each Jest worker is assigned a unique temporary state file via `HCLI_STATE_FILE` (per-worker path in the OS temp directory). This prevents cross-test interference when tests run in parallel and mutate runtime state.
 - The store dynamically re-loads user config on hydration, so changes to the user config file appear without restarting the process.
 
@@ -63,7 +63,7 @@ test('missing user config falls back to defaults', () => {
 
 ### Logging & Silencing Strategy in Tests
 
-Unit tests load `__tests__/setup/silenceLogs.ts` which sets `HCLI_LOG_MODE=silent`. The `Logger` will not emit user-facing output while still allowing Jest spies on `console.log` / `console.error` to observe calls (the silent transport routes through console for mocks).
+The unified setup file also sets `HCLI_LOG_MODE=silent` by default so test output stays clean. Override early in a test (before importing the logger) if you need visible logs.
 
 Per‑test scoped control helpers live in `__tests__/helpers/loggerHelper.ts`:
 
