@@ -1,13 +1,13 @@
-import { alice, bob, tokenState } from '../../helpers/state';
+import { TransactionId } from '@hashgraph/sdk';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
 import { saveState as storeSaveState } from '../../../src/state/store';
-import { TransactionId } from '@hashgraph/sdk';
 import { Logger } from '../../../src/utils/logger';
+import { alice, bob, tokenState } from '../../helpers/state';
 
 const logger = Logger.getInstance();
 
-let tokenId = Object.keys(tokenState.tokens)[0];
+const tokenId = Object.keys(tokenState.tokens)[0];
 const txId = '0.0.14288@1706880903.830877722';
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');

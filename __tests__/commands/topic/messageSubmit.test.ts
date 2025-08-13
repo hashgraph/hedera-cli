@@ -1,9 +1,9 @@
-import { topicState, topic, baseState } from '../../helpers/state';
+import { TopicMessageSubmitTransaction } from '@hashgraph/sdk';
+import { Command } from 'commander';
 import commands from '../../../src/commands';
 import { saveState as storeSaveState } from '../../../src/state/store';
-import { Command } from 'commander';
 import sdkMock from '../../helpers/sdk';
-import { TopicMessageSubmitTransaction } from '@hashgraph/sdk';
+import { topic, topicState } from '../../helpers/state';
 
 // Mock the @hashgraph/sdk module directly in the test file
 jest.mock('@hashgraph/sdk', () => {

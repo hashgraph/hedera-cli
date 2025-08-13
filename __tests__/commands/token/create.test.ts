@@ -1,16 +1,16 @@
-import { alice, bob, baseState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import {
-  saveState as storeSaveState,
-  get as storeGet,
-} from '../../../src/state/store';
 import * as mutations from '../../../src/state/mutations';
+import {
+  get as storeGet,
+  saveState as storeSaveState,
+} from '../../../src/state/store';
+import { alice, baseState, bob } from '../../helpers/state';
 
 import { TokenId } from '@hashgraph/sdk';
 import { Token } from '../../../types';
 
-let tokenId = '0.0.1234';
+const tokenId = '0.0.1234';
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 

@@ -1,15 +1,15 @@
 import type {
   APIResponse,
   AccountResponse,
-  TokenBalance,
   DisplayBalanceOptions,
+  TokenBalance,
 } from '../../types';
 import { Logger } from './logger';
 
 const logger = Logger.getInstance();
 
 type DisplayFunction = (
-  response: APIResponse,
+  response: APIResponse<AccountResponse>,
   options?: DisplayBalanceOptions,
 ) => void;
 
@@ -54,10 +54,10 @@ function displayAllBalances(
 }
 
 function displayBalance(
-  response: APIResponse,
+  response: APIResponse<AccountResponse>,
   options?: DisplayBalanceOptions,
 ): void {
-  const accountResponse = response.data as AccountResponse;
+  const accountResponse = response.data;
   const accountId = accountResponse.account;
   const hbars = accountResponse.balance.balance;
   const tokens = accountResponse.balance.tokens;
@@ -80,7 +80,7 @@ const displayFunctions: Record<string, DisplayFunction> = {
 // -- main display function -- //
 function display(
   displayFunctionName: string,
-  response: APIResponse,
+  response: APIResponse<AccountResponse>,
   options: DisplayBalanceOptions,
 ): void {
   const fn = displayFunctions[displayFunctionName];

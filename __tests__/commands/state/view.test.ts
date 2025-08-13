@@ -1,8 +1,8 @@
-import { fullState, alice } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
 import { saveState as storeSaveState } from '../../../src/state/store';
 import { Logger } from '../../../src/utils/logger';
+import { alice, fullState } from '../../helpers/state';
 
 const logger = Logger.getInstance();
 
@@ -35,11 +35,11 @@ describe('state view command', () => {
         (v) => v && typeof v === 'object' && (v as any).accounts,
       );
       const {
-        actions,
-        scriptExecutionName: _legacyName,
-        ...restLogged
+        actions: _actionsView,
+        scriptExecutionName: _scriptExecView,
+        ...afterView
       } = loggedState as any;
-      expect(restLogged).toEqual(fullState);
+      expect(afterView).toEqual(fullState);
     });
 
     test('✅ view specific account with name', async () => {

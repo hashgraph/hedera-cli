@@ -1,10 +1,10 @@
 import {
-  exitOnError,
   DomainError,
+  exitOnError,
   installGlobalErrorHandlers,
 } from '../../src/utils/errors';
-import telemetryUtils from '../../src/utils/telemetry';
 import { Logger } from '../../src/utils/logger';
+import telemetryUtils from '../../src/utils/telemetry';
 
 jest.mock('../../src/utils/telemetry', () => ({
   __esModule: true,
@@ -71,7 +71,9 @@ describe('errors utilities', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (process as any).exitCode = undefined;
       const logger = Logger.getInstance();
-      const spy = jest.spyOn(logger, 'error').mockImplementation(() => {});
+      const spy = jest
+        .spyOn(logger, 'error')
+        .mockImplementation((...args) => Logger.getInstance().error(...args));
       unhandledRejectionHandler?.(new Error('UR Generic'));
       expect(process.exitCode).toBe(1);
       expect(spy).toHaveBeenCalled();
@@ -91,7 +93,9 @@ describe('errors utilities', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (process as any).exitCode = undefined;
       const logger = Logger.getInstance();
-      const spy = jest.spyOn(logger, 'error').mockImplementation(() => {});
+      const spy = jest
+        .spyOn(logger, 'error')
+        .mockImplementation((...args) => Logger.getInstance().error(...args));
       uncaughtExceptionHandler?.(new Error('UE Generic'));
       expect(process.exitCode).toBe(1);
       expect(spy).toHaveBeenCalled();

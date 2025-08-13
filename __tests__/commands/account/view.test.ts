@@ -1,10 +1,10 @@
-import { alice, baseState } from '../../helpers/state';
 import { Command } from 'commander';
-import commands from '../../../src/commands';
 import api from '../../../src/api/';
+import commands from '../../../src/commands';
 import { saveState as storeSaveState } from '../../../src/state/store';
-import { accountResponse } from '../../helpers/api/apiAccountHelper';
 import { Logger } from '../../../src/utils/logger';
+import { accountResponse } from '../../helpers/api/apiAccountHelper';
+import { baseState } from '../../helpers/state';
 
 const logger = Logger.getInstance();
 

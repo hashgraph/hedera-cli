@@ -16,6 +16,15 @@ else
 	exit $code
 fi
 
+echo "pre-commit: running full repo lint (quiet)"
+if npm run lint --silent; then
+	echo "pre-commit: full lint passed"
+else
+	code=$?
+	echo "pre-commit: full lint failed (code $code)"
+	exit $code
+fi
+
 # After formatting/auto-fixes, it's possible all changes were whitespace and now match HEAD
 if git diff --cached --quiet --name-only; then
 	echo "pre-commit: all staged changes were formatting-only and are now identical to HEAD"

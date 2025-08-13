@@ -1,10 +1,7 @@
-import { baseState, scriptState, script_basic } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import {
-  saveState as storeSaveState,
-  saveKey as storeSaveKey,
-} from '../../../src/state/store';
+import { saveState as storeSaveState } from '../../../src/state/store';
+import { baseState, scriptState, script_basic } from '../../helpers/state';
 
 describe('script list command', () => {
   const logSpy = jest.spyOn(console, 'log');

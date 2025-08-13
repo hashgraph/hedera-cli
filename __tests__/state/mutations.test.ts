@@ -1,19 +1,19 @@
 import {
-  saveState as storeSaveState,
+  addAccount,
+  addScript,
+  addToken,
+  addTopic,
+  removeAccount,
+} from '../../src/state/mutations';
+import {
   get as storeGet,
   saveKey as storeSaveKey,
   saveScriptArgument as storeSaveScriptArgument,
+  saveState as storeSaveState,
 } from '../../src/state/store';
-import { baseState, alice } from '../helpers/state';
-import {
-  addAccount,
-  removeAccount,
-  addToken,
-  addTopic,
-  addScript,
-} from '../../src/state/mutations';
 import { DomainError } from '../../src/utils/errors';
-import type { Account, Token, Topic, Script } from '../../types';
+import type { Script, Token, Topic } from '../../types';
+import { alice, baseState } from '../helpers/state';
 
 describe('state mutations helpers', () => {
   beforeEach(() => {

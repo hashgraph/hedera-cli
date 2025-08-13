@@ -1,4 +1,4 @@
-const { resetStore, getState } = require('../../src/state/store');
+import { getState, resetStore } from '../../src/state/store';
 describe('config layering with test user config', () => {
   test('merges test user config with base defaults', () => {
     // Sanity: marker env set

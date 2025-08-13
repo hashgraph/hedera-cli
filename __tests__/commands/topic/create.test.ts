@@ -1,10 +1,10 @@
-import { topicState, topic, baseState } from '../../helpers/state';
+import { Command } from 'commander';
 import commands from '../../../src/commands';
 import {
-  saveState as storeSaveState,
   get as storeGet,
+  saveState as storeSaveState,
 } from '../../../src/state/store';
-import { Command } from 'commander';
+import { baseState, topic } from '../../helpers/state';
 
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');

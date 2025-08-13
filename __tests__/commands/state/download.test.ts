@@ -1,17 +1,17 @@
-import {
-  baseState,
-  fullState,
-  downloadState,
-  script_basic,
-  accountState,
-} from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
 import {
-  saveState as storeSaveState,
   getState as storeGetAll,
+  saveState as storeSaveState,
 } from '../../../src/state/store';
 import stateUtils from '../../../src/utils/state';
+import {
+  accountState,
+  baseState,
+  downloadState,
+  fullState,
+  script_basic,
+} from '../../helpers/state';
 
 describe('state download command', () => {
   const stateUtilsDownloadStateSpy = jest
@@ -59,8 +59,8 @@ describe('state download command', () => {
       // Assert
       expect(stateUtilsDownloadStateSpy).toHaveBeenCalledWith(url);
       const {
-        actions: _a1,
-        scriptExecutionName: _legacyName1,
+        actions: _actionsMerge,
+        scriptExecutionName: _scriptExecMerge,
         ...stateAfterMerge
       } = storeGetAll() as any;
       expect(stateAfterMerge).toEqual({
@@ -96,8 +96,8 @@ describe('state download command', () => {
       // Assert
       expect(stateUtilsDownloadStateSpy).toHaveBeenCalledWith(url);
       const {
-        actions: _a2,
-        scriptExecutionName: _legacyName2,
+        actions: _actionsOverwrite,
+        scriptExecutionName: _scriptExecOverwrite,
         ...stateAfterOverwrite
       } = storeGetAll() as any;
       expect(stateAfterOverwrite).toEqual({

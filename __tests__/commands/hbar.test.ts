@@ -1,8 +1,8 @@
-import { baseState, fullState, bob, alice } from '../helpers/state';
 import { Command } from 'commander';
 import commands from '../../src/commands';
 import { saveState as storeSaveState } from '../../src/state/store';
 import hbarUtils from '../../src/utils/hbar';
+import { alice, bob, fullState } from '../helpers/state';
 
 describe('hbar transfer command', () => {
   const hbarUtilsSpy = jest.spyOn(hbarUtils, 'transfer').mockResolvedValue();

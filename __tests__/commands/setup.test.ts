@@ -1,23 +1,20 @@
-import { testnetOperatorId, testnetOperatorKey } from '../helpers/state';
 import { Command } from 'commander';
+import dotenv from 'dotenv';
 import commands from '../../src/commands';
-
-const os = require('os');
-const dotenv = require('dotenv');
+import { getState as storeGetAll } from '../../src/state/store';
 import accountUtils from '../../src/utils/account';
-import {
-  saveState as storeSaveState,
-  getState as storeGetAll,
-} from '../../src/state/store';
 import setupUtils from '../../src/utils/setup';
+import { testnetOperatorId, testnetOperatorKey } from '../helpers/state';
 
 jest.mock('os');
-jest.mock('dotenv');
+jest.mock('dotenv', () => ({
+  __esModule: true,
+  default: { config: jest.fn().mockReturnValue({ error: null }) },
+}));
 
 describe('setup init command', () => {
   describe('setup init - success path', () => {
     let originalEnv: any;
-    const logSpy = jest.spyOn(console, 'log');
     const setupOperatorAccountSpy = jest.spyOn(
       setupUtils,
       'setupOperatorAccount',
@@ -44,7 +41,10 @@ describe('setup init command', () => {
       process.env.TESTNET_OPERATOR_ID = testnetOperatorId;
 
       const mockEnvPath = '/some/path/.env';
-      dotenv.config.mockReturnValue({ error: null }); // Mock dotenv to succeed - if error path doesn't exist
+      // dotenv.config already mocked above; ensure it returns success
+      (dotenv as unknown as { config: jest.Mock }).config.mockReturnValue({
+        error: null,
+      });
       accountUtils.getAccountHbarBalance = jest
         .fn()
         .mockResolvedValue(1000000000); // Mock accountUtils to succeed

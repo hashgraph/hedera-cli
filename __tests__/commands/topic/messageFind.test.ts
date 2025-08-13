@@ -1,18 +1,17 @@
 import axios from 'axios';
 
-import { topicState, topic } from '../../helpers/state';
-import commands from '../../../src/commands';
-import { saveState as storeSaveState } from '../../../src/state/store';
 import { Command } from 'commander';
 import api from '../../../src/api';
+import commands from '../../../src/commands';
+import { saveState as storeSaveState } from '../../../src/state/store';
+import { Logger } from '../../../src/utils/logger';
+import stateUtils from '../../../src/utils/state';
 import {
   findMessageResponseMock,
   topicMessageResponse,
-  findMessagesResponseMock,
   topicMessagesResponse,
 } from '../../helpers/api/apiTopicHelper';
-import { Logger } from '../../../src/utils/logger';
-import stateUtils from '../../../src/utils/state';
+import { topic, topicState } from '../../helpers/state';
 
 const logger = Logger.getInstance();
 jest.mock('axios');

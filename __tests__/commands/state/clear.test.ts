@@ -1,16 +1,15 @@
-import {
-  baseState,
-  fullState,
-  accountState,
-  tokenState,
-  scriptState,
-} from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
 import {
-  saveState as storeSaveState,
   getState as storeGetAll,
+  saveState as storeSaveState,
 } from '../../../src/state/store';
+import {
+  accountState,
+  fullState,
+  scriptState,
+  tokenState,
+} from '../../helpers/state';
 
 describe('state clear command', () => {
   const saveStateControllerSpy = jest.spyOn({ save: storeSaveState }, 'save');
@@ -34,11 +33,7 @@ describe('state clear command', () => {
       await program.parse(['node', 'hedera-cli.ts', 'state', 'clear']);
 
       // Assert
-      const args = saveStateControllerSpy.mock.calls.map((c) => c[0]);
-      const saved = args.find((a) => a && a.network);
-      const { actions: _a, ...savedNoActions } = storeGetAll() as any;
-      // savedNoActions already reflects post-clear mutated state; baseState passed to saveState should remain unchanged shape-wise
-      expect(Object.keys(savedNoActions)).toContain('accounts');
+      expect((storeGetAll() as any).accounts).toBeDefined();
     });
 
     test('✅ clear state skip accounts', async () => {
@@ -57,11 +52,11 @@ describe('state clear command', () => {
 
       // Assert
       const {
-        actions: _acctsA,
-        scriptExecutionName: _legacyNameA,
-        ...afterAccounts
+        actions: _aAcc,
+        scriptExecutionName: _sAcc,
+        ...accountsView
       } = storeGetAll() as any;
-      expect(afterAccounts).toEqual(accountState);
+      expect(accountsView).toEqual(accountState);
     });
 
     test('✅ clear state skip tokens', async () => {
@@ -80,11 +75,11 @@ describe('state clear command', () => {
 
       // Assert
       const {
-        actions: _acctsT,
-        scriptExecutionName: _legacyNameT,
-        ...afterTokens
+        actions: _aTok,
+        scriptExecutionName: _sTok,
+        ...tokensView
       } = storeGetAll() as any;
-      expect(afterTokens).toEqual(tokenState);
+      expect(tokensView).toEqual(tokenState);
     });
 
     test('✅ clear state skip scripts', async () => {
@@ -103,11 +98,11 @@ describe('state clear command', () => {
 
       // Assert
       const {
-        actions: _acctsS,
-        scriptExecutionName: _legacyNameS,
-        ...afterScripts
+        actions: _aScr,
+        scriptExecutionName: _sScr,
+        ...scriptsView
       } = storeGetAll() as any;
-      expect(afterScripts).toEqual(scriptState);
+      expect(scriptsView).toEqual(scriptState);
     });
 
     test('✅ clear state skip all (tokens, scripts, and accounts)', async () => {
@@ -128,13 +123,14 @@ describe('state clear command', () => {
 
       // Assert
       // With all skips the state should remain unchanged
-      const { actions: _actsSkipAll, ...current } = storeGetAll() as any;
-      const { actions: _actsBase, ...base } = fullState as any;
-      // Topics, accounts, tokens, scripts all skipped so state should match original fullState
+      const {
+        actions: _aAll,
+        scriptExecutionName: _sAll,
+        ...current
+      } = storeGetAll() as any;
       expect(current.accounts).toEqual(fullState.accounts);
       expect(current.tokens).toEqual(fullState.tokens);
       expect(current.scripts).toEqual(fullState.scripts);
-      // topics may be cleared or retained depending on prior state; ensure shape at least exists
       expect(current).toHaveProperty('topics');
     });
   });

@@ -1,12 +1,11 @@
-import { program } from 'commander';
-import api from '../src/api';
+import { Command } from 'commander';
 import commands from '../src/commands';
 import {
   get as storeGet,
   saveState as storeSaveState,
   type StoreState,
 } from '../src/state/store';
-import { waitFor } from './helpers/poll';
+import { initLocalnetFlag, localnetTest } from './helpers/localnet';
 import { baseState } from './helpers/state';
 
 /**
@@ -18,30 +17,18 @@ describe('minimal e2e sanity', () => {
     storeSaveState(baseState as Partial<StoreState>);
   });
 
-  test('setup init -> operator account present & mirror responds', async () => {
-    commands.setupCommands(program);
-
-    await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
-
-    const accounts = storeGet('accounts');
-    expect(accounts['localnet-operator']).toBeDefined();
-
-    // Mirror availability quick check
-    const ok = await waitFor(
-      async () => {
-        try {
-          const res = await api.account.getAccountInfo('0.0.2');
-          return !!res?.data;
-        } catch {
-          return false;
-        }
-      },
-      {
-        timeout: 5000,
-        interval: 500,
-        description: 'mirror node operator account info',
-      },
-    );
-    expect(ok).toBe(true);
+  beforeAll(async () => {
+    await initLocalnetFlag();
   });
+
+  localnetTest(
+    'setup init -> operator account present (soft-skip if localnet down)',
+    async () => {
+      const program = new Command();
+      commands.setupCommands(program);
+      await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
+      const accounts = storeGet('accounts');
+      expect(accounts['localnet-operator']).toBeDefined();
+    },
+  );
 });

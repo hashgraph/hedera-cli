@@ -1,12 +1,12 @@
 // Negative test: invalid user config file should be ignored and fallback to base defaults
 // We simulate this by pointing HCLI_CONFIG_FILE at an invalid JSON file and clearing module caches.
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 describe('invalid user config handling', () => {
-  test('falls back to base defaults when user config is unreadable JSON', () => {
+  test('falls back to base defaults when user config is unreadable JSON', async () => {
     // Create a temporary invalid JSON file
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hcli-invalid-'));
     const invalidPath = path.join(tmpDir, 'hedera-cli.invalid.config.json');
@@ -17,8 +17,9 @@ describe('invalid user config handling', () => {
 
     let state: any;
     jest.isolateModules(() => {
-      const { getState } = require('../../src/state/store');
-      state = getState();
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const mod = require('../../src/state/store');
+      state = mod.getState();
     });
 
     // Because file is invalid we should still have default base network (localnet) from baseConfig
@@ -30,9 +31,7 @@ describe('invalid user config handling', () => {
     expect(state.networks.testnet).toBeDefined();
 
     // Clean up temp file
-    try {
-      fs.unlinkSync(invalidPath);
-      fs.rmdirSync(tmpDir);
-    } catch {}
+    if (fs.existsSync(invalidPath)) fs.unlinkSync(invalidPath);
+    if (fs.existsSync(tmpDir)) fs.rmdirSync(tmpDir);
   });
 });

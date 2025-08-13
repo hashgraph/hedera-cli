@@ -1,7 +1,6 @@
+import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
-
-import { program } from 'commander';
 import api from '../src/api';
 import commands from '../src/commands';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../src/state/store';
 import { Logger } from '../src/utils/logger';
 import type { Token } from '../types';
+import { initLocalnetFlag, localnetTest } from './helpers/localnet';
 import { waitFor } from './helpers/poll';
 import { baseState } from './helpers/state';
 
@@ -18,30 +18,8 @@ const logger = Logger.getInstance();
 
 describe('End to end tests', () => {
   const logSpy = jest.spyOn(logger, 'log');
-
-  // Fast-fail: ensure localnet mirror endpoint is responding before running long flows.
   beforeAll(async () => {
-    const available = await waitFor(
-      async () => {
-        try {
-          const res = await api.account.getAccountInfo('0.0.2');
-          return !!res?.data;
-        } catch {
-          return false;
-        }
-      },
-      {
-        timeout: 5000,
-        interval: 500,
-        description:
-          'localnet mirror node availability (operator account 0.0.2)',
-      },
-    );
-    if (!available) {
-      throw new Error(
-        'Localnet unavailable: mirror node did not respond within 5s. Start local solo node before running e2e tests.',
-      );
-    }
+    await initLocalnetFlag();
   });
 
   beforeEach(() => {
@@ -74,7 +52,8 @@ describe('End to end tests', () => {
    * - Delete the account and verify it is deleted
    * - Restore the state file from backup and verify the account and operator details are restored
    */
-  test('✅ Flow 1', async () => {
+  localnetTest('✅ Flow 1', async () => {
+    const program = new Command();
     // Extend timeout for this long flow (was formerly passed as 3rd arg)
     jest.setTimeout(45000);
     // Arrange: Setup init
@@ -254,7 +233,8 @@ describe('End to end tests', () => {
    * - Load and execute the script (list all scripts and spy on logger function)
    * - Delete script and verify it is deleted in state file
    */
-  test('✅ Script features', async () => {
+  localnetTest('✅ Script features', async () => {
+    const program = new Command();
     // Arrange: Download a script from the internet
     commands.stateCommands(program);
     const scriptURL =
@@ -330,7 +310,8 @@ describe('End to end tests', () => {
    * - Transfer 1 unit of token from treasury to account 3
    * - Verify balance by looking up the token balance of account 3 via API
    */
-  test('✅ Token features', async () => {
+  localnetTest('✅ Token features', async () => {
+    const program = new Command();
     // Arrange: Create 3 accounts
     commands.accountCommands(program);
     const accountNameTreasury = 'treasury';
@@ -495,7 +476,8 @@ describe('End to end tests', () => {
    * - Submit a message to topic (submit key should sign)
    * - Find the message and verify it is correct
    */
-  test('✅ Topic features', async () => {
+  localnetTest('✅ Topic features', async () => {
+    const program = new Command();
     // Arrange: Setup init
     commands.setupCommands(program);
 

@@ -1,12 +1,12 @@
-import { alice, tokenState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
 import {
-  saveState as storeSaveState,
   get as storeGet,
+  saveState as storeSaveState,
 } from '../../../src/state/store';
+import { alice, tokenState } from '../../helpers/state';
 
-let tokenId = Object.keys(tokenState.tokens)[0];
+const tokenId = Object.keys(tokenState.tokens)[0];
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 
