@@ -1,29 +1,52 @@
-// Simple color wrapper (can be disabled globally)
-// Using ANSI codes directly to avoid extra dependency
-const codes = {
-  reset: '\u001b[0m',
-  dim: '\u001b[2m',
-  green: '\u001b[32m',
-  yellow: '\u001b[33m',
-  blue: '\u001b[34m',
-  magenta: '\u001b[35m',
-  cyan: '\u001b[36m',
-  red: '\u001b[31m',
-};
+// Color helper built atop colorette for lightweight, dependency-based styling
+// Provides central enable/disable switch respecting --no-color and test environments.
+import * as c from 'colorette';
 
 let enabled = true;
+const isTest = !!process.env.JEST_WORKER_ID;
+
+// In test environment disable colors unless FORCE_COLOR=1 explicitly set.
+if (isTest) {
+  enabled = process.env.FORCE_COLOR === '1';
+}
+
 export function setColorEnabled(v: boolean) {
+  if (isTest && process.env.FORCE_COLOR !== '1') return; // force stay disabled in tests
   enabled = v;
+  // colorette reads isColorSupported at import; soft-disable via wrappers
 }
-function wrap(color: keyof typeof codes, text: string) {
-  return enabled ? codes[color] + text + codes.reset : text;
+
+function wrap<T extends (str: string) => string>(fn: T) {
+  return (s: string) => (enabled ? fn(s) : s);
 }
+
 export const color = {
-  green: (s: string) => wrap('green', s),
-  yellow: (s: string) => wrap('yellow', s),
-  blue: (s: string) => wrap('blue', s),
-  magenta: (s: string) => wrap('magenta', s),
-  cyan: (s: string) => wrap('cyan', s),
-  red: (s: string) => wrap('red', s),
-  dim: (s: string) => wrap('dim', s),
+  green: wrap(c.green),
+  yellow: wrap(c.yellow),
+  blue: wrap(c.blue),
+  magenta: wrap(c.magenta),
+  cyan: wrap(c.cyan),
+  red: wrap(c.red),
+  dim: wrap(c.dim),
+  bold: wrap(c.bold),
 };
+
+export function heading(text: string): string {
+  return color.bold(color.cyan(text));
+}
+
+export function subtle(text: string): string {
+  return color.dim(text);
+}
+
+export function success(text: string): string {
+  return color.green(text);
+}
+
+export function warn(text: string): string {
+  return color.yellow(text);
+}
+
+export function failure(text: string): string {
+  return color.red(text);
+}

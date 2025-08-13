@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { heading, success } from '../../utils/color';
 import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
 import { isJsonOutput, printOutput } from '../../utils/output';
@@ -20,7 +21,7 @@ export default (program: Command) => {
           printOutput('network', { activeNetwork: name });
           return;
         }
-        logger.log(`Active network set to: ${name}`);
+        logger.log(heading('Active network: ') + success(name));
       }),
     )
     .addHelpText(

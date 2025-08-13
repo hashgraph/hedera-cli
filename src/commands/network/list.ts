@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { color, heading } from '../../utils/color';
 import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
 import { isJsonOutput, printOutput } from '../../utils/output';
@@ -19,8 +20,10 @@ export default (program: Command) => {
           printOutput('networks', { networks: networkNames });
           return;
         }
-        logger.log('Available networks:');
-        networkNames.forEach((name) => logger.log(`- ${name}`));
+        logger.log(heading('Available networks:'));
+        networkNames.forEach((name) =>
+          logger.log(`${color.green('-')} ${color.magenta(name)}`),
+        );
       }),
     );
 

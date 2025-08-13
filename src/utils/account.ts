@@ -5,15 +5,15 @@ import {
   PrivateKey,
 } from '@hashgraph/sdk';
 
-import { updateState as storeUpdateState } from '../state/store';
-import { actions } from '../state/store';
-import { selectAccounts } from '../state/selectors';
+import api from '../api';
 import { addAccount } from '../state/mutations';
-import stateUtils from '../utils/state';
+import { selectAccounts } from '../state/selectors';
+import { actions, updateState as storeUpdateState } from '../state/store';
+import { color, heading, warn } from '../utils/color';
 import { display } from '../utils/display';
 import { Logger } from '../utils/logger';
+import stateUtils from '../utils/state';
 import { DomainError } from './errors';
-import api from '../api';
 
 import type { Account } from '../../types';
 
@@ -147,24 +147,26 @@ function listAccounts(showPrivateKeys: boolean = false): void {
 
   // Check if there are any accounts in the config
   if (!accounts || Object.keys(accounts).length === 0) {
-    logger.log('No accounts found.');
+    logger.log(warn('No accounts found.'));
     throw new DomainError('No accounts found.', 0);
   }
 
   // Log details for each account
+  logger.log(
+    heading(
+      showPrivateKeys
+        ? 'Name, account ID, type, private key (DER)'
+        : 'Name, account ID, type',
+    ) + '\n',
+  );
   for (const [name, account] of Object.entries(accounts)) {
+    const base = `${color.magenta(name)}, ${color.cyan(
+      account.accountId,
+    )}, ${color.green(account.type.toUpperCase())}`;
     if (showPrivateKeys) {
-      logger.log('Name, account ID, type, private key (DER)\n');
-      logger.log(
-        `${name}, ${account.accountId}, ${account.type.toUpperCase()}, ${
-          account.privateKey
-        }`,
-      );
+      logger.log(`${base}, ${color.yellow(account.privateKey)}`);
     } else {
-      logger.log('Name, account ID, type\n');
-      logger.log(
-        `${name}, ${account.accountId}, ${account.type.toUpperCase()}`,
-      );
+      logger.log(base);
     }
   }
 }

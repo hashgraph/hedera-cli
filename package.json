@@ -50,6 +50,7 @@
     "cosmiconfig": "^9.0.0",
     "dotenv": "^16.4.7",
     "enquirer": "^2.4.1",
+    "colorette": "^2.0.20",
     "zod": "^3.23.8",
     "uuid": "^11.1.0",
     "zustand": "^4.5.2"
