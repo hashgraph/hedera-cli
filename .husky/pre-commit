@@ -1,11 +1,26 @@
 #!/usr/bin/env sh
 set -e
 
+# Detect staged changes first
+if git diff --cached --quiet --name-only; then
+	echo "pre-commit: no staged changes (nothing to do)"
+	exit 0
+fi
+
 echo "pre-commit: running lint-staged"
-if npx lint-staged; then
-	echo "pre-commit: success"
+if npx lint-staged --allow-empty; then
+	echo "pre-commit: lint-staged success"
 else
 	code=$?
-	echo "pre-commit: failed (code $code)"
+	echo "pre-commit: lint-staged failed (code $code)"
 	exit $code
 fi
+
+# After formatting/auto-fixes, it's possible all changes were whitespace and now match HEAD
+if git diff --cached --quiet --name-only; then
+	echo "pre-commit: all staged changes were formatting-only and are now identical to HEAD"
+	echo "pre-commit: aborting empty commit (use --allow-empty if intentional)"
+	exit 1
+fi
+
+echo "pre-commit: passing control back to git"
