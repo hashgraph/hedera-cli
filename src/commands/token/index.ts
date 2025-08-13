@@ -5,7 +5,10 @@ import createFromFileCommand from './createFromFile';
 import transferCommand from './transfer';
 
 export default (program: Command) => {
-  const token = program.command('token').description('Handle tokens');
+  const token = program
+    .command('token')
+    .alias('tok')
+    .description('Handle tokens');
 
   associateCommand(token);
   createCommand(token);

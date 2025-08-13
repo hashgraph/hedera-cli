@@ -6,6 +6,7 @@ import listCommand from './list';
 export default (program: Command) => {
   const topic = program
     .command('topic')
+    .alias('tpc')
     .description(
       'Hedera Consensus Service commands handling topics and messages',
     );

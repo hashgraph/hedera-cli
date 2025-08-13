@@ -8,7 +8,7 @@ import stateUtils from '../utils/state';
 import { telemetryPreAction } from './shared/telemetryHook';
 import { wrapAction } from './shared/wrapAction';
 export default (program: Command) => {
-  const hbar = program.command('hbar');
+  const hbar = program.command('hbar').alias('hb');
 
   hbar
     .command('transfer')

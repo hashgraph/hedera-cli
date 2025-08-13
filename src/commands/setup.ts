@@ -112,7 +112,10 @@ async function setupCLI(
 }
 
 export default (program: Command) => {
-  const setup = program.command('setup').description('Setup Hedera CLI');
+  const setup = program
+    .command('setup')
+    .alias('su')
+    .description('Setup Hedera CLI');
 
   setup
     .command('init')

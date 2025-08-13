@@ -9,6 +9,7 @@ const logger = Logger.getInstance();
 export default (program: Command) => {
   program
     .command('telemetry <action>')
+    .alias('tel')
     .description('Enable or disable telemetry')
     .action(
       wrapAction(

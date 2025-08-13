@@ -8,7 +8,7 @@ import clearCommand from './clear';
 import viewCommand from './view';
 
 export default (program: Command) => {
-  const account = program.command('account');
+  const account = program.command('account').alias('acct');
 
   deleteCommand(account);
   balanceCommand(account);
