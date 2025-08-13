@@ -666,26 +666,109 @@ A token input file looks like below. You can define all properties you would nor
 Here's how custom fees are defined in the token input file:
 
 ```json
-"customFees": [
-  {
-    "type": "fixed", // Indicates a fixed fee
-    "unitType": "token", // Indicates the denomination of the fee: "token", "hbar", or "tinybar"
-    "amount": 1, // Amount of the fee
-    "denom": "0.0.3609946", // If the unit type is "token", then you need to set a denominating token ID to collect the fees in
-    "exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
-    "collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
-  },
-  {
-    "type": "fractional", // Indicates a fractional fee
-    "numerator": 1, // Numerator of the fractional fee
-    "denominator": 100, // Denominator of the fractional fee: 1/100 = 1% fee on the transfer
-    "min": 1, // Optional: Minimum fee user has to pay
-    "max": 100, // Optional: Maximum fee user has to pay because fractional fees can become very costly
-    "exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
-    "collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
-  }
-]
+
+### Token file schema & validation
+
+The `token create-from-file` command validates your JSON definition against a strict schema (implemented with `zod`). The file must include ALL required fields; unknown or invalid values cause the command to fail (exit code set, no network transaction performed, and each validation error logged).
+
+Key rules:
+
+| Field | Rules |
+| ----- | ----- |
+| `name` | 1–100 characters |
+| `symbol` | 1–20 characters |
+| `decimals` | Integer 0–18 |
+| `supplyType` | `finite` or `infinite` |
+| `initialSupply` | Integer >= 0 |
+| `maxSupply` | Required > 0 only when `supplyType` = `finite`; ignored (can be 0) for `infinite` |
+| `memo` | Optional, up to 100 chars |
+| `keys.treasuryKey` | REQUIRED (non‑empty string or placeholder). All other keys may be an empty string to omit |
+| `customFees` | Array (can be empty). Each element must be a valid fixed or fractional fee (see below) |
+
+Keys object (all properties must exist, but may be empty strings except `treasuryKey`):
 ```
+
+{
+"adminKey": "", "supplyKey": "", "wipeKey": "", "kycKey": "",
+"freezeKey": "", "pauseKey": "", "feeScheduleKey": "", "treasuryKey": "<name:alice>"
+}
+
+````
+
+Placeholders supported in any key field:
+
+* `<name:ACCOUNT_NAME>` – replaced with the private key of an existing account in your address book.
+* `<newkey:ecdsa:INITIAL_BALANCE_TINYBARS>` – creates a brand new ECDSA account with a random name and the given initial balance (tinybars), then substitutes its private key.
+
+Notes:
+* Only ECDSA new keys are allowed. `<newkey:ed25519:...>` is rejected.
+* `treasuryId` is inferred automatically from the (resolved) `treasuryKey`'s account if not already known.
+* Leave a key as an empty string (e.g. `"freezeKey": ""`) to omit that permission.
+
+Custom fee validation:
+
+Fixed fee (`type: "fixed"`):
+* `amount`: positive integer
+* `unitType`: one of `hbar`, `hbars`, `tinybar`, `tinybars`, `token`, `tokens`
+* If `unitType` is `token`/`tokens`, `denom` (token ID) is required
+* Optional: `collectorId` (account ID `shard.realm.num`), `exempt` (boolean)
+
+Fractional fee (`type: "fractional"`):
+* `numerator` / `denominator`: positive integers (denominator > 0)
+* Optional: `min`, `max` (non‑negative integers); if both present then `min <= max`
+* Optional: `collectorId`, `exempt`
+
+Failure behavior:
+* The CLI prints: `Token file validation failed` then each specific issue (e.g. `name: Required`) and sets `process.exitCode = 1`.
+* No partial state is written and no token creation transaction is attempted.
+
+Example minimal infinite‑supply definition (unused keys empty, no fees):
+```json
+{
+  "name": "Example",
+  "symbol": "EX",
+  "decimals": 0,
+  "supplyType": "infinite",
+  "initialSupply": 0,
+  "maxSupply": 0,
+  "keys": {
+    "supplyKey": "",
+    "treasuryKey": "<name:alice>",
+    "adminKey": "",
+    "feeScheduleKey": "",
+    "freezeKey": "",
+    "pauseKey": "",
+    "wipeKey": "",
+    "kycKey": ""
+  },
+  "customFees": [],
+  "memo": ""
+}
+````
+
+Tip (scripting): Combine `--args` with placeholders to capture the newly created token's ID and keys for later commands, e.g. `--args tokenId:myTokenId`.
+
+"customFees": [
+{
+"type": "fixed", // Indicates a fixed fee
+"unitType": "token", // Indicates the denomination of the fee: "token", "hbar", or "tinybar"
+"amount": 1, // Amount of the fee
+"denom": "0.0.3609946", // If the unit type is "token", then you need to set a denominating token ID to collect the fees in
+"exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
+"collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
+},
+{
+"type": "fractional", // Indicates a fractional fee
+"numerator": 1, // Numerator of the fractional fee
+"denominator": 100, // Denominator of the fractional fee: 1/100 = 1% fee on the transfer
+"min": 1, // Optional: Minimum fee user has to pay
+"max": 100, // Optional: Maximum fee user has to pay because fractional fees can become very costly
+"exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
+"collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
+}
+]
+
+````
 
 **2. Create Fungible Token:**
 
@@ -693,7 +776,7 @@ Creates a new fungible token with specified properties like name, symbol, treasu
 
 ```sh
 hcli token create --treasury-id <treasuryId> --treasury-key <treasuryKey> --name <name> --symbol <symbol> --decimals <decimals> --supply-type <supplyType> --initial-supply <initialSupply> --admin-key <adminKey>
-```
+````
 
 Flags:
 
