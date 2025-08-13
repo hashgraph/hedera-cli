@@ -3,6 +3,8 @@ import accountUtils from '../../utils/account';
 import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
 import { telemetryPreAction } from '../shared/telemetryHook';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import { selectAccounts } from '../../state/selectors';
 
 const logger = Logger.getInstance();
 
@@ -15,8 +17,17 @@ export default (program: Command) => {
     .action(
       exitOnError((options: ListAccountsOptions) => {
         logger.verbose('Listing accounts');
+        if (isJsonOutput()) {
+          const accounts = selectAccounts();
+          printOutput('accounts', { accounts });
+          return;
+        }
         accountUtils.listAccounts(options.private);
       }),
+    )
+    .addHelpText(
+      'after',
+      `\nExamples:\n  $ hedera-cli account list\n  $ hedera-cli account list --private\n  $ hedera-cli --json account list\n`,
     );
 };
 

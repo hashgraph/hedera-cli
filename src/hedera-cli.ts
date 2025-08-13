@@ -1,7 +1,9 @@
 import { program } from 'commander';
 import commands from './commands';
+import { setColorEnabled } from './utils/color';
 import { installGlobalErrorHandlers } from './utils/errors';
 import { Logger } from './utils/logger';
+import { setGlobalOutputMode } from './utils/output';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json') as { version?: string };
@@ -12,6 +14,8 @@ program
   .description('A CLI tool for managing Hedera environments')
   .option('-v, --verbose', 'Enable verbose logging')
   .option('-q, --quiet', 'Quiet mode (only errors)')
+  .option('--json', 'Machine-readable JSON output where supported')
+  .option('--no-color', 'Disable ANSI colors in output')
   .option(
     '--log-mode <mode>',
     'Explicit log mode (normal|verbose|quiet|silent)',
@@ -23,17 +27,18 @@ program.hook('preAction', () => {
     verbose?: boolean;
     quiet?: boolean;
     logMode?: string;
+    json?: boolean;
+    color?: boolean; // from --no-color inverse boolean option
   }>();
   if (opts.logMode) {
     const mode = opts.logMode as 'verbose' | 'quiet' | 'normal' | 'silent';
     if (mode === 'silent') logger.setMode('silent');
     else if (mode === 'verbose' || mode === 'quiet' || mode === 'normal')
       logger.setLevel(mode);
-  } else if (opts.verbose) {
-    logger.setLevel('verbose');
-  } else if (opts.quiet) {
-    logger.setLevel('quiet');
-  }
+  } else if (opts.verbose) logger.setLevel('verbose');
+  else if (opts.quiet) logger.setLevel('quiet');
+  setColorEnabled(opts.color !== false);
+  setGlobalOutputMode({ json: Boolean(opts.json) });
 });
 
 // Auto-register all exported command registrar functions
