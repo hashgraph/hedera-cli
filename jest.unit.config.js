@@ -6,7 +6,8 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.test.ts'],
   testPathIgnorePatterns: [
     ...(base.testPathIgnorePatterns || []),
-    '<rootDir>/__tests__/e2e.test.ts',
+    // Ignore any e2e* tests (handled by jest.e2e.config.js)
+    '<rootDir>/__tests__/e2e.*\\.test\\.ts',
   ],
   // Load test user config fixture before any modules
   setupFiles: ['<rootDir>/__tests__/setup/jestSetup.ts'],
