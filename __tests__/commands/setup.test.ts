@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import commands from '../../src/commands';
 import { getState as storeGetAll } from '../../src/state/store';
 import accountUtils from '../../src/utils/account';
@@ -9,7 +9,7 @@ import { testnetOperatorId, testnetOperatorKey } from '../helpers/state';
 jest.mock('os');
 jest.mock('dotenv', () => ({
   __esModule: true,
-  default: { config: jest.fn().mockReturnValue({ error: null }) },
+  config: jest.fn().mockReturnValue({ error: null }),
 }));
 
 describe('setup init command', () => {
@@ -41,10 +41,8 @@ describe('setup init command', () => {
       process.env.TESTNET_OPERATOR_ID = testnetOperatorId;
 
       const mockEnvPath = '/some/path/.env';
-      // dotenv.config already mocked above; ensure it returns success
-      (dotenv as unknown as { config: jest.Mock }).config.mockReturnValue({
-        error: null,
-      });
+      // ensure dotenv.config mock returns success (already set in jest.mock but reaffirm for clarity)
+      (dotenv.config as unknown as jest.Mock).mockReturnValue({ error: null });
       accountUtils.getAccountHbarBalance = jest
         .fn()
         .mockResolvedValue(1000000000); // Mock accountUtils to succeed

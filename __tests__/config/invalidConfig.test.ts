@@ -1,9 +1,9 @@
 // Negative test: invalid user config file should be ignored and fallback to base defaults
 // We simulate this by pointing HCLI_CONFIG_FILE at an invalid JSON file and clearing module caches.
 
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 describe('invalid user config handling', () => {
   test('falls back to base defaults when user config is unreadable JSON', async () => {
