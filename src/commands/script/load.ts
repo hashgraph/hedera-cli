@@ -1,12 +1,14 @@
+import { execSync } from 'child_process';
 import { Command } from 'commander';
+import type { Script } from '../../../types';
 import { getState } from '../../state/store';
+import { heading, success } from '../../utils/color';
+import { DomainError } from '../../utils/errors';
+import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
-import { execSync } from 'child_process';
-import { Logger } from '../../utils/logger';
-import { DomainError } from '../../utils/errors';
-import type { Script } from '../../../types';
 
 const logger = Logger.getInstance();
 
@@ -61,7 +63,20 @@ function loadScript(name: string): void {
   });
 
   stateUtils.stopScriptExecution();
-  logger.log(`\nScript ${script.name} executed successfully`);
+  if (isJsonOutput()) {
+    printOutput('scriptLoad', {
+      name: script.name,
+      commands: script.commands,
+      count: script.commands.length,
+    });
+  } else {
+    logger.log(
+      '\n' +
+        heading('Script executed successfully') +
+        ' ' +
+        success(script.name),
+    );
+  }
 }
 
 export default (program: Command) => {
@@ -77,5 +92,9 @@ export default (program: Command) => {
         },
         { log: (o) => `Loading script ${o.name}` },
       ),
+    )
+    .addHelpText(
+      'afterAll',
+      '\nExamples:\n  $ hedera script load -n setup-env\n  $ hedera script load -n setup-env --json',
     );
 };
