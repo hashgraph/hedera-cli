@@ -77,7 +77,7 @@
   },
   "lint-staged": {
     "**/*.{js,ts,tsx}": [
-      "eslint --fix",
+      "eslint --fix --ignore-pattern jest.*.config.js --ignore-pattern test-setup/**",
       "prettier --write"
     ],
     "**/*.{json,md,yml,yaml,css,scss,html}": [

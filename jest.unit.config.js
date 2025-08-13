@@ -11,7 +11,7 @@ module.exports = {
   // Load test user config fixture before any modules
   setupFiles: [
     '<rootDir>/__tests__/setup/setTestUserConfig.js',
-    '<rootDir>/__tests__/setup/silenceLogs.ts',
+    '<rootDir>/test-setup/silenceLogs.ts',
   ],
   // Optionally tighten timeout for unit tests
   testTimeout: 20000,
