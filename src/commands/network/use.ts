@@ -1,9 +1,9 @@
 import { Command } from 'commander';
 import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
-import { isJsonOutput, printOutput } from '../../utils/output';
 
 const logger = Logger.getInstance();
 

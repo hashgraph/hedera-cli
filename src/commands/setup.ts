@@ -1,17 +1,17 @@
 import { Command } from 'commander';
 import * as dotenv from 'dotenv';
+import config from '../state/config';
+import {
+  saveKey as storeSaveKey,
+  saveState as storeSaveState,
+} from '../state/store';
+import accountUtils from '../utils/account';
+import { DomainError } from '../utils/errors';
+import { Logger } from '../utils/logger';
+import setupUtils from '../utils/setup';
 import stateUtils from '../utils/state';
 import { telemetryPreAction } from './shared/telemetryHook';
-import config from '../state/config';
-import { Logger } from '../utils/logger';
-import { DomainError } from '../utils/errors';
-import accountUtils from '../utils/account';
-import setupUtils from '../utils/setup';
 import { wrapAction } from './shared/wrapAction';
-import {
-  saveState as storeSaveState,
-  saveKey as storeSaveKey,
-} from '../state/store';
 
 const logger = Logger.getInstance();
 

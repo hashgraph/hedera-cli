@@ -1,10 +1,10 @@
 import { Command } from 'commander';
-import deleteCommand from './delete';
 import balanceCommand from './balance';
+import clearCommand from './clear';
 import createCommand from './create';
+import deleteCommand from './delete';
 import importCommand from './import';
 import listCommand from './list';
-import clearCommand from './clear';
 import viewCommand from './view';
 
 export default (program: Command) => {

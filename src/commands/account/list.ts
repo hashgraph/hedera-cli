@@ -1,10 +1,10 @@
 import { Command } from 'commander';
+import { selectAccounts } from '../../state/selectors';
 import accountUtils from '../../utils/account';
 import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
-import { telemetryPreAction } from '../shared/telemetryHook';
 import { isJsonOutput, printOutput } from '../../utils/output';
-import { selectAccounts } from '../../state/selectors';
+import { telemetryPreAction } from '../shared/telemetryHook';
 
 const logger = Logger.getInstance();
 

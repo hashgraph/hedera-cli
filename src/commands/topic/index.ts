@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import createCommand from './create';
-import messageCommand from './message';
 import listCommand from './list';
+import messageCommand from './message';
 
 export default (program: Command) => {
   const topic = program
