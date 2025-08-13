@@ -8,5 +8,5 @@ module.exports = {
   testTimeout: 90000,
   // E2E often needs runInBand to avoid shared state/race conditions
   maxWorkers: 1,
-  setupFiles: ['<rootDir>/__tests__/setup/silenceLogs.ts'],
+  setupFiles: ['<rootDir>/__tests__/setup/jestSetup.ts'],
 };
