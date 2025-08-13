@@ -30,13 +30,6 @@
       }
     },
     {
-      "files": ["test-setup/silenceLogs.ts"],
-      "parserOptions": {
-        "project": ["./tsconfig.json", "./tsconfig.lint-extra.json"]
-      },
-      "rules": { "no-restricted-syntax": "off" }
-    },
-    {
       "files": ["jest.*.config.js"],
       "rules": { "@typescript-eslint/no-var-requires": "off" }
     },
