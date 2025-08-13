@@ -62,6 +62,10 @@ async function createAccountForToken(
 }
 
 function resolveTokenFilePath(filename: string): string {
+  const overrideDir = process.env.HCLI_TOKEN_INPUT_DIR;
+  if (overrideDir && overrideDir.trim() !== '') {
+    return path.join(overrideDir, `token.${filename}.json`);
+  }
   return path.join(__dirname, '../..', 'input', `token.${filename}.json`);
 }
 

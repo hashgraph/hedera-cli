@@ -35,15 +35,9 @@ describe('token create-from-file validation', () => {
     }
   });
 
-  function placeInRuntimeInput(fileName: string) {
-    const commandModuleDir = path.dirname(
-      require.resolve('../../../src/commands/token/createFromFile'),
-    );
-    const expectedInputDir = path.join(commandModuleDir, '../..', 'input');
-    fs.mkdirSync(expectedInputDir, { recursive: true });
-    const source = path.join(localInputDir, `token.${fileName}.json`);
-    const dest = path.join(expectedInputDir, `token.${fileName}.json`);
-    fs.copyFileSync(source, dest);
+  // Instead of writing inside the source tree (src/input), point the command to a temp dir
+  function setOverrideDir() {
+    process.env.HCLI_TOKEN_INPUT_DIR = localInputDir;
   }
 
   test('accepts valid token file', async () => {
@@ -78,7 +72,7 @@ describe('token create-from-file validation', () => {
       'utf-8',
     );
 
-    placeInRuntimeInput(fileName);
+    setOverrideDir();
 
     const program = new Command();
     commands.tokenCommands(program);
@@ -125,7 +119,7 @@ describe('token create-from-file validation', () => {
       'utf-8',
     );
 
-    placeInRuntimeInput(fileName);
+    setOverrideDir();
 
     const program = new Command();
     commands.tokenCommands(program);
