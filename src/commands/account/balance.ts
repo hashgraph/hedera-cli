@@ -1,5 +1,6 @@
 import accountUtils from '../../utils/account';
 import { DomainError } from '../../utils/errors';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
@@ -31,10 +32,21 @@ export default (program: Command) => {
             options.onlyHbar,
             options.tokenId,
           );
+          if (isJsonOutput()) {
+            printOutput('accountBalance', {
+              target: options.accountIdOrName,
+              onlyHbar: options.onlyHbar || false,
+              tokenId: options.tokenId || null,
+            });
+          }
         },
         { log: (o) => `Getting balance for ${o.accountIdOrName}` },
       ),
     );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera account balance -a 0.0.1234\n  $ hedera account balance -a alice -h --json',
+  );
 };
 
 interface GetAccountBalanceOptions {

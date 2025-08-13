@@ -1,8 +1,9 @@
-import { myParseInt, parseIntOption } from '../../utils/verification';
 import accountUtils from '../../utils/account';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import { myParseInt, parseIntOption } from '../../utils/verification';
 // Removed direct exitOnError usage; wrapAction handles error wrapping
-import { telemetryPreAction } from '../shared/telemetryHook';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
@@ -48,6 +49,17 @@ export default (program: Command) => {
             options.name,
             Number(options.autoAssociations),
           );
+          if (isJsonOutput()) {
+            printOutput('accountCreate', {
+              name: accountDetails.name,
+              accountId: accountDetails.accountId,
+              type: accountDetails.type,
+              publicKey: accountDetails.publicKey,
+              evmAddress: accountDetails.evmAddress,
+              network: accountDetails.network,
+              solidityAddress: accountDetails.solidityAddress,
+            });
+          }
           dynamicVariablesUtils.storeArgs(
             options.args,
             dynamicVariablesUtils.commandActions.account.create.action,
@@ -57,6 +69,10 @@ export default (program: Command) => {
         { log: (o) => `Creating account with name: ${o.name}` },
       ),
     );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera account create -n alice -b 10000\n  $ hedera account create -n bob --json',
+  );
 };
 
 interface CreateAccountOptions {

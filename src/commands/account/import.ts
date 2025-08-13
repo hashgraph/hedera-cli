@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import accountUtils from '../../utils/account';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
@@ -27,6 +28,14 @@ export default (program: Command) => {
           const accountDetails = options.key
             ? accountUtils.importAccount(options.id, options.key, options.name)
             : accountUtils.importAccountId(options.id, options.name);
+          if (isJsonOutput()) {
+            printOutput('accountImport', {
+              name: accountDetails.name,
+              accountId: accountDetails.accountId,
+              type: accountDetails.type,
+              network: accountDetails.network,
+            });
+          }
           dynamicVariablesUtils.storeArgs(
             options.args,
             dynamicVariablesUtils.commandActions.account.import.action,
@@ -36,6 +45,10 @@ export default (program: Command) => {
         { log: (o) => `Importing account with name: ${o.name}` },
       ),
     );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera account import -n alice -i 0.0.1234 -k <privateKey>\n  $ hedera account import -n external -i 0.0.2222 --json',
+  );
 };
 
 interface ImportAccountOptions {

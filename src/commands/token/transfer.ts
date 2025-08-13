@@ -1,9 +1,10 @@
-import { myParseInt } from '../../utils/verification';
 import stateUtils from '../../utils/state';
+import { myParseInt } from '../../utils/verification';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 import { Command } from 'commander';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import tokenUtils from '../../utils/token';
 
 // logging handled via wrapAction configuration
@@ -42,10 +43,22 @@ export default (program: Command) => {
             toId,
             Number(balance),
           );
+          if (isJsonOutput()) {
+            printOutput('tokenTransfer', {
+              tokenId,
+              from: fromId,
+              to: toId,
+              amount: balance,
+            });
+          }
         },
         { log: (o) => `Transfering tokens from ${o.from} to ${o.to}` },
       ),
     );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera token transfer -t 0.0.5555 --from 0.0.1111 --to 0.0.2222 -b 10\n  $ hedera token transfer ... --json',
+  );
 };
 
 interface TransferTokenOptions {

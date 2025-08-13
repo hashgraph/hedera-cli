@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { updateState as storeUpdateState } from '../../state/store';
 import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
 
@@ -52,6 +53,20 @@ export default (program: Command) => {
           options.skipScripts,
           options.skipTopics,
         );
+        if (isJsonOutput()) {
+          printOutput('stateClear', {
+            skipped: {
+              accounts: options.skipAccounts || false,
+              tokens: options.skipTokens || false,
+              scripts: options.skipScripts || false,
+              topics: options.skipTopics || false,
+            },
+          });
+        }
       }),
     );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera state clear\n  $ hedera state clear -a -t --json',
+  );
 };

@@ -4,6 +4,7 @@ import { getState } from '../../state/store';
 import accountUtils from '../../utils/account';
 import enquirerUtils from '../../utils/enquirer';
 import { DomainError } from '../../utils/errors';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
@@ -51,10 +52,17 @@ export default (program: Command) => {
             );
           }
           accountUtils.deleteAccount(accountIdOrName);
+          if (isJsonOutput()) {
+            printOutput('accountDelete', { target: accountIdOrName });
+          }
         },
         { log: (o) => `Deleting account with name or ID: ${o.id || o.name}` },
       ),
     );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera account delete -n alice\n  $ hedera account delete -i 0.0.1234 --json',
+  );
 };
 
 interface AccountDeleteOptions {
