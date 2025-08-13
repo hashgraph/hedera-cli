@@ -1,14 +1,16 @@
-import stateUtils from '../../utils/state';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-import { Logger } from '../../utils/logger';
-import { DomainError } from '../../utils/errors';
-import signUtils from '../../utils/sign';
-import { telemetryPreAction } from '../shared/telemetryHook';
-import { addTopic } from '../../state/mutations';
-import { TopicCreateTransaction, PrivateKey } from '@hashgraph/sdk';
+import { PrivateKey, TopicCreateTransaction } from '@hashgraph/sdk';
 import { Command } from 'commander';
-import { wrapAction } from '../shared/wrapAction';
 import type { Topic } from '../../../types';
+import { addTopic } from '../../state/mutations';
+import { heading, success } from '../../utils/color';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { DomainError } from '../../utils/errors';
+import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import signUtils from '../../utils/sign';
+import stateUtils from '../../utils/state';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
 const logger = Logger.getInstance();
 
@@ -17,6 +19,10 @@ export default (program: Command) => {
     .command('create')
     .hook('preAction', telemetryPreAction)
     .description('Create a new topic')
+    .addHelpText(
+      'afterAll',
+      '\nExamples:\n  $ hedera topic create --memo "Announcements"\n  $ hedera topic create --admin-key <key> --submit-key <key> --json',
+    )
     .option('-a, --admin-key <adminKey>', 'The admin key')
     .option('-s, --submit-key <submitKey>', 'The submit key')
     .option('--memo <memo>', 'The memo')
@@ -76,7 +82,12 @@ export default (program: Command) => {
             throw new DomainError('Failed to create new topic');
           }
 
-          logger.log(`Created new topic: ${topicId.toString()}`);
+          if (isJsonOutput()) {
+            printOutput('topicCreate', { topicId: topicId.toString() });
+          } else {
+            logger.log(heading('Topic created'));
+            logger.log(success(`ID: ${topicId.toString()}`));
+          }
 
           const topic: Topic = {
             network: stateUtils.getNetwork(),

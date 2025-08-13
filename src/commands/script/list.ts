@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { heading } from '../../utils/color';
 import scriptUtils from '../../utils/script';
 import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
@@ -15,5 +16,9 @@ export default (program: Command) => {
         },
         { log: 'Listing all script names' },
       ),
+    )
+    .addHelpText(
+      'afterAll',
+      `\n${heading('Examples:')}\n  $ hedera script list\n  $ hedera script list --json`,
     );
 };

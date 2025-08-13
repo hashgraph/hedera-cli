@@ -1,9 +1,10 @@
-import { telemetryPreAction } from '../shared/telemetryHook';
+import { Command } from 'commander';
+import api from '../../api';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { Logger } from '../../utils/logger';
-import { Command } from 'commander';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
-import api from '../../api';
 
 const logger = Logger.getInstance();
 
@@ -14,8 +15,10 @@ export default (program: Command) => {
     .description(
       'View the detials of an account by accound ID. The account can be in the state or external.',
     )
-    // We don't allow a name here as you can use the state command to view accounts by name
-    // This command is used to look up external accounts via mirror node
+    .addHelpText(
+      'afterAll',
+      '\nExamples:\n  $ hedera account view 0.0.1234\n  $ hedera account view 0.0.1234 --json',
+    )
     .requiredOption('-i, --id <id>', 'Account ID')
     .option(
       '--args <args>',
@@ -40,6 +43,22 @@ export default (program: Command) => {
             logger.log(
               `Max automatic token associations: ${response.data.max_automatic_token_associations}`,
             );
+            if (isJsonOutput()) {
+              printOutput('accountView', {
+                name: response.data.account,
+                id: response.data.account,
+                balance: response.data.balance.balance,
+                hbars: response.data.balance.balance.toString(),
+                mirrorNodeQueryTime: new Date().toISOString(),
+                mirrorNodeQueryStatus: 'success',
+                mirrorNodeQueryError: null,
+                mirrorNodeQueryUrl: null,
+                keyType: response.data.key._type,
+                publicKey: response.data.key.key,
+              });
+            } else {
+              // (No memo field present in response)
+            }
             dynamicVariablesUtils.storeArgs(
               options.args,
               dynamicVariablesUtils.commandActions.account.view.action,

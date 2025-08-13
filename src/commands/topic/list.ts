@@ -16,5 +16,9 @@ export default (program: Command) => {
         logger.verbose(`Listing all topic IDs and if they contain keys`);
         topicUtils.list();
       }),
+    )
+    .addHelpText(
+      'after',
+      `\nExamples:\n  $ hedera-cli topic list\n  $ hedera-cli --json topic list\n`,
     );
 };

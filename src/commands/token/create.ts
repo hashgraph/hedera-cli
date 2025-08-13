@@ -1,15 +1,17 @@
+import { PrivateKey, TokenCreateTransaction, TokenType } from '@hashgraph/sdk';
 import { Command } from 'commander';
-import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
-import { myParseInt } from '../../utils/verification';
-import tokenUtils from '../../utils/token';
-import stateUtils from '../../utils/state';
-import { telemetryPreAction } from '../shared/telemetryHook';
-import { Logger } from '../../utils/logger';
-import { DomainError } from '../../utils/errors';
-import { addToken } from '../../state/mutations';
 import type { Token } from '../../../types/state';
+import { addToken } from '../../state/mutations';
+import { heading, success } from '../../utils/color';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { DomainError } from '../../utils/errors';
+import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import signUtils from '../../utils/sign';
+import stateUtils from '../../utils/state';
+import tokenUtils from '../../utils/token';
+import { myParseInt } from '../../utils/verification';
+import { telemetryPreAction } from '../shared/telemetryHook';
 import { wrapAction } from '../shared/wrapAction';
 
 const logger = Logger.getInstance();
@@ -66,7 +68,12 @@ async function createFungibleToken(
       throw new DomainError('Token was not created');
     }
 
-    logger.log(`Token ID: ${tokenId}`);
+    if (isJsonOutput()) {
+      printOutput('tokenCreate', { tokenId });
+    } else {
+      logger.log(heading('Token created'));
+      logger.log(success(`Token ID: ${tokenId}`));
+    }
   } catch (error) {
     client.close();
     throw new DomainError('Failed to create token');
@@ -108,6 +115,10 @@ export default (program: Command) => {
     .command('create')
     .hook('preAction', telemetryPreAction)
     .description('Create a new fungible token')
+    .addHelpText(
+      'afterAll',
+      '\nExamples:\n  $ hedera token create -t 0.0.1001 -k <treasuryKey> -n "My Token" -s MTK -d 2 -i 1000 --supply-type finite -a <adminKey>\n  $ hedera token create ... --json',
+    )
     .requiredOption(
       '-t, --treasury-id <treasuryId>',
       'Treasury of the fungible token',

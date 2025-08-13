@@ -1,24 +1,41 @@
-import { updateState as storeUpdateState } from '../state/store';
 import { selectScripts } from '../state/selectors';
-import { Logger } from './logger';
+import { updateState as storeUpdateState } from '../state/store';
+import { color, heading } from './color';
 import { DomainError } from './errors';
+import { Logger } from './logger';
+import { isJsonOutput, printOutput } from './output';
 
 const logger = Logger.getInstance();
 
 function listScripts(): void {
   const scripts = selectScripts();
   const scriptNames = Object.keys(scripts);
-  if (scriptNames.length === 0) {
-    logger.log('No scripts found');
+  if (isJsonOutput()) {
+    printOutput('scripts', {
+      scripts: scriptNames.map((key) => {
+        const entry = scripts[key];
+        return {
+          name: key.replace(/^script-/, ''),
+          commands: entry.commands,
+          creation: entry.creation,
+        };
+      }),
+    });
     return;
   }
-  logger.log('Scripts:');
+  if (scriptNames.length === 0) {
+    logger.log(heading('No scripts found'));
+    return;
+  }
+  logger.log(heading('Scripts:'));
   scriptNames.forEach((key) => {
     const internal = key.startsWith('script-') ? key : `script-${key}`;
     const entry = scripts[key];
-    logger.log(`\t${internal}`);
+    logger.log(`\t${color.magenta(internal)}`);
     logger.log(`\t- Commands:`);
-    (entry.commands || []).forEach((command) => logger.log(`\t\t${command}`));
+    (entry.commands || []).forEach((command) =>
+      logger.log(`\t\t${color.cyan(command)}`),
+    );
   });
 }
 
