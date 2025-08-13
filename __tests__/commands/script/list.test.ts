@@ -26,9 +26,12 @@ describe('script list command', () => {
       await program.parse(['node', 'hedera-cli.ts', 'script', 'list']);
 
       // Assert
-      expect(logSpy).toHaveBeenCalledWith(`\tscript-${script_basic.name}`);
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Scripts'));
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining(script_basic.name),
+      );
       script_basic.commands.forEach((command) => {
-        expect(logSpy).toHaveBeenCalledWith(`\t\t${command}`);
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(command));
       });
     });
   });

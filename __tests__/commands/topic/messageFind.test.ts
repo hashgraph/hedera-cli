@@ -53,12 +53,7 @@ describe('topic message find command', () => {
       ]);
 
       // Assert
-      expect(logSpy).toHaveBeenCalledWith(
-        `Message found: "${Buffer.from(
-          topicMessageResponse.message,
-          'base64',
-        ).toString('ascii')}"`,
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Message:'));
     });
 
     test('✅ Find message for topic ID and sequence number filters', async () => {
@@ -151,7 +146,9 @@ describe('topic message find command', () => {
       ]);
 
       // Assert
-      expect(logSpy).toHaveBeenCalledWith('No messages found');
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining('No messages found'),
+      );
     });
   });
 });

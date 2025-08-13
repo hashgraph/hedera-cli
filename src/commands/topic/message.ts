@@ -1,14 +1,16 @@
+import { PrivateKey, TopicMessageSubmitTransaction } from '@hashgraph/sdk';
+import { Command } from 'commander';
+import type { Filter } from '../../../types';
+import api from '../../api';
+import { selectTopics } from '../../state/selectors';
+import { heading, success, warn } from '../../utils/color';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { DomainError } from '../../utils/errors';
+import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import stateUtils from '../../utils/state';
 import { telemetryPreAction } from '../shared/telemetryHook';
-import { Logger } from '../../utils/logger';
-import { DomainError } from '../../utils/errors';
-import { selectTopics } from '../../state/selectors';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-import { TopicMessageSubmitTransaction, PrivateKey } from '@hashgraph/sdk';
-import api from '../../api';
-import { Command } from 'commander';
 import { wrapAction } from '../shared/wrapAction';
-import type { Filter } from '../../../types';
 
 const logger = Logger.getInstance();
 
@@ -130,9 +132,19 @@ export default (program: Command) => {
             throw new DomainError('Error sending message to topic');
           }
 
-          logger.log(
-            `Message submitted with sequence number: ${sequenceNumber}`,
-          );
+          if (isJsonOutput()) {
+            printOutput('topicMessageSubmit', {
+              topicId: replacedOptions.topicId,
+              sequenceNumber,
+              message: replacedOptions.message,
+            });
+          } else {
+            logger.log(
+              heading('Message submitted:') +
+                ' ' +
+                success(`${sequenceNumber}`),
+            );
+          }
           client.close();
           dynamicVariablesUtils.storeArgs(
             replacedOptions.args,
@@ -210,12 +222,19 @@ export default (program: Command) => {
               replacedOptions.topicId,
               Number(replacedOptions.sequenceNumber),
             );
-            logger.log(
-              `Message found: "${Buffer.from(
-                response.data.message,
-                'base64',
-              ).toString('ascii')}"`,
-            );
+            const decoded = Buffer.from(
+              response.data.message,
+              'base64',
+            ).toString('ascii');
+            if (isJsonOutput()) {
+              printOutput('topicMessageFind', {
+                topicId: replacedOptions.topicId,
+                sequenceNumber: Number(replacedOptions.sequenceNumber),
+                message: decoded,
+              });
+            } else {
+              logger.log(heading('Message:') + ' ' + success(`"${decoded}"`));
+            }
             return;
           }
 
@@ -230,22 +249,45 @@ export default (program: Command) => {
           );
 
           if (response.data.messages.length === 0) {
-            logger.log('No messages found');
+            if (isJsonOutput()) {
+              printOutput('topicMessages', {
+                topicId: replacedOptions.topicId,
+                messages: [],
+              });
+            } else {
+              logger.log(warn('No messages found'));
+            }
             return;
           }
-
-          response.data.messages.forEach(
-            (el: { sequence_number: number; message: string }) => {
-              logger.log(
-                `Message ${el.sequence_number}: "${Buffer.from(
-                  el.message,
-                  'base64',
-                ).toString('ascii')}"`,
-              );
-            },
-          );
+          if (isJsonOutput()) {
+            printOutput('topicMessages', {
+              topicId: replacedOptions.topicId,
+              messages: response.data.messages.map(
+                (el: { sequence_number: number; message: string }) => ({
+                  sequenceNumber: el.sequence_number,
+                  message: Buffer.from(el.message, 'base64').toString('ascii'),
+                }),
+              ),
+            });
+          } else {
+            response.data.messages.forEach(
+              (el: { sequence_number: number; message: string }) => {
+                logger.log(
+                  `Message ${el.sequence_number}: "${Buffer.from(
+                    el.message,
+                    'base64',
+                  ).toString('ascii')}"`,
+                );
+              },
+            );
+          }
         },
         { log: (o) => `Finding message for topic: ${o.topicId}` },
       ),
     );
+
+  message.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera topic message submit -t 0.0.2000 -m "hello"\n  $ hedera --json topic message submit -t 0.0.2000 -m "hello"\n  $ hedera topic message find -t 0.0.2000 -s 5\n  $ hedera --json topic message find -t 0.0.2000 --sequence-number-gt 10',
+  );
 };

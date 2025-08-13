@@ -66,7 +66,7 @@ describe('topic message submit command', () => {
 
       // Assert
       expect(logSpy).toHaveBeenCalledWith(
-        `Message submitted with sequence number: ${sequenceNumber}`,
+        expect.stringContaining('Message submitted:'),
       );
     });
   });

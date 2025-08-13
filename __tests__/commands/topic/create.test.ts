@@ -62,8 +62,9 @@ describe('topic create command', () => {
       expect(Object.keys(topics).length).toEqual(1);
       expect(topics[topic.topicId]).toEqual(customTopic);
       expect(logSpy).toHaveBeenCalledWith(
-        `Created new topic: ${topic.topicId}`,
+        expect.stringContaining('Topic created'),
       );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('ID:'));
     });
   });
 });

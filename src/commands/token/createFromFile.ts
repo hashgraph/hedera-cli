@@ -16,10 +16,12 @@ import type {
 } from '../../../types/state';
 import { get as storeGet, saveKey as storeSaveKey } from '../../state/store';
 import accountUtils from '../../utils/account';
+import { heading, success } from '../../utils/color';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
 import { exitOnError, fail } from '../../utils/errors';
 import feeUtils from '../../utils/fees';
 import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import signUtils from '../../utils/sign';
 import stateUtils from '../../utils/state';
 import tokenUtils from '../../utils/token';
@@ -298,7 +300,20 @@ async function createTokenOnNetwork(token: Token) {
     }
 
     token.tokenId = tokenCreateRx.tokenId.toString();
-    logger.log(`Token ID: ${token.tokenId}`);
+    if (isJsonOutput()) {
+      printOutput('tokenCreateFromFile', {
+        tokenId: token.tokenId,
+        name: token.name,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        initialSupply: token.initialSupply,
+        supplyType: token.supplyType,
+        maxSupply: token.maxSupply,
+        customFeesCount: token.customFees.length,
+      });
+    } else {
+      logger.log(heading('Token created:') + ' ' + success(token.tokenId));
+    }
     client.close();
   } catch (error) {
     logger.error(error as object);
@@ -390,5 +405,9 @@ export default (program: Command) => {
         previous ? [...previous, value] : [value],
       [] as string[],
     )
-    .action(exitOnError(createToken));
+    .action(exitOnError(createToken))
+    .addHelpText(
+      'afterAll',
+      '\nExamples:\n  $ hedera token create-from-file -f mytoken\n  $ hedera --json token create-from-file -f mytoken',
+    );
 };
