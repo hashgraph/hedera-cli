@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { program } from 'commander';
 import commands from './commands';
 import { setColorEnabled } from './utils/color';
