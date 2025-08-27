@@ -2,30 +2,30 @@ import { AccountId, Client, PrivateKey } from '@hashgraph/sdk';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Logger } from './logger';
-import { DomainError } from './errors';
-import {
-  get as storeGet,
-  saveKey as storeSaveKey,
-  updateState as storeUpdateState,
-  saveState as storeSaveState,
-  getState,
-} from '../state/store';
 import {
   selectAccounts,
+  selectScripts,
   selectTokens,
   selectTopics,
-  selectScripts,
 } from '../state/selectors';
+import {
+  getState,
+  get as storeGet,
+  saveKey as storeSaveKey,
+  saveState as storeSaveState,
+  updateState as storeUpdateState,
+} from '../state/store';
+import { DomainError } from './errors';
+import { Logger } from './logger';
 
 import type {
   Account,
   DownloadState,
   NetworkConfig,
   Script,
+  State,
   Token,
   Topic,
-  State,
 } from '../../types';
 
 const logger = Logger.getInstance();
@@ -108,6 +108,8 @@ function getHederaClient(): Client {
   const state = getState();
   const { operatorId, operatorKey } = getOperator(state.network);
   let client: Client;
+
+  // Handle predefined networks
   switch (state.network) {
     case 'mainnet':
       client = Client.forMainnet();
@@ -129,10 +131,31 @@ function getHederaClient(): Client {
       );
       break;
     }
-    default:
-      logger.error('Invalid network name');
-      throw new DomainError('Invalid network name');
+    default: {
+      // Handle custom networks from config
+      const networkConfig = getNetworkFromState(state.network);
+      if (!networkConfig.rpcUrl) {
+        logger.error(`RPC URL not configured for network: ${state.network}`);
+        throw new DomainError(
+          `RPC URL not configured for network: ${state.network}`,
+        );
+      }
+
+      // For custom networks, we need to create a client with custom endpoints
+      // Use the same approach as localnet but with custom URLs
+      const node = {
+        [networkConfig.rpcUrl]: AccountId.fromString('0.0.3'), // Default node account
+      };
+      client = Client.forNetwork(node);
+
+      // Set mirror network if configured
+      if (networkConfig.mirrorNodeUrl) {
+        client.setMirrorNetwork(networkConfig.mirrorNodeUrl);
+      }
+      break;
+    }
   }
+
   return client.setOperator(
     AccountId.fromString(operatorId),
     PrivateKey.fromStringDer(operatorKey),
