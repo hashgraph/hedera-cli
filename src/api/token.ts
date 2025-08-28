@@ -1,8 +1,8 @@
 import axios from 'axios';
 import type { APIResponse, BalanceResponse, TokenResponse } from '../../types';
-import stateUtils from '../utils/state';
-import { Logger } from '../utils/logger';
 import { fail } from '../utils/errors';
+import { Logger } from '../utils/logger';
+import stateUtils from '../utils/state';
 
 const logger = Logger.getInstance();
 
@@ -18,12 +18,23 @@ async function getTokenInfo(
 ): Promise<APIResponse<TokenResponse>> {
   try {
     const mirrorNodeURL = stateUtils.getMirrorNodeURL();
-    const response = await axios.get(`${mirrorNodeURL}/tokens/${tokenId}`);
+    const fullUrl = `${mirrorNodeURL}/tokens/${tokenId}`;
+
+    // Debug logging
+    logger.debug(`Calling mirror node URL: ${fullUrl}`);
+    logger.debug(`Mirror node base URL: ${mirrorNodeURL}`);
+    logger.debug(`Token ID: ${tokenId}`);
+
+    const response = await axios.get(fullUrl, {
+      timeout: 5000, // 5 second timeout
+    });
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      logger.error(error.message);
+      logger.debug(`Axios error - ${error.code}: ${error.message}`);
+      logger.error(`Resource ${tokenId} doesn't exist. ${error.message}`);
     } else {
+      logger.debug(`Unexpected error:`, error);
       logger.error('Unexpected error:', error as object);
     }
     fail('Failed to fetch token info');
@@ -36,14 +47,23 @@ async function getTokenBalance(
 ): Promise<APIResponse<BalanceResponse>> {
   try {
     const mirrorNodeURL = stateUtils.getMirrorNodeURL();
-    const response = await axios.get(
-      `${mirrorNodeURL}/tokens/${tokenId}/balances?account.id=eq:${accountId}`,
-    );
+    const fullUrl = `${mirrorNodeURL}/accounts/${accountId}/tokens?token.id=${tokenId}`;
+
+    // Debug logging
+    logger.debug(`Calling mirror node URL: ${fullUrl}`);
+    logger.debug(`Mirror node base URL: ${mirrorNodeURL}`);
+    logger.debug(`Token ID: ${tokenId}, Account ID: ${accountId}`);
+
+    const response = await axios.get(fullUrl, {
+      timeout: 5000, // 5 second timeout
+    });
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      logger.error(error.message);
+      logger.debug(`Axios error - ${error.code}: ${error.message}`);
+      logger.error(`Resource ${tokenId} doesn't exist. ${error.message}`);
     } else {
+      logger.debug(`Unexpected error:`, error);
       logger.error('Unexpected error:', error as object);
     }
     fail('Failed to fetch token balance');

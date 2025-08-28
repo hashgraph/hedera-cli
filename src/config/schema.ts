@@ -18,6 +18,7 @@ export const userConfigSchema = z
     network: z.string().optional(),
     telemetry: z.number().int().min(0).max(1).optional(),
     telemetryServer: z.string().url().optional(),
+    debug: z.boolean().optional(),
     networks: z.record(z.string(), networkConfigSchema).optional(),
   })
   .strict();

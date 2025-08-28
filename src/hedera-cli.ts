@@ -16,6 +16,10 @@ program
   .description('A CLI tool for managing Hedera environments')
   .option('-v, --verbose', 'Enable verbose logging')
   .option('-q, --quiet', 'Quiet mode (only errors)')
+  .option(
+    '--debug',
+    'Enable debug logging (shows API URLs, network info, etc.)',
+  )
   .option('--json', 'Machine-readable JSON output where supported')
   .option('--no-color', 'Disable ANSI colors in output')
   .option(
@@ -28,10 +32,17 @@ program.hook('preAction', () => {
   const opts = program.opts<{
     verbose?: boolean;
     quiet?: boolean;
+    debug?: boolean;
     logMode?: string;
     json?: boolean;
     color?: boolean; // from --no-color inverse boolean option
   }>();
+
+  // Handle debug flag (highest priority)
+  if (opts.debug) {
+    process.env.HCLI_DEBUG = 'true';
+  }
+
   if (opts.logMode) {
     const mode = opts.logMode as 'verbose' | 'quiet' | 'normal' | 'silent';
     if (mode === 'silent') logger.setMode('silent');

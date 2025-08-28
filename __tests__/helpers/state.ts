@@ -1,17 +1,17 @@
 import {
   Account,
-  State,
-  Script,
-  Topic,
-  Token,
   DownloadState,
+  Script,
+  State,
+  Token,
+  Topic,
 } from '../../types';
 
 export const baseState: State = {
   network: 'localnet',
   networks: {
     localnet: {
-      mirrorNodeUrl: 'http://localhost:5551/api/v1',
+      mirrorNodeUrl: 'http://localhost:8081/api/v1',
       rpcUrl: 'http://localhost:7546',
       operatorKey:
         '302e020100300506032b65700422042091132178e72057a1d7528025956fe39b0b847f200ab59b2fdd367017f3087137',

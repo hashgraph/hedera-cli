@@ -32,7 +32,12 @@
     "test:e2e": "JEST_SUITE_NAME='E2E Tests' JEST_JUNIT_OUTPUT_NAME='junit-e2e.xml' jest -c jest.e2e.config.js --coverage --coverageDirectory='coverage/e2e' --runInBand",
     "test:all": "npm run test:unit && npm run test:e2e",
     "test": "npm run test:unit",
-    "single-test": "jest"
+    "single-test": "jest",
+    "dev": "ts-node src/hedera-cli.ts",
+    "dev:watch": "nodemon --exec ts-node src/hedera-cli.ts",
+    "start": "ts-node src/hedera-cli.ts",
+    "hcli": "ts-node src/hedera-cli.ts",
+    "debug": "ts-node --inspect src/hedera-cli.ts"
   },
   "keywords": [
     "CLI",

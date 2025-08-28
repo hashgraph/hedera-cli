@@ -1,6 +1,7 @@
 {
   "network": "testnet",
   "telemetry": 0,
+  "debug": false,
   "networks": {
     "localnet": {
       "rpcUrl": "http://localhost:7546",

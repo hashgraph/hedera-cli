@@ -271,6 +271,13 @@ async function getAccountBalance(
 ): Promise<void> {
   const accounts = selectAccounts();
   const client = stateUtils.getHederaClient();
+  const currentNetwork = stateUtils.getNetwork();
+
+  // Debug logging
+  logger.debug(`Current network: ${currentNetwork}`);
+  logger.debug(`Account ID or name: ${accountIdOrName}`);
+  logger.debug(`Only Hbar: ${onlyHbar}`);
+  logger.debug(`Token ID: ${tokenId || 'none'}`);
 
   let accountId;
 
@@ -287,6 +294,8 @@ async function getAccountBalance(
       'Invalid account ID or name not found in address book.',
     );
   }
+
+  logger.debug(`Resolved account ID: ${accountId}`);
 
   const response = await api.account.getAccountInfo(accountId);
   display('displayBalance', response, { onlyHbar, tokenId });

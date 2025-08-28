@@ -243,9 +243,9 @@ export default (program: Command) => {
           formatFilters(filters, replacedOptions);
 
           // Call the new API function
-          const response = await api.topic.findMessagesWithFilters(
+          const response = await api.topic.getTopicMessages(
             replacedOptions.topicId,
-            filters,
+            filters[0], // Use the first filter for now
           );
 
           if (response.data.messages.length === 0) {

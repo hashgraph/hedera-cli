@@ -1,3 +1,6 @@
+import * as chalk from 'chalk';
+import { getState } from '../state/store';
+
 /**
  * Logger modes:
  *  normal  - standard logs + errors
@@ -56,10 +59,12 @@ export class Logger {
   private static instance: Logger;
   private transport: LoggerTransport;
   private _mode: LoggerMode = 'normal';
+  private isDebugMode: boolean = false;
 
   private constructor() {
     this.transport = new ConsoleTransport();
     this.configureFromEnv();
+    this.updateDebugMode();
   }
 
   static getInstance(): Logger {
@@ -91,6 +96,34 @@ export class Logger {
   private configureFromEnv(): void {
     const explicit = process.env.HCLI_LOG_MODE as LoggerMode | undefined;
     if (explicit) this.setMode(explicit);
+  }
+
+  private updateDebugMode(): void {
+    // Check environment variable first (highest priority)
+    if (process.env.HCLI_DEBUG === 'true' || process.env.HCLI_DEBUG === '1') {
+      this.isDebugMode = true;
+      return;
+    }
+
+    // Check config file
+    try {
+      const state = getState();
+      this.isDebugMode = state.debug === true;
+    } catch (error) {
+      // If we can't read config, default to false
+      this.isDebugMode = false;
+    }
+  }
+
+  public isDebugEnabled(): boolean {
+    this.updateDebugMode(); // Refresh in case config changed
+    return this.isDebugMode;
+  }
+
+  public debug(message: string, ...args: unknown[]): void {
+    if (this.isDebugEnabled()) {
+      console.log(chalk.blue(`🔍 DEBUG: ${message}`), ...args);
+    }
   }
 
   log(message: string | object): void {

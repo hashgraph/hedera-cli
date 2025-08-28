@@ -91,6 +91,7 @@ export interface State {
   networks: Record<string, NetworkConfig>;
   telemetryServer: string;
   telemetry: number;
+  debug?: boolean;
   // Script execution runtime status persisted as structured object
   scriptExecution: {
     active: boolean;

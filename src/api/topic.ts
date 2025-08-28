@@ -2,14 +2,14 @@ import axios from 'axios';
 
 import type {
   APIResponse,
+  Filter,
   TopicMessageResponse,
   TopicMessagesResponse,
-  Filter,
 } from '../../types';
-import stateUtils from '../utils/state';
 import apiUtils from '../utils/api';
-import { Logger } from '../utils/logger';
 import { fail } from '../utils/errors';
+import { Logger } from '../utils/logger';
+import stateUtils from '../utils/state';
 
 const logger = Logger.getInstance();
 
@@ -25,6 +25,9 @@ async function findMessage(
     const mirrorNodeURL = stateUtils.getMirrorNodeURL();
     const response = await axios.get(
       `${mirrorNodeURL}/topics/${topicId}/messages/${sequenceNumber}`,
+      {
+        timeout: 5000, // 5 second timeout
+      },
     );
     return response;
   } catch (error) {
@@ -46,30 +49,41 @@ async function findMessage(
  * @note There's a limit for 100 messages per request. TODO: Add pagination.
  * @returns Promise resolving to the API response.
  */
-async function findMessagesWithFilters(
+async function getTopicMessages(
   topicId: string,
-  filters: Filter[],
+  filter?: Filter,
 ): Promise<APIResponse<TopicMessagesResponse>> {
   try {
     const mirrorNodeURL = stateUtils.getMirrorNodeURL();
     const baseUrl = `${mirrorNodeURL}/topics/${topicId}/messages`;
-    const fullUrl = apiUtils.constructQueryUrl(baseUrl, filters);
+    const fullUrl = filter
+      ? apiUtils.constructQueryUrl(baseUrl, [filter])
+      : baseUrl;
 
-    const response = await axios.get(fullUrl);
+    // Debug logging
+    logger.debug(`Calling mirror node URL: ${fullUrl}`);
+    logger.debug(`Mirror node base URL: ${mirrorNodeURL}`);
+    logger.debug(
+      `Topic ID: ${topicId}, Filter: ${JSON.stringify(filter || {})}`,
+    );
+
+    const response = await axios.get(fullUrl, {
+      timeout: 5000, // 5 second timeout
+    });
     return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      logger.error(
-        `Failed to find messages for topic ${topicId} with filters. ${error.message}`,
-      );
+      logger.debug(`Axios error - ${error.code}: ${error.message}`);
+      logger.error(`Resource ${topicId} doesn't exist. ${error.message}`);
     } else {
+      logger.debug(`Unexpected error:`, error);
       logger.error('Unexpected error:', error as object);
     }
-    fail('Failed to find topic messages with filters');
+    fail('Failed to fetch topic messages');
   }
 }
 
 export default {
   findMessage,
-  findMessagesWithFilters,
+  getTopicMessages,
 };

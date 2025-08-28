@@ -28,6 +28,8 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
   - [State Commands](#state-commands)
   - [Script Commands](#script-commands)
     - [Dynamic Variables in Scripts](#dynamic-variables-in-scripts)
+- [Configuration & State Storage](#configuration--state-storage)
+- [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
@@ -197,6 +199,8 @@ Let's explore the different commands, their options, and outputs.
 > Each of the commands can be run with the `--help` flag to display the command's options and usage.
 >
 > Use the `--quiet` flag to suppress the output of the command or the `--verbose` flag to display more information.
+>
+> Use the `--debug` flag to enable detailed debugging information including API URLs, network configuration, and request parameters.
 
 ## Setup Commands
 
@@ -1565,6 +1569,61 @@ The CLI uses a centralized logger singleton (`src/utils/logger.ts`) with four mo
 | quiet   | `--quiet` or `--log-mode quiet`     | quiet                 | Suppresses standard logs (errors still shown)                                 |
 | silent  | `--log-mode silent`                 | silent                | Suppresses all user-facing logs (still routed internally so tests can assert) |
 
+### Debug Mode
+
+The CLI includes a debug mode that provides detailed information about API calls, network configuration, and request parameters. This is particularly useful for troubleshooting network issues and understanding what URLs are being called.
+
+**Debug mode can be enabled in three ways (in order of priority):**
+
+1. **Command Line Flag** (highest priority):
+
+   ```bash
+   hedera-cli --debug account balance -a 0.0.2
+   ```
+
+2. **Environment Variable**:
+
+   ```bash
+   HCLI_DEBUG=true hedera-cli account balance -a 0.0.2
+   # or
+   HCLI_DEBUG=1 hedera-cli account balance -a 0.0.2
+   ```
+
+3. **Config File** (lowest priority):
+   ```json
+   {
+     "network": "testnet",
+     "debug": true,
+     "networks": {
+       // ... network configurations
+     }
+   }
+   ```
+
+**Debug output includes:**
+
+- Current network configuration
+- Account IDs, token IDs, and other request parameters
+- Full mirror node URLs being called
+- Base URLs for API endpoints
+- Detailed error information including Axios error codes
+- Request/response debugging information
+
+**Example debug output:**
+
+```
+🔍 DEBUG: Current network: testnet
+🔍 DEBUG: Account ID or name: 0.0.2
+🔍 DEBUG: Only Hbar: false
+🔍 DEBUG: Token ID: none
+🔍 DEBUG: Resolved account ID: 0.0.2
+🔍 DEBUG: Calling mirror node URL: https://testnet.mirrornode.hedera.com/api/v1/accounts/0.0.2
+🔍 DEBUG: Mirror node base URL: https://testnet.mirrornode.hedera.com/api/v1
+🔍 DEBUG: Account ID: 0.0.2
+Balance for account 0.0.2:
+1000000000 Hbars
+```
+
 Programmatic usage:
 
 ```ts
@@ -1584,6 +1643,42 @@ When adding a new command:
 3. Do not call `process.exit()` inside handlers; throw a `DomainError` instead.
 
 Legacy env flags like `HCLI_SUPPRESS_CONSOLE` were removed—use the log modes above instead.
+
+## Troubleshooting
+
+### Common Issues
+
+**Commands hanging or timing out:**
+If commands seem to hang or take too long, enable debug mode to see what's happening:
+
+```bash
+hedera-cli --debug account balance -a 0.0.2
+```
+
+This will show you the exact URLs being called and help identify if the issue is with:
+
+- Network connectivity
+- Mirror node availability
+- Incorrect network configuration
+- API endpoint issues
+
+**Network connection issues:**
+Use debug mode to verify the correct mirror node URLs are being used:
+
+```bash
+HCLI_DEBUG=true hedera-cli network list
+```
+
+**API errors:**
+Debug mode provides detailed error information including HTTP status codes and error messages from the Hedera Mirror Node API.
+
+### Getting Help
+
+If you encounter issues not covered here, please:
+
+1. Enable debug mode to gather detailed information
+2. Check the [GitHub issues](https://github.com/hashgraph/hedera-cli/issues) for similar problems
+3. Create a new issue with debug output included
 
 ## Support
 
