@@ -38,12 +38,13 @@ describe('network list command', () => {
       const payload = JSON.parse(String(logSpy.mock.calls[0][0]));
       expect(payload.networks).toEqual(
         expect.arrayContaining([
-          'localnet',
-          'testnet',
-          'previewnet',
-          'mainnet',
+          expect.objectContaining({ name: 'localnet' }),
+          expect.objectContaining({ name: 'testnet' }),
+          expect.objectContaining({ name: 'previewnet' }),
+          expect.objectContaining({ name: 'mainnet' }),
         ]),
       );
+      expect(payload.activeNetwork).toBe('localnet');
     });
 
     test('✅ list available networks including custom networks (JSON)', async () => {
@@ -90,14 +91,15 @@ describe('network list command', () => {
       const payload = JSON.parse(String(logSpy.mock.calls[0][0]));
       expect(payload.networks).toEqual(
         expect.arrayContaining([
-          'localnet',
-          'testnet',
-          'previewnet',
-          'mainnet',
-          'solo-local',
-          'custom-network',
+          expect.objectContaining({ name: 'localnet' }),
+          expect.objectContaining({ name: 'testnet' }),
+          expect.objectContaining({ name: 'previewnet' }),
+          expect.objectContaining({ name: 'mainnet' }),
+          expect.objectContaining({ name: 'solo-local' }),
+          expect.objectContaining({ name: 'custom-network' }),
         ]),
       );
+      expect(payload.activeNetwork).toBe('localnet');
     });
   });
 });

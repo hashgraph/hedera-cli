@@ -270,7 +270,6 @@ async function getAccountBalance(
   tokenId?: string,
 ): Promise<void> {
   const accounts = selectAccounts();
-  const client = stateUtils.getHederaClient();
   const currentNetwork = stateUtils.getNetwork();
 
   // Debug logging
@@ -289,7 +288,6 @@ async function getAccountBalance(
     accountId = accounts[accountIdOrName].accountId;
   } else {
     logger.error('Invalid account ID or name not found in address book.');
-    client.close();
     throw new DomainError(
       'Invalid account ID or name not found in address book.',
     );
@@ -300,7 +298,6 @@ async function getAccountBalance(
   const response = await api.account.getAccountInfo(accountId);
   display('displayBalance', response, { onlyHbar, tokenId });
 
-  client.close();
   return;
 }
 

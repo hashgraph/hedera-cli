@@ -35,7 +35,7 @@ async function getAccountInfo(
       logger.debug(`Unexpected error:`, error);
       logger.error('Unexpected error:', error as object);
     }
-    fail('Failed to fetch account info');
+    throw new Error('Failed to fetch account info');
   }
 }
 
