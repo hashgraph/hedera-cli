@@ -80,6 +80,7 @@ describe('topic message find command', () => {
       // Assert
       expect(mockedAxios.get).toHaveBeenCalledWith(
         `${stateUtils.getMirrorNodeURL()}/topics/${topic.topicId}/messages?sequencenumber=gte:${topicMessagesResponse.messages.length.toString()}&limit=100`,
+        { timeout: 5000 },
       );
     });
   });
@@ -128,7 +129,7 @@ describe('topic message find command', () => {
           },
         },
       };
-      api.topic.findMessagesWithFilters = jest
+      api.topic.getTopicMessages = jest
         .fn()
         .mockResolvedValue(customFindMessageResponseMock);
 
