@@ -141,17 +141,8 @@ function getHederaClient(): Client {
         );
       }
 
-      // For custom networks, we need to create a client with custom endpoints
-      // Use the same approach as localnet but with custom URLs
-      const node = {
-        '0.0.3': AccountId.fromString('0.0.3'), // Default node account
-      };
-      client = Client.forNetwork(node);
-
-      // Set custom RPC URL if configured
-      if (networkConfig.rpcUrl) {
-        client.setNetwork(networkConfig.rpcUrl);
-      }
+      // For custom networks, use testnet as base and set custom mirror network
+      client = Client.forTestnet();
 
       // Set mirror network if configured
       if (networkConfig.mirrorNodeUrl) {
