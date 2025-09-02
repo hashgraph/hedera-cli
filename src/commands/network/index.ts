@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import addCommand from './add';
 import listCommand from './list';
 import useCommand from './use';
 
@@ -10,4 +11,5 @@ export default (program: Command) => {
 
   useCommand(network);
   listCommand(network);
+  addCommand(network);
 };
