@@ -4,7 +4,7 @@
   "networks": {
     "localnet": {
       "rpcUrl": "http://localhost:7546",
-      "mirrorNodeUrl": "http://localhost:5551/api/v1"
+      "mirrorNodeUrl": "http://localhost:8081/api/v1"
     },
     "fixture-extra": {
       "rpcUrl": "https://fixture.extra/rpc",

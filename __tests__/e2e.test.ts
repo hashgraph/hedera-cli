@@ -19,6 +19,21 @@ const logger = Logger.getInstance();
 describe('End to end tests', () => {
   const logSpy = jest.spyOn(logger, 'log');
   beforeAll(async () => {
+    // Debug: print active network configuration for visibility in e2e runs
+    const activeNetwork = storeGet('network');
+    const networks = storeGet('networks') as Record<
+      string,
+      { rpcUrl?: string; mirrorNodeUrl?: string }
+    >;
+    const cfg = networks[activeNetwork] || {};
+    const localNodeAddress = storeGet('localNodeAddress');
+    const localNodeAccountId = storeGet('localNodeAccountId');
+    const localNodeMirrorAddressGRPC = storeGet('localNodeMirrorAddressGRPC');
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[e2e] Using network="${activeNetwork}" rpcUrl=${cfg.rpcUrl} mirrorNodeUrl=${cfg.mirrorNodeUrl} localNode=${localNodeAddress}(${localNodeAccountId}) mirrorGrpc=${localNodeMirrorAddressGRPC} configFile=${process.env.HCLI_CONFIG_FILE}`,
+    );
+
     await initLocalnetFlag();
   });
 
@@ -52,7 +67,7 @@ describe('End to end tests', () => {
    * - Delete the account and verify it is deleted
    * - Restore the state file from backup and verify the account and operator details are restored
    */
-  localnetTest('✅ Flow 1', async () => {
+  test('✅ Flow 1', async () => {
     const program = new Command();
     // Extend timeout for this long flow (was formerly passed as 3rd arg)
     jest.setTimeout(45000);

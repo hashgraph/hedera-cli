@@ -18,6 +18,7 @@ describe('minimal e2e sanity', () => {
   });
 
   beforeAll(async () => {
+    console.warn('beforeAll');
     await initLocalnetFlag();
   });
 

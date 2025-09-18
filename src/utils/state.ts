@@ -141,12 +141,51 @@ function getHederaClient(): Client {
         );
       }
 
-      // For custom networks, use testnet as base and set custom mirror network
-      client = Client.forTestnet();
+      const isLocalish = state.network.toLowerCase().includes('local');
 
-      // Set mirror network if configured
-      if (networkConfig.mirrorNodeUrl) {
-        client.setMirrorNetwork(networkConfig.mirrorNodeUrl);
+      if (isLocalish) {
+        // Treat custom local-like networks similar to built-in localnet
+        const node = {
+          [state.localNodeAddress]: AccountId.fromString(
+            state.localNodeAccountId,
+          ),
+        };
+        client = Client.forNetwork(node);
+
+        // Mirror selection for local-like networks
+        const cfgAny = networkConfig as unknown as { mirrorNodeGrpc?: string };
+        const mirrorGrpc = cfgAny?.mirrorNodeGrpc;
+        const mirrorUrl = networkConfig.mirrorNodeUrl;
+        const isHttpUrl =
+          typeof mirrorUrl === 'string' && /^https?:\/\//i.test(mirrorUrl);
+        if (typeof mirrorGrpc === 'string' && mirrorGrpc.trim().length > 0) {
+          client.setMirrorNetwork(mirrorGrpc);
+        } else if (
+          typeof mirrorUrl === 'string' &&
+          mirrorUrl.trim().length > 0 &&
+          !isHttpUrl
+        ) {
+          client.setMirrorNetwork(mirrorUrl);
+        } else {
+          client.setMirrorNetwork(state.localNodeMirrorAddressGRPC);
+        }
+      } else {
+        // Non-local custom networks: start from testnet defaults and optionally override mirror
+        client = Client.forTestnet();
+        const cfgAny = networkConfig as unknown as { mirrorNodeGrpc?: string };
+        const mirrorGrpc = cfgAny?.mirrorNodeGrpc;
+        const mirrorUrl = networkConfig.mirrorNodeUrl;
+        const isHttpUrl =
+          typeof mirrorUrl === 'string' && /^https?:\/\//i.test(mirrorUrl);
+        if (typeof mirrorGrpc === 'string' && mirrorGrpc.trim().length > 0) {
+          client.setMirrorNetwork(mirrorGrpc);
+        } else if (
+          typeof mirrorUrl === 'string' &&
+          mirrorUrl.trim().length > 0 &&
+          !isHttpUrl
+        ) {
+          client.setMirrorNetwork(mirrorUrl);
+        }
       }
       break;
     }
