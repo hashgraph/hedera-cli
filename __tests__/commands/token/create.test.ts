@@ -1,13 +1,16 @@
-import { alice, bob, baseState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import * as mutations from '../../../src/state/mutations';
+import {
+  get as storeGet,
+  saveState as storeSaveState,
+} from '../../../src/state/store';
+import { alice, baseState, bob } from '../../helpers/state';
 
 import { TokenId } from '@hashgraph/sdk';
 import { Token } from '../../../types';
 
-let tokenId = '0.0.1234';
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
+const tokenId = '0.0.1234';
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 
@@ -40,16 +43,16 @@ describe('token create command', () => {
       throw new Error(`Process.exit(${code})`); // Forces the code to throw instead of exit
     });
 
-  const saveKeyStateControllerSpy = jest.spyOn(stateController, 'saveKey');
+  const addTokenSpy = jest.spyOn(mutations, 'addToken');
 
   beforeEach(() => {
-    stateController.saveState(baseState);
+    storeSaveState(baseState as any);
   });
 
   afterEach(() => {
     // Spy cleanup
     mockProcessExit.mockClear();
-    saveKeyStateControllerSpy.mockClear();
+    addTokenSpy.mockClear();
   });
 
   describe('token create - success path', () => {
@@ -88,7 +91,7 @@ describe('token create command', () => {
       ]);
 
       // Assert
-      const tokens = stateController.get('tokens');
+      const tokens = storeGet('tokens' as any);
       expect(Object.keys(tokens).length).toEqual(1);
       expect(tokens[tokenId]).toEqual({
         tokenId: tokenId,
@@ -113,10 +116,7 @@ describe('token create command', () => {
         network: 'localnet',
         customFees: [],
       } as Token);
-      expect(saveKeyStateControllerSpy).toHaveBeenCalledWith(
-        'tokens',
-        expect.any(Object),
-      );
+      expect(addTokenSpy).toHaveBeenCalled();
     });
   });
 });

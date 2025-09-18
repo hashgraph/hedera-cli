@@ -1,33 +1,38 @@
-import stateUtils from '../../utils/state';
-import scriptUtils from '../../utils/script';
-import telemetryUtils from '../../utils/telemetry';
+import { Command } from 'commander';
+import { heading, success } from '../../utils/color';
 import { Logger } from '../../utils/logger';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-
-import type { Command } from '../../../types';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import scriptUtils from '../../utils/script';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('delete')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Delete a script')
     .requiredOption('-n, --name <name>', 'Name of script to delete')
-    .action((options: ScriptDeleteOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options);
-      logger.verbose(`Deleting script: ${options.name}`);
-
-      scriptUtils.deleteScript(options.name);
-    });
+    .action(
+      wrapAction<ScriptDeleteOptions>(
+        (options) => {
+          scriptUtils.deleteScript(options.name);
+          if (isJsonOutput()) {
+            printOutput('scriptDelete', { name: options.name });
+          } else {
+            logger.log(
+              heading('Script deleted:') + ' ' + success(options.name),
+            );
+          }
+        },
+        { log: (o) => `Deleting script: ${o.name}` },
+      ),
+    )
+    .addHelpText(
+      'afterAll',
+      '\nExamples:\n  $ hedera script delete -n setup-env\n  $ hedera script delete -n setup-env --json',
+    );
 };
 
 interface ScriptDeleteOptions {

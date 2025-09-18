@@ -1,138 +1,35 @@
-import { AccountId, PrivateKey } from '@hashgraph/sdk';
-import stateController from '../state/stateController';
+import { AccountId } from '@hashgraph/sdk';
+import { updateState as storeUpdateState } from '../state/store';
 import accountUtils from './account';
+import type { Account } from '../../types';
 
-/**
- * @description Setup operator accounts for previewnet, testnet, and mainnet in the state file
- */
-function setupOperatorAccounts(
-  testnetOperatorId: string,
-  testnetOperatorKey: string,
-  mainnetOperatorId: string,
-  mainnetOperatorKey: string,
-  previewnetOperatorId: string,
-  previewnetOperatorKey: string,
-  localnetOperatorId: string,
-  localnetOperatorKey: string,
+// rewrite the function below to create an a single operator account for each network with the network name as a prefix
+function setupOperatorAccount(
+  operatorId: string,
+  operatorKey: string,
+  network: string,
 ): void {
-  const state = stateController.getAll();
-  let newState = { ...state };
-  newState.testnetOperatorKey = testnetOperatorKey;
-  newState.testnetOperatorId = testnetOperatorId;
-  newState.mainnetOperatorKey = mainnetOperatorKey;
-  newState.mainnetOperatorId = mainnetOperatorId;
-  newState.previewnetOperatorId = previewnetOperatorId;
-  newState.previewnetOperatorKey = previewnetOperatorKey;
-  newState.localnetOperatorKey = localnetOperatorKey;
-  newState.localnetOperatorId = localnetOperatorId;
-
-  if (testnetOperatorId) {
-    const privateTestnetKeyEcdsa = PrivateKey.fromStringDer(testnetOperatorKey);
-    newState.testnetOperatorKeyHex = `0x${privateTestnetKeyEcdsa.toStringRaw()}`;
-
-    const privateKeyObject =
-      accountUtils.getPrivateKeyObject(testnetOperatorKey);
-
-    newState.accounts['testnet-operator'] = {
-      accountId: testnetOperatorId,
-      privateKey: testnetOperatorKey,
-      network: 'testnet',
-      name: 'testnet-operator',
-      type: 'ECDSA',
-      publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress: privateKeyObject.publicKey.toEvmAddress(),
-      solidityAddress: `${AccountId.fromString(
-        testnetOperatorId,
-      ).toSolidityAddress()}`,
-      solidityAddressFull: `0x${AccountId.fromString(
-        testnetOperatorId,
-      ).toSolidityAddress()}`,
-    };
-  }
-
-  if (previewnetOperatorId) {
-    const privatePreviewnetKeyEcdsa = PrivateKey.fromStringDer(
-      previewnetOperatorKey,
-    );
-    newState.previewnetOperatorKeyHex = `0x${privatePreviewnetKeyEcdsa.toStringRaw()}`;
-
-    const privateKeyObject = accountUtils.getPrivateKeyObject(
-      previewnetOperatorKey,
-    );
-
-    newState.accounts['preview-operator'] = {
-      accountId: previewnetOperatorId,
-      privateKey: previewnetOperatorKey,
-      network: 'previewnet',
-      name: 'preview-operator',
-      type: 'ECDSA',
-      publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress: privateKeyObject.publicKey.toEvmAddress(),
-      solidityAddress: `${AccountId.fromString(
-        previewnetOperatorId,
-      ).toSolidityAddress()}`,
-      solidityAddressFull: `0x${AccountId.fromString(
-        previewnetOperatorId,
-      ).toSolidityAddress()}`,
-    };
-  }
-
-  if (mainnetOperatorId) {
-    const privateMainnetKeyEcdsa = PrivateKey.fromStringDer(mainnetOperatorKey);
-    newState.mainnetOperatorKeyHex = `0x${privateMainnetKeyEcdsa.toStringRaw()}`;
-
-    const privateKeyObject =
-      accountUtils.getPrivateKeyObject(mainnetOperatorKey);
-
-    newState.accounts['mainnet-operator'] = {
-      accountId: mainnetOperatorId,
-      privateKey: mainnetOperatorKey,
-      network: 'mainnet',
-      name: 'mainnet-operator',
-      type: 'ECDSA',
-      publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress: privateKeyObject.publicKey.toEvmAddress(),
-      solidityAddress: `${AccountId.fromString(
-        mainnetOperatorId,
-      ).toSolidityAddress()}`,
-      solidityAddressFull: `0x${AccountId.fromString(
-        mainnetOperatorId,
-      ).toSolidityAddress()}`,
-    };
-  }
-
-  if (localnetOperatorId) {
-    const privateLocalnetKeyEcdsa =
-      PrivateKey.fromStringDer(localnetOperatorKey);
-    newState.localnetOperatorKeyHex = `0x${privateLocalnetKeyEcdsa.toStringRaw()}`;
-
-    const privateKeyObject =
-      accountUtils.getPrivateKeyObject(localnetOperatorKey);
-
-    newState.accounts['localnet-operator'] = {
-      accountId: localnetOperatorId,
-      privateKey: localnetOperatorKey,
-      network: 'localnet',
-      name: 'localnet-operator',
-      type: 'ECDSA',
-      publicKey: privateKeyObject.publicKey.toStringDer(),
-      evmAddress: privateKeyObject.publicKey.toEvmAddress(),
-      solidityAddress: `${AccountId.fromString(
-        localnetOperatorId,
-      ).toSolidityAddress()}`,
-      solidityAddressFull: `0x${AccountId.fromString(
-        localnetOperatorId,
-      ).toSolidityAddress()}`,
-    };
-  }
-
-  newState.network = 'testnet';
-
-  stateController.saveState(newState);
+  if (!operatorId || !operatorKey) return;
+  const privateKeyObject = accountUtils.getPrivateKeyObject(operatorKey);
+  const solidity = AccountId.fromString(operatorId).toSolidityAddress();
+  const acct: Account = {
+    accountId: operatorId,
+    privateKey: operatorKey,
+    network,
+    name: `${network}-operator`,
+    type: 'ECDSA',
+    publicKey: privateKeyObject.publicKey.toStringDer(),
+    evmAddress: privateKeyObject.publicKey.toEvmAddress(),
+    solidityAddress: solidity,
+    solidityAddressFull: `0x${solidity}`,
+  };
+  storeUpdateState((draft) => {
+    draft.accounts[acct.name] = acct;
+  });
 }
 
 const setupUtils = {
-  setupOperatorAccounts,
+  setupOperatorAccount,
 };
 
 export default setupUtils;

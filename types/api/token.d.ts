@@ -1,4 +1,4 @@
-import type { Key } from "./shared";
+import type { Key } from './shared';
 
 export type TokenResponse = {
   admin_key: Key;
@@ -21,7 +21,7 @@ export type TokenResponse = {
   pause_key: Key;
   pause_status: string;
   supply_key: Key;
-  supply_type: "INFINITE" | "FINITE";
+  supply_type: 'INFINITE' | 'FINITE';
   symbol: string;
   token_id: string;
   total_supply: string;
@@ -70,4 +70,4 @@ export type BalanceResponse = {
   timestamp: string;
   balances: BalanceEntry[];
   links: Links;
-}
+};

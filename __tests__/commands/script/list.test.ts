@@ -1,41 +1,37 @@
-import { baseState, scriptState, script_basic } from "../../helpers/state";
-import { Command } from "commander";
-import commands from "../../../src/commands";
-import stateController from "../../../src/state/stateController";
+import { Command } from 'commander';
+import commands from '../../../src/commands';
+import { saveState as storeSaveState } from '../../../src/state/store';
+import { baseState, scriptState, script_basic } from '../../helpers/state';
 
-jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
-
-describe("script list command", () => {
+describe('script list command', () => {
   const logSpy = jest.spyOn(console, 'log');
 
   beforeEach(() => {
-    stateController.saveState(baseState);
+    storeSaveState(baseState as any);
   });
 
-  describe("script list - success path", () => {
+  describe('script list - success path', () => {
     afterEach(() => {
-        // Spy cleanup
-        logSpy.mockClear();
+      // Spy cleanup
+      logSpy.mockClear();
     });
 
-    test("✅ should list all scripts from state", async () => {
+    test('✅ should list all scripts from state', async () => {
       // Arrange
       const program = new Command();
       commands.scriptCommands(program);
-      stateController.saveState(scriptState)
+      storeSaveState(scriptState as any);
 
       // Act
-      await program.parse([
-        "node",
-        "hedera-cli.ts",
-        "script",
-        "list"
-      ]);
+      await program.parse(['node', 'hedera-cli.ts', 'script', 'list']);
 
       // Assert
-      expect(logSpy).toHaveBeenCalledWith(`\tscript-${script_basic.name}`)
-      script_basic.commands.forEach(command => {
-        expect(logSpy).toHaveBeenCalledWith(`\t\t${command}`);      
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Scripts'));
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining(script_basic.name),
+      );
+      script_basic.commands.forEach((command) => {
+        expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(command));
       });
     });
   });

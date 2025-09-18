@@ -1,26 +1,28 @@
-import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
+import { Command } from 'commander';
 import accountUtils from '../../utils/account';
-import type { Command } from '../../../types';
+import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import { telemetryPreAction } from '../shared/telemetryHook';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('clear')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Clear all accounts from the address book')
-    .action(() => {
-      logger.verbose('Clearing address book');
-      accountUtils.clearAddressBook();
-    });
+    .action(
+      exitOnError(() => {
+        logger.verbose('Clearing address book');
+        accountUtils.clearAddressBook();
+        if (isJsonOutput()) {
+          printOutput('accountClear', { cleared: true });
+        }
+      }),
+    );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera account clear\n  $ hedera account clear --json',
+  );
 };
