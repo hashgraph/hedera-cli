@@ -6,7 +6,6 @@ import accountUtils from '../../src/utils/account';
 import setupUtils from '../../src/utils/setup';
 import { testnetOperatorId, testnetOperatorKey } from '../helpers/state';
 
-jest.mock('os');
 jest.mock('dotenv', () => ({
   __esModule: true,
   config: jest.fn().mockReturnValue({ error: null }),
