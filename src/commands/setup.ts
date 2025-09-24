@@ -105,8 +105,7 @@ async function setupCLI(
   }
 
   // Set telemetry server URL
-  const telemetryServer =
-    TELEMETRY_URL || 'https://hedera-cli-telemetry.onrender.com/track';
+  const telemetryServer = TELEMETRY_URL || '';
   storeSaveKey('telemetryServer', telemetryServer);
   if (telemetry) storeSaveKey('telemetry', 1);
 }
