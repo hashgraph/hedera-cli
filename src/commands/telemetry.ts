@@ -14,11 +14,11 @@ export default (program: Command) => {
     .action(
       wrapAction(
         ({ action }: { action: string }) => {
-          if (action === 'enable') {
-            storeSaveKey('telemetry', 1);
-            logger.log('Telemetry turned on');
-            return;
-          }
+          // if (action === 'enable') {
+          //   storeSaveKey('telemetry', 1);
+          //   logger.log('Telemetry turned on');
+          //   return;
+          // }
           if (action === 'disable') {
             storeSaveKey('telemetry', 0);
             logger.log('Telemetry turned off');
