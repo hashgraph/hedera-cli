@@ -36,7 +36,7 @@ const defaultConfig: State = {
       hexKey: '',
     },
   },
-  telemetryServer: 'https://hedera-cli-telemetry.onrender.com/track',
+  telemetryServer: '',
   telemetry: 0,
   scriptExecution: { active: false, name: '' },
   accounts: {},
