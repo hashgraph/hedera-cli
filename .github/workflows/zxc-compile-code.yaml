@@ -103,6 +103,8 @@ jobs:
         if: ${{ inputs.enable-unit-tests && !cancelled() && !failure() }}
         env:
           CI: 'true'
+          HCLI_DISABLE_TELEMETRY: '1'
+          HEDERA_CLI_TELEMETRY: '0'
         run: npm run test:ci
 
       - name: Dump Node handles on failure
