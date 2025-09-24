@@ -17,7 +17,7 @@ describe('User config validation', () => {
   test('accepts valid partial overlay', () => {
     const cfg = writeTempConfig({
       network: 'testnet',
-      telemetry: 1,
+      telemetry: 0,
       networks: {
         testnet: { rpcUrl: 'https://testnet.hashio.io/api' },
       },
@@ -25,7 +25,7 @@ describe('User config validation', () => {
     resetStore({ userConfigPath: cfg });
     const state = getState();
     expect(state.network).toBe('testnet');
-    expect(state.telemetry).toBe(1);
+    expect(state.telemetry).toBe(0);
     expect(state.networks.testnet.rpcUrl).toBe('https://testnet.hashio.io/api');
   });
 
