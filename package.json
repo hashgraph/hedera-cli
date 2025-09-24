@@ -37,7 +37,6 @@
     "test:e2e": "cross-env JEST_SUITE_NAME=\"E2E Tests\" JEST_JUNIT_OUTPUT_NAME=\"junit-e2e.xml\" jest -c jest.e2e.config.js --coverage --coverageDirectory=coverage/e2e --runInBand",
     "test:all": "npm run test:unit && npm run test:e2e",
     "test": "npm run test:unit",
-    "test:ci": "node -e \"console.log('Node', process.version)\" && cross-env CI=true JEST_SUITE_NAME=\"Unit Tests\" JEST_JUNIT_OUTPUT_NAME=\"junit.xml\" jest -c jest.unit.config.js --ci --runInBand --detectOpenHandles --logHeapUsage --verbose --testTimeout=45000 --coverage --coverageDirectory=coverage/unit",
     "single-test": "jest",
     "dev": "ts-node src/hedera-cli.ts",
     "dev:watch": "nodemon --exec ts-node src/hedera-cli.ts",
