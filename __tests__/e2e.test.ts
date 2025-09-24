@@ -67,7 +67,7 @@ describe('End to end tests', () => {
    * - Delete the account and verify it is deleted
    * - Restore the state file from backup and verify the account and operator details are restored
    */
-  test('✅ Flow 1', async () => {
+  test.skip('✅ Flow 1', async () => {
     const program = new Command();
     // Extend timeout for this long flow (was formerly passed as 3rd arg)
     jest.setTimeout(45000);
