@@ -93,7 +93,7 @@ jobs:
         run: npm run lint
 
       - name: Run Unit Tests
-        if: ${{ inputs.enable-unit-tests }}
+        if: ${{ inputs.enable-unit-tests && !cancelled() && !failure() }}
         run: npm run test:unit
 
       - name: Publish Unit Test Report
