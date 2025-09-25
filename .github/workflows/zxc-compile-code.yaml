@@ -101,7 +101,7 @@ jobs:
           npx jest -c jest.unit.config.js \
             --ci --runInBand --verbose \
             --coverage --coverageDirectory=coverage/unit \
-            --reporters=default \
+            --forceExit \
             --json --outputFile=jest-results.json
           code=$?
           echo "JEST_EXIT=$code"
