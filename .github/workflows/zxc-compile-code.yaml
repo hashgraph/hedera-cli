@@ -108,6 +108,17 @@ jobs:
           node -e "const r=require('./jest-results.json'); console.log({success:r.success, numFailedTests:r.numFailedTests, numFailedTestSuites:r.numFailedTestSuites, wasInterrupted:r.wasInterrupted});"
           echo "::endgroup::"
 
+      - name: Print jest-results.json
+        if: always()
+        run: |
+          echo "::group::jest-results.json (full)"
+          if [ -f jest-results.json ]; then
+            cat jest-results.json
+          else
+          echo "jest-results.json missing"
+          fi 
+          echo "::endgroup::"
+
       - name: Publish Unit Test Report
         uses: step-security/publish-unit-test-result-action@5d195d4dec0b9fa7b51a3dbc4298362a021247c7 # v2.20.4
         if: ${{ inputs.enable-unit-tests && steps.npm-deps.conclusion == 'success' && !cancelled() }}
