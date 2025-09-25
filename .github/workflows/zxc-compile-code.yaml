@@ -92,11 +92,23 @@ jobs:
         if: ${{ inputs.enable-code-style-check && !cancelled() && !failure() }}
         run: npm run lint
 
-      - name: Run Unit Tests
-        if: ${{ inputs.enable-unit-tests && !cancelled() && !failure() }}
+      - name: Run Unit Test
+        if: ${{ inputs.enable-unit-tests }}
         env:
           CI: 'true'
-        run: npm run test:unit:ci -- --coverage=false
+          JEST_JUNIT_OUTPUT_NAME: junit.xml
+        run: |
+          set +e
+          npx jest -c jest.unit.config.js \
+            --ci --runInBand --verbose --detectOpenHandles \
+            --coverage --coverageDirectory=coverage/unit \
+            --reporters=default \
+            --json --outputFile=jest-results.json
+          code=$?
+          echo "JEST_EXIT=$code"
+          echo "::group::jest-results.json (key fields)"
+          node -e "const r=require('./jest-results.json'); console.log(JSON.stringify({ success:r.success, numFailedTests:r.numFailedTests, numFailedTestSuites:r.      numFailedTestSuites, wasInterrupted:r.wasInterrupted }, null, 2));"
+          echo "::endgroup::"
 
       - name: Publish Unit Test Report
         uses: step-security/publish-unit-test-result-action@5d195d4dec0b9fa7b51a3dbc4298362a021247c7 # v2.20.4
