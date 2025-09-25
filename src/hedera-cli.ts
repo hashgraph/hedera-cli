@@ -4,7 +4,7 @@ import commands from './commands';
 import { Logger } from './utils/logger';
 
 const logger = Logger.getInstance();
-
+// test
 program
   .version('1.0.0')
   .description('A CLI tool for managing Hedera environments')
