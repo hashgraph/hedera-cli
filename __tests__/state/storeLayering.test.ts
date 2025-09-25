@@ -23,7 +23,7 @@ describe('store layering', () => {
     process.env.HCLI_CONFIG_FILE = userConfigFile; // force explicit config loading (avoid cosmiconfig caching nuances)
     fs.writeFileSync(
       userConfigFile,
-      JSON.stringify({ telemetry: 1, network: 'previewnet' }),
+      JSON.stringify({ telemetry: 0, network: 'previewnet' }),
       'utf-8',
     );
     originalCwd = process.cwd();
@@ -60,7 +60,7 @@ describe('store layering', () => {
       .replace(/\.ts$/, '');
     const { getState } = fresh<{ getState: () => StoreState }>(storePath);
     const s = getState();
-    expect(s.telemetry).toBe(1);
+    expect(s.telemetry).toBe(0);
     expect(s.network).toBe('previewnet');
   });
 
@@ -92,7 +92,7 @@ describe('store layering', () => {
     fs.writeFileSync(
       userConfigFile,
       JSON.stringify({
-        telemetry: 1,
+        telemetry: 0,
         network: 'previewnet',
         networks: {
           custom: {
