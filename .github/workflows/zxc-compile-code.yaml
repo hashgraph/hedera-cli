@@ -99,15 +99,13 @@ jobs:
         run: |
           set +e
           npx jest -c jest.unit.config.js \
-            --ci --runInBand --verbose --detectOpenHandles \
+            --ci --runInBand --verbose \
             --coverage --coverageDirectory=coverage/unit \
             --reporters=default \
             --json --outputFile=jest-results.json
           code=$?
           echo "JEST_EXIT=$code"
-          echo "::group::jest-results.json (key fields)"
-          node -e "const r=require('./jest-results.json'); console.log(JSON.stringify({ success:r.success, numFailedTests:r.numFailedTests, numFailedTestSuites:r.      numFailedTestSuites, wasInterrupted:r.wasInterrupted }, null, 2));"
-          echo "::endgroup::"
+          node -e "const r=require('./jest-results.json'); console.log(JSON.stringify({ success:r.success, numFailedTests:r.numFailedTests, numFailedTestSuites:r.numFailedTestSuites, wasInterrupted:r.wasInterrupted }, null, 2));"
           exit $code
 
       - name: Publish Unit Test Report
