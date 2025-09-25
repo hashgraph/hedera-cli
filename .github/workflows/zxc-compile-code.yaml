@@ -94,7 +94,9 @@ jobs:
 
       - name: Run Unit Tests
         if: ${{ inputs.enable-unit-tests && !cancelled() && !failure() }}
-        run: npm run test:unit
+        env:
+          CI: 'true'
+        run: npm run test:unit -- --ci --runInBand --detectOpenHandles --testTimeout=45000 --verbose
 
       - name: Publish Unit Test Report
         uses: step-security/publish-unit-test-result-action@5d195d4dec0b9fa7b51a3dbc4298362a021247c7 # v2.20.4
