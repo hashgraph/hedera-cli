@@ -33,11 +33,11 @@ export const topicMessagesResponse: TopicMessagesResponse = {
   },
 };
 
-export const findMessageResponseMock: APIResponse = {
+export const findMessageResponseMock: APIResponse<TopicMessageResponse> = {
   data: topicMessageResponse,
 };
 
-export const findMessagesResponseMock: APIResponse = {
+export const findMessagesResponseMock: APIResponse<TopicMessagesResponse> = {
   data: topicMessagesResponse,
 };
 
