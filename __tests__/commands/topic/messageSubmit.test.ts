@@ -1,79 +1,73 @@
-// import { TopicMessageSubmitTransaction } from '@hashgraph/sdk';
-// import { Command } from 'commander';
-// import commands from '../../../src/commands';
-// import { saveState as storeSaveState } from '../../../src/state/store';
-// import sdkMock from '../../helpers/sdk';
-// import { topic, topicState } from '../../helpers/state';
+import { TopicMessageSubmitTransaction } from '@hashgraph/sdk';
+import { Command } from 'commander';
+import commands from '../../../src/commands';
+import { saveState as storeSaveState } from '../../../src/state/store';
+import sdkMock from '../../helpers/sdk';
+import { topic, topicState } from '../../helpers/state';
 
-describe('7', () => {
-  test('temporary', () => {
-    console.log('test');
-  });
+// Mock the @hashgraph/sdk module directly in the test file
+jest.mock('@hashgraph/sdk', () => {
+  const originalModule = jest.requireActual('@hashgraph/sdk');
+
+  return {
+    ...originalModule,
+    TopicMessageSubmitTransaction: jest
+      .fn()
+      .mockImplementation(() => sdkMock.mockTopicMessageSubmitTransaction()),
+  };
 });
 
-// // Mock the @hashgraph/sdk module directly in the test file
-// jest.mock('@hashgraph/sdk', () => {
-//   const originalModule = jest.requireActual('@hashgraph/sdk');
+describe('topic message submit command', () => {
+  const logSpy = jest.spyOn(console, 'log');
 
-//   return {
-//     ...originalModule,
-//     TopicMessageSubmitTransaction: jest
-//       .fn()
-//       .mockImplementation(() => sdkMock.mockTopicMessageSubmitTransaction()),
-//   };
-// });
+  beforeEach(() => {
+    storeSaveState(topicState as any);
+    sdkMock.setCustomMockImplementation(null);
+  });
 
-// describe('topic message submit command', () => {
-//   const logSpy = jest.spyOn(console, 'log');
+  describe('topic message submit - success path', () => {
+    afterEach(() => {
+      // Spy cleanup
+      logSpy.mockClear();
+    });
 
-//   beforeEach(() => {
-//     storeSaveState(topicState as any);
-//     sdkMock.setCustomMockImplementation(null);
-//   });
+    test('✅ Submit message to topic ID', async () => {
+      // Arrange
+      const program = new Command();
+      commands.topicCommands(program);
+      const message = 'Hello world!';
 
-//   describe('topic message submit - success path', () => {
-//     afterEach(() => {
-//       // Spy cleanup
-//       logSpy.mockClear();
-//     });
+      // Overwrite the mock implementation of TopicCreateTransaction to return a sequence number of 1
+      const sequenceNumber = 2;
+      sdkMock.setCustomMockImplementation(
+        () =>
+          ({
+            freezeWith: jest.fn().mockReturnThis(),
+            execute: jest.fn().mockResolvedValue({
+              getReceipt: jest.fn().mockResolvedValue({
+                topicSequenceNumber: sequenceNumber,
+              }),
+            }),
+          }) as unknown as TopicMessageSubmitTransaction,
+      );
 
-//     test('✅ Submit message to topic ID', async () => {
-//       // Arrange
-//       const program = new Command();
-//       commands.topicCommands(program);
-//       const message = 'Hello world!';
+      // Act
+      await program.parseAsync([
+        'node',
+        'hedera-cli.ts',
+        'topic',
+        'message',
+        'submit',
+        '--message',
+        message,
+        '-t',
+        topic.topicId,
+      ]);
 
-//       // Overwrite the mock implementation of TopicCreateTransaction to return a sequence number of 1
-//       const sequenceNumber = 2;
-//       sdkMock.setCustomMockImplementation(
-//         () =>
-//           ({
-//             freezeWith: jest.fn().mockReturnThis(),
-//             execute: jest.fn().mockResolvedValue({
-//               getReceipt: jest.fn().mockResolvedValue({
-//                 topicSequenceNumber: sequenceNumber,
-//               }),
-//             }),
-//           }) as unknown as TopicMessageSubmitTransaction,
-//       );
-
-//       // Act
-//       await program.parseAsync([
-//         'node',
-//         'hedera-cli.ts',
-//         'topic',
-//         'message',
-//         'submit',
-//         '--message',
-//         message,
-//         '-t',
-//         topic.topicId,
-//       ]);
-
-//       // Assert
-//       expect(logSpy).toHaveBeenCalledWith(
-//         expect.stringContaining('Message submitted:'),
-//       );
-//     });
-//   });
-// });
+      // Assert
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Message submitted:'),
+      );
+    });
+  });
+});
