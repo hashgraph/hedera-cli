@@ -1,13 +1,14 @@
-import deleteCommand from './delete';
+import { Command } from 'commander';
 import balanceCommand from './balance';
+import clearCommand from './clear';
 import createCommand from './create';
+import deleteCommand from './delete';
 import importCommand from './import';
 import listCommand from './list';
-import clearCommand from './clear';
 import viewCommand from './view';
 
-export default (program: any) => {
-  const account = program.command('account');
+export default (program: Command) => {
+  const account = program.command('account').alias('acct');
 
   deleteCommand(account);
   balanceCommand(account);

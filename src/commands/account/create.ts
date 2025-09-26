@@ -1,27 +1,19 @@
-import stateUtils from '../../utils/state';
-import { Logger } from '../../utils/logger';
-import { myParseInt } from '../../utils/verification';
-
 import accountUtils from '../../utils/account';
-import telemetryUtils from '../../utils/telemetry';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import { myParseInt, parseIntOption } from '../../utils/verification';
+// Removed direct exitOnError usage; wrapAction handles error wrapping
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
-import type { Command } from '../../../types';
+import { Command } from 'commander';
 
-const logger = Logger.getInstance();
+// logger handled via wrapAction config
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('create')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description(
       'Create a new Hedera account using NEW recovery words and keypair. This is default.',
     )
@@ -38,33 +30,49 @@ export default (program: any) => {
     .option(
       '--auto-associations <autoAssociations>',
       'Set number of automatic associations',
+      parseIntOption,
       0,
     )
     .option(
-      '--args <args>',
-      'Store arguments for scripts',
-      (value: string, previous: string) =>
-        previous ? previous.concat(value) : [value],
-      [],
+      '--args <arg>',
+      'Store arguments for scripts (repeatable)',
+      (value: string, previous: string[]) =>
+        previous ? [...previous, value] : [value],
+      [] as string[],
     )
-    .action(async (options: CreateAccountOptions) => {
-      logger.verbose(`Creating account with name: ${options.name}`);
-
-      options = dynamicVariablesUtils.replaceOptions(options);
-
-      let accountDetails = await accountUtils.createAccount(
-        options.balance,
-        'ECDSA',
-        options.name,
-        Number(options.autoAssociations),
-      );
-
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.account.create.action,
-        accountDetails,
-      );
-    });
+    .action(
+      wrapAction<CreateAccountOptions>(
+        async (options) => {
+          const accountDetails = await accountUtils.createAccount(
+            options.balance,
+            'ECDSA',
+            options.name,
+            Number(options.autoAssociations),
+          );
+          if (isJsonOutput()) {
+            printOutput('accountCreate', {
+              name: accountDetails.name,
+              accountId: accountDetails.accountId,
+              type: accountDetails.type,
+              publicKey: accountDetails.publicKey,
+              evmAddress: accountDetails.evmAddress,
+              network: accountDetails.network,
+              solidityAddress: accountDetails.solidityAddress,
+            });
+          }
+          dynamicVariablesUtils.storeArgs(
+            options.args,
+            dynamicVariablesUtils.commandActions.account.create.action,
+            accountDetails,
+          );
+        },
+        { log: (o) => `Creating account with name: ${o.name}` },
+      ),
+    );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera account create -n alice -b 10000\n  $ hedera account create -n bob --json',
+  );
 };
 
 interface CreateAccountOptions {

@@ -2,7 +2,6 @@
 dist/
 
 # Testing state
-src/state/test_state.json
 
 # Logs
 logs
@@ -122,7 +121,18 @@ dist
 junit*.xml
 
 # Exclude E2E/Unit test generated state files
-src/state/state.json
+
+# Ignore any accidental local persisted state copies
+hedera-cli/state.json
+**/state.json
 
 # Exclude semantic-release version info
 VERSION
+
+# User configuration overrides (cosmiconfig) - keep local only
+hedera-cli.config.local.json
+hedera-cli.config.*.local.json
+.hedera-clirc
+.hedera-clirc.json
+.hedera-clirc.yaml
+.hedera-clirc.yml

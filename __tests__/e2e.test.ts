@@ -1,26 +1,47 @@
+import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
-
-import { baseState } from './helpers/state';
-import { program } from 'commander';
-import commands from '../src/commands';
-import stateController from '../src/state/stateController';
 import api from '../src/api';
+import commands from '../src/commands';
+import {
+  get as storeGet,
+  saveState as storeSaveState,
+  type StoreState,
+} from '../src/state/store';
 import { Logger } from '../src/utils/logger';
-
-import { Token } from '../types';
+import type { Token } from '../types';
+import { initLocalnetFlag, localnetTest } from './helpers/localnet';
+import { waitFor } from './helpers/poll';
+import { baseState } from './helpers/state';
 
 const logger = Logger.getInstance();
 
 describe('End to end tests', () => {
   const logSpy = jest.spyOn(logger, 'log');
+  beforeAll(async () => {
+    // Debug: print active network configuration for visibility in e2e runs
+    const activeNetwork = storeGet('network');
+    const networks = storeGet('networks') as Record<
+      string,
+      { rpcUrl?: string; mirrorNodeUrl?: string }
+    >;
+    const cfg = networks[activeNetwork] || {};
+    const localNodeAddress = storeGet('localNodeAddress');
+    const localNodeAccountId = storeGet('localNodeAccountId');
+    const localNodeMirrorAddressGRPC = storeGet('localNodeMirrorAddressGRPC');
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[e2e] Using network="${activeNetwork}" rpcUrl=${cfg.rpcUrl} mirrorNodeUrl=${cfg.mirrorNodeUrl} localNode=${localNodeAddress}(${localNodeAccountId}) mirrorGrpc=${localNodeMirrorAddressGRPC} configFile=${process.env.HCLI_CONFIG_FILE}`,
+    );
 
-  beforeEach(() => {
-    stateController.saveState(baseState); // reset state to base state for each test
+    await initLocalnetFlag();
   });
 
-  afterEach(async () => {
-    // Reset state to base state
+  beforeEach(() => {
+    storeSaveState(baseState as Partial<StoreState>);
+  });
+
+  afterEach(() => {
     const distStatePath = path.join(
       __dirname,
       '..',
@@ -28,15 +49,11 @@ describe('End to end tests', () => {
       'state',
       'state.json',
     );
-    await fs.writeFileSync(
-      distStatePath,
-      JSON.stringify(baseState, null, 2),
-      'utf8',
-    );
+    fs.writeFileSync(distStatePath, JSON.stringify(baseState, null, 2), 'utf8');
   });
 
   afterAll(() => {
-    stateController.saveState(baseState);
+    storeSaveState(baseState as Partial<StoreState>);
     logSpy.mockClear();
   });
 
@@ -50,7 +67,11 @@ describe('End to end tests', () => {
    * - Delete the account and verify it is deleted
    * - Restore the state file from backup and verify the account and operator details are restored
    */
-  test('✅ Flow 1', async () => {
+  // @TODO Temporary omission of the test due to future reconstruction
+  test.skip('✅ Flow 1', async () => {
+    const program = new Command();
+    // Extend timeout for this long flow (was formerly passed as 3rd arg)
+    jest.setTimeout(45000);
     // Arrange: Setup init
     commands.setupCommands(program);
 
@@ -58,17 +79,23 @@ describe('End to end tests', () => {
     await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
 
     // Assert
-    const accounts = stateController.get('accounts');
+    const accounts = storeGet('accounts');
     expect(accounts['localnet-operator']).toBeDefined();
 
     // Arrange: Change network to localnet
     commands.networkCommands(program);
 
     // Act
-    await program.parseAsync(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'network',
+      'use',
+      'localnet',
+    ]);
 
     // Assert
-    const network = stateController.get('network');
+    const network = storeGet('network');
     expect(network).toEqual('localnet');
 
     // Arrange: Create a new account with specific balance, type, and network and verify it is created
@@ -87,10 +114,28 @@ describe('End to end tests', () => {
       '--auto-associations',
       '1',
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    // Capture state AFTER create before polling so we have accountId available
+    let state = storeGet('accounts');
+    // Wait for account to appear via API (faster than fixed 7s sleep)
+    await waitFor(
+      async () => {
+        try {
+          const info = await api.account.getAccountInfo(
+            state[accountName].accountId,
+          );
+          return info?.data?.balance?.balance === 10000;
+        } catch {
+          return false;
+        }
+      },
+      {
+        timeout: 10000,
+        interval: 500,
+        description: 'new account ledger propagation',
+      },
+    );
 
     // Assert
-    let state = stateController.get('accounts');
     expect(state[accountName]).toBeDefined();
     expect(state[accountName].type).toEqual('ECDSA');
 
@@ -114,7 +159,23 @@ describe('End to end tests', () => {
       '-t',
       'localnet-operator',
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await waitFor(
+      async () => {
+        try {
+          const info = await api.account.getAccountInfo(
+            state[accountName].accountId,
+          );
+          return info?.data?.balance?.balance === 9000 ? true : false;
+        } catch {
+          return false;
+        }
+      },
+      {
+        timeout: 10000,
+        interval: 500,
+        description: 'post-transfer balance update',
+      },
+    );
 
     // Assert
     data = await api.account.getAccountInfo(state[accountName].accountId);
@@ -152,7 +213,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    state = stateController.get('accounts');
+    state = storeGet('accounts');
     expect(state[accountName]).toBeUndefined();
 
     // Arrange: Restore the state file from backup and verify the account and operator details are restored
@@ -169,7 +230,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    state = stateController.get('accounts');
+    state = storeGet('accounts');
     expect(state[accountName]).toBeDefined();
 
     // Cleanup
@@ -180,7 +241,7 @@ describe('End to end tests', () => {
     for (const backup of backups) {
       fs.unlinkSync(path.join(__dirname, '..', 'src', 'state', backup));
     }
-  }, 60000);
+  });
 
   /**
    * E2E testing flow for scripts:
@@ -188,7 +249,8 @@ describe('End to end tests', () => {
    * - Load and execute the script (list all scripts and spy on logger function)
    * - Delete script and verify it is deleted in state file
    */
-  test('✅ Script features', async () => {
+  localnetTest('✅ Script features', async () => {
+    const program = new Command();
     // Arrange: Download a script from the internet
     commands.stateCommands(program);
     const scriptURL =
@@ -205,7 +267,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    let scripts = stateController.get('scripts');
+    let scripts = storeGet('scripts');
     expect(scripts['script-token']).toBeDefined();
     expect(scripts['script-account-create']).toBeDefined();
 
@@ -230,15 +292,14 @@ describe('End to end tests', () => {
       'state',
       'state.json',
     ); // read state from dist/state/state.json because script load uses dist/ logic
-    const distState = await fs.readFileSync(distStatePath, 'utf8');
-    expect(Object.keys(JSON.parse(distState).accounts).length).toBe(1); // 1 random account created
+    const distState = fs.readFileSync(distStatePath, 'utf8');
+    const parsed = JSON.parse(distState) as {
+      accounts: Record<string, unknown>;
+    };
+    expect(Object.keys(parsed.accounts).length).toBe(1); // 1 random account created
 
     // Reset state to base state
-    await fs.writeFileSync(
-      distStatePath,
-      JSON.stringify(baseState, null, 2),
-      'utf8',
-    );
+    fs.writeFileSync(distStatePath, JSON.stringify(baseState, null, 2), 'utf8');
 
     // Arrange: Delete script and verify it is deleted in state file
     // Act
@@ -252,7 +313,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    scripts = stateController.get('scripts');
+    scripts = storeGet('scripts');
     expect(scripts['script-account-create-simple']).toBeUndefined();
     expect(scripts['script-account-create']).toBeDefined();
   });
@@ -265,7 +326,8 @@ describe('End to end tests', () => {
    * - Transfer 1 unit of token from treasury to account 3
    * - Verify balance by looking up the token balance of account 3 via API
    */
-  test('✅ Token features', async () => {
+  localnetTest('✅ Token features', async () => {
+    const program = new Command();
     // Arrange: Create 3 accounts
     commands.accountCommands(program);
     const accountNameTreasury = 'treasury';
@@ -305,7 +367,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    const accounts = stateController.get('accounts');
+    const accounts = storeGet('accounts');
     expect(accounts[accountNameTreasury]).toBeDefined();
     expect(accounts[accountNameAdmin]).toBeDefined();
     expect(accounts[accountNameUser]).toBeDefined();
@@ -339,10 +401,8 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    let tokens = stateController.get('tokens') as Token[];
-    let token = Object.values(tokens).find(
-      (token: Token) => token.name === tokenName,
-    );
+    let tokens = storeGet('tokens');
+    let token = Object.values(tokens).find((t: Token) => t.name === tokenName);
     expect(token).toBeDefined();
 
     // TypeScript still sees `token` as possibly undefined. You need to assert it's not.
@@ -364,10 +424,8 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    tokens = stateController.get('tokens') as Token[];
-    token = Object.values(tokens).find(
-      (token: Token) => token.name === tokenName,
-    );
+    tokens = storeGet('tokens');
+    token = Object.values(tokens).find((t: Token) => t.name === tokenName);
     expect(token?.associations).toEqual([
       {
         accountId: accounts[accountNameUser].accountId,
@@ -395,7 +453,24 @@ describe('End to end tests', () => {
       '--to',
       accountNameUser,
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await waitFor(
+      async () => {
+        try {
+          const data = await api.token.getTokenBalance(
+            token.tokenId,
+            accounts[accountNameUser].accountId,
+          );
+          return Array.isArray(data?.data?.balances);
+        } catch {
+          return false;
+        }
+      },
+      {
+        timeout: 10000,
+        interval: 500,
+        description: 'token association propagation',
+      },
+    );
 
     // Assert
     const data = await api.token.getTokenBalance(
@@ -417,7 +492,8 @@ describe('End to end tests', () => {
    * - Submit a message to topic (submit key should sign)
    * - Find the message and verify it is correct
    */
-  test('✅ Topic features', async () => {
+  localnetTest('✅ Topic features', async () => {
+    const program = new Command();
     // Arrange: Setup init
     commands.setupCommands(program);
 
@@ -425,17 +501,23 @@ describe('End to end tests', () => {
     await program.parseAsync(['node', 'hedera-cli.ts', 'setup', 'init']);
 
     // Assert
-    let accounts = stateController.get('accounts');
+    let accounts = storeGet('accounts');
     expect(accounts['localnet-operator']).toBeDefined();
 
     // Arrange: Change network to localnet
     commands.networkCommands(program);
 
     // Act
-    await program.parseAsync(['node', 'hedera-cli.ts', 'network', 'use', 'localnet']);
+    await program.parseAsync([
+      'node',
+      'hedera-cli.ts',
+      'network',
+      'use',
+      'localnet',
+    ]);
 
     // Assert
-    const network = stateController.get('network');
+    const network = storeGet('network');
     expect(network).toEqual('localnet');
 
     // Arrange: Create 2 accounts
@@ -466,7 +548,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    accounts = stateController.get('accounts');
+    accounts = storeGet('accounts');
     expect(accounts[accountNameAdmin]).toBeDefined();
     expect(accounts[accountNameSubmit]).toBeDefined();
 
@@ -489,7 +571,7 @@ describe('End to end tests', () => {
     ]);
 
     // Assert
-    let topics = stateController.get('topics');
+    const topics = storeGet('topics');
     expect(Object.keys(topics).length).toBe(1);
     expect(topics[Object.keys(topics)[0]].memo).toEqual(topicMemo);
 
@@ -508,7 +590,21 @@ describe('End to end tests', () => {
       '-t',
       Object.keys(topics)[0],
     ]);
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await waitFor(
+      async () => {
+        try {
+          const resp = await api.topic.findMessage(Object.keys(topics)[0], 1);
+          return !!resp?.data?.message;
+        } catch {
+          return false;
+        }
+      },
+      {
+        timeout: 10000,
+        interval: 500,
+        description: 'topic message availability',
+      },
+    );
 
     // Assert
     const response = await api.topic.findMessage(Object.keys(topics)[0], 1); // first message

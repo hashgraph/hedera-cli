@@ -1,5 +1,9 @@
-import { TopicMessageResponse, APIResponse, TopicMessagesResponse } from '../../../types';
-import { topic } from '../../helpers/state'
+import {
+  TopicMessageResponse,
+  APIResponse,
+  TopicMessagesResponse,
+} from '../../../types';
+import { topic } from '../../helpers/state';
 
 export const topicMessageResponse: TopicMessageResponse = {
   chunk_info: {
@@ -23,21 +27,17 @@ export const topicMessageResponse: TopicMessageResponse = {
 };
 
 export const topicMessagesResponse: TopicMessagesResponse = {
-  messages: [
-    createMessage(1),
-    createMessage(2),
-    createMessage(3),
-  ],
+  messages: [createMessage(1), createMessage(2), createMessage(3)],
   links: {
     next: null,
   },
-}
+};
 
-export const findMessageResponseMock: APIResponse = {
+export const findMessageResponseMock: APIResponse<TopicMessageResponse> = {
   data: topicMessageResponse,
 };
 
-export const findMessagesResponseMock: APIResponse = {
+export const findMessagesResponseMock: APIResponse<TopicMessagesResponse> = {
   data: topicMessagesResponse,
 };
 

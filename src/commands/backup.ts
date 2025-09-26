@@ -1,13 +1,29 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import stateUtils from '../utils/state';
-import telemetryUtils from '../utils/telemetry';
+import { telemetryPreAction } from './shared/telemetryHook';
 import enquirerUtils from '../utils/enquirer';
-import stateController from '../state/stateController';
+import {
+  saveKey as storeSaveKey,
+  updateState as storeUpdateState,
+} from '../state/store';
+import { addAccount, addToken, addScript } from '../state/mutations';
 import { Logger } from '../utils/logger';
+import { DomainError } from '../utils/errors';
+import { wrapAction } from './shared/wrapAction';
 
-import type { Command, State } from '../../types';
+import type { State, Account, Token, Script } from '../../types';
+import type { StoreState } from '../state/store';
+import type { Command as CommanderCommand } from 'commander';
+
+// Local narrowed shapes for partial restores
+type AccountsOnly = Record<string, Account>;
+interface FullStateLike extends State {}
+
+function isFullStateLike(v: unknown): v is FullStateLike {
+  if (!v || typeof v !== 'object') return false;
+  return 'network' in v && 'accounts' in v; // light heuristic
+}
 
 const logger = Logger.getInstance();
 
@@ -20,13 +36,6 @@ const logger = Logger.getInstance();
  */
 function filterState(data: State) {
   const filteredState = { ...data };
-
-  filteredState.previewnetOperatorId = '';
-  filteredState.previewnetOperatorKey = '';
-  filteredState.testnetOperatorId = '';
-  filteredState.testnetOperatorKey = '';
-  filteredState.mainnetOperatorId = '';
-  filteredState.mainnetOperatorKey = '';
 
   Object.keys(filteredState.tokens).forEach((key) => {
     filteredState.tokens[key].keys = {
@@ -68,15 +77,15 @@ function backupState(
   backupAccounts: boolean,
   safe: boolean,
   storagePath: string,
-) {
-  let data;
+): void {
+  // Can be full state or subset (accounts object) when --accounts flag used
+  let data: State | AccountsOnly;
 
   try {
     const statePath = path.join(__dirname, '..', 'state', 'state.json');
     data = JSON.parse(fs.readFileSync(statePath, 'utf8')) as State;
   } catch (error) {
-    logger.error('Unable to read state file:', error as object);
-    process.exit(1);
+    throw new DomainError('Unable to read state file');
   }
 
   // Create backup filename
@@ -86,9 +95,7 @@ function backupState(
     backupFilename = `state.backup.${name}.json`;
   }
 
-  if (safe) {
-    data = filterState(data);
-  }
+  if (safe && isFullStateLike(data)) data = filterState(data);
 
   // Only backup accounts if the user specified the --accounts flag
   if (backupAccounts) {
@@ -96,7 +103,7 @@ function backupState(
     if (name) {
       backupFilename = `accounts.backup.${name}.json`;
     }
-    data = data.accounts;
+    if (isFullStateLike(data)) data = data.accounts;
   }
 
   if (storagePath !== '' && !path.isAbsolute(storagePath)) {
@@ -112,8 +119,7 @@ function backupState(
     fs.writeFileSync(backupPath, JSON.stringify(data, null, 2), 'utf8');
     logger.log(`Backup created with filename: ${backupFilename}`);
   } catch (error) {
-    logger.error('Unable to create backup file:', error as object);
-    process.exit(1);
+    throw new DomainError('Unable to create backup file');
   }
 }
 
@@ -127,125 +133,114 @@ function restoreState(
   restoreAccounts: boolean,
   restoreTokens: boolean,
   restoreScripts: boolean,
-) {
-  let data;
-
+): void {
+  let raw: unknown;
   try {
     const backupPath = path.join(__dirname, '..', 'state', filename);
-    data = JSON.parse(fs.readFileSync(backupPath, 'utf8')) as State;
-  } catch (error) {
-    logger.error('Unable to read backup file:', error as object);
-    process.exit(1);
+    raw = JSON.parse(fs.readFileSync(backupPath, 'utf8')) as unknown;
+  } catch {
+    throw new DomainError('Unable to read backup file');
   }
 
-  // If the backup file does not contain a network, we assume it is an account backup
-  if (!data.accounts) {
+  if (!isFullStateLike(raw)) {
+    // Treat as accounts-only backup
     logger.log('Importing account backup');
-    stateController.saveKey('accounts', data || {});
+    storeSaveKey('accounts', (raw as AccountsOnly) || {});
     logger.log('Account backup restored successfully');
     return;
   }
 
+  const data: State = raw;
+
   if (!restoreAccounts && !restoreTokens && !restoreScripts) {
-    stateController.saveState(data);
+    // Full overwrite
+    storeUpdateState((draft: StoreState) => {
+      draft.accounts = data.accounts || {};
+      draft.tokens = data.tokens || {};
+      draft.scripts = data.scripts || {};
+      draft.topics = data.topics || {};
+    });
     logger.log('Backup restored successfully');
     return;
   }
 
-  if (restoreAccounts) {
-    stateController.saveKey('accounts', data.accounts || {});
+  if (restoreAccounts && data.accounts) {
+    Object.values(data.accounts).forEach((acc: Account) =>
+      addAccount(acc, true),
+    );
   }
-
-  if (restoreTokens) {
-    stateController.saveKey('tokens', data.tokens || {});
+  if (restoreTokens && data.tokens) {
+    Object.values(data.tokens).forEach((tok: Token) => addToken(tok, true));
   }
-
-  if (restoreScripts) {
-    stateController.saveKey('scripts', data.scripts || {});
+  if (restoreScripts && data.scripts) {
+    Object.values(data.scripts).forEach((scr: Script) => addScript(scr, true));
   }
-
   logger.log('Backup restored successfully');
 }
 
-export default (program: any) => {
-  const network = program.command('backup');
+export default (program: CommanderCommand) => {
+  const backup = program.command('backup');
 
-  network
+  backup
     .command('create')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Create a backup of the state.json file')
     .option('--accounts', 'Backup the accounts')
     .option('--safe', 'Remove the private keys from the backup')
     .option('--name <name>', 'Name of the backup file')
     .option('--path <path>', 'Specify a custom path to store the backup')
-    .action((options: BackupOptions) => {
-      logger.verbose('Creating backup of state');
-      backupState(
-        options.name,
-        options.accounts,
-        options.safe,
-        options.path || '',
-      );
-    });
+    .action(
+      wrapAction<BackupOptions>(
+        (options) => {
+          backupState(
+            options.name,
+            options.accounts,
+            options.safe,
+            options.path || '',
+          );
+        },
+        { log: 'Creating backup of state' },
+      ),
+    );
 
-  network
+  backup
     .command('restore')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Restore a backup of the full state')
     .option('-f, --file <filename>', 'Filename containing the state backup')
     .option('--restore-accounts', 'Restore the accounts', false)
     .option('--restore-tokens', 'Restore the tokens', false)
     .option('--restore-scripts', 'Restore the scripts', false)
-    .action(async (options: RestoreOptions) => {
-      logger.verbose('Restoring backup of state');
-
-      let filename = options.file;
-      if (!options.file) {
-        const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
-
-        // filter out the pattern *.backup.*.json like accounts.backup.7-nov-2024.json
-        const pattern = /^.*\.backup\..*\.json$/;
-        const backups = files.filter((file) => pattern.test(file));
-
-        if (backups.length === 0) {
-          logger.error('No backup files found');
-          process.exit(1);
-        }
-
-        try {
-          filename = await enquirerUtils.createPrompt(
-            backups,
-            'Choose a backup:',
+    .action(
+      wrapAction<RestoreOptions>(
+        async (options) => {
+          let filename = options.file;
+          if (!options.file) {
+            const files = fs.readdirSync(path.join(__dirname, '..', 'state'));
+            const pattern = /^.*\.backup\..*\.json$/;
+            const backups = files.filter((file) => pattern.test(file));
+            if (backups.length === 0) {
+              throw new DomainError('No backup files found');
+            }
+            try {
+              filename = await enquirerUtils.createPrompt(
+                backups,
+                'Choose a backup:',
+              );
+            } catch (error) {
+              throw new DomainError('Unable to read backup file');
+            }
+          }
+          restoreState(
+            filename,
+            options.restoreAccounts,
+            options.restoreTokens,
+            options.restoreScripts,
           );
-        } catch (error) {
-          logger.error('Unable to read backup file:', error as object);
-          process.exit(1);
-        }
-      }
-
-      restoreState(
-        filename,
-        options.restoreAccounts,
-        options.restoreTokens,
-        options.restoreScripts,
-      );
-    });
+        },
+        { log: 'Restoring backup of state' },
+      ),
+    );
 };
 
 interface BackupOptions {

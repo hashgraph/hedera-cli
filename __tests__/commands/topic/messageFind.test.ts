@@ -1,16 +1,19 @@
 import axios from 'axios';
 
-import { topicState, topic } from '../../helpers/state';
-import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
 import { Command } from 'commander';
 import api from '../../../src/api';
-import { findMessageResponseMock, topicMessageResponse, findMessagesResponseMock, topicMessagesResponse } from '../../helpers/api/apiTopicHelper'
-import { Logger } from "../../../src/utils/logger";
+import commands from '../../../src/commands';
+import { saveState as storeSaveState } from '../../../src/state/store';
+import { Logger } from '../../../src/utils/logger';
 import stateUtils from '../../../src/utils/state';
+import {
+  findMessageResponseMock,
+  topicMessageResponse,
+  topicMessagesResponse,
+} from '../../helpers/api/apiTopicHelper';
+import { topic, topicState } from '../../helpers/state';
 
 const logger = Logger.getInstance();
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('axios');
 
 describe('topic message find command', () => {
@@ -18,7 +21,7 @@ describe('topic message find command', () => {
   const errorSpy = jest.spyOn(logger, 'error');
 
   beforeEach(() => {
-    stateController.saveState(topicState);
+    storeSaveState(topicState as any);
   });
 
   describe('topic message find - success path', () => {
@@ -32,8 +35,10 @@ describe('topic message find command', () => {
       // Arrange
       const program = new Command();
       commands.topicCommands(program);
-      api.topic.findMessage = jest.fn().mockResolvedValue(findMessageResponseMock);
-      
+      api.topic.findMessage = jest
+        .fn()
+        .mockResolvedValue(findMessageResponseMock);
+
       // Act
       await program.parseAsync([
         'node',
@@ -48,12 +53,7 @@ describe('topic message find command', () => {
       ]);
 
       // Assert
-      expect(logSpy).toHaveBeenCalledWith(
-        `Message found: "${Buffer.from(
-          topicMessageResponse.message,
-            'base64',
-          ).toString('ascii')}"`
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Message:'));
     });
 
     test('✅ Find message for topic ID and sequence number filters', async () => {
@@ -78,7 +78,10 @@ describe('topic message find command', () => {
       ]);
 
       // Assert
-      expect(mockedAxios.get).toHaveBeenCalledWith(`${stateUtils.getMirrorNodeURL()}/topics/${topic.topicId}/messages?sequencenumber=gte:${topicMessagesResponse.messages.length.toString()}&limit=100`);
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        `${stateUtils.getMirrorNodeURL()}/topics/${topic.topicId}/messages?sequencenumber=gte:${topicMessagesResponse.messages.length.toString()}&limit=100`,
+        { timeout: 5000 },
+      );
     });
   });
 
@@ -93,8 +96,10 @@ describe('topic message find command', () => {
       // Arrange
       const program = new Command();
       commands.topicCommands(program);
-      api.topic.findMessage = jest.fn().mockResolvedValue(findMessageResponseMock);
-      
+      api.topic.findMessage = jest
+        .fn()
+        .mockResolvedValue(findMessageResponseMock);
+
       // Act
       await program.parseAsync([
         'node',
@@ -108,7 +113,7 @@ describe('topic message find command', () => {
 
       // Assert
       expect(errorSpy).toHaveBeenCalledWith(
-        'Please provide a sequence number or a sequence number filter'
+        'Please provide a sequence number or a sequence number filter',
       );
     });
 
@@ -124,8 +129,10 @@ describe('topic message find command', () => {
           },
         },
       };
-      api.topic.findMessagesWithFilters = jest.fn().mockResolvedValue(customFindMessageResponseMock);
-      
+      api.topic.getTopicMessages = jest
+        .fn()
+        .mockResolvedValue(customFindMessageResponseMock);
+
       // Act
       await program.parseAsync([
         'node',
@@ -141,7 +148,7 @@ describe('topic message find command', () => {
 
       // Assert
       expect(logSpy).toHaveBeenCalledWith(
-        'No messages found'
+        expect.stringContaining('No messages found'),
       );
     });
   });

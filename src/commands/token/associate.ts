@@ -1,25 +1,13 @@
+import { Command } from 'commander';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import tokenUtils from '../../utils/token';
-import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
-import { Logger } from '../../utils/logger';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
-import type { Command } from '../../../types';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-
-const logger = Logger.getInstance();
-
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('associate')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Associate a token with an account')
     .requiredOption(
       '-a, --account-id <accountId>', // name is also possible for --account-id
@@ -29,13 +17,24 @@ export default (program: any) => {
       '-t, --token-id <tokenId>',
       'Token ID to associate with account',
     )
-    .action(async (options: AssociateTokenOptions) => {
-      logger.verbose(
-        `Associating token ${options.tokenId} with ${options.accountId}`,
-      );
-      options = dynamicVariablesUtils.replaceOptions(options);
-      await tokenUtils.associateToken(options.tokenId, options.accountId);
-    });
+    .action(
+      wrapAction<AssociateTokenOptions>(
+        async (options) => {
+          await tokenUtils.associateToken(options.tokenId, options.accountId);
+          if (isJsonOutput()) {
+            printOutput('tokenAssociate', {
+              tokenId: options.tokenId,
+              account: options.accountId,
+            });
+          }
+        },
+        { log: (o) => `Associating token ${o.tokenId} with ${o.accountId}` },
+      ),
+    );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera token associate -a 0.0.1234 -t 0.0.5555\n  $ hedera token associate -a alice -t 0.0.5555 --json',
+  );
 };
 
 interface AssociateTokenOptions {

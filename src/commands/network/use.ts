@@ -1,26 +1,31 @@
-import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
+import { Command } from 'commander';
+import { heading, success } from '../../utils/color';
+import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
-
-import type { Command } from '../../../types';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import stateUtils from '../../utils/state';
+import { telemetryPreAction } from '../shared/telemetryHook';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('use <name>')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Switch to a specific network')
-    .action((name: string) => {
-      logger.verbose(`Switching to network: ${name}`);
-      stateUtils.switchNetwork(name);
-    });
+    .action(
+      exitOnError((name: string) => {
+        logger.verbose(`Switching to network: ${name}`);
+        stateUtils.switchNetwork(name);
+        if (isJsonOutput()) {
+          printOutput('network', { activeNetwork: name });
+          return;
+        }
+        logger.log(heading('Active network: ') + success(name));
+      }),
+    )
+    .addHelpText(
+      'after',
+      `\nExamples:\n  $ hedera-cli network use testnet\n  $ hedera-cli --json network use previewnet\n`,
+    );
 };

@@ -1,26 +1,24 @@
-import stateUtils from '../../utils/state';
+import { Command } from 'commander';
+import { heading } from '../../utils/color';
 import scriptUtils from '../../utils/script';
-import telemetryUtils from '../../utils/telemetry';
-import type { Command } from '../../../types';
-import { Logger } from '../../utils/logger';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
-const logger = Logger.getInstance();
-
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('list')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('List all scripts')
-    .action(() => {
-      logger.verbose(`Listing all script names`);
-      scriptUtils.listScripts();
-    });
+    .action(
+      wrapAction(
+        () => {
+          scriptUtils.listScripts();
+        },
+        { log: 'Listing all script names' },
+      ),
+    )
+    .addHelpText(
+      'afterAll',
+      `\n${heading('Examples:')}\n  $ hedera script list\n  $ hedera script list --json`,
+    );
 };
