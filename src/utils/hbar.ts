@@ -2,6 +2,7 @@ import { TransferTransaction, Hbar, HbarUnit } from '@hashgraph/sdk';
 
 import stateUtils from './state';
 import { Logger } from '../utils/logger';
+import { DomainError } from './errors';
 import signUtils from './sign';
 
 const logger = Logger.getInstance();
@@ -13,18 +14,14 @@ async function transfer(
   memo: string,
 ): Promise<void> {
   if (from === to) {
-    logger.error('Cannot transfer to the same account');
-    process.exit(1);
+    throw new DomainError('Cannot transfer to the same account');
   }
 
-  // Find sender account
-  let fromAccount, fromId;
-  fromAccount = stateUtils.getAccountByIdOrName(from);
-  fromId = fromAccount.accountId;
-
-  // Find receiver account
-  let toAccount = stateUtils.getAccountByIdOrName(to);
-  let toId = toAccount.accountId;
+  // Find sender & receiver accounts
+  const fromAccount = stateUtils.getAccountByIdOrName(from);
+  const fromId = fromAccount.accountId;
+  const toAccount = stateUtils.getAccountByIdOrName(to);
+  const toId = toAccount.accountId;
 
   const client = stateUtils.getHederaClient();
   try {
@@ -46,10 +43,9 @@ async function transfer(
         `Transfer successful with tx ID: ${submittedTransfer.transactionId.toString()}`,
       );
     } else {
-      logger.error(
+      throw new DomainError(
         `Transfer failed with tx ID: ${submittedTransfer.transactionId.toString()}`,
       );
-      process.exit(1);
     }
   } catch (error) {
     logger.error('Unable to transfer hbar', error as object);

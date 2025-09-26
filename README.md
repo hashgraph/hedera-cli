@@ -28,6 +28,8 @@ A key advantage of the Hedera CLI Tool is its potential to enhance your workflow
   - [State Commands](#state-commands)
   - [Script Commands](#script-commands)
     - [Dynamic Variables in Scripts](#dynamic-variables-in-scripts)
+- [Configuration & State Storage](#configuration--state-storage)
+- [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
@@ -99,7 +101,7 @@ Next, set up the CLI tool with the command. **The `--telemetry` flag is optional
 node dist/hedera-cli.js setup init --telemetry
 ```
 
-The `setup init` command will also create the different operator accounts in your address book (`dist/state/state.json` file) so you can use them in your commands.
+The `setup init` command will also create the different operator accounts in your address book (persisted state file) so you can use them in your commands.
 
 ### 5. Verify Installation
 
@@ -197,6 +199,8 @@ Let's explore the different commands, their options, and outputs.
 > Each of the commands can be run with the `--help` flag to display the command's options and usage.
 >
 > Use the `--quiet` flag to suppress the output of the command or the `--verbose` flag to display more information.
+>
+> Use the `--debug` flag to enable detailed debugging information including API URLs, network configuration, and request parameters.
 
 ## Setup Commands
 
@@ -230,7 +234,7 @@ When executed, the setup command performs several key functions:
 It reads the `PREVIEWNET_OPERATOR_KEY`, `PREVIEWNET_OPERATOR_KEY`, `TESTNET_OPERATOR_KEY`, `TESTNET_OPERATOR_ID`, `MAINNET_OPERATOR_KEY`, `MAINNET_OPERATOR_ID`, `LOCALNET_OPERATOR_ID`, and `LOCALNET_OPERATOR_KEY` variables from the `.env` file in the root of the CLI project.
 
 **State Update:**
-Once the localnet, previewnet, testnet, and mainnet operator key and ID are validated, these credentials are used to update the `dist/state/state.json` file, which holds the configuration state of the CLI tool. The command will also add the operator accounts to your address book.
+Once the localnet, previewnet, testnet, and mainnet operator key and ID are validated, these credentials are written to the persisted state file, which holds the configuration state of the CLI tool. The command will also add the operator accounts to your address book.
 
 **2. Reload Operator Key and Id:**
 
@@ -277,7 +281,7 @@ hcli telemetry disable
 
 ### Overview
 
-The CLI tool uses Hardhat for all smart contract interactions. There are no dedicated commands for smart contracts in the CLI tool. Instead, you can use the Hardhat commands to deploy and interact with smart contracts. 
+The CLI tool uses Hardhat for all smart contract interactions. There are no dedicated commands for smart contracts in the CLI tool. Instead, you can use the Hardhat commands to deploy and interact with smart contracts.
 
 ### Contract Storage
 
@@ -289,15 +293,15 @@ To deploy a smart contract and interact with it, you can use the Hardhat scripts
 
 ### Configuring Hardhat
 
-Make sure the your `hardhat.config.js` file is configured correctly to interact with one of the Hedera networks. By default, the CLI tool uses the `local` network, which is configured for the Hedera Local Node. You can add the `mainnet`, `testnet`, or `previewnet` networks to the Hardhat configuration file. 
+Make sure the your `hardhat.config.js` file is configured correctly to interact with one of the Hedera networks. By default, the CLI tool uses the `local` network, which is configured for the Hedera Local Node. You can add the `mainnet`, `testnet`, or `previewnet` networks to the Hardhat configuration file.
 
 > A sample config is included in the project. If you configure the `mainnet`, `testnet`, or `previewnet` networks, make sure to set the operator key and ID in your `.env` file in the HEX format. You can see the example config reads the operator key from the `.env` file using, for example the `process.env.TESTNET_OPERATOR_KEY_HEX`. Don't forget to set these HEX-based variables in your `.env` file.
 
 ```json
-{ 
+{
   // ... other Hardhat configuration options
-  defaultNetwork: 'local',
-  networks: {
+  "defaultNetwork": "local",
+  "networks": {
     /*mainnet: {
       url: stateController.default.get('rpcUrlMainnet'),
       accounts: [process.env.MAINNET_OPERATOR_KEY_HEX],
@@ -312,14 +316,14 @@ Make sure the your `hardhat.config.js` file is configured correctly to interact 
       accounts: [process.env.PREVIEWNET_OPERATOR_KEY_HEX],
       chainId: 297,
     },*/
-    local: {
-      url: 'http://localhost:7546',
-      accounts: [
-        '0x105d050185ccb907fba04dd92d8de9e32c18305e097ab41dadda21489a211524',
-        '0x2e1d968b041d84dd120a5860cee60cd83f9374ef527ca86996317ada3d0d03e7'
+    "local": {
+      "url": "http://localhost:7546",
+      "accounts": [
+        "0x105d050185ccb907fba04dd92d8de9e32c18305e097ab41dadda21489a211524",
+        "0x2e1d968b041d84dd120a5860cee60cd83f9374ef527ca86996317ada3d0d03e7"
       ],
-      chainId: 298,
-    },
+      "chainId": 298
+    }
   }
 }
 ```
@@ -387,7 +391,7 @@ async function main() {
 main().catch(console.error);
 ```
 
-In this example, the `erc721address` variable is stored in the `args` object of the script you are executing. You can then use this variable in other scripts by retrieving it again (`stateController.getScriptArgument(erc721address)`) and using it in your Hardhat scripts. 
+In this example, the `erc721address` variable is stored in the `args` object of the script you are executing. You can then use this variable in other scripts by retrieving it again (`stateController.getScriptArgument(erc721address)`) and using it in your Hardhat scripts.
 
 _Don't forget to use `.default` when importing the `stateController` in your Hardhat scripts, as shown above._
 
@@ -395,14 +399,14 @@ As mentioned, you can build interesting script blocks that combine regular CLI c
 
 ```json
 {
-    "name": "account-storage",
-    "commands": [
-      "account create -n alice --args accountId:aliceAccId", // Create account and store account Id
-      "hardhat compile", // Compile contracts
-      "hardhat run ./dist/contracts/scripts/account-storage/deploy-acc-storage.js", // Deploy the contract
-      "hardhat run ./dist/contracts/scripts/account-storage/add-account-id.js" // Add Alice's account ID to the contract
-    ],
-    "args": {}
+  "name": "account-storage",
+  "commands": [
+    "account create -n alice --args accountId:aliceAccId", // Create account and store account Id
+    "hardhat compile", // Compile contracts
+    "hardhat run ./dist/contracts/scripts/account-storage/deploy-acc-storage.js", // Deploy the contract
+    "hardhat run ./dist/contracts/scripts/account-storage/add-account-id.js" // Add Alice's account ID to the contract
+  ],
+  "args": {}
 }
 ```
 
@@ -591,7 +595,6 @@ Flags:
 
 - **-i, --id:** (required) Account ID to view.
 
-
 ## Token Commands
 
 ### Overview
@@ -667,26 +670,109 @@ A token input file looks like below. You can define all properties you would nor
 Here's how custom fees are defined in the token input file:
 
 ```json
-"customFees": [
-  {
-    "type": "fixed", // Indicates a fixed fee
-    "unitType": "token", // Indicates the denomination of the fee: "token", "hbar", or "tinybar"
-    "amount": 1, // Amount of the fee
-    "denom": "0.0.3609946", // If the unit type is "token", then you need to set a denominating token ID to collect the fees in
-    "exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
-    "collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
-  },
-  {
-    "type": "fractional", // Indicates a fractional fee
-    "numerator": 1, // Numerator of the fractional fee
-    "denominator": 100, // Denominator of the fractional fee: 1/100 = 1% fee on the transfer
-    "min": 1, // Optional: Minimum fee user has to pay
-    "max": 100, // Optional: Maximum fee user has to pay because fractional fees can become very costly
-    "exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
-    "collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
-  }
-]
+
+### Token file schema & validation
+
+The `token create-from-file` command validates your JSON definition against a strict schema (implemented with `zod`). The file must include ALL required fields; unknown or invalid values cause the command to fail (exit code set, no network transaction performed, and each validation error logged).
+
+Key rules:
+
+| Field | Rules |
+| ----- | ----- |
+| `name` | 1–100 characters |
+| `symbol` | 1–20 characters |
+| `decimals` | Integer 0–18 |
+| `supplyType` | `finite` or `infinite` |
+| `initialSupply` | Integer >= 0 |
+| `maxSupply` | Required > 0 only when `supplyType` = `finite`; ignored (can be 0) for `infinite` |
+| `memo` | Optional, up to 100 chars |
+| `keys.treasuryKey` | REQUIRED (non‑empty string or placeholder). All other keys may be an empty string to omit |
+| `customFees` | Array (can be empty). Each element must be a valid fixed or fractional fee (see below) |
+
+Keys object (all properties must exist, but may be empty strings except `treasuryKey`):
 ```
+
+{
+"adminKey": "", "supplyKey": "", "wipeKey": "", "kycKey": "",
+"freezeKey": "", "pauseKey": "", "feeScheduleKey": "", "treasuryKey": "<name:alice>"
+}
+
+````
+
+Placeholders supported in any key field:
+
+* `<name:ACCOUNT_NAME>` – replaced with the private key of an existing account in your address book.
+* `<newkey:ecdsa:INITIAL_BALANCE_TINYBARS>` – creates a brand new ECDSA account with a random name and the given initial balance (tinybars), then substitutes its private key.
+
+Notes:
+* Only ECDSA new keys are allowed. `<newkey:ed25519:...>` is rejected.
+* `treasuryId` is inferred automatically from the (resolved) `treasuryKey`'s account if not already known.
+* Leave a key as an empty string (e.g. `"freezeKey": ""`) to omit that permission.
+
+Custom fee validation:
+
+Fixed fee (`type: "fixed"`):
+* `amount`: positive integer
+* `unitType`: one of `hbar`, `hbars`, `tinybar`, `tinybars`, `token`, `tokens`
+* If `unitType` is `token`/`tokens`, `denom` (token ID) is required
+* Optional: `collectorId` (account ID `shard.realm.num`), `exempt` (boolean)
+
+Fractional fee (`type: "fractional"`):
+* `numerator` / `denominator`: positive integers (denominator > 0)
+* Optional: `min`, `max` (non‑negative integers); if both present then `min <= max`
+* Optional: `collectorId`, `exempt`
+
+Failure behavior:
+* The CLI prints: `Token file validation failed` then each specific issue (e.g. `name: Required`) and sets `process.exitCode = 1`.
+* No partial state is written and no token creation transaction is attempted.
+
+Example minimal infinite‑supply definition (unused keys empty, no fees):
+```json
+{
+  "name": "Example",
+  "symbol": "EX",
+  "decimals": 0,
+  "supplyType": "infinite",
+  "initialSupply": 0,
+  "maxSupply": 0,
+  "keys": {
+    "supplyKey": "",
+    "treasuryKey": "<name:alice>",
+    "adminKey": "",
+    "feeScheduleKey": "",
+    "freezeKey": "",
+    "pauseKey": "",
+    "wipeKey": "",
+    "kycKey": ""
+  },
+  "customFees": [],
+  "memo": ""
+}
+````
+
+Tip (scripting): Combine `--args` with placeholders to capture the newly created token's ID and keys for later commands, e.g. `--args tokenId:myTokenId`.
+
+"customFees": [
+{
+"type": "fixed", // Indicates a fixed fee
+"unitType": "token", // Indicates the denomination of the fee: "token", "hbar", or "tinybar"
+"amount": 1, // Amount of the fee
+"denom": "0.0.3609946", // If the unit type is "token", then you need to set a denominating token ID to collect the fees in
+"exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
+"collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
+},
+{
+"type": "fractional", // Indicates a fractional fee
+"numerator": 1, // Numerator of the fractional fee
+"denominator": 100, // Denominator of the fractional fee: 1/100 = 1% fee on the transfer
+"min": 1, // Optional: Minimum fee user has to pay
+"max": 100, // Optional: Maximum fee user has to pay because fractional fees can become very costly
+"exempt": true, // If true, exempts all the token's fee collector accounts from this fee.
+"collectorId": "0.0.2221463" // Sets the fee collector account ID that collects the fee.
+}
+]
+
+````
 
 **2. Create Fungible Token:**
 
@@ -694,7 +780,7 @@ Creates a new fungible token with specified properties like name, symbol, treasu
 
 ```sh
 hcli token create --treasury-id <treasuryId> --treasury-key <treasuryKey> --name <name> --symbol <symbol> --decimals <decimals> --supply-type <supplyType> --initial-supply <initialSupply> --admin-key <adminKey>
-```
+````
 
 Flags:
 
@@ -847,7 +933,7 @@ backup restore
 
 **1. Creating Backup:**
 
-This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`. It's possible to provide a custom name for the backup file: `state.backup.<name>.json`. 
+This command creates a backup of the `state.json` file. The backup file is named using a timestamp for easy identification and recovery. The format is: `state.backup.<timestamp>.json`. The backup is stored in the same `dist/state` directory as `state.json`. It's possible to provide a custom name for the backup file: `state.backup.<name>.json`.
 
 Further, you can also provide a custom path for your backup, which is useful if you want to export a clean testing state in another application that can be used to run E2E tests.
 
@@ -911,7 +997,7 @@ state clear
 
 **1. Download State:**
 
-Downloads a state file from an external URL and add it to the `dist/state.json` file. You can use this command to update your state with new accounts, tokens, or scripts. You can choose to overwrite the current state or merge the downloaded state with the current state.
+Downloads a state file from an external URL and merges or overwrites it into your persisted state file. You can use this command to update your state with new accounts, tokens, or scripts.
 
 ```sh
 hcli state download --url <url> [--overwrite] [--merge]
@@ -943,10 +1029,7 @@ Format for remote script files:
   "scripts": {
     "script-script1": {
       "name": "script1",
-      "commands": [
-        "account create -n alice",
-        "account create -n bob"
-      ]
+      "commands": ["account create -n alice", "account create -n bob"]
     }
   },
   "tokens": {
@@ -1044,7 +1127,7 @@ Loads a script by name from state and sequentially executes each command in the 
 hcli script load -n,--name <name>
 ```
 
-Each command is executed via [`execSync`](https://nodejs.org/api/child_process.html), which runs the command in a synchronous child process. Scripts are stored in the `dist/state.json` file, in the `scripts` section. 
+Each command is executed via [`execSync`](https://nodejs.org/api/child_process.html), which runs the command in a synchronous child process. Scripts are stored in the persisted state file, in the `scripts` section.
 
 **Make sure to append each script with `script-` prefix. The name of the script is just the name without the `script-` prefix.** If you want to load this script, you use `hcli script load -n erc721`, without the `script-` prefix.
 
@@ -1066,7 +1149,7 @@ Each command is executed via [`execSync`](https://nodejs.org/api/child_process.h
 
 **2. List All Scripts:**
 
-Lists all scripts stored in the `dist/state.json` file.
+Lists all scripts stored in the persisted state file.
 
 ```sh
 hcli script list
@@ -1074,7 +1157,7 @@ hcli script list
 
 **3. Delete Script:**
 
-Deletes a script from the `dist/state.json` file.
+Deletes a script from the persisted state file.
 
 ```sh
 hcli script delete -n,--name <name>
@@ -1144,98 +1227,150 @@ This example shows how to use Hardhat scripts as part of your flow, mixing it wi
 
 Not each command exposes the same variables. Here's a list of commands and the variables they expose, which you can use in your scripts.
 
-| Command | Variables |
-| --- | --- |
-| `account create` | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
-| `account import` | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey` |
-| `account view` | `accountId`, `balance`, `evmAddress`, `type`, `maxAutomaticTokenAssociations` |
-| `token create` | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey` |
+| Command                  | Variables                                                                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `account create`         | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey`                                    |
+| `account import`         | `name`, `accountId`, `type`, `publicKey`, `evmAddress`, `solidityAddress`, `solidityAddressFull`, `privateKey`                                    |
+| `account view`           | `accountId`, `balance`, `evmAddress`, `type`, `maxAutomaticTokenAssociations`                                                                     |
+| `token create`           | `tokenId`, `name`, `symbol`, `treasuryId`, `adminKey`                                                                                             |
 | `token create-from-file` | `tokenId`, `name`, `symbol`, `treasuryId`, `treasuryKey`, `adminKey`, `pauseKey`, `kycKey`, `wipeKey`, `freezeKey`, `supplyKey`, `feeScheduleKey` |
-| `topic create` | `topicId`, `adminKey`, `submitKey` |
-| `topic message submit` | `sequenceNumber` |
+| `topic create`           | `topicId`, `adminKey`, `submitKey`                                                                                                                |
+| `topic message submit`   | `sequenceNumber`                                                                                                                                  |
 
-# CLI State
+# Configuration & State Storage
 
-The Hedera CLI tool stores its state in the `dist/state/state.json` file. This file contains all the information about your accounts, tokens, scripts, and network. You can edit this file manually, but it's not recommended.
+The CLI externalizes both its immutable base configuration and mutable runtime state. No editable JSON lives in `src/state/` anymore.
 
-Here's an example state:
+## State file location
+
+Default path (created on first write):
+
+- macOS / Linux: `~/.config/hedera-cli/state.json` (respects `XDG_CONFIG_HOME`)
+- Windows: `%APPDATA%/hedera-cli/state.json`
+
+Override with an absolute path:
+
+```sh
+export HCLI_STATE_FILE=/custom/path/my-hcli-state.json
+```
+
+## User config overrides
+
+Provide optional overrides with a cosmiconfig file (module name `hedera-cli`):
+
+- `hedera-cli.config.{js,ts,cjs,mjs,json}`
+- `.hedera-clirc` (JSON / YAML)
+- `package.json` (key: `hedera-cli`)
+
+Or explicitly:
+
+```sh
+export HCLI_CONFIG_FILE=/absolute/path/config.json
+```
+
+Only supplied keys override defaults; others fall back to `src/state/config.ts`.
+
+### Example user config
+
+An example cosmiconfig file is included as `hedera-cli.config.json` in the repository root. Treat this as a starting point – copy or rename it (e.g. to `hedera-cli.config.local.json`, which you should gitignore) and edit only the values you need. You can also point `HCLI_CONFIG_FILE` to a file stored elsewhere if you prefer to keep secrets out of the repo.
+
+Example contents:
 
 ```json
 {
   "network": "testnet",
-  "mirrorNodeLocalnet": "http://localhost:5551/api/v1",
-  "mirrorNodePreviewnet": "https://previewnet.mirrornode.hedera.com/api/v1",
-  "mirrorNodeTestnet": "https://testnet.mirrornode.hedera.com/api/v1",
-  "mirrorNodeMainnet": "https://mainnet.mirrornode.hedera.com/api/v1",
-  "rpcUrlMainnet": "https://mainnet.hashio.io/api",
-  "rpcUrlTestnet": "https://testnet.hashio.io/api",
-  "rpcUrlPreviewnet": "https://previewnet.hashio.io/api",
-  "rpcUrlLocalnet": "http://localhost:7546",
-  "telemetryServer": "http://localhost:3000/track",
-  "localNodeAddress": "127.0.0.1:50211",
-  "localNodeAccountId": "0.0.3",
-  "localNodeMirrorAddressGRPC": "127.0.0.1:5600",
-  "testnetOperatorKey": "",
-  "testnetOperatorId": "",
-  "mainnetOperatorKey": "",
-  "mainnetOperatorId": "",
-  "previewnetOperatorId": "",
-  "previewnetOperatorKey": "",
   "telemetry": 0,
-  "scriptExecution": 0,
-  "scriptExecutionName": "",
-  "uuid": "",
-  "accounts": {
-    "bob": {
-      "network": "testnet",
-      "name": "bob",
-      "accountId": "0.0.7393086",
-      "type": "ECDSA",
-      "publicKey": "302a300506032b657003210059b9fc2413aa2a1dccda4b6ea0f99a48414db6f6ad6eb28589bab12f578f8697",
-      "evmAddress": "",
-      "solidityAddress": "000000000000000000000000000000000070cf3e",
-      "solidityAddressFull": "0x000000000000000000000000000000000070cf3e",
-      "privateKey": "302e0201003005060507c46c02ad871ffc38bb216497c6ac9a34aff3ac637153815a896"
-    }
-  },
-  "scripts": {
-    "script-test": {
-      "name": "test",
-      "creation": 1697103669402,
-      "commands": [
-        "network use testnet",
-        "account create -n random --args privateKey:tokenMichielAdminKey --args name:accountName",
-        "token create -n {{accountName}} -s mm -d 2 -i 1000 --supply-type infinite -a {{tokenMichielAdminKey}} -t 0.0.4536940 -k 302e020100300506032b6568253a539643468dda3128a734c9fcb07a927b3f742719db731f9f50"
-      ],
-      "args": {}
-    }
-  },
-  "tokens": {
-    "0.0.7393102": {
-      "network": "testnet",
-      "associations": [],
-      "tokenId": "0.0.7393102",
-      "name": "myToken",
-      "symbol": "MTK",
-      "treasuryId": "0.0.7393093",
-      "decimals": 2,
-      "initialSupply": 1000,
-      "supplyType": "finite",
-      "maxSupply": 1000000,
-      "keys": {
-        "adminKey": "3030020100300506e9fdf92f82267a40c9ce7932d2622ba29aad3d8d7036dbe5d27",
-        "pauseKey": "",
-        "kycKey": "",
-        "wipeKey": "",
-        "freezeKey": "",
-        "supplyKey": "302e0201003005002ad871ffc38bb216497c6ac9a34aff3ac637153815a896",
-        "feeScheduleKey": "",
-        "treasuryKey": "302e0201003078aede2e6a5c46701d89ab48b3e28a31e50243bd85c19f0"
-      }
+  "networks": {
+    "localnet": {
+      "rpcUrl": "http://localhost:7546",
+      "mirrorNodeUrl": "http://localhost:5551/api/v1",
+      "operatorKey": "",
+      "operatorId": "",
+      "hexKey": ""
+    },
+    "customnet": {
+      "rpcUrl": "https://rpc.customnet.hedera.example/api",
+      "mirrorNodeUrl": "https://mirror.customnet.hedera.example/api/v1",
+      "operatorKey": "",
+      "operatorId": "",
+      "hexKey": ""
     }
   }
 }
 ```
+
+Guidelines:
+
+- The file is a partial overlay; omit keys you don't want to override.
+- Runtime sections (`accounts`, `tokens`, `topics`, `scripts`) are managed by the CLI and should not be placed here.
+- Keep real operator keys out of version control; prefer environment variables or a private, untracked config file.
+- To use a custom path:
+
+```sh
+export HCLI_CONFIG_FILE=/absolute/path/to/my-hcli-config.json
+```
+
+### Inspecting configuration at runtime
+
+Use the new command to inspect the layered configuration:
+
+```sh
+hcli config view          # merged view (base + user overrides + runtime metadata)
+hcli config view --active # just the active network's settings
+hcli config view --json   # machine-readable output
+```
+
+### User config validation
+
+User-provided configuration overlays are validated against a strict schema. If the file contains unknown keys, invalid URL fields, or out-of-range values (e.g. `telemetry: 2`), the entire overlay is ignored and a warning is printed. This prevents partially-applied ambiguous configuration.
+
+Allowed keys:
+
+- `network` (string)
+- `telemetry` (0 or 1)
+- `telemetryServer` (valid URL)
+- `networks` (object mapping network name -> partial network config with `mirrorNodeUrl` (URL), `rpcUrl` (URL), `operatorKey`, `operatorId`, `hexKey` strings)
+
+Example warning:
+
+```
+Invalid user config at /path/hedera-cli.config.json:
+telemetry: Number must be less than or equal to 1
+extraKey: Unrecognized key(s) in object
+```
+
+Fix the issues and re-run any command; the corrected file will be re-loaded automatically on next access.
+
+## Layering order
+
+1. Base defaults (`src/state/config.ts`)
+2. User config (cosmiconfig or `HCLI_CONFIG_FILE`)
+3. Persisted runtime state (accounts, tokens, topics, scripts, args, telemetry flag, selected network)
+
+## Inspecting state
+
+Use commands instead of editing the JSON manually:
+
+```sh
+hcli state view --accounts
+hcli state view --tokens
+```
+
+## Backups
+
+Create or restore backups via `hcli backup create|restore`. Backups sit beside your `state.json` unless you pass `--path`. Use `--safe` to strip private keys.
+
+## Temporary / test usage
+
+Run an isolated session without touching your main state:
+
+```sh
+HCLI_STATE_FILE=$(mktemp -t hcli-state.json) hcli account list
+```
+
+## Resetting
+
+Delete the file or run `hcli state clear` (optionally skipping sections) to reinitialize.
 
 ## Contributing
 
@@ -1243,24 +1378,16 @@ Contributions are welcome. Please see the [contributing guide](https://github.co
 
 ### Development Mode
 
-You can run the application in development mode. It will watch for changes in the `src` folder and automatically recompile the application while maintaining the `dist/state.json` file.
+You can run the application in development mode. It watches the `src` folder and recompiles automatically. The runtime state now lives outside the repository (e.g. `~/.config/hedera-cli/state.json`). No seeding or copying JSON files is required.
 
-To get started, create a new state file called `test_state.json` in the `/src/state/` folder.
-
-```sh
-cd src/state
-touch test_state.json
-```
-
-Next, copy the contents of the `src/state/base_state.json` file into the `test_state.json` file.
-
-Once that's done, you can start the application in development mode using the following command:
+If you want an isolated state for a development session, point `HCLI_STATE_FILE` to a temporary path before starting the watcher:
 
 ```sh
+export HCLI_STATE_FILE=$(pwd)/.dev-state.json
 npm run dev-build
 ```
 
-Further, you can lint or format the code using the following commands:
+Remove that file or unset the variable to return to your default OS config path. Lint or format the code using:
 
 ```sh
 npm run lint
@@ -1281,16 +1408,15 @@ Use `program.parseAsync` if you are testing an asynchronous command.
 
 ```js
 const { Command } = require('commander');
-const networkCommands = require("../../commands/network");
+const networkCommands = require('../../commands/network');
 
-const fs = require("fs");
+const fs = require('fs');
 
-describe("network commands", () => {
-
-  describe("network switch command", () => {
-    test("switching networks successfully", () => {
+describe('network commands', () => {
+  describe('network switch command', () => {
+    test('switching networks successfully', () => {
       // Arrange
-      fs.readFileSync = jest.fn(() => JSON.stringify({ network: "mainnet" })); // Mock fs.readFileSync to return a sample config
+      fs.readFileSync = jest.fn(() => JSON.stringify({ network: 'mainnet' })); // Mock fs.readFileSync to return a sample config
       fs.writeFileSync = jest.fn(); // Mock fs.writeFileSync to do nothing
       //console.log = jest.fn(); // Mock console.log to check the log messages
 
@@ -1298,26 +1424,26 @@ describe("network commands", () => {
       networkCommands(program);
 
       // Act
-      program.parse(["node", "hedera-cli.js", "network", "use", "testnet"]);
+      program.parse(['node', 'hedera-cli.js', 'network', 'use', 'testnet']);
 
       // Assert
       const opts = program.opts();
-      expect(opts.network).toBe("testnet");
+      expect(opts.network).toBe('testnet');
       // expect(program.args).toEqual(["--type", "order-cake"]);
 
       // Check that console.log was called with the correct message
-      expect(console.log).toHaveBeenCalledWith("Switched to testnet");
+      expect(console.log).toHaveBeenCalledWith('Switched to testnet');
 
       // Check that fs.writeFileSync was called with the updated config
       expect(fs.writeFileSync).toHaveBeenCalledWith(
         expect.any(String), // path
-        JSON.stringify({ network: "testnet" }, null, 2),
-        "utf-8"
+        JSON.stringify({ network: 'testnet' }, null, 2),
+        'utf-8',
       );
     });
   });
 
-  describe("network switch ls", () => {
+  describe('network switch ls', () => {
     // [...]
   });
 });
@@ -1325,7 +1451,7 @@ describe("network commands", () => {
 
 ## E2E Testing
 
-The E2E tests run on localnet and use the state from the `dist/state/state.json` file.
+The E2E tests run on localnet and use the state from the resolved persisted state file path.
 
 ### Dynamic Variables
 
@@ -1432,20 +1558,127 @@ The `storeArgs` function takes the `options.args` and the `commandAction` as arg
 
 Whenever changing the `commandActions` or `commandOutputs` objects, make sure to update the documentation as well.
 
-### Logging
+### Logging & Error Handling
 
-You can use the `logger` object to log messages to the console. The logger object is defined in `src/utils/logger.ts`. It is defined as a singleton which you can import in your files.
+The CLI uses a centralized logger singleton (`src/utils/logger.ts`) with four modes:
 
-```js
-import { Logger } from '../../utils/logger';
-const logger = Logger.getInstance();
+| Mode    | Set via CLI flag                    | Env (`HCLI_LOG_MODE`) | Behavior                                                                      |
+| ------- | ----------------------------------- | --------------------- | ----------------------------------------------------------------------------- |
+| normal  | (default)                           | normal                | Show standard logs only                                                       |
+| verbose | `--verbose` or `--log-mode verbose` | verbose               | Adds verbose tracing lines                                                    |
+| quiet   | `--quiet` or `--log-mode quiet`     | quiet                 | Suppresses standard logs (errors still shown)                                 |
+| silent  | `--log-mode silent`                 | silent                | Suppresses all user-facing logs (still routed internally so tests can assert) |
+
+### Debug Mode
+
+The CLI includes a debug mode that provides detailed information about API calls, network configuration, and request parameters. This is particularly useful for troubleshooting network issues and understanding what URLs are being called.
+
+**Debug mode can be enabled in three ways (in order of priority):**
+
+1. **Command Line Flag** (highest priority):
+
+   ```bash
+   hedera-cli --debug account balance -a 0.0.2
+   ```
+
+2. **Environment Variable**:
+
+   ```bash
+   HCLI_DEBUG=true hedera-cli account balance -a 0.0.2
+   # or
+   HCLI_DEBUG=1 hedera-cli account balance -a 0.0.2
+   ```
+
+3. **Config File** (lowest priority):
+   ```json
+   {
+     "network": "testnet",
+     "debug": true,
+     "networks": {
+       // ... network configurations
+     }
+   }
+   ```
+
+**Debug output includes:**
+
+- Current network configuration
+- Account IDs, token IDs, and other request parameters
+- Full mirror node URLs being called
+- Base URLs for API endpoints
+- Detailed error information including Axios error codes
+- Request/response debugging information
+
+**Example debug output:**
+
+```
+🔍 DEBUG: Current network: testnet
+🔍 DEBUG: Account ID or name: 0.0.2
+🔍 DEBUG: Only Hbar: false
+🔍 DEBUG: Token ID: none
+🔍 DEBUG: Resolved account ID: 0.0.2
+🔍 DEBUG: Calling mirror node URL: https://testnet.mirrornode.hedera.com/api/v1/accounts/0.0.2
+🔍 DEBUG: Mirror node base URL: https://testnet.mirrornode.hedera.com/api/v1
+🔍 DEBUG: Account ID: 0.0.2
+Balance for account 0.0.2:
+1000000000 Hbars
 ```
 
-- Regular output messages are logged using the `logger.log` function.
-- Verbose output messages are logged using the `logger.verbose` function.
-- Error messages are logged using the `logger.error` function which has an overload signature
-  - `logger.error(error: Error | string)`: Log a single object or string
-  - `logger.error(error: string, data: object)`: Log an error string and object
+Programmatic usage:
+
+```ts
+import { Logger } from '../../utils/logger';
+const logger = Logger.getInstance();
+logger.log('Hello');
+logger.verbose('Diagnostic detail');
+logger.error('Something failed');
+```
+
+All command handlers are wrapped with a standard error guard (`wrapAction` or `exitOnError`) ensuring that domain-specific failures (thrown as `DomainError`) set `process.exitCode` instead of abruptly exiting. This guarantees consistent telemetry flushing and avoids duplicated `try/catch` blocks. A unit test (`wrappingConsistency.test.ts`) enforces that every `.action(` is wrapped.
+
+When adding a new command:
+
+1. Prefer `wrapAction` from `src/commands/shared/wrapAction` (adds dynamic variable replacement + optional verbose pre-log + error handling).
+2. If you need only error handling, use `exitOnError` directly.
+3. Do not call `process.exit()` inside handlers; throw a `DomainError` instead.
+
+Legacy env flags like `HCLI_SUPPRESS_CONSOLE` were removed—use the log modes above instead.
+
+## Troubleshooting
+
+### Common Issues
+
+**Commands hanging or timing out:**
+If commands seem to hang or take too long, enable debug mode to see what's happening:
+
+```bash
+hedera-cli --debug account balance -a 0.0.2
+```
+
+This will show you the exact URLs being called and help identify if the issue is with:
+
+- Network connectivity
+- Mirror node availability
+- Incorrect network configuration
+- API endpoint issues
+
+**Network connection issues:**
+Use debug mode to verify the correct mirror node URLs are being used:
+
+```bash
+HCLI_DEBUG=true hedera-cli network list
+```
+
+**API errors:**
+Debug mode provides detailed error information including HTTP status codes and error messages from the Hedera Mirror Node API.
+
+### Getting Help
+
+If you encounter issues not covered here, please:
+
+1. Enable debug mode to gather detailed information
+2. Check the [GitHub issues](https://github.com/hashgraph/hedera-cli/issues) for similar problems
+3. Create a new issue with debug output included
 
 ## Support
 

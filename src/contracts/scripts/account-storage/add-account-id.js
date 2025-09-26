@@ -1,4 +1,4 @@
-const stateController = require('../../../state/stateController.js').default;
+const { getScriptArgument } = require('../../../state/newStore.js');
 
 /**
  * Purpose: Store an account ID in the HederaAccountStorage contract.
@@ -10,10 +10,8 @@ const stateController = require('../../../state/stateController.js').default;
  * - aliceAccId: The account ID to be stored in the contract (from the account create command)
  */
 async function main() {
-  const accountIdToStore = stateController.getScriptArgument('aliceAccId');
-  const contractAddress = stateController.getScriptArgument(
-    'accountstorageaddress',
-  );
+  const accountIdToStore = getScriptArgument('aliceAccId');
+  const contractAddress = getScriptArgument('accountstorageaddress');
 
   const HederaAccountStorage = await ethers.getContractFactory(
     'HederaAccountStorage',

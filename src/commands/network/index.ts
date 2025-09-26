@@ -1,9 +1,15 @@
-import useCommand from './use';
+import { Command } from 'commander';
+import addCommand from './add';
 import listCommand from './list';
+import useCommand from './use';
 
-export default (program: any) => {
-  const network = program.command('network').description('Handle networks');
+export default (program: Command) => {
+  const network = program
+    .command('network')
+    .alias('net')
+    .description('Handle networks');
 
   useCommand(network);
   listCommand(network);
+  addCommand(network);
 };
