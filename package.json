@@ -44,7 +44,7 @@
     "@hashgraph/sdk": "^2.62.0",
     "@openzeppelin/contracts": "^5.4.0",
     "axios": "^1.12.0",
-    "commander": "^11.0.0",
+    "commander": "^14.0.1",
     "dotenv": "^16.4.7",
     "enquirer": "^2.4.1",
     "uuid": "^11.1.0"
