@@ -93,9 +93,7 @@ jobs:
         run: npm run lint
 
       - name: Run Unit Test
-        if: ${{ inputs.enable-unit-tests }}
-        env:
-          CI: 'true'
+        if: ${{ inputs.enable-unit-tests && !cancelled() && !failure() }}
         run: npm run test:unit
 
       - name: Publish Unit Test Report
