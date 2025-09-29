@@ -1,8 +1,5 @@
 import { Transaction, PrivateKey } from '@hashgraph/sdk';
-
-import { Logger } from './logger';
-
-const logger = Logger.getInstance();
+import { DomainError } from './errors';
 
 interface SigningRequirements {
   [action: string]: {
@@ -36,8 +33,7 @@ async function sign(
     signedTx = await transaction.sign(PrivateKey.fromStringDer(key));
     return signedTx;
   } catch (error) {
-    logger.error('Unable to sign transaction', error as object);
-    process.exit(1);
+    throw new DomainError('Unable to sign transaction');
   }
 }
 
@@ -56,8 +52,7 @@ async function signByType(
   keys: Record<string, string>,
 ): Promise<Transaction> {
   if (!signingRequirements[type]) {
-    logger.error('Transaction type is not recognized');
-    process.exit(1);
+    throw new DomainError('Transaction type is not recognized');
   }
 
   const signatures = signingRequirements[type].sign;
@@ -67,8 +62,7 @@ async function signByType(
       if (!keys[signature]) continue; // skip iteration if the key is not set
       signedTx = await sign(signedTx, keys[signature]);
     } catch (error) {
-      logger.error('Unable to sign transaction', error as object);
-      process.exit(1);
+      throw new DomainError('Unable to sign transaction');
     }
   }
 

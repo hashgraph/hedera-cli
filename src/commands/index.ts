@@ -9,6 +9,7 @@ import telemetryCommands from './telemetry';
 import scriptCommands from './script';
 import topicCommands from './topic';
 import waitCommands from './wait';
+import configCommands from './config';
 
 const commands = {
   accountCommands,
@@ -22,6 +23,7 @@ const commands = {
   scriptCommands,
   topicCommands,
   waitCommands,
+  configCommands,
 };
 
 export default commands;

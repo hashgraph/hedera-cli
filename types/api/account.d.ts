@@ -1,4 +1,4 @@
-import type { Key } from "./shared.d.ts";
+import type { Key } from './shared.d.ts';
 
 export type TokenBalance = {
   token_id: string;
@@ -25,14 +25,14 @@ type Transaction = {
   max_fee: string;
   memo_base64: string;
   name: string;
-  nft_transfers: any[]; // Todo
+  nft_transfers: unknown[]; // TODO: refine NFT transfer shape
   node: string;
   nonce: number;
   parent_consensus_timestamp: null | string;
   result: string;
   scheduled: boolean;
-  staking_reward_transfers: any[];
-  token_transfers: any[]; // Todo
+  staking_reward_transfers: unknown[]; // TODO: refine staking reward shape
+  token_transfers: unknown[]; // TODO: refine token transfer shape
   transaction_hash: string;
   transaction_id: string;
   transfers: TransactionTransfer[];

@@ -1,11 +1,32 @@
-import { Client, AccountId, PrivateKey } from '@hashgraph/sdk';
+import { AccountId, Client, PrivateKey } from '@hashgraph/sdk';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Logger } from '../utils/logger';
-import stateController from '../state/stateController';
+import {
+  selectAccounts,
+  selectScripts,
+  selectTokens,
+  selectTopics,
+} from '../state/selectors';
+import {
+  getState,
+  get as storeGet,
+  saveKey as storeSaveKey,
+  saveState as storeSaveState,
+  updateState as storeUpdateState,
+} from '../state/store';
+import { DomainError } from './errors';
+import { Logger } from './logger';
 
-import type { Account, DownloadState, Script, Token, Topic } from '../../types';
+import type {
+  Account,
+  DownloadState,
+  NetworkConfig,
+  Script,
+  State,
+  Token,
+  Topic,
+} from '../../types';
 
 const logger = Logger.getInstance();
 
@@ -13,10 +34,9 @@ const logger = Logger.getInstance();
  * Generates a UUID when it doesn't exist
  */
 function createUUID(): void {
-  const uuid = stateController.get('uuid');
-  if (uuid === '' || !uuid) {
-    const newUUID = uuidv4();
-    stateController.saveKey('uuid', newUUID);
+  const uuid = storeGet('uuid');
+  if (!uuid) {
+    storeSaveKey('uuid', uuidv4());
   }
 }
 
@@ -25,100 +45,82 @@ function createUUID(): void {
  * @returns {boolean} telemetry
  */
 function isTelemetryEnabled(): boolean {
-  const telemetry = stateController.get('telemetry');
-  return telemetry === 1;
+  return storeGet('telemetry') === 1;
 }
 
-function getMirrorNodeURL(): string {
-  const network = stateController.get('network');
-  let mirrorNodeURL = stateController.get('mirrorNodeTestnet');
-  switch (network) {
-    case 'testnet':
-      mirrorNodeURL = stateController.get('mirrorNodeTestnet');
-      break;
-    case 'mainnet':
-      mirrorNodeURL = stateController.get('mirrorNodeMainnet');
-      break;
-    case 'previewnet':
-      mirrorNodeURL = stateController.get('mirrorNodePreviewnet');
-      break;
-    case 'localnet':
-      mirrorNodeURL = stateController.get('mirrorNodeLocalnet');
-      break;
-    default:
-      logger.error('Invalid network name');
-      process.exit(1);
+function getNetworkFromState(network: string): NetworkConfig {
+  const { networks } = getState();
+  const cfg = networks[network];
+  if (!cfg) {
+    logger.error(`Network ${network} not found in state`);
+    throw new DomainError(`Network ${network} not found in state`);
   }
-  return mirrorNodeURL;
+  return cfg;
 }
 
+function getOperator(network?: string): {
+  operatorId: string;
+  operatorKey: string;
+} {
+  const state = getState() as unknown as State & Record<string, unknown>; // allow legacy dynamic keys
+  const activeNetwork = network || state.network;
+  const netConfig = getNetworkFromState(activeNetwork);
+  let { operatorId, operatorKey } = netConfig;
+
+  if (!operatorId || !operatorKey) {
+    const legacyId = state[`${activeNetwork}OperatorId`];
+    const legacyKey = state[`${activeNetwork}OperatorKey`];
+    if (
+      typeof legacyId === 'string' &&
+      legacyId &&
+      typeof legacyKey === 'string' &&
+      legacyKey
+    ) {
+      operatorId = legacyId;
+      operatorKey = legacyKey;
+      // persist back
+      storeSaveKey('networks', {
+        ...state.networks,
+        [activeNetwork]: { ...netConfig, operatorId, operatorKey },
+      });
+    }
+  }
+
+  if (!operatorId || !operatorKey) {
+    logger.error(`operator key and ID not set for ${activeNetwork}`);
+    throw new DomainError(`operator key and ID not set for ${activeNetwork}`);
+  }
+  return { operatorId, operatorKey };
+}
+
+// Get all the available networks from the state
 function getAvailableNetworks(): string[] {
-  const mainnet = stateController.get('mainnetOperatorKey');
-  const testnet = stateController.get('testnetOperatorKey');
-  const previewnet = stateController.get('previewnetOperatorKey');
-  const localnet = stateController.get('localnetOperatorKey');
-
-  const networks = [];
-  if (mainnet) {
-    networks.push('mainnet');
-  }
-  if (testnet) {
-    networks.push('testnet');
-  }
-  if (previewnet) {
-    networks.push('previewnet');
-  }
-  if (localnet) {
-    networks.push('localnet');
-  }
-
-  return networks;
+  return Object.keys(getState().networks);
 }
 
-function getMirrorNodeURLByNetwork(network: string): string {
-  let mirrorNodeURL = stateController.get('mirrorNodeTestnet');
-  switch (network) {
-    case 'testnet':
-      mirrorNodeURL = stateController.get('mirrorNodeTestnet');
-      break;
-    case 'mainnet':
-      mirrorNodeURL = stateController.get('mirrorNodeMainnet');
-      break;
-    case 'previewnet':
-      mirrorNodeURL = stateController.get('mirrorNodePreviewnet');
-      break;
-    case 'localnet':
-      mirrorNodeURL = stateController.get('mirrorNodeLocalnet');
-      break;
-    default:
-      logger.error('Invalid network name');
-      process.exit(1);
-  }
-  return mirrorNodeURL;
-}
+const getMirrorNodeURL = (): string =>
+  getNetworkFromState(getState().network).mirrorNodeUrl;
+
+const getMirrorNodeURLByNetwork = (network: string): string =>
+  getNetworkFromState(network).mirrorNodeUrl;
 
 function getHederaClient(): Client {
-  const state = stateController.getAll();
+  const state = getState();
+  const { operatorId, operatorKey } = getOperator(state.network);
   let client: Client;
-  let operatorId, operatorKey;
 
+  // Handle predefined networks
   switch (state.network) {
     case 'mainnet':
       client = Client.forMainnet();
-      operatorId = state.mainnetOperatorId;
-      operatorKey = state.mainnetOperatorKey;
       break;
     case 'testnet':
       client = Client.forTestnet();
-      operatorId = state.testnetOperatorId;
-      operatorKey = state.testnetOperatorKey;
       break;
     case 'previewnet':
       client = Client.forPreviewnet();
-      operatorId = state.previewnetOperatorId;
-      operatorKey = state.previewnetOperatorKey;
       break;
-    case 'localnet':
+    case 'localnet': {
       const node = {
         [state.localNodeAddress]: AccountId.fromString(
           state.localNodeAccountId,
@@ -127,17 +129,66 @@ function getHederaClient(): Client {
       client = Client.forNetwork(node).setMirrorNetwork(
         state.localNodeMirrorAddressGRPC,
       );
-      operatorId = state.localnetOperatorId;
-      operatorKey = state.localnetOperatorKey;
       break;
-    default:
-      logger.error('Invalid network name');
-      process.exit(1);
-  }
+    }
+    default: {
+      // Handle custom networks from config
+      const networkConfig = getNetworkFromState(state.network);
+      if (!networkConfig.rpcUrl) {
+        logger.error(`RPC URL not configured for network: ${state.network}`);
+        throw new DomainError(
+          `RPC URL not configured for network: ${state.network}`,
+        );
+      }
 
-  if (operatorId === '' || operatorKey === '') {
-    logger.error(`operator key and ID not set for ${state.network}`);
-    process.exit(1);
+      const isLocalish = state.network.toLowerCase().includes('local');
+
+      if (isLocalish) {
+        // Treat custom local-like networks similar to built-in localnet
+        const node = {
+          [state.localNodeAddress]: AccountId.fromString(
+            state.localNodeAccountId,
+          ),
+        };
+        client = Client.forNetwork(node);
+
+        // Mirror selection for local-like networks
+        const cfgAny = networkConfig as unknown as { mirrorNodeGrpc?: string };
+        const mirrorGrpc = cfgAny?.mirrorNodeGrpc;
+        const mirrorUrl = networkConfig.mirrorNodeUrl;
+        const isHttpUrl =
+          typeof mirrorUrl === 'string' && /^https?:\/\//i.test(mirrorUrl);
+        if (typeof mirrorGrpc === 'string' && mirrorGrpc.trim().length > 0) {
+          client.setMirrorNetwork(mirrorGrpc);
+        } else if (
+          typeof mirrorUrl === 'string' &&
+          mirrorUrl.trim().length > 0 &&
+          !isHttpUrl
+        ) {
+          client.setMirrorNetwork(mirrorUrl);
+        } else {
+          client.setMirrorNetwork(state.localNodeMirrorAddressGRPC);
+        }
+      } else {
+        // Non-local custom networks: start from testnet defaults and optionally override mirror
+        client = Client.forTestnet();
+        const cfgAny = networkConfig as unknown as { mirrorNodeGrpc?: string };
+        const mirrorGrpc = cfgAny?.mirrorNodeGrpc;
+        const mirrorUrl = networkConfig.mirrorNodeUrl;
+        const isHttpUrl =
+          typeof mirrorUrl === 'string' && /^https?:\/\//i.test(mirrorUrl);
+        if (typeof mirrorGrpc === 'string' && mirrorGrpc.trim().length > 0) {
+          client.setMirrorNetwork(mirrorGrpc);
+        } else if (
+          typeof mirrorUrl === 'string' &&
+          mirrorUrl.trim().length > 0 &&
+          !isHttpUrl
+        ) {
+          client.setMirrorNetwork(mirrorUrl);
+        }
+      }
+      break;
+    }
   }
 
   return client.setOperator(
@@ -149,46 +200,8 @@ function getHederaClient(): Client {
 /**
  * @returns {string} network name
  */
-function getNetwork() {
-  const state = stateController.getAll();
-  return state.network;
-}
-
-function getOperator(): { operatorId: string; operatorKey: string } {
-  const state = stateController.getAll();
-  let operatorId, operatorKey;
-
-  switch (state.network) {
-    case 'mainnet':
-      operatorId = state.mainnetOperatorId;
-      operatorKey = state.mainnetOperatorKey;
-      break;
-    case 'testnet':
-      operatorId = state.testnetOperatorId;
-      operatorKey = state.testnetOperatorKey;
-      break;
-    case 'previewnet':
-      operatorId = state.previewnetOperatorId;
-      operatorKey = state.previewnetOperatorKey;
-      break;
-    case 'localnet':
-      operatorId = state.localnetOperatorId;
-      operatorKey = state.localnetOperatorKey;
-      break;
-    default:
-      logger.error('Invalid network name');
-      process.exit(1);
-  }
-
-  if (operatorId === '' || operatorKey === '') {
-    logger.error(`operator key and ID not set for ${state.network}`);
-    process.exit(1);
-  }
-
-  return {
-    operatorId,
-    operatorKey,
-  };
+function getNetwork(): string {
+  return getState().network;
 }
 
 function switchNetwork(name: string) {
@@ -197,64 +210,38 @@ function switchNetwork(name: string) {
     logger.error(
       'Invalid network name. Available networks: ' + networks.join(', '),
     );
-    process.exit(1);
+    throw new DomainError(
+      'Invalid network name. Available networks: ' + networks.join(', '),
+    );
   }
-
-  const state = stateController.getAll();
-  let operatorId, operatorKey;
-  switch (name) {
-    case 'mainnet':
-      operatorId = state.mainnetOperatorId;
-      operatorKey = state.mainnetOperatorKey;
-      break;
-    case 'testnet':
-      operatorId = state.testnetOperatorId;
-      operatorKey = state.testnetOperatorKey;
-      break;
-    case 'previewnet':
-      operatorId = state.previewnetOperatorId;
-      operatorKey = state.previewnetOperatorKey;
-      break;
-    case 'localnet':
-      operatorId = state.localnetOperatorId;
-      operatorKey = state.localnetOperatorKey;
-      break;
-  }
-
-  if (operatorId === '' || operatorKey === '') {
-    logger.error(`operator key and ID not set for ${name}`);
-    process.exit(1);
-  }
-
-  stateController.saveKey('network', name);
+  // Validate operator exists for selected network
+  getOperator(name);
+  storeSaveKey('network', name);
 }
 
 function addTokenAssociation(tokenId: string, accountId: string, name: string) {
-  const tokens = stateController.get('tokens');
-
-  if (!tokens[tokenId]) {
-    logger.log(
-      `Token ${tokenId} not found in state. Skipping storing the token associations.`,
-    );
-    return;
-  }
-  const token: Token = tokens[tokenId];
-  token.associations.push({ name, accountId });
-  tokens[tokenId] = token;
-  stateController.saveKey('tokens', tokens);
+  storeUpdateState((draft) => {
+    const token = draft.tokens[tokenId];
+    if (!token) {
+      logger.log(
+        `Token ${tokenId} not found in state. Skipping storing the token associations.`,
+      );
+      return;
+    }
+    token.associations.push({ name, accountId });
+  });
 }
 
 /* Accounts */
 function getAccountById(accountId: string): Account | undefined {
-  const accounts: Record<string, Account> = stateController.get('accounts');
-  const account = Object.values(accounts).find(
+  const accounts: Record<string, Account> = selectAccounts();
+  return Object.values(accounts).find(
     (el: Account) => el.accountId === accountId,
   );
-  return account;
 }
 
 function getAccountByName(name: string): Account | undefined {
-  const accounts: Record<string, Account> = stateController.get('accounts');
+  const accounts: Record<string, Account> = selectAccounts();
   return accounts[name];
 }
 
@@ -270,74 +257,82 @@ function getAccountByIdOrName(accountIdOrName: string): Account {
 
   if (!account) {
     logger.error(`Account not found: ${accountIdOrName}`);
-    process.exit(1);
+    throw new DomainError(`Account not found: ${accountIdOrName}`);
   }
 
   return account;
 }
 
 function startScriptExecution(name: string): void {
-  const state = stateController.getAll();
-  state.scriptExecutionName = name;
-  state.scriptExecution = 1;
-  stateController.saveState(state);
+  storeUpdateState((draft) => {
+    draft.scriptExecution.active = true;
+    draft.scriptExecution.name = name;
+  });
 }
 
 function stopScriptExecution(): void {
-  const state = stateController.getAll();
-  state.scripts[`script-${state.scriptExecutionName}`].args = {};
-  state.scriptExecutionName = '';
-  state.scriptExecution = 0;
-  stateController.saveState(state);
+  const { scriptExecution } = getState();
+  const active = scriptExecution.name;
+  storeUpdateState((draft) => {
+    if (active) {
+      const key = `script-${active}`;
+      const existing = draft.scripts[key];
+      if (existing) existing.args = {};
+    }
+    draft.scriptExecution = { active: false, name: '' };
+  });
 }
 
 function clearState(): void {
-  const state = stateController.getAll();
-  state.accounts = {};
-  state.tokens = {};
-  state.scripts = {};
-  state.topics = {};
-  state.scriptExecution = 0;
-  state.scriptExecutionName = '';
-
-  stateController.saveState(state);
+  const current = getState();
+  storeSaveState({
+    ...current,
+    accounts: {},
+    tokens: {},
+    scripts: {},
+    topics: {},
+    scriptExecution: { active: false, name: '' },
+  });
 }
 
 async function downloadState(url: string): Promise<DownloadState> {
-  let data;
   try {
-    const response = await axios.get(url);
-    data = response.data;
+    const response = await axios.get<DownloadState>(url);
+    return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      logger.error(error.message);
-    } else {
-      logger.error('Unexpected error downloading file', error as object);
-    }
-    process.exit(1);
+    if (axios.isAxiosError(error)) logger.error(error.message);
+    else logger.error('Unexpected error downloading file', error as object);
+    throw new DomainError('Error downloading state');
   }
-
-  return data;
 }
 
 function addAccounts(importedAccounts: Account[], merge: boolean) {
-  const accounts: Record<string, Account> = stateController.get('accounts');
-  Object.values(importedAccounts).forEach((account: Account) => {
-    const existingAccount = accounts[account.name];
+  const additions = Object.values(importedAccounts);
+  const currentAccounts: Record<string, Account> = selectAccounts();
 
+  // Validate & log merge notices first (no mutations yet)
+  additions.forEach((account) => {
+    const existingAccount = currentAccounts[account.name];
     if (!merge && existingAccount) {
-      logger.error(`Account with name ${account} already exists`);
-      process.exit(1);
+      logger.error(`Account with name ${account.name} already exists`);
+      throw new DomainError(`Account with name ${account.name} already exists`);
     }
-
     if (merge && existingAccount) {
       logger.log(
         `Account "${account.name}" already exists, merging it with the new account details`,
       );
     }
+  });
 
-    accounts[account.name] = account;
-    stateController.saveKey('accounts', accounts);
+  // Single transactional mutation
+  storeUpdateState((s) => {
+    additions.forEach((account) => {
+      s.accounts[account.name] = account;
+    });
+  });
+
+  // Success logs (post mutation)
+  additions.forEach((account) => {
     logger.log(
       `Account "${account.name}" with ID ${account.accountId} added successfully`,
     );
@@ -345,21 +340,27 @@ function addAccounts(importedAccounts: Account[], merge: boolean) {
 }
 
 function addTokens(importedTokens: Token[], merge: boolean) {
-  const tokens: Record<string, Token> = stateController.get('tokens');
-  Object.values(importedTokens).forEach((token: Token) => {
-    const existingToken = tokens[token.tokenId];
+  const additions = Object.values(importedTokens);
+  const currentTokens: Record<string, Token> = selectTokens();
 
+  additions.forEach((token) => {
+    const existingToken = currentTokens[token.tokenId];
     if (!merge && existingToken) {
       logger.error(`Token with ID ${token.tokenId} already exists`);
-      process.exit(1);
+      throw new DomainError(`Token with ID ${token.tokenId} already exists`);
     }
-
     if (merge && existingToken) {
       logger.log(`Token ${token.tokenId} already exists, overwriting it`);
     }
+  });
 
-    tokens[token.tokenId] = token;
-    stateController.saveKey('tokens', tokens);
+  storeUpdateState((s) => {
+    additions.forEach((token) => {
+      s.tokens[token.tokenId] = token;
+    });
+  });
+
+  additions.forEach((token) => {
     logger.log(
       `Token ${token.tokenId} with name "${token.name}" added successfully`,
     );
@@ -367,77 +368,90 @@ function addTokens(importedTokens: Token[], merge: boolean) {
 }
 
 function addTopics(importedTopics: Topic[], merge: boolean) {
-  const topics: Record<string, Topic> = stateController.get('topics');
-  Object.values(importedTopics).forEach((topic: Topic) => {
-    const existingTopic = topics[topic.topicId];
+  const additions = Object.values(importedTopics);
+  const currentTopics: Record<string, Topic> = selectTopics();
 
+  additions.forEach((topic) => {
+    const existingTopic = currentTopics[topic.topicId];
     if (!merge && existingTopic) {
       logger.error(`Topic with ID ${topic.topicId} already exists`);
-      process.exit(1);
+      throw new DomainError(`Topic with ID ${topic.topicId} already exists`);
     }
-
     if (merge && existingTopic) {
       logger.log(`Topic ${topic.topicId} already exists, overwriting it`);
     }
+  });
 
-    topics[topic.topicId] = topic;
-    stateController.saveKey('topics', topics);
+  storeUpdateState((s) => {
+    additions.forEach((topic) => {
+      s.topics[topic.topicId] = topic;
+    });
+  });
+
+  additions.forEach((topic) => {
     logger.log(`Topic ${topic.topicId} added successfully`);
   });
 }
 
 function addScripts(importedScripts: Script[], merge: boolean) {
-  const scripts: Record<string, Script> = stateController.get('scripts');
-  Object.values(importedScripts).forEach((script: Script) => {
-    const scriptName = `script-${script.name}`;
-    const existingScript = scripts[scriptName];
+  const additions = Object.values(importedScripts);
+  const currentScripts: Record<string, Script> = selectScripts();
 
+  additions.forEach((script) => {
+    const scriptName = `script-${script.name}`;
+    const existingScript = currentScripts[scriptName];
     if (!merge && existingScript) {
       logger.error(`Script with name ${scriptName} already exists`);
-      process.exit(1);
+      throw new DomainError(`Script with name ${scriptName} already exists`);
     }
-
     if (merge && existingScript) {
-      // continue to add values to existing state (merging)
       logger.log(`Script "${script.name}" already exists, overwriting it`);
     }
+  });
 
-    scripts[scriptName] = {
-      name: script.name,
-      creation: Date.now(),
-      commands: script.commands,
-      args: {},
-    };
-    stateController.saveKey('scripts', scripts);
+  storeUpdateState((s) => {
+    additions.forEach((script) => {
+      const scriptName = `script-${script.name}`;
+      s.scripts[scriptName] = {
+        name: script.name,
+        creation: Date.now(),
+        commands: script.commands,
+        args: {},
+      };
+    });
+  });
+
+  additions.forEach((script) => {
     logger.log(`Script "${script.name}" added successfully`);
   });
 }
 
-function importState(data: any, overwrite: boolean, merge: boolean) {
+type ImportableState = Partial<DownloadState> & {
+  scripts?: Record<string, Script>;
+};
+function importState(
+  data: ImportableState,
+  overwrite: boolean,
+  merge: boolean,
+) {
   if (overwrite) {
-    stateController.saveKey('accounts', data.accounts || {});
-    stateController.saveKey('tokens', data.tokens || {});
-    stateController.saveKey('scripts', data.scripts || {});
-    stateController.saveKey('topics', data.topics || {});
+    storeUpdateState((draft) => {
+      draft.accounts = data.accounts || {};
+      draft.tokens = data.tokens || {};
+      draft.scripts = data.scripts || {};
+      draft.topics = data.topics || {};
+    });
     logger.log('State overwritten successfully');
-    process.exit(0);
+    return;
   }
-
-  if (data.accounts && Object.entries(data.accounts).length > 0) {
-    addAccounts(data.accounts, merge);
-  }
-
-  if (data.tokens && Object.entries(data.tokens).length > 0) {
-    addTokens(data.tokens, merge);
-  }
-
-  if (data.scripts && Object.entries(data.scripts).length > 0) {
-    addScripts(data.scripts, merge);
-  }
-
-  if (data.topics && Object.entries(data.topics).length > 0) {
-    addTopics(data.topics, merge);
-  }
+  if (data.accounts && Object.keys(data.accounts).length)
+    addAccounts(Object.values(data.accounts), merge);
+  if (data.tokens && Object.keys(data.tokens).length)
+    addTokens(Object.values(data.tokens), merge);
+  if (data.scripts && Object.keys(data.scripts).length)
+    addScripts(Object.values(data.scripts), merge);
+  if (data.topics && Object.keys(data.topics).length)
+    addTopics(Object.values(data.topics), merge);
 }
 
 const stateUtils = {

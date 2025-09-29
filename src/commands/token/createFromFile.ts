@@ -1,30 +1,36 @@
-import * as path from 'path';
 import {
+  CustomFee,
+  PrivateKey,
   TokenCreateTransaction,
   TokenType,
-  PrivateKey,
-  CustomFee,
 } from '@hashgraph/sdk';
-
-import accountUtils from '../../utils/account';
-import tokenUtils from '../../utils/token';
-import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
-import feeUtils from '../../utils/fees';
-import { Logger } from '../../utils/logger';
-import stateController from '../../state/stateController';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-
+import { Command } from 'commander';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import type {
   Account,
-  Command,
-  Token,
-  Keys,
-  CustomFeeInput,
   FixedFee,
   FractionalFee,
-} from '../../../types';
+  Keys,
+  Token,
+} from '../../../types/state';
+import { get as storeGet, saveKey as storeSaveKey } from '../../state/store';
+import accountUtils from '../../utils/account';
+import { heading, success } from '../../utils/color';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { exitOnError, fail } from '../../utils/errors';
+import feeUtils from '../../utils/fees';
+import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import signUtils from '../../utils/sign';
+import stateUtils from '../../utils/state';
+import tokenUtils from '../../utils/token';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import {
+  mapToTokenInput,
+  TokenFileDefinition,
+  validateTokenFile,
+} from './schema';
 
 const logger = Logger.getInstance();
 
@@ -33,25 +39,16 @@ interface CreateTokenFromFileOptions {
   args: string[];
 }
 
-interface TokenInput {
-  name: string;
-  symbol: string;
-  decimals: number;
-  supplyType: 'finite' | 'infinite';
-  initialSupply: number;
-  keys: Keys;
-  maxSupply: number;
-  treasuryId?: string;
-  treasuryKey: string;
-  customFees: CustomFeeInput[];
-  memo: string;
+// TokenInput now derives from validated token file definition shape
+interface TokenInput extends TokenFileDefinition {
+  treasuryId?: string; // may be inferred
 }
 
 function getTreasuryIdByTreasuryKey(treasuryKey: string): string {
   const account = accountUtils.findAccountByPrivateKey(treasuryKey);
   if (!account) {
     logger.error('Treasury account not found');
-    process.exit(1);
+    fail('Treasury account not found');
   }
   return account.accountId;
 }
@@ -67,6 +64,10 @@ async function createAccountForToken(
 }
 
 function resolveTokenFilePath(filename: string): string {
+  const overrideDir = process.env.HCLI_TOKEN_INPUT_DIR;
+  if (overrideDir && overrideDir.trim() !== '') {
+    return path.join(overrideDir, `token.${filename}.json`);
+  }
   return path.join(__dirname, '../..', 'input', `token.${filename}.json`);
 }
 
@@ -104,9 +105,9 @@ function initializeToken(tokenInput: TokenInput): Token {
  * @return updated keys
  */
 function replaceNamePattern(keys: Keys): Keys {
-  const accounts = stateController.get('accounts');
+  const accounts = storeGet('accounts');
   const namePattern = /<name:([a-zA-Z0-9_-]+)>/;
-  let newKeys = { ...keys };
+  const newKeys = { ...keys };
 
   Object.keys(newKeys).forEach((key) => {
     const match = newKeys[key as keyof typeof newKeys].match(namePattern);
@@ -132,7 +133,7 @@ function replaceNamePattern(keys: Keys): Keys {
 function findNewKeyPattern(
   keys: Keys,
 ): Promise<{ key: string; account: Account }>[] {
-  let newAccountPromises: Promise<{ key: string; account: Account }>[] = [];
+  const newAccountPromises: Promise<{ key: string; account: Account }>[] = [];
 
   // Only allow ECDSA
   const newKeyPattern = /<newkey:(ecdsa|ECDSA):(\d+)>/;
@@ -150,7 +151,7 @@ function findNewKeyPattern(
       logger.error(
         'ED25519 keys are no longer supported. Only ECDSA is allowed.',
       );
-      process.exit(1);
+      fail('Unsupported key type ED25519');
     }
   });
 
@@ -163,11 +164,11 @@ function findNewKeyPattern(
  * @returns updated keys
  */
 async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
-  let newAccountPromises: Promise<{ key: string; account: Account }>[] =
+  const newAccountPromises: Promise<{ key: string; account: Account }>[] =
     findNewKeyPattern(keys);
 
   // Create new accounts if pattern is detected
-  let newKeys = { ...keys };
+  const newKeys = { ...keys };
   if (newAccountPromises.length > 0) {
     try {
       const newAccounts = await Promise.all(newAccountPromises);
@@ -180,7 +181,7 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
         'Failed to create new account(s) for token',
         error as object,
       );
-      process.exit(1);
+      fail('Failed to create new account(s) for token');
     }
   }
 
@@ -188,7 +189,7 @@ async function handleNewKeyPattern(keys: Keys): Promise<Keys> {
 }
 
 async function replaceKeysForToken(token: Token): Promise<Token> {
-  let newToken = { ...token };
+  const newToken = { ...token };
 
   // Look for name pattern in keys on token
   newToken.keys = replaceNamePattern(newToken.keys);
@@ -217,21 +218,27 @@ function addKeysToTokenCreateTx(
   tokenCreateTx: TokenCreateTransaction,
   token: Token,
 ) {
-  // Mapping key names to their corresponding setter methods
-  const keySetters = {
-    adminKey: tokenCreateTx.setAdminKey,
-    pauseKey: tokenCreateTx.setPauseKey,
-    kycKey: tokenCreateTx.setKycKey,
-    wipeKey: tokenCreateTx.setWipeKey,
-    freezeKey: tokenCreateTx.setFreezeKey,
-    supplyKey: tokenCreateTx.setSupplyKey,
-    feeScheduleKey: tokenCreateTx.setFeeScheduleKey,
+  // Mapping key names to their corresponding setter methods wrapped to preserve binding
+  const keySetters: Record<
+    string,
+    (
+      pub: ReturnType<typeof PrivateKey.fromStringDer>['publicKey'],
+    ) => TokenCreateTransaction
+  > = {
+    adminKey: (pub) => tokenCreateTx.setAdminKey(pub),
+    pauseKey: (pub) => tokenCreateTx.setPauseKey(pub),
+    kycKey: (pub) => tokenCreateTx.setKycKey(pub),
+    wipeKey: (pub) => tokenCreateTx.setWipeKey(pub),
+    freezeKey: (pub) => tokenCreateTx.setFreezeKey(pub),
+    supplyKey: (pub) => tokenCreateTx.setSupplyKey(pub),
+    feeScheduleKey: (pub) => tokenCreateTx.setFeeScheduleKey(pub),
   };
 
   Object.entries(keySetters).forEach(([key, setter]) => {
     const keyValue = token.keys[key as keyof typeof token.keys];
     if (keyValue && keyValue !== '') {
-      setter.call(tokenCreateTx, PrivateKey.fromStringDer(keyValue).publicKey);
+      const publicKey = PrivateKey.fromStringDer(keyValue).publicKey;
+      setter(publicKey);
     }
   });
 }
@@ -257,7 +264,7 @@ async function createTokenOnNetwork(token: Token) {
     addKeysToTokenCreateTx(tokenCreateTx, token);
 
     // Add custom fees
-    let fees: CustomFee[] = token.customFees.map((fee) => {
+    const fees: CustomFee[] = token.customFees.map((fee) => {
       switch (fee.type) {
         case 'fixed':
           return feeUtils.createCustomFixedFee(fee as FixedFee);
@@ -266,7 +273,7 @@ async function createTokenOnNetwork(token: Token) {
         default:
           logger.error(`Unsupported fee type: ${fee.type}`);
           client.close();
-          process.exit(1);
+          fail(`Unsupported fee type: ${fee.type}`);
       }
     });
     tokenCreateTx.setCustomFees(fees);
@@ -283,33 +290,45 @@ async function createTokenOnNetwork(token: Token) {
     );
 
     // Execute
-    let tokenCreateSubmit = await signedTokenCreateTx.execute(client);
-    let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
+    const tokenCreateSubmit = await signedTokenCreateTx.execute(client);
+    const tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
 
     if (tokenCreateRx.tokenId == null) {
       logger.error('Token was not created');
       client.close();
-      process.exit(1);
+      fail('Token was not created');
     }
 
     token.tokenId = tokenCreateRx.tokenId.toString();
-    logger.log(`Token ID: ${token.tokenId}`);
+    if (isJsonOutput()) {
+      printOutput('tokenCreateFromFile', {
+        tokenId: token.tokenId,
+        name: token.name,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        initialSupply: token.initialSupply,
+        supplyType: token.supplyType,
+        maxSupply: token.maxSupply,
+        customFeesCount: token.customFees.length,
+      });
+    } else {
+      logger.log(heading('Token created:') + ' ' + success(token.tokenId));
+    }
     client.close();
   } catch (error) {
     logger.error(error as object);
     client.close();
-    process.exit(1);
+    fail('Failed to create token on network');
   }
 }
 
 function updateTokenState(token: Token) {
-  const tokens: Record<string, Token> = stateController.get('tokens');
-  const updatedTokens = {
+  const tokens = storeGet('tokens');
+  const updatedTokens: Record<string, Token> = {
     ...tokens,
     [token.tokenId]: token,
   };
-
-  stateController.saveKey('tokens', updatedTokens);
+  storeSaveKey('tokens', updatedTokens);
   stateUtils.getHederaClient().close();
 }
 
@@ -323,21 +342,35 @@ async function createTokenFromFile(tokenInput: TokenInput): Promise<Token> {
   } catch (error) {
     logger.error(error as object);
     stateUtils.getHederaClient().close();
-    process.exit(1);
+    fail('Failed to create token from file');
   }
 }
 
 async function createToken(options: CreateTokenFromFileOptions) {
   logger.verbose(`Creating token from template with name: ${options.file}`);
-  options = dynamicVariablesUtils.replaceOptions(options);
+  const replaceTokenOptions = (
+    o: CreateTokenFromFileOptions,
+  ): CreateTokenFromFileOptions =>
+    dynamicVariablesUtils.replaceOptions<CreateTokenFromFileOptions>(o);
+  const resolvedOptions = replaceTokenOptions(options);
 
-  const filepath = resolveTokenFilePath(options.file);
-  const tokenDefinition = require(filepath);
-  const token = await createTokenFromFile(tokenDefinition);
+  const filepath = resolveTokenFilePath(resolvedOptions.file);
+  const fileContent = await fs.readFile(filepath, 'utf-8');
+  const raw = JSON.parse(fileContent) as unknown;
+  const validated = validateTokenFile(raw);
+  if (!validated.valid || !validated.data) {
+    logger.error('Token file validation failed');
+    if (validated.errors && validated.errors.length) {
+      validated.errors.forEach((e) => logger.error(e));
+    }
+    fail('Invalid token definition file');
+  }
+  const tokenDefinition = mapToTokenInput(validated.data);
+  const token = await createTokenFromFile(tokenDefinition as TokenInput);
 
   // Store dynamic script variables
   dynamicVariablesUtils.storeArgs(
-    options.args,
+    resolvedOptions.args,
     dynamicVariablesUtils.commandActions.token.createFromFile.action,
     {
       tokenId: token.tokenId,
@@ -356,18 +389,10 @@ async function createToken(options: CreateTokenFromFileOptions) {
   );
 }
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('create-from-file')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Create a new token from a file')
     .requiredOption(
       '-f, --file <filename>',
@@ -376,9 +401,13 @@ export default (program: any) => {
     .option(
       '--args <args>',
       'Store arguments for scripts',
-      (value: string, previous: string) =>
-        previous ? previous.concat(value) : [value],
-      [],
+      (value: string, previous: string[]) =>
+        previous ? [...previous, value] : [value],
+      [] as string[],
     )
-    .action(createToken);
+    .action(exitOnError(createToken))
+    .addHelpText(
+      'afterAll',
+      '\nExamples:\n  $ hedera token create-from-file -f mytoken\n  $ hedera --json token create-from-file -f mytoken',
+    );
 };

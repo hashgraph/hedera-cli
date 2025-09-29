@@ -1,11 +1,10 @@
-import { baseState } from "../../helpers/state";
-import { Command } from "commander";
-import commands from "../../../src/commands";
-import accountUtils from "../../../src/utils/account";
-import stateController from "../../../src/state/stateController";
-import { AccountId } from "@hashgraph/sdk";
+import { baseState } from '../../helpers/state';
+import { Command } from 'commander';
+import commands from '../../../src/commands';
+import accountUtils from '../../../src/utils/account';
+import { saveState as storeSaveState } from '../../../src/state/store';
+import { AccountId } from '@hashgraph/sdk';
 
-jest.mock("../../../src/state/state"); // Mock the original module -> looks for __mocks__/state.ts in same directory
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 
@@ -13,78 +12,89 @@ jest.mock('@hashgraph/sdk', () => {
     ...originalModule,
     AccountCreateTransaction: jest.fn().mockImplementation(() => ({
       setKey: jest.fn().mockReturnThis(),
+      setECDSAKeyWithAlias: jest.fn().mockReturnThis(),
       setInitialBalance: jest.fn().mockReturnThis(),
       setMaxAutomaticTokenAssociations: jest.fn().mockReturnThis(),
       execute: jest.fn().mockResolvedValue({
         getReceipt: jest.fn().mockResolvedValue({
           accountId: AccountId.fromString('0.0.1234'),
-        })
+        }),
       }),
     })),
   };
 });
 
-describe("account create command", () => {
+describe('account create command', () => {
   beforeEach(() => {
-    stateController.saveState(baseState);
+    storeSaveState(baseState as any);
   });
 
-  describe("account create - success path", () => {
-    test("✅ should create ECDSA account in state", async () => {
+  describe('account create - success path', () => {
+    test('✅ should create ECDSA account in state', async () => {
       // Arrange
       const balance = 5000;
-      const newAccountName = "greg";
-      const createAccountSpy = jest.spyOn(accountUtils, "createAccount");
+      const newAccountName = 'greg';
+      const createAccountSpy = jest.spyOn(accountUtils, 'createAccount');
 
       const program = new Command();
       commands.accountCommands(program);
 
       // Act
       await program.parseAsync([
-        "node",
-        "hedera-cli.ts",
-        "account",
-        "create",
-        "-n",
+        'node',
+        'hedera-cli.ts',
+        'account',
+        'create',
+        '-n',
         newAccountName,
-        "-b",
+        '-b',
         balance.toString(),
       ]);
 
       // Assert
       const greg = accountUtils.findAccountByName(newAccountName);
-      expect(createAccountSpy).toHaveBeenCalledWith(balance, 'ECDSA', newAccountName, 0);
+      expect(createAccountSpy).toHaveBeenCalledWith(
+        balance,
+        'ECDSA',
+        newAccountName,
+        0,
+      );
       expect(greg.name).toBe(newAccountName);
       expect(greg.type).toBe('ECDSA');
     });
 
-    test("✅ should create ECDSA account in state", async () => {
-        // Arrange
-        const balance = 5000;
-        const newAccountName = "greg";
-        const type = "ECDSA"
-        const createAccountSpy = jest.spyOn(accountUtils, "createAccount");
-  
-        const program = new Command();
-        commands.accountCommands(program);
-  
-        // Act
-        await program.parseAsync([
-          "node",
-          "hedera-cli.ts",
-          "account",
-          "create",
-          "-n",
-          newAccountName,
-          "-b",
-          balance.toString(),
-        ]);
-  
-        // Assert
-        const greg = accountUtils.findAccountByName(newAccountName);
-        expect(createAccountSpy).toHaveBeenCalledWith(balance, type, newAccountName, 0);
-        expect(greg.name).toBe(newAccountName);
-        expect(greg.type).toBe(type);
-      });
+    test('✅ should create ECDSA account in state', async () => {
+      // Arrange
+      const balance = 5000;
+      const newAccountName = 'greg';
+      const type = 'ECDSA';
+      const createAccountSpy = jest.spyOn(accountUtils, 'createAccount');
+
+      const program = new Command();
+      commands.accountCommands(program);
+
+      // Act
+      await program.parseAsync([
+        'node',
+        'hedera-cli.ts',
+        'account',
+        'create',
+        '-n',
+        newAccountName,
+        '-b',
+        balance.toString(),
+      ]);
+
+      // Assert
+      const greg = accountUtils.findAccountByName(newAccountName);
+      expect(createAccountSpy).toHaveBeenCalledWith(
+        balance,
+        type,
+        newAccountName,
+        0,
+      );
+      expect(greg.name).toBe(newAccountName);
+      expect(greg.type).toBe(type);
+    });
   });
 });

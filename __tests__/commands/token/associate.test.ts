@@ -1,10 +1,12 @@
-import { alice, tokenState } from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import {
+  get as storeGet,
+  saveState as storeSaveState,
+} from '../../../src/state/store';
+import { alice, tokenState } from '../../helpers/state';
 
-let tokenId = Object.keys(tokenState.tokens)[0];
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
+const tokenId = Object.keys(tokenState.tokens)[0];
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 
@@ -25,12 +27,12 @@ jest.mock('@hashgraph/sdk', () => {
 describe('token associate command', () => {
   beforeEach(() => {
     const tokenStateWithAlice = {
-        ...tokenState,
-        accounts: {
-            [alice.name]: alice,
-        },
+      ...tokenState,
+      accounts: {
+        [alice.name]: alice,
+      },
     };
-    stateController.saveState(tokenStateWithAlice);
+    storeSaveState(tokenStateWithAlice as any);
   });
 
   describe('token associate - success path', () => {
@@ -52,7 +54,7 @@ describe('token associate command', () => {
       ]);
 
       // Assert
-      const tokens = stateController.get('tokens');
+      const tokens = storeGet('tokens' as any);
       expect(tokens[tokenId].associations).toEqual([
         {
           name: alice.name,
