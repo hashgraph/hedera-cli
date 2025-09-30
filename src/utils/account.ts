@@ -100,7 +100,7 @@ async function createAccount(
   let newAccountId;
   try {
     const newAccount = await new AccountCreateTransaction()
-      .setECDSAKeyWithAlias(newAccountPublicKey) // this makes it EVM compatible
+      .setECDSAKeyWithAlias(newAccountPrivateKey) // this makes it EVM compatible
       .setInitialBalance(Hbar.fromTinybars(balance))
       .setMaxAutomaticTokenAssociations(setMaxAutomaticTokenAssociations)
       .execute(client);
