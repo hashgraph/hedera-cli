@@ -1,27 +1,24 @@
-import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
+import { Command } from 'commander';
+import { exitOnError } from '../../utils/errors';
 import { Logger } from '../../utils/logger';
 import topicUtils from '../../utils/topic';
-
-import type { Command } from '../../../types';
+import { telemetryPreAction } from '../shared/telemetryHook';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('list')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('List all topics')
-    .action(() => {
-      logger.verbose(`Listing all topic IDs and if they contain keys`);
-      topicUtils.list();
-    });
+    .action(
+      exitOnError(() => {
+        logger.verbose(`Listing all topic IDs and if they contain keys`);
+        topicUtils.list();
+      }),
+    )
+    .addHelpText(
+      'after',
+      `\nExamples:\n  $ hedera-cli topic list\n  $ hedera-cli --json topic list\n`,
+    );
 };

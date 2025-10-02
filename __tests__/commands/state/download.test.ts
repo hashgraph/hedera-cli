@@ -1,16 +1,17 @@
-import {
-  baseState,
-  fullState,
-  downloadState,
-  script_basic,
-  accountState,
-} from '../../helpers/state';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
+import {
+  getState as storeGetAll,
+  saveState as storeSaveState,
+} from '../../../src/state/store';
 import stateUtils from '../../../src/utils/state';
-
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
+import {
+  accountState,
+  baseState,
+  downloadState,
+  fullState,
+  script_basic,
+} from '../../helpers/state';
 
 describe('state download command', () => {
   const stateUtilsDownloadStateSpy = jest
@@ -19,13 +20,15 @@ describe('state download command', () => {
 
   const consoleErrorSpy = jest.spyOn(console, 'error');
 
-  const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation(((code) => { 
-    throw new Error(`Process.exit(${code})`); // Forces the code to throw instead of exit
-  }));
+  const mockProcessExit = jest
+    .spyOn(process, 'exit')
+    .mockImplementation((code) => {
+      throw new Error(`Process.exit(${code})`); // Forces the code to throw instead of exit
+    });
 
   describe('state download - success path', () => {
     beforeAll(() => {
-      stateController.saveState(baseState);
+      storeSaveState(baseState as any);
     });
 
     afterEach(() => {
@@ -37,7 +40,7 @@ describe('state download command', () => {
 
     test('✅ download state and merge with base state', async () => {
       // Arrange
-      stateController.saveState(baseState);
+      storeSaveState(baseState as any);
       const program = new Command();
       commands.stateCommands(program);
       const url = 'https://dummy.url/state.json';
@@ -55,7 +58,12 @@ describe('state download command', () => {
 
       // Assert
       expect(stateUtilsDownloadStateSpy).toHaveBeenCalledWith(url);
-      expect(stateController.getAll()).toEqual({
+      const {
+        actions: _actionsMerge,
+        scriptExecutionName: _scriptExecMerge,
+        ...stateAfterMerge
+      } = storeGetAll() as any;
+      expect(stateAfterMerge).toEqual({
         ...fullState,
         scripts: {
           'script-basic': {
@@ -69,29 +77,30 @@ describe('state download command', () => {
 
     test('✅ download and overwrite state', async () => {
       // Arrange
-      stateController.saveState(accountState);
+      storeSaveState(accountState as any);
       const program = new Command();
       commands.stateCommands(program);
       const url = 'https://dummy.url/state.json';
 
       // Act
-      try {
-        await program.parseAsync([
-            'node',
-            'hedera-cli.ts',
-            'state',
-            'download',
-            '--url',
-            url,
-            '--overwrite',
-          ]);
-      } catch (error) {
-        expect(error).toEqual(Error(`Process.exit(0)`));
-      }
+      await program.parseAsync([
+        'node',
+        'hedera-cli.ts',
+        'state',
+        'download',
+        '--url',
+        url,
+        '--overwrite',
+      ]);
 
       // Assert
       expect(stateUtilsDownloadStateSpy).toHaveBeenCalledWith(url);
-      expect(stateController.getAll()).toEqual({
+      const {
+        actions: _actionsOverwrite,
+        scriptExecutionName: _scriptExecOverwrite,
+        ...stateAfterOverwrite
+      } = storeGetAll() as any;
+      expect(stateAfterOverwrite).toEqual({
         ...fullState,
         scripts: {
           [`script-${script_basic.name}`]: {
@@ -100,7 +109,7 @@ describe('state download command', () => {
           },
         },
       });
-      expect(consoleErrorSpy).not.toHaveBeenCalled(); // because we are overwriting the state
+      expect(consoleErrorSpy).not.toHaveBeenCalled(); // overwrite should be silent on errors
     });
   });
 });

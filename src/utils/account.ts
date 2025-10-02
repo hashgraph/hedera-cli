@@ -1,22 +1,28 @@
 import {
-  PrivateKey,
   AccountCreateTransaction,
-  Hbar,
   AccountId,
+  Hbar,
+  PrivateKey,
 } from '@hashgraph/sdk';
 
-import stateController from '../state/stateController';
-import stateUtils from '../utils/state';
+import api from '../api';
+import { addAccount } from '../state/mutations';
+import { selectAccounts } from '../state/selectors';
+import { actions, updateState as storeUpdateState } from '../state/store';
+import { color, heading, warn } from '../utils/color';
 import { display } from '../utils/display';
 import { Logger } from '../utils/logger';
-import api from '../api';
+import stateUtils from '../utils/state';
+import { DomainError } from './errors';
 
 import type { Account } from '../../types';
 
 const logger = Logger.getInstance();
 
 function clearAddressBook(): void {
-  stateController.saveKey('accounts', {});
+  storeUpdateState((s) => {
+    s.accounts = {};
+  });
 }
 
 function deleteAccount(accountIdOrName: string): void {
@@ -24,13 +30,12 @@ function deleteAccount(accountIdOrName: string): void {
 
   if (!account) {
     logger.error('Account not found');
-    process.exit(1);
+    throw new DomainError('Account not found');
   }
 
-  const accounts = stateController.get('accounts');
-  delete accounts[account.name];
-
-  stateController.saveKey('accounts', accounts);
+  storeUpdateState((s) => {
+    delete s.accounts[account.name];
+  });
 }
 
 function generateRandomName(): string {
@@ -52,49 +57,50 @@ async function createAccount(
 ): Promise<Account> {
   // Validate balance
   if (isNaN(balance) || balance <= 0) {
-    logger.error('Invalid balance. Balance must be a positive number.');
-    process.exit(1);
+    throw new DomainError(
+      'Invalid balance. Balance must be a positive number.',
+    );
   }
 
   // Validate type
   if (type.toLowerCase() !== 'ecdsa') {
-    logger.error('Invalid type. Only "ecdsa" is supported.');
-    process.exit(1);
+    throw new DomainError('Invalid type. Only "ecdsa" is supported.');
   }
 
   // Validate name: Not allowed to use "operator" as a name or part of a name
   if (name.toLowerCase().includes('operator')) {
-    logger.error('Invalid name. Name cannot contain the word "operator".');
-    process.exit(1);
+    throw new DomainError(
+      'Invalid name. Name cannot contain the word "operator".',
+    );
   }
 
   // Get client from config
-  const accounts: Record<string, Account> = stateController.get('accounts');
+  const accounts: Record<string, Account> = selectAccounts();
   const client = stateUtils.getHederaClient();
 
   // Generate random name if "random" is provided
   let isRandomName = false;
   if (name.toLowerCase() === 'random') {
     isRandomName = true;
-    let newName = generateRandomName();
-    name = newName;
+    name = generateRandomName();
   }
 
   // Check if name is unique
   if (!isRandomName && accounts && accounts[name]) {
-    logger.error('An account with this name already exists.');
     client.close();
-    process.exit(1);
+    throw new DomainError('An account with this name already exists.');
   }
 
   // Only ECDSA supported
-  let newAccountPrivateKey = PrivateKey.generateECDSA();
-  let newAccountPublicKey = newAccountPrivateKey.publicKey;
+  const newAccountPrivateKey = PrivateKey.generateECDSA();
+  const newAccountPublicKey = newAccountPrivateKey.publicKey; // PublicKey object
+  const newAccountPublicKeyStr = newAccountPublicKey.toStringRaw();
+  const newAccountEvmAddress = newAccountPublicKey.toEvmAddress();
 
   let newAccountId;
   try {
     const newAccount = await new AccountCreateTransaction()
-      .setKey(newAccountPublicKey)
+      .setECDSAKeyWithAlias(newAccountPrivateKey) // this makes it EVM compatible
       .setInitialBalance(Hbar.fromTinybars(balance))
       .setMaxAutomaticTokenAssociations(setMaxAutomaticTokenAssociations)
       .execute(client);
@@ -103,64 +109,64 @@ async function createAccount(
     const getReceipt = await newAccount.getReceipt(client);
     newAccountId = getReceipt.accountId;
   } catch (error) {
-    logger.error('Error creating new account:', error as object);
     client.close();
-    process.exit(1);
+    throw new DomainError('Error creating new account');
   }
 
   if (newAccountId == null) {
-    logger.error('Account was not created');
     client.close();
-    process.exit(1);
+    throw new DomainError('Account was not created');
   }
 
-  // Store the new account in the config
-  const newAccountDetails = {
+  const newAccountDetails: Account = {
     network: stateUtils.getNetwork(),
     name,
     accountId: newAccountId.toString(),
     type: 'ECDSA',
-    publicKey: newAccountPrivateKey.publicKey.toString(),
-    evmAddress: newAccountPrivateKey.publicKey.toEvmAddress(),
-    solidityAddress: `${newAccountId.toSolidityAddress()}`,
+    publicKey: newAccountPublicKeyStr,
+    evmAddress: newAccountEvmAddress,
+    solidityAddress: newAccountId.toSolidityAddress(),
     solidityAddressFull: `0x${newAccountId.toSolidityAddress()}`,
-    privateKey: newAccountPrivateKey.toString(),
+    privateKey: newAccountPrivateKey.toStringRaw(),
   };
-
-  // Add the new account to the accounts object in the config
-  const updatedAccounts = { ...accounts, [name]: newAccountDetails };
-  stateController.saveKey('accounts', updatedAccounts);
+  // Transactional storage via helper (overwrite false to keep safety)
+  addAccount(newAccountDetails, false);
 
   // Log the account ID
-  logger.log(`The new account ID is: ${newAccountId}, with name: ${name}`);
+  const newAccountIdStr = newAccountId.toString();
+  logger.log(
+    'The new account ID is: ' + newAccountIdStr + ', with name: ' + name,
+  );
   client.close();
 
   return newAccountDetails;
 }
 
 function listAccounts(showPrivateKeys: boolean = false): void {
-  const accounts: Record<string, Account> = stateController.get('accounts');
+  const accounts: Record<string, Account> = selectAccounts();
 
   // Check if there are any accounts in the config
   if (!accounts || Object.keys(accounts).length === 0) {
-    logger.log('No accounts found.');
-    process.exit(0);
+    logger.log(warn('No accounts found.'));
+    throw new DomainError('No accounts found.', 0);
   }
 
   // Log details for each account
+  logger.log(
+    heading(
+      showPrivateKeys
+        ? 'Name, account ID, type, private key (DER)'
+        : 'Name, account ID, type',
+    ) + '\n',
+  );
   for (const [name, account] of Object.entries(accounts)) {
+    const base = `${color.magenta(name)}, ${color.cyan(
+      account.accountId,
+    )}, ${color.green(account.type.toUpperCase())}`;
     if (showPrivateKeys) {
-      logger.log('Name, account ID, type, private key (DER)\n');
-      logger.log(
-        `${name}, ${account.accountId}, ${account.type.toUpperCase()}, ${
-          account.privateKey
-        }`,
-      );
+      logger.log(`${base}, ${color.yellow(account.privateKey)}`);
     } else {
-      logger.log('Name, account ID, type\n');
-      logger.log(
-        `${name}, ${account.accountId}, ${account.type.toUpperCase()}`,
-      );
+      logger.log(base);
     }
   }
 }
@@ -187,15 +193,16 @@ function isValidECDSAPrivateKey(privateKey: string): boolean {
  * @returns Account
  */
 function importAccount(id: string, key: string, name: string): Account {
-  const accounts = stateController.get('accounts');
+  const accounts = selectAccounts();
 
   // Check if name is unique
   if (accounts && accounts[name]) {
     logger.error('An account with this name already exists.');
-    process.exit(1);
+    throw new DomainError('An account with this name already exists.');
   }
 
-  let privateKey, type;
+  let privateKey: PrivateKey | undefined;
+  let type: string | undefined;
   const accountId = AccountId.fromString(id);
 
   if (isValidECDSAPrivateKey(key)) {
@@ -203,51 +210,58 @@ function importAccount(id: string, key: string, name: string): Account {
     privateKey = PrivateKey.fromStringECDSA(key);
   } else {
     logger.error('Invalid key type. Only ECDSA keys are supported.');
-    process.exit(1);
+    throw new DomainError('Invalid key type. Only ECDSA keys are supported.');
   }
 
-  const updatedAccounts = { ...accounts };
-  updatedAccounts[name] = {
+  // Primary write via new store actions (validation already done above)
+  // Use DER encoding for public key to maintain backwards compatibility with stored state/tests
+  const accountPublicKeyStr = privateKey.publicKey.toStringDer();
+  const accountEvmAddress = privateKey.publicKey.toEvmAddress();
+  const account: Account = {
     network: stateUtils.getNetwork(),
     name,
     accountId: id,
     type,
-    publicKey: privateKey.publicKey.toString(),
-    evmAddress: privateKey.publicKey.toEvmAddress(),
-    solidityAddress: `${accountId.toSolidityAddress()}`,
+    publicKey: accountPublicKeyStr,
+    evmAddress: accountEvmAddress,
+    solidityAddress: accountId.toSolidityAddress(),
     solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: key,
   };
-
-  stateController.saveKey('accounts', updatedAccounts);
-  return updatedAccounts[name];
+  actions().addAccount(account, true);
+  // Dual write legacy
+  storeUpdateState((s) => {
+    s.accounts[name] = account;
+  });
+  return account;
 }
 
 function importAccountId(id: string, name: string): Account {
-  const accounts = stateController.get('accounts');
+  const accounts = selectAccounts();
 
   // Check if name is unique
   if (accounts && accounts[name]) {
     logger.error('An account with this name already exists.');
-    process.exit(1);
+    throw new DomainError('An account with this name already exists.');
   }
 
   const accountId = AccountId.fromString(id);
-  const updatedAccounts = { ...accounts };
-  updatedAccounts[name] = {
+  const account: Account = {
     network: stateUtils.getNetwork(),
     name,
     accountId: id,
     type: '',
     publicKey: '',
     evmAddress: '',
-    solidityAddress: `${accountId.toSolidityAddress()}`,
+    solidityAddress: accountId.toSolidityAddress(),
     solidityAddressFull: `0x${accountId.toSolidityAddress()}`,
     privateKey: '',
   };
-
-  stateController.saveKey('accounts', updatedAccounts);
-  return updatedAccounts[name];
+  actions().addAccount(account, true);
+  storeUpdateState((s) => {
+    s.accounts[name] = account;
+  });
+  return account;
 }
 
 async function getAccountBalance(
@@ -255,8 +269,14 @@ async function getAccountBalance(
   onlyHbar: boolean = false,
   tokenId?: string,
 ): Promise<void> {
-  const accounts = stateController.get('accounts');
-  const client = stateUtils.getHederaClient();
+  const accounts = selectAccounts();
+  const currentNetwork = stateUtils.getNetwork();
+
+  // Debug logging
+  logger.debug(`Current network: ${currentNetwork}`);
+  logger.debug(`Account ID or name: ${accountIdOrName}`);
+  logger.debug(`Only Hbar: ${onlyHbar}`);
+  logger.debug(`Token ID: ${tokenId || 'none'}`);
 
   let accountId;
 
@@ -268,14 +288,16 @@ async function getAccountBalance(
     accountId = accounts[accountIdOrName].accountId;
   } else {
     logger.error('Invalid account ID or name not found in address book.');
-    client.close();
-    process.exit(1);
+    throw new DomainError(
+      'Invalid account ID or name not found in address book.',
+    );
   }
+
+  logger.debug(`Resolved account ID: ${accountId}`);
 
   const response = await api.account.getAccountInfo(accountId);
   display('displayBalance', response, { onlyHbar, tokenId });
 
-  client.close();
   return;
 }
 
@@ -290,7 +312,7 @@ async function getAccountHbarBalanceByNetwork(
 
   if (!response) {
     logger.error('Error getting account balance');
-    process.exit(1);
+    throw new DomainError('Error getting account balance');
   }
 
   return response.data.balance.balance;
@@ -301,17 +323,17 @@ async function getAccountHbarBalance(accountId: string): Promise<number> {
 
   if (!response) {
     logger.error('Error getting account balance');
-    process.exit(1);
+    throw new DomainError('Error getting account balance');
   }
 
   return response.data.balance.balance;
 }
 
 function findAccountByPrivateKey(privateKey: string): Account {
-  const accounts: Record<string, Account> = stateController.get('accounts');
+  const accounts: Record<string, Account> = selectAccounts();
   if (!accounts) {
     logger.error('No accounts found in state');
-    process.exit(1);
+    throw new DomainError('No accounts found in state');
   }
 
   let matchingAccount: Account | null = null;
@@ -324,17 +346,17 @@ function findAccountByPrivateKey(privateKey: string): Account {
 
   if (!matchingAccount) {
     logger.error('No matching account found for private key');
-    process.exit(1);
+    throw new DomainError('No matching account found for private key');
   }
 
   return matchingAccount;
 }
 
 function findAccountByName(inputName: string): Account {
-  const accounts: Record<string, Account> = stateController.get('accounts');
+  const accounts: Record<string, Account> = selectAccounts();
   if (!accounts) {
     logger.error('No accounts found in state');
-    process.exit(1);
+    throw new DomainError('No accounts found in state');
   }
 
   let matchingAccount: Account | null = null;
@@ -347,7 +369,7 @@ function findAccountByName(inputName: string): Account {
 
   if (!matchingAccount) {
     logger.error('No matching account found for name');
-    process.exit(1);
+    throw new DomainError('No matching account found for name');
   }
 
   return matchingAccount;
@@ -355,10 +377,10 @@ function findAccountByName(inputName: string): Account {
 
 function getPublicKeyFromPrivateKey(privateKey: string): string {
   if (isValidECDSAPrivateKey(privateKey)) {
-    return PrivateKey.fromStringECDSA(privateKey).publicKey.toString();
+    return PrivateKey.fromStringECDSA(privateKey).publicKey.toStringRaw();
   }
   logger.error('Invalid private key');
-  process.exit(1);
+  throw new DomainError('Invalid private key');
 }
 
 function getPrivateKeyObject(privateKey: string): PrivateKey {
@@ -366,7 +388,7 @@ function getPrivateKeyObject(privateKey: string): PrivateKey {
     return PrivateKey.fromStringECDSA(privateKey);
   }
   logger.error('Invalid private key');
-  process.exit(1);
+  throw new DomainError('Invalid private key');
 }
 
 const accountUtils = {
@@ -382,7 +404,6 @@ const accountUtils = {
   generateRandomName,
   clearAddressBook,
   deleteAccount,
-
   findAccountByPrivateKey,
   findAccountByName,
 };

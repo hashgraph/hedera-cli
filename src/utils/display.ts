@@ -1,15 +1,17 @@
 import type {
   APIResponse,
   AccountResponse,
-  TokenBalance,
   DisplayBalanceOptions,
-  DisplayOptions,
+  TokenBalance,
 } from '../../types';
 import { Logger } from './logger';
 
 const logger = Logger.getInstance();
 
-type DisplayFunction = (response: APIResponse, options?: any) => void;
+type DisplayFunction = (
+  response: APIResponse<AccountResponse>,
+  options?: DisplayBalanceOptions,
+) => void;
 
 // -- display balance functions -- //
 function displayHbarBalance(accountId: string, hbars: number): void {
@@ -52,19 +54,19 @@ function displayAllBalances(
 }
 
 function displayBalance(
-  response: APIResponse,
-  options: DisplayBalanceOptions,
+  response: APIResponse<AccountResponse>,
+  options?: DisplayBalanceOptions,
 ): void {
-  const accountResponse = response.data as AccountResponse;
+  const accountResponse = response.data;
   const accountId = accountResponse.account;
   const hbars = accountResponse.balance.balance;
   const tokens = accountResponse.balance.tokens;
 
-  if (options.onlyHbar) {
+  if (options?.onlyHbar) {
     return displayHbarBalance(accountId, hbars);
   }
 
-  if (options.tokenId) {
+  if (options?.tokenId) {
     return displayTokenBalance(accountId, tokens, options.tokenId);
   }
 
@@ -72,16 +74,18 @@ function displayBalance(
 }
 
 const displayFunctions: Record<string, DisplayFunction> = {
-  displayBalance: displayBalance,
+  displayBalance,
 };
 
 // -- main display function -- //
 function display(
   displayFunctionName: string,
-  response: APIResponse,
-  options: DisplayOptions,
+  response: APIResponse<AccountResponse>,
+  options: DisplayBalanceOptions,
 ): void {
-  displayFunctions[displayFunctionName](response, options);
+  const fn = displayFunctions[displayFunctionName];
+  if (!fn) return; // unknown display function (silently ignore)
+  fn(response, options);
 }
 
 export { display };

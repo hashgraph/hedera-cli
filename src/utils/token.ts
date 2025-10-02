@@ -5,6 +5,7 @@ import {
 } from '@hashgraph/sdk';
 
 import { Logger } from './logger';
+import { DomainError } from './errors';
 import api from '../api';
 import stateUtils from '../utils/state';
 import signUtils from '../utils/sign';
@@ -18,8 +19,7 @@ const getSupplyType = (type: string): TokenSupplyType => {
   } else if (tokenType === 'infinite') {
     return TokenSupplyType.Infinite;
   } else {
-    logger.error('Invalid supply type');
-    process.exit(1);
+    throw new DomainError('Invalid supply type');
   }
 };
 
@@ -50,12 +50,12 @@ const associateToken = async (
   tokenId: string,
   accountIdorName: string,
 ): Promise<void> => {
-  let account = stateUtils.getAccountByIdOrName(accountIdorName);
+  const account = stateUtils.getAccountByIdOrName(accountIdorName);
 
   const client = stateUtils.getHederaClient();
   try {
     // Associate token with account
-    const tokenAssociateTx = await new TokenAssociateTransaction()
+    const tokenAssociateTx = new TokenAssociateTransaction()
       .setAccountId(account.accountId)
       .setTokenIds([tokenId])
       .freezeWith(client);
@@ -65,14 +65,13 @@ const associateToken = async (
       account.privateKey,
     );
 
-    let tokenAssociateSubmit = await signedTokenAssociateTx.execute(client);
+    const tokenAssociateSubmit = await signedTokenAssociateTx.execute(client);
     await tokenAssociateSubmit.getReceipt(client);
 
     logger.log(`Token associated: ${tokenId}`);
   } catch (error) {
-    logger.error(`Failed to associate token: ${tokenId}`, error as object);
     client.close();
-    process.exit(1);
+    throw new DomainError(`Failed to associate token: ${tokenId}`);
   }
 
   // Store association in state for token
@@ -89,7 +88,7 @@ const transfer = async (
 ) => {
   const client = stateUtils.getHederaClient();
   try {
-    const transferTx = await new TransferTransaction()
+    const transferTx = new TransferTransaction()
       .addTokenTransfer(tokenId, fromId, balance * -1)
       .addTokenTransfer(tokenId, toId, balance)
       .freezeWith(client);
@@ -103,10 +102,9 @@ const transfer = async (
         `Transfer successful with tx ID: ${submittedTransfer.transactionId.toString()}`,
       );
     } else {
-      logger.error(
+      throw new DomainError(
         `Transfer failed with tx ID: ${submittedTransfer.transactionId.toString()}`,
       );
-      process.exit(1);
     }
   } catch (error) {
     logger.error('Unable to transfer token', error as object);

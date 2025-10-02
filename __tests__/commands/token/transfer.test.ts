@@ -1,15 +1,14 @@
-import { alice, bob, tokenState } from '../../helpers/state';
+import { TransactionId } from '@hashgraph/sdk';
 import { Command } from 'commander';
 import commands from '../../../src/commands';
-import stateController from '../../../src/state/stateController';
-import { TransactionId } from '@hashgraph/sdk';
-import { Logger } from "../../../src/utils/logger";
+import { saveState as storeSaveState } from '../../../src/state/store';
+import { Logger } from '../../../src/utils/logger';
+import { alice, bob, tokenState } from '../../helpers/state';
 
 const logger = Logger.getInstance();
 
-let tokenId = Object.keys(tokenState.tokens)[0];
-const txId = "0.0.14288@1706880903.830877722";
-jest.mock('../../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
+const tokenId = Object.keys(tokenState.tokens)[0];
+const txId = '0.0.14288@1706880903.830877722';
 jest.mock('@hashgraph/sdk', () => {
   const originalModule = jest.requireActual('@hashgraph/sdk');
 
@@ -22,11 +21,10 @@ jest.mock('@hashgraph/sdk', () => {
       execute: jest.fn().mockResolvedValue({
         transactionId: TransactionId.fromString(txId),
         getReceipt: jest.fn().mockResolvedValue({
-            status: {
-                _code: 22,
-                message: 'Success',
-            },
-            
+          status: {
+            _code: 22,
+            message: 'Success',
+          },
         }),
       }),
     })),
@@ -38,13 +36,13 @@ describe('token transfer command', () => {
 
   beforeEach(() => {
     const tokenStateWithAlice = {
-        ...tokenState,
-        accounts: {
-            [alice.name]: alice,
-            [bob.name]: bob,
-        },
+      ...tokenState,
+      accounts: {
+        [alice.name]: alice,
+        [bob.name]: bob,
+      },
     };
-    stateController.saveState(tokenStateWithAlice);
+    storeSaveState(tokenStateWithAlice as any);
   });
 
   afterEach(() => {
@@ -72,11 +70,13 @@ describe('token transfer command', () => {
         '--from',
         alice.name,
         '-b',
-        balance.toString()
+        balance.toString(),
       ]);
 
       // Assert
-      expect(logSpy).toHaveBeenCalledWith(`Transfer successful with tx ID: ${txId}`);
+      expect(logSpy).toHaveBeenCalledWith(
+        `Transfer successful with tx ID: ${txId}`,
+      );
     });
   });
 });
