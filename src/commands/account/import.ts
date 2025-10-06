@@ -1,25 +1,14 @@
-import stateUtils from '../../utils/state';
+import { Command } from 'commander';
 import accountUtils from '../../utils/account';
-import telemetryUtils from '../../utils/telemetry';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
-import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
-import type { Command } from '../../../types';
-
-const logger = Logger.getInstance();
-
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('import')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description(
       'Import an existing account using an account ID, name, type, and optional private key.',
     )
@@ -29,31 +18,37 @@ export default (program: any) => {
     .option(
       '--args <args>',
       'Store arguments for scripts',
-      (value: string, previous: string) =>
+      (value: string, previous: string[]) =>
         previous ? previous.concat(value) : [value],
-      [],
+      [] as string[],
     )
-    .action((options: ImportAccountOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options);
-      logger.verbose(`Importing account with name: ${options.name}`);
-
-      let accountDetails;
-      if (options.key) {
-        accountDetails = accountUtils.importAccount(
-          options.id,
-          options.key,
-          options.name,
-        );
-      } else {
-        accountDetails = accountUtils.importAccountId(options.id, options.name);
-      }
-
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.account.import.action,
-        accountDetails,
-      );
-    });
+    .action(
+      wrapAction<ImportAccountOptions>(
+        (options) => {
+          const accountDetails = options.key
+            ? accountUtils.importAccount(options.id, options.key, options.name)
+            : accountUtils.importAccountId(options.id, options.name);
+          if (isJsonOutput()) {
+            printOutput('accountImport', {
+              name: accountDetails.name,
+              accountId: accountDetails.accountId,
+              type: accountDetails.type,
+              network: accountDetails.network,
+            });
+          }
+          dynamicVariablesUtils.storeArgs(
+            options.args,
+            dynamicVariablesUtils.commandActions.account.import.action,
+            accountDetails,
+          );
+        },
+        { log: (o) => `Importing account with name: ${o.name}` },
+      ),
+    );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera account import -n alice -i 0.0.1234 -k <privateKey>\n  $ hedera account import -n external -i 0.0.2222 --json',
+  );
 };
 
 interface ImportAccountOptions {

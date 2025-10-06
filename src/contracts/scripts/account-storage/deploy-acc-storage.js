@@ -1,4 +1,4 @@
-const stateController = require('../../../state/stateController.js').default;
+const { saveScriptArgument } = require('../../../state/newStore.js');
 
 /**
  * Purpose: Deploys an HederaAccountStorage contract and saves its address in the script arguments.
@@ -19,7 +19,7 @@ async function main() {
   console.log('HederaAccountStorage contract deployed at:', contractAddress);
 
   // Store address in script arguments as "accountstorageaddress"
-  stateController.saveScriptArgument('accountstorageaddress', contractAddress);
+  saveScriptArgument('accountstorageaddress', contractAddress);
 }
 
 main().catch(console.error);

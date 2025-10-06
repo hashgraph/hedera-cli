@@ -1,4 +1,4 @@
-const stateController = require('../../../state/stateController.js').default;
+const { saveScriptArgument } = require('../../../state/newStore.js');
 
 /**
  * Purpose: Deploys an ERC721 token contract and saves its address in the script arguments.
@@ -22,7 +22,7 @@ async function main() {
   console.log('ERC721 Token contract deployed at:', contractAddress);
 
   // Store address in script arguments as "erc721address"
-  stateController.saveScriptArgument('erc721address', contractAddress);
+  saveScriptArgument('erc721address', contractAddress);
 }
 
 main().catch(console.error);

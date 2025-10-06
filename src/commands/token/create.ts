@@ -1,15 +1,18 @@
-import { TokenCreateTransaction, TokenType, PrivateKey } from '@hashgraph/sdk';
-
-import { myParseInt } from '../../utils/verification';
-import tokenUtils from '../../utils/token';
-import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
-import { Logger } from '../../utils/logger';
-import stateController from '../../state/stateController';
-
-import type { Command, Token } from '../../../types';
+import { PrivateKey, TokenCreateTransaction, TokenType } from '@hashgraph/sdk';
+import { Command } from 'commander';
+import type { Token } from '../../../types/state';
+import { addToken } from '../../state/mutations';
+import { heading, success } from '../../utils/color';
 import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { DomainError } from '../../utils/errors';
+import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
 import signUtils from '../../utils/sign';
+import stateUtils from '../../utils/state';
+import tokenUtils from '../../utils/token';
+import { myParseInt } from '../../utils/verification';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
 const logger = Logger.getInstance();
 
@@ -37,9 +40,9 @@ async function createFungibleToken(
 ): Promise<string> {
   const client = stateUtils.getHederaClient();
 
-  let tokenId;
+  let tokenId: string | undefined;
   try {
-    let tokenCreateTx = await new TokenCreateTransaction()
+    const tokenCreateTx = new TokenCreateTransaction()
       .setTokenName(name)
       .setTokenSymbol(symbol)
       .setDecimals(decimals)
@@ -49,8 +52,7 @@ async function createFungibleToken(
       .setTreasuryAccountId(treasuryId)
       .setAdminKey(PrivateKey.fromStringDer(adminKey).publicKey)
       .freezeWith(client);
-
-    let tokenCreateTxSigned = await signUtils.signByType(
+    const tokenCreateTxSigned = await signUtils.signByType(
       tokenCreateTx,
       'tokenCreate',
       {
@@ -58,71 +60,65 @@ async function createFungibleToken(
         treasuryKey: treasuryKey,
       },
     );
-    let tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
-    let tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
-    tokenId = tokenCreateRx.tokenId;
+    const tokenCreateSubmit = await tokenCreateTxSigned.execute(client);
+    const tokenCreateRx = await tokenCreateSubmit.getReceipt(client);
+    tokenId = tokenCreateRx.tokenId?.toString();
 
     if (tokenId == null) {
-      logger.error('Token was not created');
-      process.exit(1);
+      throw new DomainError('Token was not created');
     }
 
-    logger.log(`Token ID: ${tokenId.toString()}`);
+    if (isJsonOutput()) {
+      printOutput('tokenCreate', { tokenId });
+    } else {
+      logger.log(heading('Token created'));
+      logger.log(success(`Token ID: ${tokenId}`));
+    }
   } catch (error) {
-    logger.error(error as object);
     client.close();
-    process.exit(1);
+    throw new DomainError('Failed to create token');
   }
 
   // Store new token in state
   logger.verbose(`Storing new token with ID ${tokenId} in state`);
-  const tokens: Record<string, Token> = stateController.get('tokens');
-  const updatedTokens: Record<string, Token> = {
-    ...tokens,
-    [tokenId.toString()]: {
-      tokenId: tokenId.toString(),
-      associations: [],
-      name,
-      symbol,
-      treasuryId,
-      decimals,
-      supplyType: supplyType.toUpperCase(),
-      maxSupply: supplyType.toUpperCase() === 'FINITE' ? initialSupply : 0,
-      initialSupply,
-      keys: {
-        treasuryKey,
-        adminKey,
-        supplyKey: '',
-        wipeKey: '',
-        kycKey: '',
-        freezeKey: '',
-        pauseKey: '',
-        feeScheduleKey: '',
-      },
-      network: stateUtils.getNetwork(),
-      customFees: [],
+  const newToken: Token = {
+    tokenId: tokenId,
+    associations: [],
+    name,
+    symbol,
+    treasuryId,
+    decimals,
+    supplyType: supplyType.toUpperCase(),
+    maxSupply: supplyType.toUpperCase() === 'FINITE' ? initialSupply : 0,
+    initialSupply,
+    keys: {
+      treasuryKey,
+      adminKey,
+      supplyKey: '',
+      wipeKey: '',
+      kycKey: '',
+      freezeKey: '',
+      pauseKey: '',
+      feeScheduleKey: '',
     },
+    network: stateUtils.getNetwork(),
+    customFees: [],
   };
-
-  stateController.saveKey('tokens', updatedTokens);
+  addToken(newToken, false);
 
   client.close();
-  return tokenId.toString();
+  return tokenId;
 }
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('create')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Create a new fungible token')
+    .addHelpText(
+      'afterAll',
+      '\nExamples:\n  $ hedera token create -t 0.0.1001 -k <treasuryKey> -n "My Token" -s MTK -d 2 -i 1000 --supply-type finite -a <adminKey>\n  $ hedera token create ... --json',
+    )
     .requiredOption(
       '-t, --treasury-id <treasuryId>',
       'Treasury of the fungible token',
@@ -154,34 +150,36 @@ export default (program: any) => {
     .option(
       '--args <args>',
       'Store arguments for scripts',
-      (value: string, previous: string) =>
-        previous ? previous.concat(value) : [value],
-      [],
+      (value: string, previous: string[]) =>
+        previous ? [...previous, value] : [value],
+      [] as string[],
     )
-    .action(async (options: CreateOptions) => {
-      logger.verbose('Creating new token');
-      options = dynamicVariablesUtils.replaceOptions(options);
-      const tokenId = await createFungibleToken(
-        options.name,
-        options.symbol,
-        options.treasuryId,
-        options.treasuryKey,
-        options.decimals,
-        options.initialSupply,
-        options.supplyType,
-        options.adminKey,
-      );
-
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.token.create.action,
-        {
-          tokenId: tokenId.toString(),
-          name: options.name,
-          symbol: options.symbol,
-          treasuryId: options.treasuryId,
-          adminKey: options.adminKey,
+    .action(
+      wrapAction<CreateOptions>(
+        async (options) => {
+          const tokenId = await createFungibleToken(
+            options.name,
+            options.symbol,
+            options.treasuryId,
+            options.treasuryKey,
+            options.decimals,
+            options.initialSupply,
+            options.supplyType,
+            options.adminKey,
+          );
+          dynamicVariablesUtils.storeArgs(
+            options.args,
+            dynamicVariablesUtils.commandActions.token.create.action,
+            {
+              tokenId: tokenId,
+              name: options.name,
+              symbol: options.symbol,
+              treasuryId: options.treasuryId,
+              adminKey: options.adminKey,
+            },
+          );
         },
-      );
-    });
+        { log: 'Creating new token' },
+      ),
+    );
 };

@@ -1,24 +1,23 @@
-
-import { baseState, testnetOperatorAccount, testnetOperatorId, testnetOperatorKey } from '../helpers/state';
 import { Command } from 'commander';
+import * as dotenv from 'dotenv';
 import commands from '../../src/commands';
-
-const os = require('os');
-const dotenv = require('dotenv');
+import { getState as storeGetAll } from '../../src/state/store';
 import accountUtils from '../../src/utils/account';
-import stateController from '../../src/state/stateController';
 import setupUtils from '../../src/utils/setup';
+import { testnetOperatorId, testnetOperatorKey } from '../helpers/state';
 
-jest.mock('os');
-jest.mock('dotenv');
-jest.mock('../../src/state/state'); // Mock the original module -> looks for __mocks__/state.ts in same directory
+jest.mock('dotenv', () => ({
+  __esModule: true,
+  config: jest.fn().mockReturnValue({ error: null }),
+}));
 
 describe('setup init command', () => {
   describe('setup init - success path', () => {
     let originalEnv: any;
-    const logSpy = jest.spyOn(console, 'log');
-    const setupOperatorAccountsSpy = jest.spyOn(setupUtils, 'setupOperatorAccounts');
-    const saveStateControllerSpy = jest.spyOn(stateController, 'saveState');
+    const setupOperatorAccountSpy = jest.spyOn(
+      setupUtils,
+      'setupOperatorAccount',
+    );
 
     beforeEach(() => {
       // Save the original process.env
@@ -28,9 +27,7 @@ describe('setup init command', () => {
     afterEach(() => {
       // Reset process.env to its original state
       process.env = originalEnv;
-      logSpy.mockClear();
-      setupOperatorAccountsSpy.mockClear();
-      saveStateControllerSpy.mockClear();
+      jest.clearAllMocks();
     });
 
     test('✅ should set up state with environment variables with custom path', async () => {
@@ -41,10 +38,16 @@ describe('setup init command', () => {
       // Set up mock environment variables
       process.env.TESTNET_OPERATOR_KEY = testnetOperatorKey;
       process.env.TESTNET_OPERATOR_ID = testnetOperatorId;
-      
+
       const mockEnvPath = '/some/path/.env';
-      dotenv.config.mockReturnValue({ error: null }); // Mock dotenv to succeed - if error path doesn't exist
-      accountUtils.getAccountHbarBalance = jest.fn().mockResolvedValue(1000000000); // Mock accountUtils to succeed
+      // ensure dotenv.config mock returns success (already set in jest.mock but reaffirm for clarity)
+      (dotenv.config as unknown as jest.Mock).mockReturnValue({ error: null });
+      accountUtils.getAccountHbarBalance = jest
+        .fn()
+        .mockResolvedValue(1000000000); // Mock accountUtils to succeed
+      accountUtils.getAccountHbarBalanceByNetwork = jest
+        .fn()
+        .mockResolvedValue(1000000000);
 
       // Act
       await program.parseAsync([
@@ -58,12 +61,25 @@ describe('setup init command', () => {
 
       // Assert
       expect(dotenv.config).toHaveBeenCalledWith({ path: mockEnvPath });
-      expect(setupOperatorAccountsSpy).toHaveBeenCalledWith(testnetOperatorId, testnetOperatorKey, '', '', '', '');
-      expect(saveStateControllerSpy).toHaveBeenCalledWith({
-        ...baseState,
-        testnetOperatorId,
-        testnetOperatorKey,
-        accounts: testnetOperatorAccount,
+      // Assert we invoked setupOperatorAccount for testnet with expected args
+      const calls = setupOperatorAccountSpy.mock.calls;
+      const hasExpectedCall = calls.some(
+        (c) =>
+          c[0] === testnetOperatorId &&
+          c[1] === testnetOperatorKey &&
+          c[2] === 'testnet',
+      );
+      expect(hasExpectedCall).toBe(true);
+
+      const finalState = storeGetAll();
+      const opAcct = finalState.accounts?.['testnet-operator'];
+      expect(opAcct).toBeDefined();
+      expect(opAcct).toMatchObject({
+        accountId: testnetOperatorId,
+        privateKey: testnetOperatorKey,
+        network: 'testnet',
+        name: 'testnet-operator',
+        type: 'ECDSA',
       });
     });
   });

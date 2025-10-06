@@ -1,24 +1,18 @@
-import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
-import type { Command } from '../../../types';
+import { Command } from 'commander';
+import { getState } from '../../state/store';
 import { Logger } from '../../utils/logger';
-import stateController from '../../state/stateController';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { isJsonOutput } from '../../utils/output';
+import stateUtils from '../../utils/state';
+import { outputState } from '../../utils/stateOutput';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
 const logger = Logger.getInstance();
 
-export default (program: any) => {
+export default (program: Command) => {
   program
     .command('view')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('View state')
     .option('--accounts', 'View accounts', false)
     .option('--account-name <account-name>', 'View account by name')
@@ -26,57 +20,99 @@ export default (program: any) => {
     .option('--tokens', 'View tokens', false)
     .option('--token-id <token-id>', 'View token by ID')
     .option('--scripts', 'View scripts', false)
-    .action((options: ViewStateOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for account-name, account-id, and token-id
-      logger.verbose('Viewing state');
+    .action(
+      wrapAction<ViewStateOptions>(
+        (options) => {
+          logger.verbose('Viewing state');
 
-      const state = stateController.getAll();
+          const state = getState();
 
-      if (
-        !options.accounts &&
-        !options.tokens &&
-        !options.scripts &&
-        !options.accountName &&
-        !options.accountId &&
-        !options.tokenId
-      ) {
-        logger.log('\nState:');
-        logger.log(state);
-        return;
-      }
+          const noFilters =
+            !options.accounts &&
+            !options.tokens &&
+            !options.scripts &&
+            !options.accountName &&
+            !options.accountId &&
+            !options.tokenId;
+          if (noFilters) {
+            if (isJsonOutput()) {
+              outputState('stateView', { all: true });
+            } else {
+              logger.log('\nState:');
+              logger.log(state);
+            }
+            return;
+          }
 
-      if (options.accountId) {
-        logger.log(`\nAccount ${options.accountId}:`);
-        logger.log(
-          stateUtils.getAccountById(options.accountId) || 'Account not found',
-        );
-      }
+          if (options.accountId) {
+            const account =
+              stateUtils.getAccountById(options.accountId) ||
+              'Account not found';
+            if (isJsonOutput()) {
+              outputState('stateAccountView', { accountId: options.accountId });
+            } else {
+              logger.log(`\nAccount ${options.accountId}:`);
+              logger.log(account);
+            }
+          }
 
-      if (options.accountName) {
-        logger.log('\nAccount:');
-        logger.log(state.accounts[options.accountName] || 'Account not found');
-      }
+          if (options.accountName) {
+            const account =
+              state.accounts[options.accountName] || 'Account not found';
+            if (isJsonOutput()) {
+              outputState('stateAccountView', {
+                accountName: options.accountName,
+              });
+            } else {
+              logger.log('\nAccount:');
+              logger.log(account);
+            }
+          }
 
-      if (options.tokenId) {
-        logger.log(`\nToken ${options.tokenId}:`);
-        logger.log(state.tokens[options.tokenId] || 'Token not found');
-      }
+          if (options.tokenId) {
+            const token = state.tokens[options.tokenId] || 'Token not found';
+            if (isJsonOutput()) {
+              outputState('stateTokenView', { tokenId: options.tokenId });
+            } else {
+              logger.log(`\nToken ${options.tokenId}:`);
+              logger.log(token);
+            }
+          }
 
-      if (options.accounts) {
-        logger.log('\nAccounts:');
-        logger.log(state.accounts);
-      }
+          if (options.accounts) {
+            if (isJsonOutput()) {
+              outputState('stateAccounts', { accounts: true });
+            } else {
+              logger.log('\nAccounts:');
+              logger.log(state.accounts);
+            }
+          }
 
-      if (options.tokens) {
-        logger.log('\nTokens:');
-        logger.log(state.tokens);
-      }
+          if (options.tokens) {
+            if (isJsonOutput()) {
+              outputState('stateTokens', { tokens: true });
+            } else {
+              logger.log('\nTokens:');
+              logger.log(state.tokens);
+            }
+          }
 
-      if (options.scripts) {
-        logger.log('\nScripts:');
-        logger.log(state.scripts);
-      }
-    });
+          if (options.scripts) {
+            if (isJsonOutput()) {
+              outputState('stateScripts', { scripts: true });
+            } else {
+              logger.log('\nScripts:');
+              logger.log(state.scripts);
+            }
+          }
+        },
+        { log: 'View state' },
+      ),
+    );
+  program.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera state view\n  $ hedera state view --accounts --json',
+  );
 };
 
 interface ViewStateOptions {

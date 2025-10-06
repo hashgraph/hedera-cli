@@ -1,3 +1,11 @@
-npm run test
-node clear-state.js
-git add .
+#!/usr/bin/env sh
+set -e
+
+echo "pre-push: running unit tests (npm run test:unit)"
+if npm run test:unit; then
+	echo "pre-push: success"
+else
+	code=$?
+	echo "pre-push: failed (code $code)"
+	exit $code
+fi

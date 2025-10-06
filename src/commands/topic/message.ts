@@ -1,12 +1,16 @@
-import stateUtils from '../../utils/state';
-import telemetryUtils from '../../utils/telemetry';
-import { Logger } from '../../utils/logger';
-import stateController from '../../state/stateController';
-import dynamicVariablesUtils from '../../utils/dynamicVariables';
-import { TopicMessageSubmitTransaction, PrivateKey } from '@hashgraph/sdk';
+import { PrivateKey, TopicMessageSubmitTransaction } from '@hashgraph/sdk';
+import { Command } from 'commander';
+import type { Filter } from '../../../types';
 import api from '../../api';
-
-import type { Command, Filter } from '../../../types';
+import { selectTopics } from '../../state/selectors';
+import { heading, success, warn } from '../../utils/color';
+import dynamicVariablesUtils from '../../utils/dynamicVariables';
+import { DomainError } from '../../utils/errors';
+import { Logger } from '../../utils/logger';
+import { isJsonOutput, printOutput } from '../../utils/output';
+import stateUtils from '../../utils/state';
+import { telemetryPreAction } from '../shared/telemetryHook';
+import { wrapAction } from '../shared/wrapAction';
 
 const logger = Logger.getInstance();
 
@@ -77,81 +81,84 @@ function formatFilters(filters: Filter[], options: FindMessageOptions) {
   }
 }
 
-export default (program: any) => {
+export default (program: Command) => {
   const message = program.command('message');
 
   message
     .command('submit')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Submit a message to a topic')
     .requiredOption('-m, --message <message>', 'Submit a message to the topic')
     .requiredOption('-t, --topic-id <topicId>', 'The topic ID')
     .option(
       '--args <args>',
       'Store arguments for scripts',
-      (value: string, previous: string) =>
+      (value: string, previous: string[]) =>
         previous ? previous.concat(value) : [value],
-      [],
+      [] as string[],
     )
-    .action(async (options: SubmitMessageOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id
-      logger.verbose(`Submitting message to topic: ${options.topicId}`);
+    .action(
+      wrapAction<SubmitMessageOptions>(
+        async (replacedOptions) => {
+          const client = stateUtils.getHederaClient();
 
-      const client = stateUtils.getHederaClient();
+          let sequenceNumber: number | undefined;
+          try {
+            const submitMessageTx = new TopicMessageSubmitTransaction({
+              topicId: replacedOptions.topicId,
+              message: replacedOptions.message,
+            }).freezeWith(client);
 
-      let sequenceNumber;
-      try {
-        const submitMessageTx = await new TopicMessageSubmitTransaction({
-          topicId: options.topicId,
-          message: options.message,
-        }).freezeWith(client);
+            // Signing if submit key is set (if it exists in the state - otherwise skip this step)
+            const topics = selectTopics();
+            const topicEntry = topics[replacedOptions.topicId];
+            if (topicEntry && topicEntry.submitKey) {
+              const submitKey = PrivateKey.fromStringDer(topicEntry.submitKey);
+              submitMessageTx.sign(submitKey);
+            }
 
-        // Signing if submit key is set (if it exists in the state - otherwise skip this step)
-        const topics = stateController.get('topics');
-        if (topics[options.topicId] && topics[options.topicId].submitKey) {
-          const submitKey = PrivateKey.fromStringDer(
-            topics[options.topicId].submitKey,
+            const topicMessageTxResponse =
+              await submitMessageTx.execute(client);
+            const receipt = (await topicMessageTxResponse.getReceipt(
+              client,
+            )) as {
+              topicSequenceNumber?: number;
+            };
+            sequenceNumber = receipt.topicSequenceNumber
+              ? Number(receipt.topicSequenceNumber)
+              : undefined;
+          } catch (_e: unknown) {
+            client.close();
+            throw new DomainError('Error sending message to topic');
+          }
+
+          if (isJsonOutput()) {
+            printOutput('topicMessageSubmit', {
+              topicId: replacedOptions.topicId,
+              sequenceNumber,
+              message: replacedOptions.message,
+            });
+          } else {
+            logger.log(
+              heading('Message submitted:') +
+                ' ' +
+                success(`${sequenceNumber}`),
+            );
+          }
+          client.close();
+          dynamicVariablesUtils.storeArgs(
+            replacedOptions.args,
+            dynamicVariablesUtils.commandActions.topic.messageSubmit.action,
+            { sequenceNumber: String(sequenceNumber) },
           );
-          submitMessageTx.sign(submitKey);
-        }
-
-        const topicMessageTxResponse = await submitMessageTx.execute(client);
-        const receipt = await topicMessageTxResponse.getReceipt(client);
-        sequenceNumber = receipt.topicSequenceNumber;
-      } catch (error) {
-        logger.error('Error sending message to topic', error as object);
-        client.close();
-        process.exit(1);
-      }
-
-      logger.log(`Message submitted with sequence number: ${sequenceNumber}`);
-      client.close();
-      dynamicVariablesUtils.storeArgs(
-        options.args,
-        dynamicVariablesUtils.commandActions.topic.messageSubmit.action,
-        { sequenceNumber: sequenceNumber.toString() },
-      );
-    });
+        },
+        { log: (o) => `Submitting message to topic: ${o.topicId}` },
+      ),
+    );
 
   message
     .command('find')
-    .hook('preAction', async (thisCommand: Command) => {
-      const command = [
-        thisCommand.parent.action().name(),
-        ...thisCommand.parent.args,
-      ];
-      if (stateUtils.isTelemetryEnabled()) {
-        await telemetryUtils.recordCommand(command.join(' '));
-      }
-    })
+    .hook('preAction', telemetryPreAction)
     .description('Find a message by sequence number')
     .option('-s, --sequence-number <sequenceNumber>', 'The sequence number')
     .option('-t, --topic-id <topicId>', 'The topic ID')
@@ -179,69 +186,108 @@ export default (program: any) => {
       '--sequence-number-ne <sequenceNumberNe>',
       'The sequence number not equal to',
     )
-    .action(async (options: FindMessageOptions) => {
-      options = dynamicVariablesUtils.replaceOptions(options); // allow dynamic vars for topic-id and sequence-number
-      logger.verbose(`Finding message for topic: ${options.topicId}`);
+    .action(
+      wrapAction<FindMessageOptions>(
+        async (replacedOptions) => {
+          logger.verbose(
+            `Finding message for topic: ${replacedOptions.topicId}`,
+          );
 
-      // Define the keys of options we are interested in
-      const sequenceNumberOptions: string[] = [
-        'sequenceNumberGt',
-        'sequenceNumberLt',
-        'sequenceNumberGte',
-        'sequenceNumberLte',
-        'sequenceNumberEq',
-        'sequenceNumberNe',
-      ];
+          // Define the keys of options we are interested in
+          const sequenceNumberOptions: string[] = [
+            'sequenceNumberGt',
+            'sequenceNumberLt',
+            'sequenceNumberGte',
+            'sequenceNumberLte',
+            'sequenceNumberEq',
+            'sequenceNumberNe',
+          ];
 
-      // Check if any of the sequence number options is set
-      const isAnyOptionSet = sequenceNumberOptions.some(
-        (option: string) => options[option as keyof FindMessageOptions],
-      );
+          // Check if any of the sequence number options is set
+          const isAnyOptionSet = sequenceNumberOptions.some(
+            (option: string) =>
+              replacedOptions[option as keyof FindMessageOptions],
+          );
 
-      if (!isAnyOptionSet && !options.sequenceNumber) {
-        logger.error(
-          'Please provide a sequence number or a sequence number filter',
-        );
-        return;
-      }
+          if (!isAnyOptionSet && !replacedOptions.sequenceNumber) {
+            logger.error(
+              'Please provide a sequence number or a sequence number filter',
+            );
+            return;
+          }
 
-      if (!isAnyOptionSet) {
-        // If no sequence number options are set, proceed with the original logic
-        const response = await api.topic.findMessage(
-          options.topicId,
-          Number(options.sequenceNumber),
-        );
-        logger.log(
-          `Message found: "${Buffer.from(
-            response.data.message,
-            'base64',
-          ).toString('ascii')}"`,
-        );
-        return;
-      }
+          if (!isAnyOptionSet) {
+            // If no sequence number options are set, proceed with the original logic
+            const response = await api.topic.findMessage(
+              replacedOptions.topicId,
+              Number(replacedOptions.sequenceNumber),
+            );
+            const decoded = Buffer.from(
+              response.data.message,
+              'base64',
+            ).toString('ascii');
+            if (isJsonOutput()) {
+              printOutput('topicMessageFind', {
+                topicId: replacedOptions.topicId,
+                sequenceNumber: Number(replacedOptions.sequenceNumber),
+                message: decoded,
+              });
+            } else {
+              logger.log(heading('Message:') + ' ' + success(`"${decoded}"`));
+            }
+            return;
+          }
 
-      // Assuming options can include multiple filters
-      let filters: Filter[] = []; // Populate this based on the options provided
-      formatFilters(filters, options);
+          // Assuming options can include multiple filters
+          const filters: Filter[] = []; // Populate this based on the options provided
+          formatFilters(filters, replacedOptions);
 
-      // Call the new API function
-      const response = await api.topic.findMessagesWithFilters(
-        options.topicId,
-        filters,
-      );
+          // Call the new API function
+          const response = await api.topic.getTopicMessages(
+            replacedOptions.topicId,
+            filters[0], // Use the first filter for now
+          );
 
-      if (response.data.messages.length === 0) {
-        logger.log('No messages found');
-        return;
-      }
+          if (response.data.messages.length === 0) {
+            if (isJsonOutput()) {
+              printOutput('topicMessages', {
+                topicId: replacedOptions.topicId,
+                messages: [],
+              });
+            } else {
+              logger.log(warn('No messages found'));
+            }
+            return;
+          }
+          if (isJsonOutput()) {
+            printOutput('topicMessages', {
+              topicId: replacedOptions.topicId,
+              messages: response.data.messages.map(
+                (el: { sequence_number: number; message: string }) => ({
+                  sequenceNumber: el.sequence_number,
+                  message: Buffer.from(el.message, 'base64').toString('ascii'),
+                }),
+              ),
+            });
+          } else {
+            response.data.messages.forEach(
+              (el: { sequence_number: number; message: string }) => {
+                logger.log(
+                  `Message ${el.sequence_number}: "${Buffer.from(
+                    el.message,
+                    'base64',
+                  ).toString('ascii')}"`,
+                );
+              },
+            );
+          }
+        },
+        { log: (o) => `Finding message for topic: ${o.topicId}` },
+      ),
+    );
 
-      response.data.messages.forEach((el) => {
-        logger.log(
-          `Message ${el.sequence_number}: "${Buffer.from(
-            el.message,
-            'base64',
-          ).toString('ascii')}"`,
-        );
-      });
-    });
+  message.addHelpText(
+    'afterAll',
+    '\nExamples:\n  $ hedera topic message submit -t 0.0.2000 -m "hello"\n  $ hedera --json topic message submit -t 0.0.2000 -m "hello"\n  $ hedera topic message find -t 0.0.2000 -s 5\n  $ hedera --json topic message find -t 0.0.2000 --sequence-number-gt 10',
+  );
 };
